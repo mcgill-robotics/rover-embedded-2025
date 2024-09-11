@@ -1,0 +1,1 @@
+#define USE_ROS_FIRMWARE 1
