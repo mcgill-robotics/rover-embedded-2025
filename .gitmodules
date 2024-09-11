@@ -1,0 +1,3 @@
+[submodule "teensy40_microros/lib/micro_ros_platformio"]
+	path = teensy40_microros/lib/micro_ros_platformio
+	url = https://github.com/micro-ROS/micro_ros_platformio.git
