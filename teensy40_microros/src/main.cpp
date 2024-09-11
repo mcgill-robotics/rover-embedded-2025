@@ -6,7 +6,8 @@
 #include <model_encoder.h>
 #include <model_sensor.h>
 
-#include <micro_ros_arduino.h>
+// #include <micro_ros_arduino.h>
+#include <micro_ros_platformio.h>
 
 #include <stdio.h>
 #include <rcl/rcl.h>
@@ -174,6 +175,8 @@ uint32_t loop_last_time = 0;
 
 void setup()
 {
+  set_microros_serial_transports(SerialUSB);
+
   HWSERIAL.begin(115200);
   while (!HWSERIAL)
     ;
