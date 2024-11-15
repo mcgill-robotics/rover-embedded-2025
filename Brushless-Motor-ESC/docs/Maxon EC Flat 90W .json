@@ -1,0 +1,22 @@
+{
+    "BEmfConstant": 16.11986541748047,
+    "compatibility": [
+        "FOC",
+        "sixStep"
+    ],
+    "description": "70:1 redu. Test Motor",
+    "friction": 5.57,
+    "hardwareFamily": "MOTOR",
+    "id": "Maxon EC Flat 90W ",
+    "inertia": 34.55,
+    "label": "Maxon EC Flat 90W ",
+    "ls": 1.17,
+    "magneticStructure": {
+        "type": "SM-PMSM"
+    },
+    "maxRatedSpeed": 996,
+    "nominalCurrent": 6.059999942779541,
+    "nominalDCVoltage": 23.896392822265625,
+    "polePairs": 12,
+    "rs": 1.1202037334442139
+}
