@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "Registers.h"
+#include "bms_interface.h"
 
 
 // Defines
