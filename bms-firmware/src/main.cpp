@@ -1,68 +1,65 @@
+// Includes
 #include <Arduino.h>
 #include <Wire.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "Registers.h"
 
-#define PUBLISH_RATE 500 // every 500 ms
 
-//mV, per cell over and undervoltage thresholds initials (don't want to change?)
-#define OV_THRESH 4500
-#define UV_THRESH 3500
+// Defines
+#define PUBLISH_RATE_MS 500
 
-//BMS I2C Addresses
-#define BMS1_ADDRESS 0x08
-//#define BMS2_ADDRESS (need the actual address)
-
-// I2C pins for ESP32 (not sure what they are on the new BMS chip that kathelina is designing, could be SDA = 4 SCL = 5)
-#define SDA_PIN 21 //only for one, need a second one
+#define SDA_PIN 21
 #define SCL_PIN 22
 
+#define OV_THRESH_MV 4500
+#define UV_THRESH_MV 3500
+
+#define BMS_I2C_ADDR_1 0x08
+
 #define CELLS_PER_BATTERY 10
-//structs
+
+
+// Data structures
 typedef struct {
   String name;
-  byte address; //check type
+  byte address;
   int cell_voltages[CELLS_PER_BATTERY];
-} BMS_chip;
+} BMS_controller;
 
-//Global 'values' of bms (not real) to practice serial.println to jetson
-int* cell_voltages1[10];
-int* cell_voltages2[10];
 
+// Globals
 int last_time_ms;
 
-BMS_chip chip1;
-BMS_chip chip2;
+BMS_controller bms_controller_1;
+BMS_controller bms_controller_2;
 
-// put function declarations here:
-void upload_setpoints(byte);
-void read_setpoints(byte);
-int read_register(byte); // byte is the address, int would be the data to write to the register (ie the setpoints for the first interaction)
-int write_register(byte, int);
-void print_values(BMS_chip); //int is cellvoltages for 1 or 2
 
+// Function declarations
+void upload_bms_setpoints(BMS_controller*);
+void read_bms_data(BMS_controller*);
+void publish_bms_data(BMS_controller*);
+
+
+// Main functions
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   last_time_ms = millis();
 }
 
 void loop() {
-  if(millis() - last_time_ms > PUBLISH_RATE){
-    print_values(&chip1);
-    print_values(&chip2);
+  if(millis() - last_time_ms > PUBLISH_RATE_MS){
+    publish_bms_data(&bms_controller_1);
     last_time_ms = millis();  
   }
 }
 
-// put function definitions here:
-void print_values(BMS_chip *chip){
-    Serial.print(chip->name);
+
+// Function definitions
+void publish_bms_data(BMS_controller *bms_controller){
+    Serial.print(bms_controller->name);
     for (int i = 0; i<CELLS_PER_BATTERY; i++){
-      Serial.print(chip->cell_voltages[i]+",");
+      Serial.print(bms_controller->cell_voltages[i]+",");
     }
     Serial.println();
   }
-
