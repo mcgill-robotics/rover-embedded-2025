@@ -21,7 +21,7 @@ The *bms_interface.cpp* file abstracts away the BMS chip's details, leading to s
 
 ### enable_adc
 ```cpp
-void enable_adc(byte i2c_addr)
+void enable_adc(byte i2c_addr);
 ```
 Enables ADCs (analog-to-digital converters) on the selected BMS so it can read the appropriate voltage and current values.
 - **params:**
@@ -31,7 +31,7 @@ Enables ADCs (analog-to-digital converters) on the selected BMS so it can read t
 
 ### enable_discharge_mosfet
 ```cpp
-void enable_discharge_mosfet(byte i2c_addr)
+void enable_discharge_mosfet(byte i2c_addr);
 ```
 Enables the selected BMS's discharge MOSFET, which allows the battery to discharge power into the rest of the rover.
 - **params:**
