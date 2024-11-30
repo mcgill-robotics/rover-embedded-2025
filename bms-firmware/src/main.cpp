@@ -41,11 +41,14 @@ void upload_bms_setpoints(BMS_controller*);
 void read_bms_data(BMS_controller*);
 void publish_bms_data(BMS_controller*);
 
+void _write_register(byte i2c_addr, byte reg_addr, int reg_data);
+int _read_register(byte i2c_addr, byte reg_addr);
 
 // Main functions
 void setup() {
-  Serial.begin(9600);
   last_time_ms = millis();
+  Serial.begin(9600);
+  Wire.begin();
 
   bms_controller_1.name = "BMS1";
   bms_controller_1.address = BMS_I2C_ADDR_1;
@@ -70,11 +73,21 @@ void loop() {
 
 // Function definitions
 void upload_bms_setpoints(BMS_controller *bms_controller) {
+  Serial.println("Uploading bms setpoints to " + bms_controller->name);
 
+  Wire.beginTransmission(bms_controller->address);
+  Wire.write(SYS_CTRL1);
+  Wire.write(0b00010000);
+  Wire.endTransmission();
+
+  Serial.println("Successfully uploaded bms setpoints to " + bms_controller->name);
 }
 
 void read_bms_data(BMS_controller *bms_controller) {
-
+  // TODO: implement proper BMS cell voltage reading
+  for (int i = 0; i < CELLS_PER_BATTERY; i++) {
+    bms_controller->cell_voltages[i] = i;
+  }
 }
 
 void publish_bms_data(BMS_controller *bms_controller){
@@ -84,3 +97,17 @@ void publish_bms_data(BMS_controller *bms_controller){
     }
     Serial.println();
   }
+
+void _write_register(byte i2c_addr, byte reg_addr, int reg_data) {
+  Wire.beginTransmission(i2c_addr);
+  Wire.write(reg_addr);
+  Wire.write(reg_data);
+  Wire.endTransmission();  
+}
+
+int _read_register(byte i2c_addr, byte reg_addr) {
+  Wire.beginTransmission(i2c_addr);
+  Wire.write(reg_addr);
+  Wire.endTransmission();
+  return Wire.read();
+}
