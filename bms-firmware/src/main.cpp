@@ -66,7 +66,7 @@ void loop() {
     // read_bms_data(&bms_controller_2);
     // publish_bms_data(&bms_controller_2);
     
-    last_time_ms = millis();  
+    last_time_ms = millis();
   }
 }
 
@@ -75,10 +75,7 @@ void loop() {
 void upload_bms_setpoints(BMS_controller *bms_controller) {
   Serial.println("Uploading bms setpoints to " + bms_controller->name);
 
-  Wire.beginTransmission(bms_controller->address);
-  Wire.write(SYS_CTRL1);
-  Wire.write(0b00010000);
-  Wire.endTransmission();
+  _write_register(bms_controller->address, SYS_CTRL1, 0b00010000);  // set ADC
 
   Serial.println("Successfully uploaded bms setpoints to " + bms_controller->name);
 }
