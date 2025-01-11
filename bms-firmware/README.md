@@ -79,6 +79,6 @@ void set_short_circuit_protection(byte i2c_addr, int current_ma);
 Sets the current level for detecting a short circuit. Selected BMS will shut down when this current level has been exceeded.
 - **params:**
     - **i2c_addr (byte):** I2C address of the BMS chip with which to communicate.
-    - **voltage_mv (int):** Current (in mA) to set the short circuit protection level to.
+    - **current_ma (int):** Current (in mA) to set the short circuit protection level to.
 - **returns:**
     - none
