@@ -11,6 +11,9 @@ namespace bms_interface {
     int _adc_offset(byte i2c_addr);
     int _adc_gain(byte i2c_gain);
 
+	const int OCD_THRESHOLD_SETTING_MV[16] =
+		{ 17, 22, 28, 33, 39, 44, 50, 56, 61, 67, 72, 78, 83, 89, 94, 100 };
+
     void enable_adc(byte i2c_addr) {
         _write_register(i2c_addr, SYS_CTRL1, 0x10);
     }
@@ -42,7 +45,11 @@ namespace bms_interface {
     }
 
     void set_overcurrent_discharge_protection(byte i2c_addr, int current_ma) {
-
+		int ocd_array_len = sizeof(OCD_THRESHOLD_SETTING_MV)
+							/ sizeof(OCD_THRESHOLD_SETTING_MV[0]);
+		for (int i = ocd_array_len; i >= 0; i--) {
+			
+		}
     }
 
     void set_short_circuit_protection(byte i2c_addr, int current_ma) {
