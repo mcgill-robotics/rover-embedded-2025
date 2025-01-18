@@ -1,5 +1,5 @@
 Application/User/main.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/Motor_param/Test-V3/Src/main.c \
+ C:/Users/rywan/STM32CubeIDE/workspace_1.16.0/rover-embedded-2025/Brushless-Motor-ESC/src/Test-V3/Src/main.c \
  ../../Inc/main.h ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../../Inc/stm32g4xx_hal_conf.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -82,7 +82,7 @@ Application/User/main.o: \
  ../../Inc/parameters_conversion.h ../../Inc/mc_math.h \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
- ../../Inc/mc_api.h
+ ../../Inc/mc_api.h ../../Inc/mc_api.h
 ../../Inc/main.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
@@ -173,4 +173,5 @@ Application/User/main.o: \
 ../../Inc/drive_parameters.h:
 ../../Inc/power_stage_parameters.h:
 ../../Inc/pmsm_motor_parameters.h:
+../../Inc/mc_api.h:
 ../../Inc/mc_api.h:

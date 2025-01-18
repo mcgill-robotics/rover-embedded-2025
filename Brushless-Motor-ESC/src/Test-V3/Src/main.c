@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mc_api.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -138,6 +138,11 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  if (!MC_StartMotor1()){
+	  Error_Handler();
+  }
+
+
 
   /* USER CODE END 2 */
 
@@ -145,6 +150,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	MC_ProgramSpeedRampMotor1_F(2, 100); // 2 rpm, 100ms of ramp
+	float_t arrayy[200]={0};
+	for (int i = 0; i <= 100; i ++){
+		arrayy[i] = MC_GetMecSpeedReferenceMotor1_F();
+		HAL_Delay(1);
+	}
+
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

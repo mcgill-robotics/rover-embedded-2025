@@ -1,5 +1,5 @@
 Middlewares/MotorControl/virtual_speed_sensor.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/Motor_param/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/virtual_speed_sensor.c \
+ C:/Users/rywan/STM32CubeIDE/workspace_1.16.0/rover-embedded-2025/Brushless-Motor-ESC/src/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/virtual_speed_sensor.c \
  ../../MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Inc/virtual_speed_sensor.h \
  ../../MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Inc/speed_pos_fdbk.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \

@@ -1,5 +1,5 @@
 Middlewares/MotorControl/circle_limitation.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/Motor_param/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/circle_limitation.c \
+ C:/Users/rywan/STM32CubeIDE/workspace_1.16.0/rover-embedded-2025/Brushless-Motor-ESC/src/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/circle_limitation.c \
  ../../MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Inc/circle_limitation.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h \

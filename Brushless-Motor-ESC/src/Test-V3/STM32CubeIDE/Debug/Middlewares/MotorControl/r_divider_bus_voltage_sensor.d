@@ -1,5 +1,5 @@
 Middlewares/MotorControl/r_divider_bus_voltage_sensor.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/Motor_param/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/r_divider_bus_voltage_sensor.c \
+ C:/Users/rywan/STM32CubeIDE/workspace_1.16.0/rover-embedded-2025/Brushless-Motor-ESC/src/Test-V3/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/r_divider_bus_voltage_sensor.c \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h \
  ../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g4xx.h \
