@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "pantilt.h"
+
 // put function declarations here:
 int myFunction(int, int);
 
@@ -9,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  pantilt::set_pantilt(5, 15);
 }
 
 // put function definitions here:
