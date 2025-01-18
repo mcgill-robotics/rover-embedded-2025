@@ -34,8 +34,6 @@ double crossProduct(const std::vector<double> &v1,
   return v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-// main function that returns the angle between vectors v1 and v2
-// to be called in main. should rotate the 
 int getAngle() {
   std::vector<double> v1 = {1.0, 2.0}; // Replace with your first vector
   std::vector<double> v2 = {4.0, 5.0}; // Replace with your second vector
