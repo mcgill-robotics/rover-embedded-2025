@@ -16,6 +16,9 @@ public:
      * @param topic The name of the ROS2 topic.
      * @param message The message to be sent.
      * @return True if the message was successfully sent, false otherwise.
+     * 
+     * Message format: "<topic>:<message>\n"
+     * Example: "sensor_data:25.3\n"
      */
     static bool publish(String topic, String message);
 
@@ -35,6 +38,9 @@ public:
     /**
      * @brief Handles incoming serial messages.
      * This function should be called regularly inside the `loop()` function.
+     * 
+     * Expected message format from ROS2: "<topic>:<message>\n"
+     * Example: "cmd_vel:{"x":1.0,"y":0.0}\n"
      */
     static void spin();
 };
