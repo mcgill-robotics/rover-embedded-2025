@@ -8,21 +8,21 @@ namespace pantilt {
   Servo pitch; // Between 0 and 180 (tilt)
   Servo yaw;   // Between 0 and 360 (pan)
 
-  const int PITCH_PIN = 9;
-  const int YAW_PIN = 11;
+  const double PITCH_PIN = 23;
+  const double YAW_PIN = 22;
 
-  const int MIN_PITCH_DEG = 0;
-  const int MIN_YAW_DEG = 0;
-  const int MAX_PITCH_DEG = 180;
-  const int MAX_YAW_DEG = 360;
+  const double MIN_PITCH_DEG = 0;
+  const double MIN_YAW_DEG = 0;
+  const double MAX_PITCH_DEG = 180;
+  const double MAX_YAW_DEG = 360;
 
-  void set_pantilt(int yaw_deg, int pitch_deg)
+  void set_pantilt(double yaw_deg, double pitch_deg)
   {
     yaw_spin(yaw_deg);
     pitch_spin(pitch_deg);
   }
 
-  void pitch_spin(int deg)
+  void pitch_spin(double deg)
   {
     if (deg < MIN_PITCH_DEG)
     {
@@ -38,7 +38,7 @@ namespace pantilt {
     }
   }
 
-  void yaw_spin(int deg)
+  void yaw_spin(double deg)
   {
     if (deg < MIN_YAW_DEG)
     {
