@@ -279,26 +279,26 @@ def run_speed(senderID, speed, station: CANStation):
 
     
 
-def run_position(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.RUN, CommandSpec.POSITION, additional_data)
+# def run_position(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.RUN, CommandSpec.POSITION, additional_data)
 
-def read_speed(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.READ, CommandSpec.SPEED, additional_data)
+# def read_speed(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.READ, CommandSpec.SPEED, additional_data)
 
-def read_position(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.READ, CommandSpec.POSITION, additional_data)
+# def read_position(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.READ, CommandSpec.POSITION, additional_data)
 
-def read_voltage(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.READ, CommandSpec.VOLTAGE, additional_data)
+# def read_voltage(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.READ, CommandSpec.VOLTAGE, additional_data)
 
-def read_current(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.READ, CommandSpec.CURRENT, additional_data)
+# def read_current(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.READ, CommandSpec.CURRENT, additional_data)
 
-def read_temperature(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.READ, CommandSpec.TEMPERATURE, additional_data)
+# def read_temperature(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.READ, CommandSpec.TEMPERATURE, additional_data)
 
-def fault_speed(senderID, speed, station: CANStation):
-    return create_can_message(CommandType.FAULT, CommandSpec.SPEED, additional_data)
+# def fault_speed(senderID, speed, station: CANStation):
+#     return create_can_message(CommandType.FAULT, CommandSpec.SPEED, additional_data)
 
 # def main():
 #     bus = can.Bus(channel='COM6', interface='slcan', bitrate=500000)
