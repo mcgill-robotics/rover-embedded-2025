@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mc_api.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,6 +32,13 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+// Define CAN message IDs
+//#define CAN_ID_START  0x100
+//#define CAN_ID_STOP   0x101
+//#define CAN_ID_SPEED  0x102
+//#define CAN_ID_STATUS 0x103
+
 
 /* USER CODE END PD */
 
@@ -51,6 +59,8 @@ CORDIC_HandleTypeDef hcordic;
 
 DAC_HandleTypeDef hdac3;
 
+FDCAN_HandleTypeDef hfdcan1;
+
 OPAMP_HandleTypeDef hopamp1;
 OPAMP_HandleTypeDef hopamp2;
 OPAMP_HandleTypeDef hopamp3;
@@ -62,6 +72,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
+
 
 /* USER CODE END PV */
 
@@ -81,13 +92,56 @@ static void MX_OPAMP2_Init(void);
 static void MX_OPAMP3_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_FDCAN1_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
+
+// Function prototype
+void ESC_Initialize(void);
+void ESC_RunStateMachine(void);
+void CAN_ReceiveMessage(void);
+void HandleCANMessage(uint32_t id, uint8_t *data, uint8_t len);
+void SetMotorSpeed(int16_t speed);
+bool StartConditionMet(void);
+bool StopConditionMet(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0) {
+        FDCAN_RxHeaderTypeDef rxHeader;
+        uint8_t rxData[8];
+
+        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK) {
+            CAN_ProcessMessage(&rxHeader, rxData);  // Process the received message
+        }
+    }
+}
+
+
+
+void ESC_SendCANMessage(void) {
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[4] = {0x01, 0x02, 0x03, 0x04};  // Example payload
+
+    txHeader.Identifier = 0x100;  // Message ID
+    txHeader.IdType = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = FDCAN_DLC_BYTES_4;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
+    // Add the message to the TX FIFO Queue
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
+        Error_Handler();  // Handle errors (e.g., TX FIFO full)
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -100,6 +154,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -108,7 +163,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+//  MC_Initialize();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -134,10 +189,21 @@ int main(void)
   MX_TIM1_Init();
   MX_USART2_UART_Init();
   MX_MotorControl_Init();
+  MX_FDCAN1_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+
+//  float speedRPM = DEFAULT_MOTOR_SPEED;
+//  MC_ProgramSpeedRampMotor1(speedRPM, 200); // Ramp to speed over 1000ms
+//  MC_StartMotor1();
+
+
+
+
+
+
 
   /* USER CODE END 2 */
 
@@ -145,12 +211,23 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+//  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);  // Toggle ESC LED
+//  HAL_Delay(500); // Keep the system responsive
+//  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);  // Toggle ESC LED
+//  HAL_Delay(500); // Keep the system responsive
+
+//  ESC_SendCANMessage();  // Send a message
+  HAL_Delay(100);       // Wait 1 second
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
+
+
+
 
 /**
   * @brief System Clock Configuration
@@ -225,6 +302,16 @@ static void MX_NVIC_Init(void)
   /* EXTI15_10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  //added for CAN
+
+      HAL_NVIC_SetPriority(FDCAN1_IT0_IRQn, 0, 0);  // Set priority
+      HAL_NVIC_EnableIRQ(FDCAN1_IT0_IRQn);          // Enable interrupt
+      HAL_FDCAN_Start(&hfdcan1);  // Start the FDCAN peripheral
+
+
+
+
 }
 
 /**
@@ -584,6 +671,69 @@ static void MX_DAC3_Init(void)
 }
 
 /**
+  * @brief FDCAN1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_FDCAN1_Init(void)
+{
+
+  /* USER CODE BEGIN FDCAN1_Init 0 */
+
+  /* USER CODE END FDCAN1_Init 0 */
+
+  /* USER CODE BEGIN FDCAN1_Init 1 */
+
+  /* USER CODE END FDCAN1_Init 1 */
+  hfdcan1.Instance = FDCAN1;
+  hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
+  hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+  hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan1.Init.AutoRetransmission = DISABLE;
+  hfdcan1.Init.TransmitPause = DISABLE;
+  hfdcan1.Init.ProtocolException = DISABLE;
+  hfdcan1.Init.NominalPrescaler = 68;
+  hfdcan1.Init.NominalSyncJumpWidth = 1;
+  hfdcan1.Init.NominalTimeSeg1 = 2;
+  hfdcan1.Init.NominalTimeSeg2 = 2;
+  hfdcan1.Init.DataPrescaler = 1;
+  hfdcan1.Init.DataSyncJumpWidth = 1;
+  hfdcan1.Init.DataTimeSeg1 = 1;
+  hfdcan1.Init.DataTimeSeg2 = 1;
+  hfdcan1.Init.StdFiltersNbr = 0;
+  hfdcan1.Init.ExtFiltersNbr = 0;
+  hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+  if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN FDCAN1_Init 2 */
+
+  // Configure CAN filters (only accept messages with ID 0x100)
+  FDCAN_FilterTypeDef sFilterConfig;
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfig.FilterID1 = 0x100;  // Accept messages with ID 0x100
+  sFilterConfig.FilterID2 = 0x7FF;  // Mask (match exact ID)
+
+  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
+      Error_Handler();
+  }
+
+  // Start FDCAN1
+  if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
+      Error_Handler();
+  }
+
+  // Enable reception interrupts
+  HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  /* USER CODE END FDCAN1_Init 2 */
+
+}
+
+/**
   * @brief OPAMP1 Initialization Function
   * @param None
   * @retval None
@@ -866,11 +1016,21 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : Start_Stop_Pin */
   GPIO_InitStruct.Pin = Start_Stop_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Start_Stop_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

@@ -26,7 +26,6 @@
 #include "speed_torq_ctrl.h"
 #include "mc_interface.h"
 #include "motorcontrol.h"
-
 #define ROUNDING_OFF
 
 /** @addtogroup MCSDK
@@ -50,10 +49,324 @@
   * @{
   */
 /* Private macros ------------------------------------------------------------*/
-
 #define round(x) ((x)>=0?(int32_t)((x)+0.5):(int32_t)((x)-0.5))
+#define CAN_SEND_ID 0x201
+
+// TODO use bitwise operations for these states
+
+extern FDCAN_HandleTypeDef hfdcan1;
+
+// For all the typedefs, they cannot go at the end of the enum bc in C you cannot impose a type and declare them in enum, so this
+// alternative must be done since we need to force them to only be 1 byte as int would otherwise be the default.
+
+/* The way the CAN messages are handled are according to a custom code system, which relies on encoding the 8 byte message window from CAN
+ * Starting from the MSB to the LSB, the first 4 bytes are used as information to specify what the commands purpose is. The first byte is
+ * what is the main action being requested by the ESC, that is:
+				READ_REQUEST : The ESC will provide information of itself to the bus
+				RUN_REQUEST  : The ESC will be moving the motor
+				FAULT_REQUEST: The ESC will provide information concerning a fault it is currently in
+
+  The next byte in the coding system specifies information about the previous request that was made. There are many options which can be specified
+  and not all can requests can provide the same type of specification. For a more detailed list of which command request can be specified in a particular
+  way, please refer to the documentation.
+
+  The next byte is responsible uniquely for the direction, thus it is only used in the RUN_Request state. It simply specifis in which direction the motor
+  should be turning.
+
+  The last of the command bytes is only used for error codes, which helps make debugging easier.
+
+ */
+
+// Types for the different types of requests to the ESC
+typedef uint8_t CommandTypes;
+enum {
+    READ_REQUEST = 0x00,
+    RUN_REQUEST = 0x01,
+    FAULT_REQUEST = 0x02
+};
+
+
+//types for the different specifications for the ESC requests
+typedef uint8_t SpecificationTypes;
+enum{
+    SPEED = 0x00,
+    POSITION = 0x01,
+    VOLTAGE = 0x02,
+    CURRENT = 0x03,
+    GET_CURRENT_FAULTS = 0x04,
+    GET_ALL_FAULTS = 0x05,
+    ACKNOWLEDGE_FAULTS = 0x06,
+    GET_CURRENT_STATE = 0x07,
+    STOP_MOTOR = 0xFF
+};
+
+// Types of directions considered
+typedef uint8_t DirectionTypes;
+enum {
+	FORWARD_CW = 0x00,
+	BACKWARD_CCW = 0x01
+};
+
+// Types of errors which can be ran-into
+typedef uint8_t ErrorTypes;
+enum{
+	UNRECOGNIZABLE_REQUEST = 0x00, // the user has used something other than the 3 possible options
+	UNREACHABLE_SPECIFICATION = 0x01, // the user is asking for something it cannot given the request given to the ESC
+	CANNOT_START_MOTOR = 0x02,
+	CANNOT_STOP_MOTOR = 0x03
+};
+
 
 /* Functions -----------------------------------------------*/
+float ExtractFloatFromCAN(uint8_t *data) {
+    float value;
+    uint8_t reorderedData[4];
+
+    // Copy bytes in correct order (Big Endian → Little Endian)
+    reorderedData[0] = data[3];
+    reorderedData[1] = data[2];
+    reorderedData[2] = data[1];
+    reorderedData[3] = data[0];
+
+    memcpy(&value, reorderedData, sizeof(float));  // Copy into float variable
+    return value;
+}
+
+/* This function returns information given a read command. Therefore, only the specification and the read data
+ * will be sent back. All CAN messages that are sent as a response from the ESC are sent to the same address.
+ *
+ */
+void sendReadCANResponse(SpecificationTypes typeSpecified, float information ){
+
+    // Prepare response message
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8]; //response that will be sent back
+    uint32_t txMailbox;
+
+    // Properly formulate a message given the convention (see documentation)
+    txData[7] = (CommandTypes) READ_REQUEST;
+    txData[6] = typeSpecified;
+    memcpy(&txData[0], &information, sizeof(float));
+
+
+    txHeader.Identifier = CAN_SEND_ID;  // ID of the response being sent back
+    txHeader.IdType = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = FDCAN_DLC_BYTES_8;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
+    // Send response
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+
+void sendRunCANResponse(SpecificationTypes typeSpecified, DirectionTypes direction, float information ){
+
+    // Prepare response message
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8]; //response that will be sent back
+    uint32_t txMailbox;
+
+    // Properly formulate a message given the convention (see documentation)
+    txData[7] = (CommandTypes) RUN_REQUEST;
+    txData[6] = typeSpecified;
+    txData[5] = direction;
+    memcpy(&txData[0], &information, sizeof(float));
+
+
+    txHeader.Identifier = CAN_SEND_ID;  // ID of the response being sent back
+    txHeader.IdType = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = FDCAN_DLC_BYTES_8;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
+    // Send response
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+
+/* The purpose of this function is to send an error should either the user provide a unacceptable input, or if any of the internal functions
+ * result in an issue. The error will specify what type of error it is, and the information provided in the previous CAN message for more context
+ */
+void sendRunErrorCANResponse(SpecificationTypes typeSpecified, DirectionTypes direction, ErrorTypes errorCode, float information ){
+
+    // Prepare response message
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8]; //response that will be sent back
+    uint32_t txMailbox;
+
+    // Properly formulate a message given the convention (see documentation)
+    txData[7] = (CommandTypes) FAULT_REQUEST;
+    txData[6] = typeSpecified;
+    txData[5] = direction;
+    txData[4] = errorCode;
+    memcpy(&txData[0], &information, sizeof(float));
+
+
+    txHeader.Identifier = CAN_SEND_ID;  // ID of the response being sent back
+    txHeader.IdType = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = FDCAN_DLC_BYTES_8;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
+    // Send response
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+void sendFaultErrorCANResponse(SpecificationTypes typeSpecified, float information ){
+
+    // Prepare response message
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8]; //response that will be sent back
+    uint32_t txMailbox;
+
+    // Properly formulate a message given the convention (see documentation)
+    txData[7] = FAULT_REQUEST;
+    txData[6] = typeSpecified;
+    memcpy(&txData[0], &information, sizeof(float));
+
+
+    txHeader.Identifier = CAN_SEND_ID;  // ID of the response being sent back
+    txHeader.IdType = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = FDCAN_DLC_BYTES_8;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
+    // Send response
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+
+int runMotor (float speed){
+
+	MC_ProgramSpeedRampMotor1_F(speed, 0);
+
+	if (MC_GetSTMStateMotor1() != RUN){
+		if (!MC_StartMotor1()) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+
+void CAN_ProcessMessage(FDCAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData) {
+
+    if (rxHeader->Identifier == 0x200) {
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
+
+        // Breaking down the parts of the message
+        uint8_t commandType = rxData[7];
+        uint8_t commandSpecification = rxData[6];
+        uint8_t direction = rxData[5];
+        float information = ExtractFloatFromCAN(rxData);
+
+        switch (commandType) {
+
+            case READ_REQUEST:
+
+            	switch (commandSpecification){
+
+					case SPEED:
+						float currentSpeed = MC_GetMecSpeedReferenceMotor1_F();
+						sendReadCANResponse(commandSpecification, currentSpeed );
+						break;
+
+					case VOLTAGE:
+						float phaseVoltage = MC_GetPhaseVoltageAmplitudeMotor1();
+						sendReadCANResponse(commandSpecification, phaseVoltage );
+						break;
+
+					case CURRENT:
+						float phaseCurrent = MC_GetPhaseCurrentAmplitudeMotor1();
+						sendReadCANResponse(commandSpecification, phaseCurrent );
+						break;
+
+					case GET_CURRENT_STATE:
+						MCI_State_t currentState = MC_GetSTMStateMotor1();
+						sendReadCANResponse(commandSpecification, currentState );
+						break;
+            	}
+            	break;
+
+            case RUN_REQUEST:
+
+            	switch (commandSpecification){
+
+					case SPEED:
+						int motorRan = runMotor(information);
+						if (motorRan == 1) { //Issue while trying to run the motor
+							sendRunErrorCANResponse(commandSpecification, direction, CANNOT_START_MOTOR, information );
+						}
+						else{
+							float currentRPM = MC_GetMecSpeedReferenceMotor1_F();
+							sendRunCANResponse(commandSpecification, direction, currentRPM );
+						}
+						break;
+
+					case STOP_MOTOR:
+						if(MC_StopMotor1()){
+						sendRunCANResponse(commandSpecification, direction, 0);
+						}
+						else{
+							sendRunErrorCANResponse(commandSpecification, direction, CANNOT_STOP_MOTOR, information );
+						}
+						break;
+            	}
+            	break;
+
+            case FAULT_REQUEST:
+            	// TODO Decode all of the fault bitmaps which are returned as integers
+
+            	switch (commandSpecification){
+
+					case GET_CURRENT_FAULTS:
+						uint16_t currentFaults = MC_GetCurrentFaultsMotor1 ();
+						sendFaultErrorCANResponse(commandSpecification, currentFaults);
+						break;
+
+					case GET_ALL_FAULTS:
+						uint16_t occuredFaults = MC_GetOccurredFaultsMotor1();
+						sendFaultErrorCANResponse(commandSpecification, occuredFaults);
+						break;
+
+					case ACKNOWLEDGE_FAULTS:
+						bool faultsAcknowledged = MC_AcknowledgeFaultMotor1 ();
+						sendFaultErrorCANResponse(commandSpecification, 1);
+						break;
+            	}
+
+            break;
+        }
+    }
+}
+
+
 
 /**
   * @brief  Programs a motor speed ramp
