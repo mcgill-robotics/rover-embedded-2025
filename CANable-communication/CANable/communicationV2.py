@@ -3,11 +3,39 @@ import time
 import serial
 from enum import Enum
 
+## FIRST FOUR BYTES OF THE SENT/DATA FROM MSE TO LSE. RXDATA AND TXDATA HAVE A MAX OF 8 BYTES ##
+## THOSE 4 BYTES SPECIFY THE TYPE OF COMMAND SENT TO THE MOTOR/ RECEIVED FROM THE MOTORS ##
+class CommandType(Enum):
+    """First byte position in the sent data for CAN messages"""
+    RUN = 0x00
+    READ = 0x01
+    FAULT = 0x02
 
-# TODO: need robust
-# TODO: add to doc that: add threads to be able to tx rx simultaneously - no simultaenously
-# if many instructions from wheels - CAN should take care of that
+class SpecType(Enum):
+    """Second byte position in the sent data for CAN messages"""
+    SPEED = 0x00,
+    POSITION = 0x01
+    VOLTAGE = 0x02
+    CURRENT = 0x03
+    GET_CURRENT_FAULTS = 0x04
+    GET_ALL_FAULTS = 0x05
+    ACKNOWLEDGE_FAULTS = 0x06
+    GET_CURRENT_STATE = 0x07
+    STOP_MOTOR = 0xFF
 
+class DirectionType(Enum):
+    """Third byte position in the sent data for CAN messages"""
+    FORWARD_CW = 0x00
+    BACKWARD_CCW = 0x01
+
+class ErrorType(Enum):
+    """Fourth and last byte position in the sent data for CAN messages"""
+    UNRECOGNIZABLE_REQUEST = 0x00 # the user has used something other than the 3 possible options
+    UNREACHABLE_SPECIFICATION = 0x01 # the user is asking for something it cannot given the request given to the ESC
+    CANNOT_START_MOTOR = 0x02
+    CANNOT_STOP_MOTOR = 0x03
+
+## ID OF THE CANBUS (HAS NOTHING TO DO WITH THE DATA BYTES ABOVE) ##
 class IDNumber(Enum):
     """ID numbers for the different CAN messages"""
     #max 11 bits long for ID (since CAN only takes an 11 bit identifier) 
@@ -38,12 +66,55 @@ class IDNumber(Enum):
 
     TESTSTM = 0x201 #TODO: for testing with stm32, erase later
 
+
+"""your task is to essentially create the outline of a function, 
+which allows me to alter the first 4 bytes of the message which is being sent, 
+and fit the rest of the message with a float. 
+(If you have time, you can have a function to implement some of these functions, 
+like one for running motor and stopping, one for reading and one for faults, 
+and then that is plenty since we can copy and paste this format for different types of commands from then on
+"""
+def create_message(senderID: IDNumber, command: CommandType, specification: SpecType = 0x10, direction: DirectionType = 0x10, error: ErrorType = 0x10, message: float = 0, ):
+    """This function specifies the 8 data sent/received via CANbus
+    
+    Params:
+    - command: one of the commands in the CommandType Enumeration
+    - specification: one of the specs in the SpecType Enumeration
+        - Default value: 0x10 since the FAULT command does not require any specifications
+    - direction: one of the two directions in the DirecitonType
+        - Defaut value: 0x10 since some commands do not need a direction)
+    - error: one of the errors in ErrorType Enumeration
+        - Default value: 0x10 since only the FAULT command requires this data byte
+    - message: float value that represents the speed, postion, voltage and current values received or sent
+        - Default value: 0 since some commands do not need a float
+    
+    Returns:
+    - CANMessage: the message in CAN format
+    - -1        : if any error occurs      
+    
+    """
+
+
+    # TODO: reutrn error for combinations that dont work
+
+    full_message = [command.value, specification.value, direction.value, error.value, message]
+
+    try:
+        message = CANMessage(senderID = senderID.value, DLC = 8, message=full_message)
+    except can.CanError as e:
+        print(f"Could not create message due to: {e}")
+        return -1
+    
+    return full_message
+
+
 class CANMessage:
-    def __init__(self, senderID, DLC: int, message: list[int]): 
+    def __init__(self, senderID, DLC: int, message = list[int]): 
         """Creates a CAN message
         param:      senderID: any of the list of IDNumber
                     DLC     : from 0 to 8 bytes of sent info
                     message : is no longer than DLC and contains the information
+                    message : data bytes of the message
                 
         returns:    None
         
@@ -53,12 +124,12 @@ class CANMessage:
         elif type(senderID) == int:
             self.senderID = IDNumber(senderID)
         self.DLC = DLC
-        #TODO: make sure that the message is sent in hexadecimal or what
+        
         self.message = message
 
         # Verifies the size of the message corresponds to DLC size
         # If DLC is bigger than message size, CANBus will pad the rest with 0x00
-        if len(self.message) > self.DLC:
+        if len(self.message) > self.DLC: 
             raise ValueError(f"Given message of size {len(self.message)} is bigger than configured DLC size {self.DLC}")
 
     def to_can_msg(self):
@@ -198,6 +269,36 @@ class CANStation:
             except Exception as e:
                 print(f"Unexpected error while shutting down CAN bus: {e}")
 
+## LIST OF FUNCTIONS ##
+def run_speed(senderID, speed, station: CANStation):
+    try:
+        my_msg = CANMessage(senderID, 8, 'RUN', 'SPEED', [speed])
+        station.send_msg(my_msg)
+    except can.CanError as e:
+        print(f"Command not successfully ran due to {e}")
+
+    
+
+def run_position(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.RUN, CommandSpec.POSITION, additional_data)
+
+def read_speed(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.READ, CommandSpec.SPEED, additional_data)
+
+def read_position(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.READ, CommandSpec.POSITION, additional_data)
+
+def read_voltage(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.READ, CommandSpec.VOLTAGE, additional_data)
+
+def read_current(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.READ, CommandSpec.CURRENT, additional_data)
+
+def read_temperature(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.READ, CommandSpec.TEMPERATURE, additional_data)
+
+def fault_speed(senderID, speed, station: CANStation):
+    return create_can_message(CommandType.FAULT, CommandSpec.SPEED, additional_data)
 
 # def main():
 #     bus = can.Bus(channel='COM6', interface='slcan', bitrate=500000)
