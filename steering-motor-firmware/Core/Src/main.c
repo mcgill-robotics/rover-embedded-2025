@@ -45,8 +45,6 @@ TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
 
 /* USER CODE BEGIN PV */
-int16_t counts = 0;
-int16_t iter = 0;
 volatile int on_off  = 0;
 /* USER CODE END PV */
 
@@ -62,7 +60,9 @@ static void MX_TIM8_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#include "encoder.h"
+#include "motor.h"
+#include "pid.h"
 /* USER CODE END 0 */
 
 /**
@@ -99,17 +99,17 @@ int main(void)
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
-  TIM8->CCR2 = 0;
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
-  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+  set_motor_speed(0);
+  TIM2->CNT = 0;
+  setPIDGoalA(90);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  counts = (int16_t) TIM2->CNT;
-	  iter++;
+	  set_counts((int16_t) TIM2->CNT);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -369,15 +369,13 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
-	printf("isr triggered");
+
   if (GPIO_PIN == Button_Pin)
   {
 	  if (!on_off){
-		  TIM8->CCR2 = 100;
-		  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+		  set_motor_speed(100);
 	  } else {
-		  TIM8->CCR2 = 0;
-		  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+		  set_motor_speed(0);
 	  }
 	  on_off = !on_off;
     /* Your code goes here */
