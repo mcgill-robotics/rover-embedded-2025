@@ -1,0 +1,2 @@
+../Core/Src/motor.c:3:6:set_motor_speed	16	static
+../Core/Src/motor.c:6:6:set_motor_direction	16	static
