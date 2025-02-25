@@ -3,19 +3,16 @@ import time
 import struct
 from enum import Enum
 
-#
-# Your enumerations or IDs
-#
 class IDNumber(Enum):
-    # The motor firmware is expecting ID=0x200, so let's keep that.
     MOTOR_ESC = 0x200
+    # Add more as needed
 
-# Command categories (matches interface.c logic)
+# Command categories
 READ_REQUEST  = 0x00
 RUN_REQUEST   = 0x01
 FAULT_REQUEST = 0x02
 
-# Specification values (subset that interface.c supports in CAN_ProcessMessage)
+# Specs
 SPEED              = 0x00
 STOP_MOTOR         = 0xFF
 GET_CURRENT_STATE  = 0x07
@@ -29,9 +26,6 @@ ACKNOWLEDGE_FAULTS = 0x06
 FORWARD_CW   = 0x00
 BACKWARD_CCW = 0x01
 
-#
-# A basic CANMessage class, exactly as before
-#
 class CANMessage:
     def __init__(self, sender_id, DLC, data_bytes):
         if isinstance(sender_id, IDNumber):
@@ -44,6 +38,7 @@ class CANMessage:
         self.DLC = DLC
         if len(data_bytes) > DLC:
             raise ValueError("Data too long vs. DLC")
+
         self.data = data_bytes
 
     def to_can_msg(self):
@@ -54,9 +49,7 @@ class CANMessage:
             is_extended_id=False
         )
 
-#
-# The CANStation class (unchanged), with a helper 'send_STM_command()'
-#
+
 class CANStation:
     def __init__(self, interface, channel, bitrate):
         self.interface = interface
@@ -83,9 +76,19 @@ class CANStation:
             return -1
 
         can_msg = msg.to_can_msg()
+
+        # Decode first 4 bytes as a float (big-endian), if present
+        float_val_str = ""
+        if len(can_msg.data) >= 4:
+            float_val = struct.unpack(">f", bytes(can_msg.data[:4]))[0]
+            float_val_str = f" (floatValue={float_val})"
+
         try:
             self.bus.send(can_msg)
-            print(f"Sent: ID=0x{can_msg.arbitration_id:X} Data={list(can_msg.data)}")
+            print(
+                f"Sent: ID=0x{can_msg.arbitration_id:X} "
+                f"Data={list(can_msg.data)}{float_val_str}"
+            )
             return 0
         except can.CanError as e:
             print(f"Send fail: {e}")
@@ -99,10 +102,20 @@ class CANStation:
 
         rx = self.bus.recv(timeout=timeout)
         if rx:
-            print(f"RX: ID=0x{rx.arbitration_id:X}, Data={list(rx.data)}")
+            # Decode first 4 bytes as a float (big-endian), if present
+            float_val_str = ""
+            if len(rx.data) >= 4:
+                float_val = struct.unpack(">f", bytes(rx.data[:4]))[0]
+                float_val_str = f" (floatValue={float_val})"
+
+            print(
+                f"RX: ID=0x{rx.arbitration_id:X}, "
+                f"Data={list(rx.data)}{float_val_str}"
+            )
+            return rx
         else:
             print("No message within timeout.")
-        return rx
+            return None
 
     def close(self):
         if self.bus:
@@ -112,9 +125,10 @@ class CANStation:
             except Exception as e:
                 print(f"Close error: {e}")
 
-    def send_STM_command(self, commandType, specification, direction, floatValue):
+    def send_STM_command(self, commandType, specification, direction, floatValue, 
+                         node_id=IDNumber.MOTOR_ESC):
         """
-        Sends 8 bytes to ID=0x200:
+        Sends 8 bytes to the given node_id:
           [0..3]: big-endian float
           [4]   : (unused error code) = 0
           [5]   : direction
@@ -129,107 +143,52 @@ class CANStation:
         data[6] = specification
         data[7] = commandType
 
-        msg = CANMessage(IDNumber.MOTOR_ESC, 8, list(data))
+        msg = CANMessage(node_id, 8, list(data))
         return self.send_msg(msg)
 
 
 class ESCInterface:
-    """
-    This class provides higher-level Python functions that correspond
-    to each of the commands recognized by interface.c's CAN_ProcessMessage().
-    Each function calls station.send_STM_command() with the appropriate
-    arguments. You can optionally call station.recv_msg() to read a response
-    after each command.
-    """
-
     def __init__(self, station: CANStation):
         self.station = station
 
-    # ========== RUN_REQUEST commands ==========
+    def run_speed(self, speed_value, direction=FORWARD_CW, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(RUN_REQUEST, SPEED, direction, speed_value, node_id=node_id)
 
-    def run_speed(self, speed_value, direction=FORWARD_CW):
-        """
-        Start motor at the given speed (floatValue in RPM or your chosen units).
-        """
-        # This triggers the 'runMotor(...)' logic in interface.c, i.e. RUN_REQUEST with specification=SPEED
-        self.station.send_STM_command(RUN_REQUEST, SPEED, direction, speed_value)
+    def stop_motor(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(RUN_REQUEST, STOP_MOTOR, FORWARD_CW, 0.0, node_id=node_id)
 
-    def stop_motor(self):
-        """
-        Stop the motor by sending a RUN_REQUEST with specification STOP_MOTOR.
-        """
-        self.station.send_STM_command(RUN_REQUEST, STOP_MOTOR, FORWARD_CW, 0.0)
+    def read_speed(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(READ_REQUEST, SPEED, FORWARD_CW, 0.0, node_id=node_id)
 
-    # ========== READ_REQUEST commands ==========
+    def read_voltage(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(READ_REQUEST, VOLTAGE, FORWARD_CW, 0.0, node_id=node_id)
 
-    def read_speed(self):
-        """
-        Ask the firmware for the current speed. 
-        The firmware replies with a CAN frame whose specification is SPEED. 
-        """
-        self.station.send_STM_command(READ_REQUEST, SPEED, FORWARD_CW, 0.0)
+    def read_current(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(READ_REQUEST, CURRENT, FORWARD_CW, 0.0, node_id=node_id)
 
-    def read_voltage(self):
-        """
-        Ask the firmware for the current phase voltage amplitude.
-        """
-        self.station.send_STM_command(READ_REQUEST, VOLTAGE, FORWARD_CW, 0.0)
+    def read_state(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(READ_REQUEST, GET_CURRENT_STATE, FORWARD_CW, 0.0, node_id=node_id)
 
-    def read_current(self):
-        """
-        Ask the firmware for the current phase current amplitude.
-        """
-        self.station.send_STM_command(READ_REQUEST, CURRENT, FORWARD_CW, 0.0)
+    def get_current_faults(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(FAULT_REQUEST, GET_CURRENT_FAULTS, 0, 0.0, node_id=node_id)
 
-    def read_state(self):
-        """
-        Ask the firmware for the current MC state (like IDLE, RUN, FAULT, etc.).
-        """
-        self.station.send_STM_command(READ_REQUEST, GET_CURRENT_STATE, FORWARD_CW, 0.0)
+    def get_all_faults(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(FAULT_REQUEST, GET_ALL_FAULTS, 0, 0.0, node_id=node_id)
 
-    # ========== FAULT_REQUEST commands ==========
-
-    def get_current_faults(self):
-        """
-        Ask the firmware for any actively occurring faults (fault bits).
-        """
-        self.station.send_STM_command(FAULT_REQUEST, GET_CURRENT_FAULTS, 0, 0.0)
-
-    def get_all_faults(self):
-        """
-        Ask the firmware for all faults that have occurred.
-        """
-        self.station.send_STM_command(FAULT_REQUEST, GET_ALL_FAULTS, 0, 0.0)
-
-    def acknowledge_faults(self):
-        """
-        Tell the firmware to acknowledge/clear any fault states, if possible.
-        """
-        self.station.send_STM_command(FAULT_REQUEST, ACKNOWLEDGE_FAULTS, 0, 0.0)
+    def acknowledge_faults(self, node_id=IDNumber.MOTOR_ESC):
+        self.station.send_STM_command(FAULT_REQUEST, ACKNOWLEDGE_FAULTS, 0, 0.0, node_id=node_id)
 
 
 if __name__ == "__main__":
-    # Example usage:
+    # Example usage
     station = CANStation(interface="slcan", channel="COM6", bitrate=500000)
     esc = ESCInterface(station)
 
-    # 1) Start the motor at speed=300
-    # esc.run_speed(1500.0, direction=FORWARD_CW)
-    # resp = station.recv_msg(timeout=2.0)  # read the response if needed
-
-    # 2) Ask for current MC state
-    # esc.read_state()
-    # resp = station.recv_msg(timeout=2.0)
-
-    # # 3) Stop the motor
-    esc.stop_motor()
-    resp = station.recv_msg(timeout=2.0)
-
-    # # 4) Read faults
-    esc.get_current_faults()
-    resp = station.recv_msg(timeout=2.0)
-
-    esc.get_all_faults()
-    resp = station.recv_msg(timeout=2.0)
+    # Send a motor speed command
+    # esc.acknowledge_faults(node_id=0x200)
+    # esc.run_speed(10.0, direction=FORWARD_CW, node_id=0x200)
+    esc.acknowledge_faults(node_id=0x200)
+    esc.run_speed(1000, node_id=0x200)
+    station.recv_msg(timeout=2.0)  # see response
 
     station.close()
