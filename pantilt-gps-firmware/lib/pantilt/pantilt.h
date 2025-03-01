@@ -2,7 +2,7 @@
 #define PANTILT
 
 namespace pantilt {
-    void set_pantilt(int yaw_deg, int pitch_deg);
+    void set_pantilt(double yaw_deg, double pitch_deg);
 }
 
 #endif
