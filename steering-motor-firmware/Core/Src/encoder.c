@@ -1,7 +1,8 @@
 int counts;
 
 void set_counts(int n){
-	counts = n;
+	int max_count = 16*516*4.0;
+	counts = ((n%max_count)+max_count)%max_count;
 }
 int get_counts(){
 	return counts;
