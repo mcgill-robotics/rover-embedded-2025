@@ -50,6 +50,11 @@ void updatePID() {
 		return;
 	}
 	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
+	if (angleCorrection < 0){
+		set_motor_direction(1);
+	} else{
+		set_motor_direction(0);
+	}
 	oldAngleError = angleError;
 	set_motor_speed(angleCorrection);
 

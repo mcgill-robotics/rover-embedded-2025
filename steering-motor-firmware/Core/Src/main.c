@@ -44,6 +44,8 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 volatile int on_off  = 0;
 /* USER CODE END PV */
@@ -54,8 +56,9 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM8_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -63,6 +66,8 @@ static void MX_TIM8_Init(void);
 #include "encoder.h"
 #include "motor.h"
 #include "pid.h"
+
+int c=0;
 /* USER CODE END 0 */
 
 /**
@@ -97,19 +102,20 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM5_Init();
   MX_TIM8_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
   set_motor_speed(0);
+  set_motor_direction(0);
   TIM2->CNT = 0;
   setPIDGoalA(90);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  set_counts((int16_t) TIM2->CNT);
+  while (1){
+//	  printf("%d\n\r", );
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -328,6 +334,39 @@ static void MX_TIM8_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -367,17 +406,28 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  *   None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 
   if (GPIO_PIN == Button_Pin)
   {
-	  if (!on_off){
-		  set_motor_speed(100);
-	  } else {
-		  set_motor_speed(0);
-	  }
-	  on_off = !on_off;
+	  TIM2->CNT = 0;
+	  setPIDGoalA(180);
     /* Your code goes here */
   }
 }
