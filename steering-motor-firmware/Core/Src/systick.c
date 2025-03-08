@@ -17,7 +17,7 @@ void SysTickFunction(void) {
 	set_counts((int16_t) TIM2->CNT);
 	i=count_to_angle((int16_t) TIM2->CNT);
 //	printf("%d\n\r",TIM2->CNT);
-	printf("%f\n\r",i);
+//	printf("%f\n\r",i);
 
 	/*
 	 * This code prevents PID errors when the encoder counts get too high. For example, without it then

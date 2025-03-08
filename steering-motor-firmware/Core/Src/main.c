@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "CAN_Interface.c"
+#include "math.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -67,7 +69,6 @@ static void MX_USART2_UART_Init(void);
 #include "motor.h"
 #include "pid.h"
 
-int c=0;
 /* USER CODE END 0 */
 
 /**
@@ -109,14 +110,17 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(0);
   TIM2->CNT = 0;
-  setPIDGoalA(90);
+  setPIDGoalA(3.14/2.0);
+  printf("test %d\r\n", 5);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-//	  printf("%d\n\r", );
+//	  print("%d\n\r", );
     /* USER CODE END WHILE */
+
+	//setPIDGoalA(getGoalAngle());
 
     /* USER CODE BEGIN 3 */
   }

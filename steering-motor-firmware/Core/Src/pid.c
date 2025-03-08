@@ -5,14 +5,22 @@
 #include "main.h"
 #include "encoder.h"
 #include "motor.h"
+#include "math.h"
+#include "main.h"
 
 int angleError = 0;
 int oldAngleError = 0;
+
+#define MAX_COUNTS 33024
+#define HALF_COUNTS 16512
+
 
 float kPw = 0.05;
 float kDw = 0;
 
 int goalAngle = 0;
+
+int testAngle = M_PI/2;
 
 void resetPID() {
 	/*
@@ -42,18 +50,27 @@ void updatePID() {
 	 *
 	 * For assignment 3.2: implement this function so it calculates distanceError as the difference between your goal distance and the average of
 	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
-	 * right encoder counts. Refer to pseudocode example document on the google drive for some pointers.
+	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
-	int angleError = goalAngle - abs(get_counts());
-	if (angleError < 0.001){
+	int angleError = goalAngle - get_counts();
+	if (abs(angleError) > HALF_COUNTS) { // the units need to be fixed but this gets the best path
+		if (angleError > 0) {
+			angleError = angleError - MAX_COUNTS;
+		}
+		else {
+			angleError = angleError + MAX_COUNTS;
+		}
+	}
+
+	if (angleError < 100){
 		set_motor_speed(0);
 		return;
 	}
 	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
 	if (angleCorrection < 0){
-		set_motor_direction(1);
-	} else{
 		set_motor_direction(0);
+	} else{
+		set_motor_direction(1);
 	}
 	oldAngleError = angleError;
 	set_motor_speed(angleCorrection);

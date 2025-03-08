@@ -1,4 +1,4 @@
-../Core/Src/encoder.c:3:6:set_counts	1
-../Core/Src/encoder.c:7:5:get_counts	1
-../Core/Src/encoder.c:11:7:count_to_angle	2
-../Core/Src/encoder.c:21:5:angle_to_count	1
+../Core/Src/encoder.c:6:6:set_counts	1
+../Core/Src/encoder.c:10:5:get_counts	1
+../Core/Src/encoder.c:14:7:count_to_angle	2
+../Core/Src/encoder.c:24:7:angle_to_count	1
