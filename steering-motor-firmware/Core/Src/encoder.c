@@ -1,3 +1,6 @@
+#ifndef ENCODER_H
+#define ENCODER_H
+
 #include "math.h"
 #include "main.h"
 
@@ -21,8 +24,9 @@ float count_to_angle(int n){
 	return angle;
 }
 
-float angle_to_count(float n){
-	float new_n = abs(fmod(n,2*3.14));
-	printf("a2c %f\r\n",n);
-	return (new_n/(2.0*3.14))*16*516*4;
+int angle_to_count(double n){
+	double new_n = fabs(fmod(n,2.0*3.14));
+	return (int) ((new_n/(2.0*3.14))*16.0*516.0*4.0);
 }
+
+#endif

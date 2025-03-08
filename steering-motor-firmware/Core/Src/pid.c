@@ -2,11 +2,13 @@
  * pid.c
  */
 
+#ifndef PID_H
+#define PID_H
+
 #include "main.h"
 #include "encoder.h"
 #include "motor.h"
 #include "math.h"
-#include "main.h"
 
 int angleError = 0;
 int oldAngleError = 0;
@@ -15,12 +17,10 @@ int oldAngleError = 0;
 #define HALF_COUNTS 16512
 
 
-float kPw = 0.05;
-float kDw = 0;
+float kPw = 1.5;
+float kDw = 6;
 
-int goalAngle = 0;
-
-int testAngle = M_PI/2;
+volatile int goalAngle = 0;
 
 void resetPID() {
 	/*
@@ -62,15 +62,20 @@ void updatePID() {
 		}
 	}
 
-	if (angleError < 100){
+	if (abs(angleError) < 5){
 		set_motor_speed(0);
 		return;
 	}
 	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
+//	printf("correction %d\r\n", angleCorrection);
 	if (angleCorrection < 0){
 		set_motor_direction(0);
 	} else{
 		set_motor_direction(1);
+	}
+	int clampedAngleCorrection = angleCorrection;
+	if (abs(angleCorrection) > 100) {
+		angleCorrection = 100;
 	}
 	oldAngleError = angleError;
 	set_motor_speed(angleCorrection);
@@ -84,8 +89,10 @@ void setPIDGoalD(int16_t distance) {
 	 */
 }
 
-void setPIDGoalA(int16_t angle) {
+void setPIDGoalA(double angle) {
+	printf("set goal %f\r\n", angle);
 	goalAngle = angle_to_count(angle);
+	printf("goal %d\r\n", goalAngle);
 	/*
 	 * For assignment 3.1: this function does not need to do anything
 	 * For assignment 3.2: This function should set a variable that stores the goal angle.
@@ -102,3 +109,5 @@ int8_t PIDdone(void) { // There is no bool type in C. True/False values are repr
 
 	return 1;
 }
+
+#endif

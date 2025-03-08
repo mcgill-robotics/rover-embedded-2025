@@ -110,8 +110,9 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(0);
   TIM2->CNT = 0;
-  setPIDGoalA(3.14/2.0);
-  printf("test %d\r\n", 5);
+  double goal = 3.14;
+  printf("goal %f\r\n");
+  setPIDGoalA(goal);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -430,8 +431,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 
   if (GPIO_PIN == Button_Pin)
   {
-	  TIM2->CNT = 0;
-	  setPIDGoalA(180);
+//	  TIM2->CNT = 0;
+	  double new_goal = 3*3.14/4.0;
+	  printf("%f set new goal\r\n", new_goal);
+	  setPIDGoalA(new_goal);
     /* Your code goes here */
   }
 }
