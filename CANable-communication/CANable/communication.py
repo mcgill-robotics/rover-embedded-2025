@@ -181,14 +181,37 @@ class ESCInterface:
 
 if __name__ == "__main__":
     # Example usage
-    station = CANStation(interface="slcan", channel="COM6", bitrate=500000)
+    station = CANStation(interface="slcan", channel="COM12", bitrate=500000)
     esc = ESCInterface(station)
 
+    
     # Send a motor speed command
-    # esc.acknowledge_faults(node_id=0x200)
+    # esc.acknowledge_faults(node_id=0x101)
     # esc.run_speed(10.0, direction=FORWARD_CW, node_id=0x200)
-    esc.acknowledge_faults(node_id=0x200)
-    esc.run_speed(1000, node_id=0x200)
-    station.recv_msg(timeout=2.0)  # see response
+
+    # esc.stop_motor()
+    # esc.acknowledge_faults(node_id=0x001)
+    esc.run_speed(200, node_id=0x001)
+    # esc.acknowledge_faults(node_id=0x001)
+    # esc.acknowledge_faults(node_id=0x101)
+    # esc.stop_motor(node_id=0x001)
+    # esc.run_speed(2500, node_id=0x002)
+    # esc.run_speed(-2500, node_id=0x003)
+    # esc.run_speed(-2500, node_id=0x004)
+
+    
+    # esc.stop_motor(node_id=0x001)
+    # esc.stop_motor(node_id=0x002)
+    # esc.stop_motor(node_id=0x003)
+    # esc.stop_motor(node_id=0x004)
+
+    # esc.run_speed(300, node_id=0x200)
+    # station.recv_msg(timeout=2.0)  # see response
+    # time.sleep(2)
+    # esc.stop_motor(node_id=0x200)
+    # time.sleep(2)
+    # esc.run_speed(-500, node_id=0x200)
+    # time.sleep(2)
+    # esc.stop_motor(node_id=0x200)
 
     station.close()
