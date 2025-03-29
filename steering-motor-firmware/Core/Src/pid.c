@@ -17,8 +17,8 @@ int oldAngleError = 0;
 #define HALF_COUNTS 16512
 
 
-float kPw = 1.5;
-float kDw = 6;
+float kPw = 0.5;
+float kDw = 0;
 
 volatile int goalAngle = 0;
 
@@ -63,11 +63,11 @@ void updatePID() {
 	}
 
 	if (abs(angleError) < 5){
-		set_motor_speed(0);
+		/*set_motor_speed(0);*/
 		return;
 	}
 	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
-//	printf("correction %d\r\n", angleCorrection);
+	printf("correction %d\r\n", angleCorrection);
 	if (angleCorrection < 0){
 		set_motor_direction(0);
 	} else{
