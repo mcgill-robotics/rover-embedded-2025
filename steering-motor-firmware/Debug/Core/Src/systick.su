@@ -1,1 +1,1 @@
-../Core/Src/systick.c:10:6:SysTickFunction	8	static
+../Core/Src/systick.c:10:6:SysTickFunction	4	static

@@ -55,6 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim8;
 /* USER CODE BEGIN EV */
 
@@ -199,20 +200,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles EXTI line[15:10] interrupts.
-  */
-void EXTI15_10_IRQHandler(void)
-{
-  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-
-  /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(Button_Pin);
-  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-
-  /* USER CODE END EXTI15_10_IRQn 1 */
-}
-
-/**
   * @brief This function handles TIM8 break interrupt and TIM12 global interrupt.
   */
 void TIM8_BRK_TIM12_IRQHandler(void)
@@ -238,6 +225,34 @@ void TIM8_UP_TIM13_IRQHandler(void)
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 1 */
 
   /* USER CODE END TIM8_UP_TIM13_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN2 RX0 interrupt.
+  */
+void CAN2_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
+
+  /* USER CODE END CAN2_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan2);
+  /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
+
+  /* USER CODE END CAN2_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN2 RX1 interrupt.
+  */
+void CAN2_RX1_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN2_RX1_IRQn 0 */
+
+  /* USER CODE END CAN2_RX1_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan2);
+  /* USER CODE BEGIN CAN2_RX1_IRQn 1 */
+
+  /* USER CODE END CAN2_RX1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
