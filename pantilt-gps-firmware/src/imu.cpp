@@ -38,7 +38,7 @@ void imusetup()
   sensor.setGyroSensitivity(0);   //  250 degrees/s
 
   sensor.setThrottle();
-  Serial.println("start...");
+  // Serial.println("start...");
   
   //  set calibration values from calibration sketch.
   sensor.axe = 0;
@@ -59,29 +59,40 @@ void imuloop()
   float gx = sensor.getGyroX();
   float gy = sensor.getGyroY();
   float gz = sensor.getGyroZ();
-  float t = sensor.getTemperature();
+  // float t = sensor.getTemperature();
 
-  if (counter % 10 == 0)
-  {
-    Serial.println("\n\tACCELEROMETER\t\tGYROSCOPE\t\tTEMPERATURE");
-    Serial.println("\tax\tay\taz\tgx\tgy\tgz\tT");
-  }
+  // if (counter % 10 == 0)
+  // {
+  //   Serial.println("\n\tACCELEROMETER\t\tGYROSCOPE\t\tTEMPERATURE");
+  //   Serial.println("\tax\tay\taz\tgx\tgy\tgz\tT");
+  // }
 
-  Serial.print(counter);
-  Serial.print('\t');
+
+  // Serial.print("imu: ");
+  Serial.print("  [");
+  // Serial.print(counter);
+  // Serial.print('\t');
+  // Serial.print(", ");
   Serial.print(ax, 3);
-  Serial.print('\t');
+  // Serial.print('\t');
+  Serial.print(", ");
   Serial.print(ay, 3);
-  Serial.print('\t');
+  // Serial.print('\t');
+  Serial.print(", ");
   Serial.print(az, 3);
-  Serial.print('\t');
+  // Serial.print('\t');
+  Serial.print(", ");
   Serial.print(gx, 3);
-  Serial.print('\t');
+  // Serial.print('\t');
+  Serial.print(", ");
   Serial.print(gy, 3);
-  Serial.print('\t');
+  // Serial.print('\t');
+  Serial.print(", ");
   Serial.print(gz, 3);
-  Serial.print('\t');
-  Serial.print(t, 3);
+  Serial.print("]");
+  // Serial.print('\t');
+  // Serial.print("Temp.: ");
+  // Serial.print(t, 3);
   Serial.println();
 
   counter++;
