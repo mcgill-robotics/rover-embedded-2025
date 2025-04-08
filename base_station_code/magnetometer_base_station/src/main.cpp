@@ -72,7 +72,7 @@ bool manualCompass = false;
 
 void setup() {
   Serial.begin(9600);
-  Serial1.begin(9600);
+  // Serial1.begin(9600);
 
   servo.attach(7);
   servo.write(90); // Start at neutral position
