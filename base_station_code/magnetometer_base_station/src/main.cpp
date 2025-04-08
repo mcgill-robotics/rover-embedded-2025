@@ -1,18 +1,25 @@
 #include <Servo.h>
 #include <Arduino.h>
 #include <globals.h>
+// #include <QMC5883LCompass.h>// QMC5883L Compass Library
+
 
 // Initialize variables in globals.h
-extern double localGPS_lat = 0.0; // gps coords from gps attached teensy   
-extern double localGPS_long = 0.0;
-extern double rover_gps_coords[2] = {0.0, 0.0};
-extern int azimuth = 0; // compass pos -> [-180, 180] -> angle 0 for N, and -90 for West
+// extern double localGPS_lat = 0.0; // gps coords from gps attached teensy   
+// extern double localGPS_long = 0.0;
+// extern double rover_gps_coords[2] = {0.0, 0.0};
+
+
 
 // functions
 float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, float vectorB_y);
 // double get_GPS_coord(); // Dummy function simulating GPS
 double get_moving_avg(double newValue, double avgArr[], int &index, double &sum); // Moving average function
 const int number_of_avg = 10; // Set to 10 by default to take 10 values for the average - can be changed
+
+
+double rover_gps_coords[2] = {0.0, 0.0};
+
 
 // Base & Rover Coordinates
 double North_coords_x = 86.494; // stays constant //so we doing itto magnetic north (compass) -> so drumheller/ UdeM doesnt matter
@@ -65,6 +72,8 @@ bool manualCompass = false;
 
 void setup() {
   Serial.begin(9600);
+  Serial1.begin(9600);
+
   servo.attach(7);
   servo.write(90); // Start at neutral position
 
@@ -120,13 +129,18 @@ void setup() {
 }
 
 void loop() {
+
+  // compass_loop();
+  gps_loop();
+  delay(300);
   // if (!test){
 
   // Start the gps loop to update rover coordinates
-  if (!manualBaseStationGPS) {gps_loop();}
+  // if (!manualBaseStationGPS) {gps_loop();}
 
   // Get new GPS coordinates
-  double current_Base_x = rover_gps_coords[0]; // Simulated update
+  //THIS IS WRONG GPS COORDS VAR BTW
+  double current_Base_x = rover_gps_coords[0]; // Simulated update 
   double current_Base_y = rover_gps_coords[1]; // Simulated update
 
   // Apply moving average

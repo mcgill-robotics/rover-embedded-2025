@@ -5,7 +5,10 @@
 #include "globals.h"
 
 // Set I2C bus to use Wire1
-#define WIRE Wire1
+// #define WIRE Wire1
+
+int azimuth = 0; // compass pos -> [-180, 180] -> angle 0 for N, and -90 for West
+
 
 // QMC5883L Compass object
 QMC5883LCompass compass;
