@@ -135,7 +135,7 @@ class CANStation:
           [6]   : specification
           [7]   : command type
         """
-        float_bytes = struct.pack(">f", floatValue)  # big-endian float
+        float_bytes = struct.pack(">f", floatValue)  # Big-Endian format
         data = bytearray(8)
         data[0:4] = float_bytes
         data[4] = 0  # not used
@@ -179,31 +179,66 @@ class ESCInterface:
         self.station.send_STM_command(FAULT_REQUEST, ACKNOWLEDGE_FAULTS, 0, 0.0, node_id=node_id)
 
 
+
+
+def run_motor_straight(speed):
+    esc.run_speed(speed,0, node_id=0x001)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,1, node_id=0x002)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,1, node_id=0x003)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,1 , node_id=0x004)
+    station.recv_msg(timeout=2.0)  # see response
+
+def run_motor_back(speed):
+    esc.run_speed(speed,1, node_id=0x001)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,0, node_id=0x002)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,0, node_id=0x003)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.run_speed(speed,0 , node_id=0x004)
+    station.recv_msg(timeout=2.0)  # see response
+
+def stop_all_motors():
+    esc.stop_motor(node_id=0x001)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.stop_motor(node_id=0x002)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.stop_motor(node_id=0x003)
+    station.recv_msg(timeout=2.0)  # see response
+    esc.stop_motor(node_id=0x004)
+    station.recv_msg(timeout=2.0)  # see response
+    
+
 if __name__ == "__main__":
     # Example usage
     station = CANStation(interface="slcan", channel="COM12", bitrate=500000)
     esc = ESCInterface(station)
 
+    # run_motor_straight(2500)
+    # run_motor_back(2500)
+
     
+
+    # stop_all_motors()
+    esc.run_speed(500, 1, node_id=0x01)
     # Send a motor speed command
     # esc.acknowledge_faults(node_id=0x101)
     # esc.run_speed(10.0, direction=FORWARD_CW, node_id=0x200)
-
     # esc.stop_motor()
     # esc.acknowledge_faults(node_id=0x001)
-    esc.run_speed(200, node_id=0x001)
-    # esc.acknowledge_faults(node_id=0x001)
-    # esc.acknowledge_faults(node_id=0x101)
     # esc.stop_motor(node_id=0x001)
-    # esc.run_speed(2500, node_id=0x002)
-    # esc.run_speed(-2500, node_id=0x003)
-    # esc.run_speed(-2500, node_id=0x004)
+    # esc.run_speed(2000, 0, node_id=0x001)
 
-    
-    # esc.stop_motor(node_id=0x001)
+    # run_motor_straight(2500)
+    # stop_all_motors()
+
+
+
+    # station.recv_msg(timeout=2.0)  # see response
     # esc.stop_motor(node_id=0x002)
-    # esc.stop_motor(node_id=0x003)
-    # esc.stop_motor(node_id=0x004)
 
     # esc.run_speed(300, node_id=0x200)
     # station.recv_msg(timeout=2.0)  # see response
