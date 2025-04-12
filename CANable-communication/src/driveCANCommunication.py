@@ -3,6 +3,8 @@ import time
 import struct
 from enum import Enum
 
+# global variable 
+IDNumber = 0
 # Enum classes which are used for the encoding when messages are being sent to the Drive ESCs
 class ActionType(Enum):
     RUN = 0
@@ -49,7 +51,6 @@ def build_custom_can_id(action, multi_single, drive_steer, spec, node_id):
     bit 6-4: spec (0–7)
     bit 3-0: node ID (0–15)
     """
-
     can_id = 0
     can_id |= (0 << 10)                  # sender = master
     can_id |= ((action & 0x01) << 9)
@@ -78,12 +79,11 @@ def parse_can_id(can_id):
 
 class CANMessage:
     def __init__(self, sender_id, DLC, data_bytes):
-        if isinstance(sender_id, IDNumber):
-            self.arbitration_id = sender_id.value
-        elif isinstance(sender_id, int):
+        if isinstance(sender_id, int):
             self.arbitration_id = sender_id
         else:
-            raise ValueError("sender_id must be int or IDNumber")
+            raise ValueError("sender_id must be an int")
+
 
         self.DLC = DLC
         if len(data_bytes) > DLC:
@@ -98,7 +98,7 @@ class CANMessage:
             dlc=self.DLC,
             is_extended_id=False
         )
-    
+
 class CANStation:
     def __init__(self, interface, channel, bitrate):
         self.interface = interface
@@ -126,22 +126,24 @@ class CANStation:
 
         can_msg = msg.to_can_msg()
 
-        # Decode first 4 bytes as a float (little-endian), if present
+        # Interpret float value from the first 4 bytes, if applicable
         float_val_str = ""
         if len(can_msg.data) >= 4:
             float_val = struct.unpack("<f", bytes(can_msg.data[:4]))[0]
             float_val_str = f" (floatValue={float_val})"
 
+        # Build binary string of the 11-bit CAN ID
+        bin_id = format(can_msg.arbitration_id & 0x7FF, '011b')
+
         try:
             self.bus.send(can_msg)
-            print(
-                f"Sent: ID=0x{can_msg.arbitration_id:X} "
-                f"Data={list(can_msg.data)}{float_val_str}"
-            )
+            print(f"[TX] ID: 0x{can_msg.arbitration_id:03X} ({can_msg.arbitration_id}) "
+                f"[{bin_id}] | Data: {list(can_msg.data)}{float_val_str}")
             return 0
         except can.CanError as e:
             print(f"Send fail: {e}")
             return -1
+
 
     def recv_msg(self, timeout=1.0):
         if not self.bus:
@@ -175,7 +177,8 @@ class CANStation:
                 7: "Ping"
             }.get(spec, "Unknown Spec")
 
-            print(f"[ESC ID {node}] → {spec_meaning}: {val:.2f}")
+            print(f"[ESC ID {node}] -> {spec_meaning}: {val:.2f}")
+
             return [node, spec_meaning, val]
         else:
             print("No message within timeout.")
@@ -202,44 +205,40 @@ class CANStation:
 
         can_id = build_custom_can_id(
             action=action.value,
-            is_single=1 if is_single else 0,
-            is_steer=1 if motor_type == MotorType.STEER else 0,
+            multi_single=1 if is_single else 0,
+            drive_steer=1 if motor_type == MotorType.STEER else 0,
             spec=spec_value,
             node_id=node_id.value
         )
 
+
         msg = CANMessage(can_id, 4, list(data))
         return self.send_msg(msg)
-
-
 
 class ESCInterface:
     def __init__(self, station: CANStation):
         self.station = station
 
     def send_multi_motor_speeds(self, speeds: list[float], motor_type: MotorType):
-        """
-        Sends 4 speeds in a single multi-run CAN frame.
-        Each speed is encoded as a 16-bit signed int (little endian).
-        """
         if len(speeds) != 4:
             raise ValueError("Multi-run command requires exactly 4 speeds")
 
         data = bytearray(8)
         for i, speed in enumerate(speeds):
-            speed_int16 = int(speed) 
+            speed_int16 = int(speed)
             struct.pack_into("<h", data, i * 2, speed_int16)
 
         can_id = build_custom_can_id(
             action=ActionType.RUN.value,
-            is_single=0,
-            is_steer=1 if motor_type == MotorType.STEER else 0,
+            multi_single=0,  # multi mode
+            drive_steer=1 if motor_type == MotorType.STEER else 0,
             spec=RunSpec.SPEED.value,
-            node_id=NodeID.RF_DRIVE.value  # Arbitrary ID (ignored in multi mode)
+            node_id=NodeID.RF_DRIVE.value  # Ignored in multi mode
         )
 
         msg = CANMessage(can_id, 8, list(data))
-        return self.send_msg(msg)
+        return self.station.send_msg(msg)
+
     
 
     def run(self, spec: RunSpec, value, motor_type: MotorType, node_id: NodeID, is_single=True):
@@ -338,8 +337,14 @@ if __name__ == "__main__":
     drive = DriveInterface(escInterface)
 
     # Now go wild 
-    drive.run_motor(NodeID.RF_DRIVE, 500)
-    station.recv_msg()
+    # drive.run_motor(NodeID.RF_DRIVE, 400)
 
-
+    # drive.ping_motor(NodeID.RF_DRIVE)
+    drive.read_all_faults(NodeID.RF_DRIVE)
+    # drive.run_motor(NodeID.RF_DRIVE, 600)
+    # drive.ping_motor(NodeID.RF_DRIVE)
+    # # drive.broadcast_multi_momtor_speeds([100,200,300,400])
+    # drive.read_all_faults(NodeID.RF_DRIVE)
+    station.recv_msg(1)
+    
     station.close()

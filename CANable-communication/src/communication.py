@@ -217,36 +217,18 @@ if __name__ == "__main__":
     station = CANStation(interface="slcan", channel="COM12", bitrate=500000)
     esc = ESCInterface(station)
 
-    # run_motor_straight(2500)
+    #caused an issue...
+
+    #esc.run_speed(100,1, node_id=0x001) // fucked it 
+
+    #esc.run_speed(2000,0, node_id=0x002)
+    # run_motor_straight(20)
     # run_motor_back(2500)
 
-    
-
-    # stop_all_motors()
-    esc.run_speed(500, 1, node_id=0x01)
+    stop_all_motors()
+    #esc.run_speed(500, 1, node_id=0x03)
     # Send a motor speed command
     # esc.acknowledge_faults(node_id=0x101)
-    # esc.run_speed(10.0, direction=FORWARD_CW, node_id=0x200)
-    # esc.stop_motor()
-    # esc.acknowledge_faults(node_id=0x001)
-    # esc.stop_motor(node_id=0x001)
-    # esc.run_speed(2000, 0, node_id=0x001)
-
-    # run_motor_straight(2500)
-    # stop_all_motors()
-
-
-
-    # station.recv_msg(timeout=2.0)  # see response
-    # esc.stop_motor(node_id=0x002)
-
-    # esc.run_speed(300, node_id=0x200)
-    # station.recv_msg(timeout=2.0)  # see response
-    # time.sleep(2)
-    # esc.stop_motor(node_id=0x200)
-    # time.sleep(2)
-    # esc.run_speed(-500, node_id=0x200)
-    # time.sleep(2)
-    # esc.stop_motor(node_id=0x200)
+ 
 
     station.close()
