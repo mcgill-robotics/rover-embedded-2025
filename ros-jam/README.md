@@ -30,17 +30,19 @@ This project allows you to send commands to an MC (Microcontroller) over serial 
 Users need to:
 
 1. **Define their custom functions** (e.g., `motorStart()`, `sensorRead()`).
-2. **Override `initCustomSetup()`** to add custom hardware setup, calling the base version of the function using `::initCustomSetup()` first (Note: call ::initCustomSetup() first simply for the `Serial.begin(9600)` line. If you want to use a different baud rate, just write in `Serial.begin(...)` in your `::initCustomSetup()`.
-3. **Override `initCustomCommands()`** to register their own commands, calling the base version using `::initCustomCommands()` first.
+2. **Override `initCustomSetup()`** to add custom hardware setup, calling the base version of the function using `::initCustomSetup()` first (Note: write `::initCustomSetup()` at the top of your `initCustomSetup()` simply for the `Serial.begin(9600)` line that I included in my `setup()`. If you want to use a different baud rate, just write in `Serial.begin(...)` at the top of your `initCustomSetup()` and do NOT write `::initCustomSetup()` at the top.
+
 
 
 
 ### Setting Up Each Function
 
-1. **Register Custom Setup**: In the `setup()` function function of the main.cpp code, `initCustomSetup()` is called for flexibility and to allow members to define their own setups. Note: You must define your own `initCustomSetup()` function that would simply have a similar structure:
+1. **Register Custom Setup**: In the `setup()` function function of the `main.cpp` code, `initCustomSetup()` is called for flexibility and to allow members to define their own setups. 
+
+Note: You must define your own `initCustomSetup()` function that would simply have a similar structure:
 
 ```cpp
-// Elec members will define their custom setup function like this:
+// Users will define their custom setup function like this:
 
 void initCustomSetup() {
   // Call the base version of initCustomSetup to retain default setup
