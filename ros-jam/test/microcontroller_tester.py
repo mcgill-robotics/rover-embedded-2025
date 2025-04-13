@@ -53,7 +53,7 @@ class RosJamTester:
         self.ser.close()
 
 if __name__ == "__main__":
-    tester = RosJamTester(port="/dev/ttyUSB0")  # Adjust port as needed
+    tester = RosJamTester(port="COM3")  # Adjust port as needed
     
     # Run Test 1.1: Basic Initialization
     print("Test 1.1 - Initialization Test:", "Passed" if tester.test_basic_initialization() else "Failed")
