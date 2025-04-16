@@ -10,6 +10,8 @@
 double localGPS_lat = 0.0; // gps coords from gps attached teensy   
 double localGPS_long = 0.0;
 
+bool gps_valid = false;
+
 void displayInfo();
 
 // The TinyGPSPlus object
@@ -47,6 +49,14 @@ void gps_loop()
         localGPS_lat = 0;
         localGPS_long = 0; // gps returning 0,0 should be seen as an error code
         //  while (true); // program gives up on you
+    }
+
+    // update global variable
+    if (gps.location.isValid()) {
+        gps_valid = true;
+    }
+    else {
+        gps_valid = false;
     }
 
 
@@ -90,6 +100,8 @@ void gps_loop()
 // Displayed Latitude, Longitude, Date, Time
 void displayInfo()
 {
+    // Not needed for now
+    /*
     Serial.print(F("Location: "));
     if (gps.location.isValid())
     {
@@ -102,6 +114,7 @@ void displayInfo()
         Serial.print(F("INVALID"));
     }
 
+    
     Serial.print(F("  Date/Time: "));
     if (gps.date.isValid())
     {
@@ -141,4 +154,5 @@ void displayInfo()
     }
 
     Serial.println();
+    */
 }

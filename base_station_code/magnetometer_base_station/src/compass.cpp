@@ -35,41 +35,41 @@ void compass_setup() {
 
 void compass_loop() {
   if (!calibration){
-    int x, y, z, a, b;
+    // int x, y, z, a, b;
     
     compass.read();
     
-    x = compass.getX();
-    y = compass.getY();
-    z = compass.getZ();
+    // x = compass.getX();
+    // y = compass.getY();
+    // z = compass.getZ();
     
-    a = compass.getAzimuth();
+    int a = compass.getAzimuth();
     azimuth = a; //update global vars
 
-    b = compass.getBearing(a);
+    // b = compass.getBearing(a);
 
     // Convert azimuth to a 0-360 degree angle relative to true north
-    int trueNorthAngle = (a < 0) ? (a + 360) : a;
+    // int trueNorthAngle = (a < 0) ? (a + 360) : a;
     
-    Serial.print("X: ");
-    Serial.print(x);
+    // Serial.print("X: ");
+    // Serial.print(x);
 
-    Serial.print(" Y: ");
-    Serial.print(y);
+    // Serial.print(" Y: ");
+    // Serial.print(y);
 
-    Serial.print(" Z: ");
-    Serial.print(z);
+    // Serial.print(" Z: ");
+    // Serial.print(z);
 
-    Serial.print(" Azimuth: ");
-    Serial.print(a);
+    // Serial.print(" Azimuth: ");
+    // Serial.print(a);
 
-    Serial.print(" Bearing: ");
-    Serial.print(b);
+    // Serial.print(" Bearing: ");
+    // Serial.print(b);
 
-    Serial.print(" True North Angle: ");
-    Serial.print(trueNorthAngle);
+    // Serial.print(" True North Angle: ");
+    // Serial.print(trueNorthAngle);
 
-    Serial.println();
+    // Serial.println();
 
     // delay(250); - shouldnt be needed when used as support scripts
   }

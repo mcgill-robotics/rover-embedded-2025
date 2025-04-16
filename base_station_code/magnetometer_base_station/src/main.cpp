@@ -9,7 +9,7 @@
 // extern double localGPS_long = 0.0;
 // extern double rover_gps_coords[2] = {0.0, 0.0};
 
-
+//TODO: change base coord to local gps lat /long
 
 // functions
 float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, float vectorB_y);
@@ -45,6 +45,7 @@ Servo servo;
 float targetAngle = 0;  // Target Absolute angle (to face rover)
 float currentAngle = 0; // Current absolute angle
 float error = 0; // Different between current and target (how much the servo needs to turn to reach targetAngle)
+float servoreading = 0; // keep track of angle of server , between [0, 180]
 
 ////////////////////////////////////////////////
 ///// VARIABLES TO CHANGE MANUALLY - START /////
@@ -60,7 +61,7 @@ bool compassCalibrate = false; // set to true whenever you need to calibrate the
 // bool test = false; // for testing only
 
 // Manual data entering for GPS? (in case GPS failure)
-bool manualBaseStationGPS = false;
+bool manualBaseStationGPS = true;
 
 // Manual data entering for compass? (in case of compass failure)
 bool manualCompass = false;
@@ -74,14 +75,14 @@ void setup() {
   Serial.begin(9600);
   // Serial1.begin(9600);
 
-  servo.attach(7);
-  servo.write(90); // Start at neutral position
+  servo.attach(2);
+  servo.write(0); // Start at right extremity position
+  servoreading = 0; // update servo reading
+  delay(10000);
 
   // Calculate initial north reference vector
   Base_to_North_x = North_coords_x - Base_coords_x;
   Base_to_North_y = North_coords_y - Base_coords_y;
-
-  servo.write(0); // start motor at the left extremity
 
   // Compass
   if (!manualCompass){
@@ -118,30 +119,34 @@ void setup() {
   }
   else{
     // Base station coord
-    localGPS_lat = 0; // ENTER YOUR OWN VALUE HERE
-    localGPS_long = 0; // ENTER YOUR OWN VALUE HERE
+    localGPS_lat = 45.50589236158162; // ENTER YOUR OWN VALUE HERE
+    localGPS_long = -73.5762117355281; // ENTER YOUR OWN VALUE HERE
 
     // Rover coord
-    rover_gps_coords[0] = 0; // ENTER YOUR OWN VALUE HERE
-    rover_gps_coords[1] = 0; // ENTER YOUR OWN VALUE HERE
+    rover_gps_coords[0] = 45.50657475904433; // ENTER YOUR OWN VALUE HERE
+    rover_gps_coords[1] = -73.5769841762006; // ENTER YOUR OWN VALUE HERE
   }
   
 }
 
 void loop() {
 
-  // compass_loop();
-  gps_loop();
+  if (!manualCompass) {compass_loop();}
+  if (!manualBaseStationGPS){gps_loop();}
   delay(300);
   // if (!test){
 
   // Start the gps loop to update rover coordinates
   // if (!manualBaseStationGPS) {gps_loop();}
 
-  // Get new GPS coordinates
-  //THIS IS WRONG GPS COORDS VAR BTW
-  double current_Base_x = rover_gps_coords[0]; // Simulated update 
-  double current_Base_y = rover_gps_coords[1]; // Simulated update
+  // Get new GPS coordinates for rover
+  // for testing for now
+  double current_Base_x = localGPS_lat; // Simulated update 
+  double current_Base_y = localGPS_long; // Simulated update
+
+  // Get new GPS coord for base station // TODO: change such that we only get base station coord at the beginning of setup
+  double Rover_coords_x = rover_gps_coords[0]; // Simulated update 
+  double Rover_coords_y = rover_gps_coords[1]; // Simulated update 
 
   // Apply moving average
   Base_coords_x = get_moving_avg(current_Base_x, Base_coords_x_avg, avgIndex, sum_x);
@@ -151,20 +156,14 @@ void loop() {
   Base_to_North_x = North_coords_x - Base_coords_x;
   Base_to_North_y = North_coords_y - Base_coords_y;
 
-  // Get Rover coords using GPS
-  // note that this is the GPS on the rover, not the base
-  // TODO
-
-  // }
-
   // Update target angle
   Base_to_Rover_x = Rover_coords_x - Base_coords_x;
   Base_to_Rover_y = Rover_coords_y - Base_coords_y;
   targetAngle = get_angle_from_vectors(Base_to_Rover_x, Base_to_Rover_y, Base_to_North_x, Base_to_North_y);
 
   // Get current servo angle
-  float currServoAngle = servo.read();
-  currServoAngle = constrain(currServoAngle, 0, 180); // the servo is 180deg
+  float currServoAngle = servoreading;
+  // currServoAngle = constrain(currServoAngle, 0, 180); // the servo is 180deg
 
   // Get angle between Base to North and Servo Angle
   currentAngle = azimuth + currServoAngle + offset;
@@ -173,17 +172,25 @@ void loop() {
   error = targetAngle - currentAngle;
 
   // Calculate new servo angle
-  float newServoAngle = servo.read() + error; //+ pidOutput;
-  newServoAngle = constrain(newServoAngle, 0, 180);
+  float newServoAngle = currServoAngle + error; //+ pidOutput;
+  // newServoAngle = constrain(newServoAngle, 0, 180);
 
   // Move servo
   servo.write(newServoAngle);
+  servoreading = newServoAngle; // update servo angle
 
   // Debug Output
-  Serial.print("Target Angle: "); Serial.print(targetAngle);
-  Serial.print(" | Azimuth: "); Serial.print(azimuth);
+  Serial.print("GPS validity: "); 
+  if (gps_valid) {Serial.print("valid");}
+  else {Serial.print("not valid");}
+  Serial.print(" | GPS Lat: "); Serial.print(localGPS_lat, 6);
+  Serial.print(", Long: "); Serial.print(localGPS_long, 6);
+  Serial.print(" | Compass Azimuth: "); Serial.print(azimuth);
+  Serial.print(" | Target Angle: "); Serial.print(targetAngle);
+  Serial.print(" | Current Angle: "); Serial.print(currentAngle);
   Serial.print(" | Error: "); Serial.print(error);
-  Serial.print(" | Servo Angle: "); Serial.println(newServoAngle);
+  Serial.print(" | Servo Angle: "); Serial.print(newServoAngle);
+  Serial.print(" | Prev Servo Angle: "); Serial.println(currServoAngle);
 
   delay(50); // Smooth updates
 }

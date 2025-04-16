@@ -7,6 +7,8 @@ extern double localGPS_long;
 
 extern double rover_gps_coords[2];
 
+extern bool gps_valid; // whether gps can be detected or not
+
 extern int azimuth; // compass pos?
 
 extern void gps_setup();
