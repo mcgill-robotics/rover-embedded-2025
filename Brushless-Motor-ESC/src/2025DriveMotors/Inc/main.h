@@ -57,6 +57,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void MX_USART2_UART_Init(void);  // Declare this for uart to work
+
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

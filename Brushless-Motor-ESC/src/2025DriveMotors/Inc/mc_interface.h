@@ -48,8 +48,6 @@ extern "C" {
 /**
  * @brief Status of a user (buffered) command
  */
-
-// Define variable from other files (added manually)
 typedef enum
 {
   MCI_BUFFER_EMPTY,                  /*!< If no buffered command has been called.*/

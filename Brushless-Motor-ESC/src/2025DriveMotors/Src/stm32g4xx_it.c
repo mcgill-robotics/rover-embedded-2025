@@ -22,6 +22,8 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "uart_debugging.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,5 +103,9 @@ void FDCAN1_IT1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+
+
+
 
 /* USER CODE END 1 */

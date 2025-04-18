@@ -42,9 +42,9 @@ const GlobalConfig_reg_t globalConfig_reg =
 
 static const ApplicationConfig_reg_t M1_ApplicationConfig_reg =
 {
-  .maxMechanicalSpeed = 3222,
+  .maxMechanicalSpeed = 2604,
   .maxReadableCurrent = M1_MAX_READABLE_CURRENT,
-  .nominalCurrent     = 9.34,
+  .nominalCurrent     = 6.06,
   .nominalVoltage     = 25,
   .driveType          = DRIVE_TYPE_M1,
 };
@@ -52,12 +52,12 @@ static const ApplicationConfig_reg_t M1_ApplicationConfig_reg =
 //cstat !MISRAC2012-Rule-9.2
 static const MotorConfig_reg_t M1_MotorConfig_reg =
 {
-  .polePairs  = 7,
-  .ratedFlux  = 4.6,
-  .rs         = 0.1,
-  .ls         = 0.00006*1.000,
-  .ld         = 0.00006,
-  .maxCurrent = 9.34,
+  .polePairs  = 12,
+  .ratedFlux  = 6.0,
+  .rs         = 0.21,
+  .ls         = 0.00011*1.000,
+  .ld         = 0.00011,
+  .maxCurrent = 6.06,
   .name = "OGMotor"
 };
 

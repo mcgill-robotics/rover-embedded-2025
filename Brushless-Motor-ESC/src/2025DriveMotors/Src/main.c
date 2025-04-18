@@ -22,6 +22,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "CAN_processing.h"
+#include <stdbool.h>
+#include "stdio.h"
+#include "uart_debugging.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,8 +74,14 @@ DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
-int deviceID = RF_CAN_ID; // CHANGE THIS ID FOR EACH ESC THAT IS CONNECTED TO THE DRIVE SYSTEM!
+
+int ESC_ID =RF_CAN_ID; // CHANGE THIS ID FOR EACH ESC THAT IS CONNECTED TO THE DRIVE SYSTEM!
+
 volatile bool received_CAN_command = false;
+FDCAN_RxHeaderTypeDef rxHeader;
+uint8_t rxData[8];
+FDCAN_HandleTypeDef hfdcan1;
+//extern UART_HandleTypeDef huart2; //used for debug
 
 /* USER CODE END PV */
 
@@ -89,7 +100,7 @@ static void MX_OPAMP1_Init(void);
 static void MX_OPAMP2_Init(void);
 static void MX_OPAMP3_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_USART2_UART_Init(void);
+void MX_USART2_UART_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
@@ -98,6 +109,8 @@ static void MX_NVIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
 
 void CAN_TerminationEnable(bool enable)
 {
@@ -116,14 +129,13 @@ void CAN_TerminationEnable(bool enable)
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
     if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0) {
-        FDCAN_RxHeaderTypeDef rxHeader;
-        uint8_t rxData[8];
-
         if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK) {
         	received_CAN_command = true;
         }
     }
 }
+
+
 
 /* USER CODE END 0 */
 
@@ -135,13 +147,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	// First check to see if the board should be terminating or not
-	if (deviceID == RF_CAN_ID || deviceID == LB_CAN_ID){
-		CAN_TerminationEnable(true);
-	}
-	else{
-		CAN_TerminationEnable(false);
-	}
 
   /* USER CODE END 1 */
 
@@ -183,17 +188,50 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
+	// First check to see if the board should be terminating or not
+	if (ESC_ID == RF_CAN_ID || ESC_ID == LB_CAN_ID){
+
+	     uart_debug_print("EnableTermination\r\n");
+		CAN_TerminationEnable(true);
+	}
+	else{
+		CAN_TerminationEnable(false);
+	}
+
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);  // Ensure LED is off at startup
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+     uart_debug_print("UART is initialized and ready to go\r\n");
+	 uart_debug_print("ESC ID is set to: %d\r\n", (int)ESC_ID);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-	  if (received_command){
-		  received_command = false;
-		  CAN_Parse_MSG (rxHeader, rxData);
+
+
+	 if (received_CAN_command){
+	     received_CAN_command = false;
+
+	     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
+	     HAL_Delay(25);
+	     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
+	     HAL_Delay(25);
+	 	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 	 uart_debug_print("---------->>>>>>Received CAN command<<<<<<-----------\r\n");
+	 	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	     CAN_Parse_MSG(&rxHeader, rxData);
 	  }
+
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -668,7 +706,25 @@ static void MX_FDCAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
+  FDCAN_FilterTypeDef sFilterConfig;
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfig.FilterID1 = 0x000;        // Accept everything
+  sFilterConfig.FilterID2 = 0x000;
 
+  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
+      Error_Handler();
+  }
+
+  if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
+      Error_Handler();
+  }
+
+  if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
+      Error_Handler();
+  }
   /* USER CODE END FDCAN1_Init 2 */
 
 }
@@ -884,10 +940,11 @@ static void MX_TIM1_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USART2_UART_Init(void)
+ void MX_USART2_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART2_Init 0 */
+__HAL_LINKDMA(&huart2, hdmatx, hdma_usart2_tx);
 
   /* USER CODE END USART2_Init 0 */
 
@@ -895,7 +952,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 1843200;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -957,10 +1014,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14|GPIO_PIN_6, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PC14 */
-  GPIO_InitStruct.Pin = GPIO_PIN_14;
+  /*Configure GPIO pins : PC14 PC6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
