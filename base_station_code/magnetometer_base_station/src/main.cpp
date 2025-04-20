@@ -15,6 +15,10 @@
 float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, float vectorB_y);
 // double get_GPS_coord(); // Dummy function simulating GPS
 double get_moving_avg(double newValue, double avgArr[], int &index, double &sum); // Moving average function
+float normalize_angle_180(float angle_deg);
+float normalize_angle_360(float angle_deg);
+
+
 const int number_of_avg = 10; // Set to 10 by default to take 10 values for the average - can be changed
 
 
@@ -45,7 +49,7 @@ Servo servo;
 float targetAngle = 0;  // Target Absolute angle (to face rover)
 float currentAngle = 0; // Current absolute angle
 float error = 0; // Different between current and target (how much the servo needs to turn to reach targetAngle)
-float servoreading = 0; // keep track of angle of server , between [0, 180]
+float servo_pos = 0; // keep track of angle of server , between [0, 180]
 
 ////////////////////////////////////////////////
 ///// VARIABLES TO CHANGE MANUALLY - START /////
@@ -76,10 +80,9 @@ void setup() {
   // Serial1.begin(9600);
 
   servo.attach(2);
-  servo.write(0); // Start at right extremity position
-  servoreading = 0; // update servo reading
-  delay(10000);
-
+  servo_pos = 90; // update servo reading
+  servo.write(servo_pos); // Start at right extremity position
+  
   // Calculate initial north reference vector
   Base_to_North_x = North_coords_x - Base_coords_x;
   Base_to_North_y = North_coords_y - Base_coords_y;
@@ -132,25 +135,26 @@ void setup() {
 void loop() {
 
   if (!manualCompass) {compass_loop();}
+  delay(150);
   if (!manualBaseStationGPS){gps_loop();}
-  delay(300);
+  delay(150);
   // if (!test){
 
   // Start the gps loop to update rover coordinates
   // if (!manualBaseStationGPS) {gps_loop();}
 
-  // Get new GPS coordinates for rover
+  // Apply moving average
+  // Base_coords_x = get_moving_avg(current_Base_x, Base_coords_x_avg, avgIndex, sum_x); //temp disable for debugging
+  // Base_coords_y = get_moving_avg(current_Base_y, Base_coords_y_avg, avgIndex, sum_y);
+
+  // ----------------------------------------------------------------------------------------------------------------------------------
   // for testing for now
-  double current_Base_x = localGPS_lat; // Simulated update 
+  double current_Base_x = localGPS_lat; // Simulated update <------------ NEED HELPS
   double current_Base_y = localGPS_long; // Simulated update
 
   // Get new GPS coord for base station // TODO: change such that we only get base station coord at the beginning of setup
   double Rover_coords_x = rover_gps_coords[0]; // Simulated update 
   double Rover_coords_y = rover_gps_coords[1]; // Simulated update 
-
-  // Apply moving average
-  Base_coords_x = get_moving_avg(current_Base_x, Base_coords_x_avg, avgIndex, sum_x);
-  Base_coords_y = get_moving_avg(current_Base_y, Base_coords_y_avg, avgIndex, sum_y);
   
   // Calculate north reference vector
   Base_to_North_x = North_coords_x - Base_coords_x;
@@ -161,23 +165,27 @@ void loop() {
   Base_to_Rover_y = Rover_coords_y - Base_coords_y;
   targetAngle = get_angle_from_vectors(Base_to_Rover_x, Base_to_Rover_y, Base_to_North_x, Base_to_North_y);
 
-  // Get current servo angle
-  float currServoAngle = servoreading;
-  // currServoAngle = constrain(currServoAngle, 0, 180); // the servo is 180deg
-
   // Get angle between Base to North and Servo Angle
-  currentAngle = azimuth + currServoAngle + offset;
+  currentAngle = offset + servo_pos - azimuth; //<---- this - sign might need to be changed
 
-  // To match targetAngle with currentAngle
-  error = targetAngle - currentAngle;
+  error = normalize_angle_180(targetAngle - currentAngle);
 
   // Calculate new servo angle
-  float newServoAngle = currServoAngle + error; //+ pidOutput;
-  // newServoAngle = constrain(newServoAngle, 0, 180);
+  float newServoAngle = currentAngle + error; 
+
+  if (newServoAngle < 0) { //cap min and max angles
+    currentAngle = 0;
+  } else if (newServoAngle > 180) {
+    currentAngle = 180;
+  } else {
+    currentAngle = newServoAngle;
+  }
 
   // Move servo
-  servo.write(newServoAngle);
-  servoreading = newServoAngle; // update servo angle
+  servo_pos = currentAngle; // update servo angle
+  servo.write(servo_pos);
+  
+  //----------------------------------------------------------------------------------------------------------------------------------
 
   // Debug Output
   Serial.print("GPS validity: "); 
@@ -208,38 +216,28 @@ float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, 
     float magnitudeA = sqrt((vectorA_x * vectorA_x) + (vectorA_y * vectorA_y));
     float magnitudeB = sqrt((vectorB_x * vectorB_x) + (vectorB_y * vectorB_y));
 
-    float angleRad = acos(dotProduct / (magnitudeA * magnitudeB));
+    float cos_theta = dotProduct / (magnitudeA * magnitudeB);
+    if (cos_theta > 1.0) {
+      cos_theta = 1.0;
+    } else if (cos_theta < -1.0) {
+      cos_theta = -1.0;
+    }
+
+    float angleRad = math.acos(cos_theta);
+
     float angleDeg = angleRad * (180.0 / PI);
 
-    // Finding the sign of the angle
-    // Rover right to north -> positive angle
-    // Rover left to North -> negative angle
-     if ((vectorA_x * vectorB_y) - (vectorA_y * vectorB_x) > 0){
+    float cross = vectorB_x*vectorA_y - vectorB_y*vectorA_x ;
+
+    if (cross > 0){
       angleDeg = abs(angleDeg);
-     }
-     else if ((vectorA_x * vectorB_y) - (vectorA_y * vectorB_x) < 0){
+    }
+    else if (cross < 0){
       angleDeg = -abs(angleDeg);
-     }
-     else{ // when the cross product  = 0
-      if (dotProduct > 0) { //dot product > 0
-        angleDeg = 0;
-      }
-      else if (dotProduct < 0){ //dot product < 0
-        angleDeg = 180;
-      }
-     }
+    }
   
     return angleDeg;
 }
-
-// Dummy function simulating GPS located at the base
-// double get_GPS_coord() {
-//   // double coords_x = random(100000,2000000)/10000.0;
-//   // double coords_y = random(100000,2000000)/10000.0;
-//   double coords_x = rover_gps_coords[0];
-//   double coords_y = rover_gps_coords[1];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-//   return coords_x, coords_y;
-// }
 
 // Function that calculates moving average
 double get_moving_avg(double newValue, double avgArr[], int &index, double &sum) {
@@ -250,4 +248,21 @@ double get_moving_avg(double newValue, double avgArr[], int &index, double &sum)
   index = (index + 1) % number_of_avg; // Move index in circular manner
 
   return sum / number_of_avg; // Return the new moving average
+}
+
+float normalize_angle_180(float angle_deg){
+  float angle = normalize_angle_360(angle_deg + 180) - 180;
+  // Handle the -180 case to be exactly 180 if preferred, depends on convention
+  // For error calculation, -180 is fine.
+  // if angle == -180: angle = 180 # Optional adjustment
+  return angle
+}
+
+float normalize_angle_360(float angle_deg) {
+  // Normalize angle to be within [0, 360)
+  float normalized = fmod(angle_deg, 360.0);
+  if (normalized < 0) {
+    normalized += 360.0;
+  }
+  return normalized;
 }
