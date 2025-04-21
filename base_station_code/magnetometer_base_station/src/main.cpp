@@ -116,14 +116,21 @@ void setup() {
   }
   else{
     // Base station coord
-    localGPS_lat = 45.50589236158162; // ENTER YOUR OWN VALUE HERE
-    localGPS_long = -73.5762117355281; // ENTER YOUR OWN VALUE HERE
+    localGPS_lat = 45.50584881308653; // ENTER YOUR OWN VALUE HERE , 
+    localGPS_long = -73.57617928280965; // ENTER YOUR OWN VALUE HERE
 
     // Rover coord
-    rover_gps_coords[0] = 45.50657475904433; // ENTER YOUR OWN VALUE HERE
-    rover_gps_coords[1] = -73.5769841762006; // ENTER YOUR OWN VALUE HERE
+    rover_gps_coords[0] = 45.461961639948484; // ENTER YOUR OWN VALUE HERE
+    rover_gps_coords[1] = -73.71433228690131; // ENTER YOUR OWN VALUE HERE
+
+        
+    Base_coords_x = 45.50584881308653;
+    Base_coords_y = -73.57617928280965;
+
+    Rover_coords_x = 45.461961639948484;
+    Rover_coords_y = -73.71433228690131;
   }
-  
+  // 45.461961639948484, -73.71433228690131
 }
 
 void loop() {
@@ -161,14 +168,18 @@ void loop() {
   Base_to_Rover_x = Rover_coords_x - Base_coords_x;
   Base_to_Rover_y = Rover_coords_y - Base_coords_y;
   targetAngle = get_angle_from_vectors(Base_to_Rover_x, Base_to_Rover_y, Base_to_North_x, Base_to_North_y);
+  Serial.print("Target Angle: ");Serial.print(targetAngle);
 
   // Get angle between Base to North and Servo Angle
-  currentAngle = offset + servo_pos - azimuth; //<---- this - sign might need to be changed
+  currentAngle = offset + servo_pos + azimuth; //<---- this - sign might need to be changed
+  Serial.print("Current Angle: ");Serial.print(currentAngle);
 
   error = normalize_angle_180(targetAngle - currentAngle);
 
   // Calculate new servo angle
-  float newServoAngle = currentAngle + error; 
+  float newServoAngle = servo_pos + error; 
+  Serial.print(" | newServoAngle: ");Serial.print(newServoAngle);
+  Serial.print(" | servo_pos: ");Serial.print(servo_pos);
 
   if (newServoAngle < 0) { //cap min and max angles
     currentAngle = 0;
@@ -192,7 +203,7 @@ void loop() {
   Serial.print(", Long: "); Serial.print(localGPS_long, 6);
   Serial.print(" | Compass Azimuth: "); Serial.print(azimuth);
   Serial.print(" | Target Angle: "); Serial.print(targetAngle);
-  Serial.print(" | Current Angle: "); Serial.print(currentAngle);
+  Serial.print(" | Current Angle: "); Serial.print(servo_pos);
   Serial.print(" | Error: "); Serial.print(error);
   Serial.print(" | Servo Angle: "); Serial.print(newServoAngle);
   Serial.print(" | Prev Servo Angle: "); Serial.println(temp_current_angle);
@@ -252,7 +263,7 @@ float normalize_angle_180(float angle_deg){
   // Handle the -180 case to be exactly 180 if preferred, depends on convention
   // For error calculation, -180 is fine.
   // if angle == -180: angle = 180 # Optional adjustment
-  return angle
+  return angle;
 }
 
 float normalize_angle_360(float angle_deg) {
