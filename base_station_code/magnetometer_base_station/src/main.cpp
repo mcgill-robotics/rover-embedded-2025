@@ -3,7 +3,6 @@
 #include <globals.h>
 // #include <QMC5883LCompass.h>// QMC5883L Compass Library
 
-
 // Initialize variables in globals.h
 // extern double localGPS_lat = 0.0; // gps coords from gps attached teensy   
 // extern double localGPS_long = 0.0;
@@ -13,17 +12,13 @@
 
 // functions
 float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, float vectorB_y);
-// double get_GPS_coord(); // Dummy function simulating GPS
-double get_moving_avg(double newValue, double avgArr[], int &index, double &sum); // Moving average function
 float normalize_angle_180(float angle_deg);
 float normalize_angle_360(float angle_deg);
-
+double get_moving_avg(double newValue, double avgArr[], int &index, double &sum); // Moving average function
 
 const int number_of_avg = 10; // Set to 10 by default to take 10 values for the average - can be changed
 
-
 double rover_gps_coords[2] = {0.0, 0.0};
-
 
 // Base & Rover Coordinates
 double North_coords_x = 86.494; // stays constant //so we doing itto magnetic north (compass) -> so drumheller/ UdeM doesnt matter
@@ -77,7 +72,6 @@ bool manualCompass = false;
 
 void setup() {
   Serial.begin(9600);
-  // Serial1.begin(9600);
 
   servo.attach(2);
   servo_pos = 90; // update servo reading
@@ -149,7 +143,10 @@ void loop() {
 
   // ----------------------------------------------------------------------------------------------------------------------------------
   // for testing for now
-  double current_Base_x = localGPS_lat; // Simulated update <------------ NEED HELPS
+
+  float temp_current_angle = servo_pos;
+
+  double current_Base_x = localGPS_lat; // Simulated update <------------ NEED change when full stack implementation
   double current_Base_y = localGPS_long; // Simulated update
 
   // Get new GPS coord for base station // TODO: change such that we only get base station coord at the beginning of setup
@@ -198,7 +195,7 @@ void loop() {
   Serial.print(" | Current Angle: "); Serial.print(currentAngle);
   Serial.print(" | Error: "); Serial.print(error);
   Serial.print(" | Servo Angle: "); Serial.print(newServoAngle);
-  Serial.print(" | Prev Servo Angle: "); Serial.println(currServoAngle);
+  Serial.print(" | Prev Servo Angle: "); Serial.println(temp_current_angle);
 
   delay(50); // Smooth updates
 }
@@ -223,7 +220,7 @@ float get_angle_from_vectors(float vectorA_x, float vectorA_y, float vectorB_x, 
       cos_theta = -1.0;
     }
 
-    float angleRad = math.acos(cos_theta);
+    float angleRad = acos(cos_theta);
 
     float angleDeg = angleRad * (180.0 / PI);
 
