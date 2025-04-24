@@ -163,8 +163,8 @@ const R3_2_Params_t R3_2_ParamsM1 =
   .DAC_Channel_OVP       = (uint32_t)0,
 
 /* DAC settings --------------------------------------------------------------*/
-  .DAC_OCP_Threshold     = 4083,
-  .DAC_OVP_Threshold     = 23830,
+  .DAC_OCP_Threshold     = 5000,
+  .DAC_OVP_Threshold     = 26000,
 
 };
 
