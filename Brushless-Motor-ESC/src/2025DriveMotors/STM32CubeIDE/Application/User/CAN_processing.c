@@ -24,10 +24,10 @@
 #define ID_DEVICE_MASK					(0x000f)// 0b000000001111
 
 // Variable declarations
-
+static float g_lastCommandedSpeed = 0;
 int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backward
 extern UART_HandleTypeDef huart2;
-
+int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands to
 // Threshold to consider "almost zero" / unreliable speed feedback point
 const float SPEED_ZERO_THR = 50.0f;
 const float MAX_SPEED_THR = 3200.0f;
@@ -139,7 +139,7 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				MC_StopMotor1();
+				safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
@@ -218,7 +218,7 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			MC_StopMotor1();
+	 	 	safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
 			break;
 	break;
 	}
@@ -235,6 +235,12 @@ int16_t extract_multiple_speeds(const uint8_t *rxData){
 
 
 float speedCheck(float targetSpeed){
+	/*
+	 * The main purpose of this function is to check 2 things, the first is if the speed demanded is much greater than the previous speed, and if so, to adjust
+	 * the change in speed such that it is not too great and will cause too high of a voltage spike to fault the motor. THe other function is to make sure that the speed
+	 * setpoint is something that is actually a setpoint (like within the motors actual parameters) in case anything in the sending logic doesnt work
+	 *
+	 */
 
     //Deadzone for small speeds
     if (fabsf(targetSpeed) < SPEED_ZERO_THR) {
@@ -248,17 +254,58 @@ float speedCheck(float targetSpeed){
     return targetSpeed;
 }
 
+float clippingCheck(float currentSpeedSetpoint){
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("CHECK FOR CLIPPING\r\n");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if (MC_GetSTMStateMotor1() == RUN) {
+		float delta = currentSpeedSetpoint - g_lastCommandedSpeed;
+
+		if (fabsf(delta) > DELTA_SPEED_THRESH) {
+			g_lastCommandedSpeed += (delta > 0.0f ? DELTA_SPEED_THRESH : -DELTA_SPEED_THRESH);
+		} else {
+			g_lastCommandedSpeed = currentSpeedSetpoint;
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("Clipping occured !\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		return speedCheck(g_lastCommandedSpeed);
+	}
+	else{
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("No chopping!\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		return speedCheck(g_lastCommandedSpeed);
+	}
+}
 
 void safeStopMotor(float currentSpeedRpm){
 
 	//First check to see if the motor was moving a significant amount before this function was being called
-	if (fabsf(currentSpeedRpm) > 100){
+	if (fabsf(currentSpeedRpm) > 250){
 
 		//Slow down through a speed ramp
 		float rampTarget = (currentSpeedRpm > 0) ? 100.0f : -100.0f;
-		uint16_t rampTime = computeRampTimeMs(currentSpeedRpm, rampTarget);
+		float deltaSpeed = currentSpeedRpm - rampTarget;
 
-		MC_ProgramSpeedRampMotor1_F(rampTarget, rampTime);
+		int rampDownDivisions = (int)(fabsf(deltaSpeed) / DELTA_SPEED_THRESH);
+		if (rampDownDivisions < 1) rampDownDivisions = 1;  // Ensure at least one division
+
+		float stepSize = deltaSpeed / rampDownDivisions;
+
+		// Slowly ramp down to target before stopping
+		for (int i = 1; i <= rampDownDivisions; i++) {
+			float intermediateTarget = currentSpeedRpm - (stepSize * i);
+			uint16_t rampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), intermediateTarget);
+			MC_ProgramSpeedRampMotor1_F(intermediateTarget, rampTime);
+			HAL_Delay(rampTime);  // Wait for ramp to apply before next one
+		}
+
+		// Final ramp to fixed low-speed value to soften the last deceleration step
+		uint16_t finalRampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), rampTarget);
+		MC_ProgramSpeedRampMotor1_F(rampTarget, finalRampTime);
 
 		// Wait for motor speed to reach near 100 --> Use timeout in case this runs into an issue
 		uint32_t tStart = HAL_GetTick();
@@ -271,6 +318,8 @@ void safeStopMotor(float currentSpeedRpm){
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		 uart_debug_print("Motor is now stopped\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		s_previousDirection = 0;
+		g_lastCommandedSpeed = 0;
 	}
 
 	else{
@@ -280,12 +329,16 @@ void safeStopMotor(float currentSpeedRpm){
 		 uart_debug_print("Motor is now stopped\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    s_previousDirection = 0;
+	    g_lastCommandedSpeed = 0;
 	}
 }
 
 void checkReversing(float speedCmd){
 	 // If previous direction was positive but new speed is negative (or opposite)
 	// then first ramp to 0 before allowing opposite sign.
+
+	//First if its in run state, then make sure the offset is applied (edge case on startup)
+
 	bool reversing = false;
 	if (s_previousDirection > 0 && speedCmd < 0) {
 		reversing = true;
@@ -308,14 +361,14 @@ void checkReversing(float speedCmd){
 
 
 		//  Wait for motor to become IDLE
+		uint32_t tStart = HAL_GetTick();
 		while (1) {
 			HAL_Delay(5); // poll the state until it IDLE
-
 			MCI_State_t currState = MC_GetSTMStateMotor1();
 			int currentFaults = MC_GetOccurredFaultsMotor1();
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			 uart_debug_print("current state is %d\r\n", currState);
-			 uart_debug_print("current fault is %d\r\n", currentFaults);
+//			 uart_debug_print("current state is %d\r\n", currState);
+//			 uart_debug_print("current fault is %d\r\n", currentFaults);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			if (currState == IDLE && MC_GetAverageMecSpeedMotor1_F() == 0) {
 				HAL_Delay(500); // Tune this value for seemless transition, but
@@ -324,7 +377,14 @@ void checkReversing(float speedCmd){
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				 break;
 			}
-			//TODO ADD A TIMEOUT FOR WAITING
+
+		    if (HAL_GetTick() - tStart > 1000) { //use 1 sec for timeout period
+		        uart_debug_print("Motor failed to stop in time!!\r\n");
+			    s_previousDirection = 0;
+			    g_lastCommandedSpeed = 0;
+		        MCI_FaultProcessing(&Mci[0], MC_DP_FAULT, 0);
+		        break;
+		    }
 
 		}
 	}
@@ -335,7 +395,7 @@ void checkReversing(float speedCmd){
 void runSingleMotor(float newSpeed) {
 
     float speedCmd = newSpeed;
-    speedCmd = speedCheck(speedCmd);
+    MCI_State_t motorState = MC_GetSTMStateMotor1();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 uart_debug_print("Running Single Motor...\r\n");
@@ -343,9 +403,13 @@ void runSingleMotor(float newSpeed) {
 	 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    MCI_State_t motorState = MC_GetSTMStateMotor1();
+	 //First Check if the speed command needs any changing
+	 speedCmd = speedCheck(speedCmd); // adjust in case the inserted speed is not an option
+	 if (motorState == RUN){ //account for clipping in case the next command is too crazy
+		 speedCmd = clippingCheck(speedCmd);
+	 }
 
-    //First Check if there is a reversal happening
+    //Check if there is a reversal happening
     // If the motor is currently in RUN, or startup, or any ready state --> check for reversal
     if (motorState != IDLE)
     {
@@ -354,10 +418,10 @@ void runSingleMotor(float newSpeed) {
 
     // Handle case where motor is not running
     motorState = MC_GetSTMStateMotor1();
-    if (motorState != RUN) // This means it is in IDLE state
+    if (motorState != RUN) // This means it is in IDLE state, or startup
     {
     	checkReversing(speedCmd);
-
+   	    speedCmd = speedCheck(speedCmd); // adjust in case the inserted speed is not an option
         if (speedCmd != 0.0f)
         {
             // Start from IDLE
@@ -371,6 +435,7 @@ void runSingleMotor(float newSpeed) {
 
             MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
             s_previousDirection = (speedCmd > 0) ? 1 : -1; //update the previous direction global var
+            g_lastCommandedSpeed = speedCmd;
             if (!MC_StartMotor1()) {
             	////////////////////////////////////////////////////////////////////////////////////////////////////////
             	 uart_debug_print("Start Failed");
@@ -383,10 +448,11 @@ void runSingleMotor(float newSpeed) {
         	 uart_debug_print("Direction has been updated to: %d\r\n", (int)s_previousDirection);
         	////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
-        else {
+        else { // setpoint was zero while idle...
 
             // speedCmd is 0, remain IDLE
             s_previousDirection = 0;
+            g_lastCommandedSpeed = 0;
         	////////////////////////////////////////////////////////////////////////////////////////////////////////
         	 uart_debug_print("Speed Command was considered to be or is 0\r\n");
         	 uart_debug_print("Direction has been updated to: %d\r\n", (int)s_previousDirection);
@@ -428,6 +494,7 @@ void runSingleMotor(float newSpeed) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
+            g_lastCommandedSpeed = speedCmd;
     	}
     }
 
@@ -455,9 +522,9 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
     // Configure the ID of the message according to what was received
     txID |= (1 & 0x01) << SENDER_DEVICE_SHIFT; // This calue is now always 1 since the esc is sending data.
-    txID |= (CANMessageID->motorType & 0x01) << NACTION_READ_ID_DEVICE_SHIFT;
+    txID |= (CANMessageID->motorType & 0x01) << NDRIVE_STEERING_SHIFT;
     txID |= (CANMessageID->motorConfig & 0x01) << NMULTI_SINGLE_SHIFT;
-    txID |= (CANMessageID->commandType & 0x01) << NDRIVE_STEERING_SHIFT;
+    txID |= (CANMessageID->commandType & 0x01) << NACTION_READ_ID_DEVICE_SHIFT;
     txID |= (CANMessageID->readSpec & 0x07) << MSG_SPECIFICATION_SHIFT;
     txID |= (CANMessageID->motorID & 0x0f);
 

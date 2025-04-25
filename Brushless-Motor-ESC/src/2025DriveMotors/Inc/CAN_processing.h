@@ -100,6 +100,7 @@ void runSingleMotor(float newSpeed);
 float speedCheck (float targetSpeed);
 void checkReversing(float speedCmd);
 void safeStopMotor(float currentSpeedRpm);
+float clippingCheck(float currentSpeedSetpoint);
 int16_t extract_multiple_speeds(const uint8_t *rxData);
 uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm);
 

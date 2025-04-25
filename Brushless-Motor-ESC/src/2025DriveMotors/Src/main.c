@@ -41,6 +41,7 @@
 #define LF_CAN_ID 1
 #define LB_CAN_ID 2
 #define RB_CAN_ID 3
+#define MAX_CAN_BUFFERED_MSGS 5 // number of CAN messages that are buffered
 
 /* USER CODE END PD */
 
@@ -76,11 +77,16 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 
 int ESC_ID =RF_CAN_ID; // CHANGE THIS ID FOR EACH ESC THAT IS CONNECTED TO THE DRIVE SYSTEM!
-
 volatile bool received_CAN_command = false;
 FDCAN_RxHeaderTypeDef rxHeader;
 uint8_t rxData[8];
 FDCAN_HandleTypeDef hfdcan1;
+
+//These are for CAN buffer things
+//FDCAN_RxHeaderTypeDef canBufferHeaders[MAX_CAN_BUFFERED_MSGS];
+//uint8_t canBufferData[MAX_CAN_BUFFERED_MSGS][8];
+//uint8_t canBufferCount = 0;
+
 //extern UART_HandleTypeDef huart2; //used for debug
 
 /* USER CODE END PV */
@@ -126,14 +132,72 @@ void CAN_TerminationEnable(bool enable)
   }
 }
 
-
+//keep latest command only
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
     if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0) {
-        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK) {
-        	received_CAN_command = true;
+        // Keep reading until FIFO is empty, but only keep the last message
+        while (HAL_FDCAN_GetRxFifoFillLevel(hfdcan, FDCAN_RX_FIFO0) > 0) {
+            HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData);
         }
+
+        received_CAN_command = true;
     }
 }
+
+// Basic Standard
+//void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+//    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0) {
+//        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK) {
+//        	received_CAN_command = true;
+//        }
+//    }
+//}
+
+
+//Used for a custom 5 place smart buffer
+//void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+//    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0) {
+//        while (HAL_FDCAN_GetRxFifoFillLevel(hfdcan, FDCAN_RX_FIFO0) > 0) {
+//            FDCAN_RxHeaderTypeDef tempHeader;
+//            uint8_t tempData[8];
+//
+//            if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &tempHeader, tempData) != HAL_OK) continue;
+//
+//            // Parse spec
+//            uint16_t id = tempHeader.Identifier & 0x07FF;
+//            uint8_t spec = (id >> 4) & 0x07;
+//            uint8_t action = (id >> 9) & 0x01;
+//
+//            bool isSpeedCommand = (action == 0) && (spec == 2);  // RUN + SPEED
+//
+//            // If it's a speed command, replace the last one
+//            bool replaced = false;
+//            if (isSpeedCommand) {
+//                for (int i = 0; i < canBufferCount; i++) {
+//                    uint16_t idOld = canBufferHeaders[i].Identifier & 0x07FF;
+//                    uint8_t specOld = (idOld >> 4) & 0x07;
+//                    uint8_t actionOld = (idOld >> 9) & 0x01;
+//
+//                    if ((actionOld == 0) && (specOld == 2)) {
+//                        canBufferHeaders[i] = tempHeader;
+//                        memcpy(canBufferData[i], tempData, 8);
+//                        replaced = true;
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            // If not replaced, append (if room)
+//            if (!replaced && canBufferCount < MAX_CAN_BUFFERED_MSGS) {
+//                canBufferHeaders[canBufferCount] = tempHeader;
+//                memcpy(canBufferData[canBufferCount], tempData, 8);
+//                canBufferCount++;
+//            }
+//        }
+//
+//        received_CAN_command = true;
+//    }
+//}
 
 
 
@@ -215,7 +279,7 @@ int main(void)
   while (1)
   {
 
-
+	 // Parse Without Buffer
 	 if (received_CAN_command){
 	     received_CAN_command = false;
 
@@ -229,6 +293,20 @@ int main(void)
 
 	     CAN_Parse_MSG(&rxHeader, rxData);
 	  }
+	  // Parse with buffer
+//	  if (received_CAN_command) {
+//	      received_CAN_command = false;
+//
+//	      for (int i = 0; i < canBufferCount; i++) {
+//	    	  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	    	  uart_debug_print("---------->>>>>>Received CAN command<<<<<<-----------\r\n");
+//	    	  uart_debug_print("---------->>>>>>CAN BUFFER %d<<<<<<-----------\r\n", i);
+//	    	  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	          CAN_Parse_MSG(&canBufferHeaders[i], canBufferData[i]);
+//	      }
+//	      canBufferCount = 0; // reset buffer after processing
+//	  }
+
 
     /* USER CODE END WHILE */
 
