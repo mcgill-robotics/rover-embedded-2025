@@ -284,9 +284,9 @@ int main(void)
 	     received_CAN_command = false;
 
 	     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
-	     HAL_Delay(25);
+	     HAL_Delay(5);
 	     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
-	     HAL_Delay(25);
+	     HAL_Delay(5);
 	 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 	 uart_debug_print("---------->>>>>>Received CAN command<<<<<<-----------\r\n");
 	 	////////////////////////////////////////////////////////////////////////////////////////////////////////
