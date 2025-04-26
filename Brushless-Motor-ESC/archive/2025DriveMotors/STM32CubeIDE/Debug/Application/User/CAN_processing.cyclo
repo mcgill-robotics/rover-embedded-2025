@@ -1,0 +1,17 @@
+../Application/User/CAN_processing.c:37:9:get_CAN_transmitter	1
+../Application/User/CAN_processing.c:40:9:get_CAN_action	1
+../Application/User/CAN_processing.c:43:9:get_CAN_motor_mov_type	1
+../Application/User/CAN_processing.c:46:9:get_CAN_motor_type	1
+../Application/User/CAN_processing.c:49:9:get_CAN_SPEC	1
+../Application/User/CAN_processing.c:52:5:get_CAN_device_ID	1
+../Application/User/CAN_processing.c:230:9:extract_multiple_speeds	1
+../Application/User/CAN_processing.c:237:7:speedCheck	3
+../Application/User/CAN_processing.c:252:6:safeStopMotor	6
+../Application/User/CAN_processing.c:286:6:checkReversing	7
+../Application/User/CAN_processing.c:335:6:runSingleMotor	19
+../Application/User/CAN_processing.c:195:6:Process_Multiple_ESC_Command	3
+../Application/User/CAN_processing.c:444:6:sendCANResponse	2
+../Application/User/CAN_processing.c:129:6:Process_Single_ESC_Command	11
+../Application/User/CAN_processing.c:59:6:CAN_Parse_MSG	8
+../Application/User/CAN_processing.c:490:10:computeRampTimeMs	6
+../Application/User/CAN_processing.c:528:7:SingleExtractFloatFromCAN	1
