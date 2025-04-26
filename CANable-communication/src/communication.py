@@ -218,14 +218,13 @@ if __name__ == "__main__":
     esc = ESCInterface(station)
 
     #caused an issue...
-
     #esc.run_speed(100,1, node_id=0x001) // fucked it 
 
     #esc.run_speed(2000,0, node_id=0x002)
     # run_motor_straight(20)
     # run_motor_back(2500)
 
-    stop_all_motors()
+    # stop_all_motors()
     #esc.run_speed(500, 1, node_id=0x03)
     # Send a motor speed command
     # esc.acknowledge_faults(node_id=0x101)
