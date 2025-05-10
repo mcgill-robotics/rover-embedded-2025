@@ -13,9 +13,9 @@ void SysTickFunction(void) {
 	 * Call you PID update function here.
 	 */
 
-	/*updatePID();*/
-	/*set_counts((int16_t) TIM2->CNT);
-	i=count_to_angle((int16_t) TIM2->CNT);*/
+	updatePID();
+	set_counts((int16_t) TIM2->CNT);
+	i=count_to_angle((int16_t) TIM2->CNT);
 //	printf("%d\n\r",TIM2->CNT);
 //	printf("%f\n\r",i);
 

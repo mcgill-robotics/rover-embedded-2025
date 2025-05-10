@@ -92,11 +92,9 @@ void setPIDGoalD(int16_t distance) {
 void setPIDGoalA(double angle) {
 	printf("set goal %f\r\n", angle);
 	goalAngle = angle_to_count(angle);
+	goalAngle = 90;
+
 	printf("goal %d\r\n", goalAngle);
-	/*
-	 * For assignment 3.1: this function does not need to do anything
-	 * For assignment 3.2: This function should set a variable that stores the goal angle.
-	 */
 }
 
 int8_t PIDdone(void) { // There is no bool type in C. True/False values are represented as 1 or 0.

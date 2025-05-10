@@ -47,6 +47,8 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 volatile int on_off  = 0;
 /* USER CODE END PV */
@@ -59,6 +61,7 @@ static void MX_TIM5_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_CAN2_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 /* USER CODE END PFP */
@@ -119,7 +122,7 @@ int main(void)
   MX_TIM8_Init();
   MX_TIM1_Init();
   MX_CAN2_Init();
-
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
@@ -147,25 +150,36 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1){
 //	  print("%d\n\r", );
+	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  HAL_Delay(1000);*/
+
+//	  TxData[0] = 100;
+//	  HAL_Delay(500);
+//	  TxData[1] = 10;
+//
+//
+//	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
+
+
 	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  HAL_Delay(1000);
+	  setPIDGoalA(90);
+	  HAL_Delay(500);
+	  setPIDGoalA(180);
+	  HAL_Delay(500);
+	  setPIDGoalA(0);
+	  HAL_Delay(500);
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  HAL_Delay(500);
 
-	  TxData[0] = 100;
-	  TxData[1] = 10;
 
 
-
-	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
-
-
-
-	  if (datacheck) {
+	  /*if (datacheck) {
 		  for(int i = 0; i < RxData[1]; i++) {
 			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			  HAL_Delay(RxData[0]);
 		  }
 		  datacheck = 0;
-	  }
+	  }*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -190,10 +204,15 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 72;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -203,12 +222,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -230,10 +249,10 @@ static void MX_CAN2_Init(void)
 
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 16;
+  hcan2.Init.Prescaler = 18;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan2.Init.TimeSeg1 = CAN_BS1_1TQ;
+  hcan2.Init.TimeSeg1 = CAN_BS1_2TQ;
   hcan2.Init.TimeSeg2 = CAN_BS2_1TQ;
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
@@ -483,6 +502,39 @@ static void MX_TIM8_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -534,7 +586,7 @@ PUTCHAR_PROTOTYPE
 {
   /* Place your implementation of fputc here */
   /* e.g. write a character to the USART1 and Loop until the end of transmission */
-//  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
 
   return ch;
 }
