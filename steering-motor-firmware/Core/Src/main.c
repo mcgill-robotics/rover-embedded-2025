@@ -127,12 +127,12 @@ int main(void)
   HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 //  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
-//  set_motor_speed(0);
-//  set_motor_direction(0);
-//  TIM2->CNT = 0;
-//  double goal = 1.07;
+  set_motor_speed(0);
+  set_motor_direction(0);
+  TIM2->CNT = 0;
+  double goal = 3.14/2;
 //  printf("goal %f\r\n");
-//  setPIDGoalA(goal);
+  setPIDGoalA(goal);
 
   /* CAN initialization below */
   HAL_CAN_Start(&hcan2);
@@ -161,15 +161,15 @@ int main(void)
 //	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
 
 
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  setPIDGoalA(90);
-	  HAL_Delay(500);
-	  setPIDGoalA(180);
-	  HAL_Delay(500);
-	  setPIDGoalA(0);
-	  HAL_Delay(500);
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  HAL_Delay(500);
+//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//	  setPIDGoalA(90);
+//	  HAL_Delay(500);
+//	  setPIDGoalA(180);
+//	  HAL_Delay(500);
+//	  setPIDGoalA(0);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//	  HAL_Delay(500);
 
 
 

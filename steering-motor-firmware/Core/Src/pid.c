@@ -9,6 +9,7 @@
 #include "encoder.h"
 #include "motor.h"
 #include "math.h"
+#include <stdatomic.h>
 
 int angleError = 0;
 int oldAngleError = 0;
@@ -20,7 +21,9 @@ int oldAngleError = 0;
 float kPw = 0.5;
 float kDw = 0;
 
-volatile int goalAngle = 0;
+// FIGURE OUT HOW LOCK FREE ATOMIC INTS WORK
+// This is probably the problem behind the goalAngle not updating
+static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
 
 void resetPID() {
 	/*
@@ -92,7 +95,6 @@ void setPIDGoalD(int16_t distance) {
 void setPIDGoalA(double angle) {
 	printf("set goal %f\r\n", angle);
 	goalAngle = angle_to_count(angle);
-	goalAngle = 90;
 
 	printf("goal %d\r\n", goalAngle);
 }
