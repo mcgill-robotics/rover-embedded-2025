@@ -23,14 +23,25 @@
 #define MSG_SPECIFICATION_SHIFT			(4U)
 #define ID_DEVICE_MASK					(0x000f)// 0b000000001111
 
-// Variable declarations
-static float g_lastCommandedSpeed = 0;
-int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backward
+#define RAMP_MIN_MS_RUN      200   // small tweaks while already running
+#define RAMP_MIN_MS_STARTUP  500   // zero → set-point, or after stop
+
+// For print statements
 extern UART_HandleTypeDef huart2;
-int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands to
-// Threshold to consider "almost zero" / unreliable speed feedback point
-const float SPEED_ZERO_THR = 50.0f;
+
+// Variable declarations
+static float g_lastCommandedSpeed = 0; // Previous speed setpoint given to the esc
+int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backward
+int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands
+const float SPEED_ZERO_THR = 50.0f; // Threshold to consider "almost zero" / unreliable speed feedback point
 const float MAX_SPEED_THR = 3200.0f;
+const int WAIT_AFTER_STOP = 500; // amountin ms motor will wait after it has issued a stopMotor command
+
+//Motor parameters --> Get these from the profiled motor!!
+static float g_maxTorque   = 0.30f;    // [N·m]  conservative value
+const float g_startupTorque = 0.15f;   // typical open-loop pull-in
+static float g_inertia     = 0.00001242f; // [kg·m^2]
+static float g_speedThresh = 50.0f;    // threshold below which we treat speed as zero
 
 
 //The next functions here are to retrieve the correct pattern of bits from the received CAN message
@@ -127,7 +138,6 @@ void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 
 void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
-//	uart_debug_print("Im in can things ouuu \r\n");
 
 	//single information will always come as a float (signed 4 bytes)
 	float information = SingleExtractFloatFromCAN(rxData);
@@ -139,7 +149,7 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
+				safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), MC_GetSTMStateMotor1());
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
@@ -149,14 +159,20 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 		case (RUN_SPEED):
 				uart_debug_print("In case RUN_SPEED\r\n");
 //				MC_AcknowledgeFaultMotor1(); // ensuring there is no fault on run <-- sketch
-				runSingleMotor(information);
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
+				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				ControlSingleMotor(information);
 				break;
-		break;
+		default:
+			break;
 		}
 		//otherwise ignore whatever was received :)
 	}
 
-	else{ // IT IS A READ COMMAND
+	else{
+		// We are now in a read command
 		switch(CANMessageID->readSpec){
 
 		case(READ_SPEED):
@@ -180,7 +196,7 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 				sendCANResponse(CANMessageID, currentState);
 				break;
 		case(GET_TEMPERATURE):
-				//TODO --> Might need to poll the gpio, check the datasheed later
+				//TODO --> need to poll the gpio, check the datasheet later for whichever pin this is
 				break;
 		case(GET_PING):
 				float feedback = 69;// ;)
@@ -193,13 +209,14 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 }
 
 void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
-	switch(CANMessageID->runSpec){
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 uart_debug_print("Running Multiple Motors...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	case (RUN_SPEED):
+	switch(CANMessageID->runSpec){
 
+	case (RUN_SPEED):
 
 			int16_t curESCSpeed = extract_multiple_speeds(rxData);
 
@@ -209,8 +226,7 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//			MC_AcknowledgeFaultMotor1(); // ensuring there is no fault on run <-- sketch
-			runSingleMotor(curESCSpeed);
+			ControlSingleMotor(curESCSpeed);
 			break;
 
 	case (RUN_STOP):
@@ -218,7 +234,7 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	 	 	safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
+	 	 	safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), MC_GetSTMStateMotor1());
 			break;
 	break;
 	}
@@ -227,20 +243,252 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 }
 
 
-int16_t extract_multiple_speeds(const uint8_t *rxData){
-    uint16_t offset = ESC_ID * 2;
-    int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
-    return value;
+void ControlSingleMotor(float newSpeed){
+
+	MCI_State_t motorState =  MC_GetSTMStateMotor1();
+
+	switch (motorState){
+
+	case(IDLE):
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Idle\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		IdleSingleMotor(newSpeed);
+		break;
+
+	case(RUN):
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Run\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		runSingleMotorV2(newSpeed);
+		break;
+
+	case(START):
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Start\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		StartSingleMotor(newSpeed);
+		break;
+
+	case(SWITCH_OVER):
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Switch over\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		StartSingleMotor(newSpeed);
+		break;
+
+	case(OFFSET_CALIB):
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Offset Calibration\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		StartSingleMotor(newSpeed);
+		break;
+
+
+	case(FAULT_OVER):
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Fault Over \r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		break;
+
+	case(FAULT_NOW):
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor State: Fault Now \r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		break;
+
+	default:
+	    uart_debug_print("Motor state not explicitly handled: %d\r\n", motorState);
+	    break;
+	}
+
+	return;
+}
+
+
+void runSingleMotorV2(float newSpeed){
+
+	/*
+	 * The run state indicates that the motor is currently being controlled by the ESC, that is, it is already moving. To leave this state,
+	 * either a fault has occured or a stop command has been issued.
+	 *
+	 * Since the motor has been previously moving, the purpose of this state is to simply update the motor speed with the new setpoint
+	 * given in the command that was received. Various checks are performed on the new setpoint in order to properly control the motor:
+	 *
+	 *	- Check that the setpoint is with motor parameters (less than max rmp, greater than very slow rpm that would provide unreliable data)
+	 *	- Check that the new setpoint does not differ by too much from the current operating speed, and adjust it if it is
+	 *	- Check that reversing did not occur, that is if the new speed setpoint is now in the opposite direction, the motor will be indicated to stop
+	 *		instead of procesing in the negative direction. Note here, that the motor will not be set to the new negative setpoint, rather it will stop
+	 *		and is is up to the next command in order to determine the setpoint. This has been done as to avoid any timing errors on the CAN bus, as well
+	 *		as to allow the motor to ramp to higher values in the negative direction that is not affected by the clipping function which controls the
+	 *		degree of change between past and previous setpoints as previously discussed.
+	 *
+	 *	Based on these checks, the action taken by the motor is determined. In short, the motor will either:
+	 *	1. Move to the new setpoint indicated in the command in the same direction
+	 *	2. Stop the motor if a 0 speed input is received, or direction is changed
+	 */
+
+	float speedCmd = newSpeed;
+
+	speedCmd = speedCheck(speedCmd); // Checks to make sure the speed is within acceptable limits, corrects otherwise
+	speedCmd = clippingCheck(speedCmd); // Checks the degree of variation between the previous two commands, if too great than correct
+
+	if (checkReversing(speedCmd)){ // If the motor has reversed, then motor is stopped (or fault has occured) so leave process
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("REVERSING DETECTED!\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// Stop motor in order to bring it back to zero
+		if(safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), RUN)){
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has executed successfully \r\n");
+			 uart_debug_print("Motor is now stopped after direction change \r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+		else{
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has NOT executed successfully!!!! \r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+		return;
+	}
+
+	// After this point, it means the setpoint is either 0, or a change of speed in the same direction
+
+	if (fabsf(speedCmd) < 0.001){
+		safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), RUN);
+		return;
+	}
+
+	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), speedCmd, false);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Motor is already moving, change setpoint in same direction\r\n");
+	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
+	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
+	 uart_debug_print("Current direction is %d ms\r\n", s_previousDirection);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
+	s_previousDirection = (speedCmd > 0) ? 1 : -1;
+    g_lastCommandedSpeed = speedCmd;
+}
+
+
+void IdleSingleMotor(float newSpeed){
+	/*
+	 * This idle state indicates that the esc is not currently controlling the motor, this usually means the motor is stopped. In order to
+	 * leave the idle state, the motor needs to start, or a fault needs to occur, meaning that IDLE state is only realized on ESC boot (POR)
+	 * or after a successful motor stop.
+	 *
+	 * When it comes to controlling the motor, from the IDLE state there are really only 2 options:
+	 *
+	 * 1. A zero setpoint (or near 0) was commanded, so nothing will happen to the motor since it is already in the idle state (it will not start)
+	 * 2. A non-zero setpoint is received, so the motor will begin its start sequence to ramp to the given speed.
+	 */
+
+	float speedCmd = newSpeed;
+	speedCmd = speedCheck(speedCmd);
+
+
+	if (fabsf(speedCmd) < 0.001){
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor received command that is or was considered to be 0, so nothing happens\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		return;
+	}
+
+	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), speedCmd, true);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Motor will begin to ramp!\r\n");
+	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
+	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
+	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Motor startup sequence
+
+	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime); // Must set a setpoint before startup --> otherwise unpredictable behavior
+	if (!MC_StartMotor1()) {
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("Start Failed...");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		return; // start failed
+	}
+
+	//Than motor start command has been issued
+	s_previousDirection = (speedCmd > 0) ? 1 : -1;
+	g_lastCommandedSpeed = speedCmd;
+
+	return;
+}
+
+void StartSingleMotor (float newSpeed){
+
+	/*
+	 * The Start state is entered when the motor is issued the startMotor() function, and it initializes the starting sequence. The same
+	 * logic of the START state is also true for the SWITHC_OVER state, and the OFFSET_CALIB, so this function is used for all three cases
+	 *
+	 * When in this state, on of three things may occur:
+	 * 1. Another setpoint in the same direction is received
+	 * 		In this cse, we will simply ignore the setpoint as it would otherwise be buffered in the lower level firmware anyways,
+	 * 		so it is more efficient so simply drop the command
+	 * 2. A zero (or close to 0) speed is issued, in which case the motor should stop the starting sequence
+	 * 3. A command with a different direction is issued, in which the case the motor should stop the starting sequence
+	 */
+
+	float speedCmd = newSpeed;
+	speedCmd = speedCheck(speedCmd);
+
+	if (fabs(speedCmd) < 0.001){
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		uart_debug_print("Motor received command that is or was considered to be 0\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if (safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), START)){
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has executed successfully \r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+		else{
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has NOT executed successfully!!!! \r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+	}
+
+	else if (checkReversing(speedCmd)){
+
+		if (safeStopMotor(MC_GetAverageMecSpeedMotor1_F(), START)){
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has executed successfully \r\n");
+			 uart_debug_print("Motor is now stopped after direction change\r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+		else{
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("Safe Stop has NOT executed successfully!!!! \r\n");
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		}
+	}
+	else{
+		return;
+	}
 }
 
 
 float speedCheck(float targetSpeed){
 	/*
-	 * The main purpose of this function is to check 2 things, the first is if the speed demanded is much greater than the previous speed, and if so, to adjust
-	 * the change in speed such that it is not too great and will cause too high of a voltage spike to fault the motor. THe other function is to make sure that the speed
-	 * setpoint is something that is actually a setpoint (like within the motors actual parameters) in case anything in the sending logic doesnt work
-	 *
+	 * The main purpose of this function is to make sure that the speed demanded falls within the actual range at which the motor
+	 * is capable of operating in.
 	 */
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Checking speed...\r\n");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Deadzone for small speeds
     if (fabsf(targetSpeed) < SPEED_ZERO_THR) {
@@ -256,35 +504,63 @@ float speedCheck(float targetSpeed){
 
 float clippingCheck(float currentSpeedSetpoint){
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("CHECK FOR CLIPPING\r\n");
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if (MC_GetSTMStateMotor1() == RUN) {
-		float delta = currentSpeedSetpoint - g_lastCommandedSpeed;
+	/*
+	 * The main purpose of this function is to check if the speed demanded is much greater than the previous speed, and if so, to adjust
+	 * the change in speed such that it is not too great and will cause too high of a voltage spike to fault the motor. This logic works
+	 * due to how the motor is being operated for our teams rover, and is highly project based. This can also be implemented in software,
+	 * however it will be integrated in the firmware for this 2025 Rover.
+	 */
 
-		if (fabsf(delta) > DELTA_SPEED_THRESH) {
-			g_lastCommandedSpeed += (delta > 0.0f ? DELTA_SPEED_THRESH : -DELTA_SPEED_THRESH);
-		} else {
-			g_lastCommandedSpeed = currentSpeedSetpoint;
-		}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Checking clipping...\r\n");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("Clipping occured !\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		return speedCheck(g_lastCommandedSpeed);
+	float delta = currentSpeedSetpoint - g_lastCommandedSpeed;
+
+	if (fabsf(delta) > DELTA_SPEED_THRESH) {
+		g_lastCommandedSpeed += (delta > 0.0f ? DELTA_SPEED_THRESH : -DELTA_SPEED_THRESH);
+	} else {
+		g_lastCommandedSpeed = currentSpeedSetpoint;
 	}
-	else{
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("No chopping!\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		return speedCheck(g_lastCommandedSpeed);
-	}
+
+	return speedCheck(g_lastCommandedSpeed);
+
 }
 
-void safeStopMotor(float currentSpeedRpm){
+bool safeStopMotor(float currentSpeedRpm, MCI_State_t motorState){
+
+	/*
+	 * This function is designed in order to safely stop the motor. The ST library already containts a stopMotor() function,
+	 * although it can sometimes be unsafe to use depending on how the motor is operating, and as it is a non-blocking function,
+	 * it can be hard to know if it actually executed or not. This functon also updates the previous setpoint, and the direction
+	 * after is has executed
+	 *
+	 * This function will do one of two things based on the current speed of the motor and the State:
+	 * 1. The motor is moving quickly
+	 * 		if the motor is moving quickly when this function is called, then a blocking ramp downwards is created, so that the motor
+	 * 		is guided to a slow stop, so as to avoid any issued when stopping abruptly while the motor is moving quickly. In addition,
+	 * 		due to the nature of the code preventing large jumps in speed setpoints, under normal operation this condition is never
+	 * 		really used since the motor setpoints would otherwise be guided to a slow speed before stopping thanks to the clipping check
+	 * 		function. Thus, condition 1 is really only used for if the user wants to abruptly stop the motor manually instead of letting
+	 * 		it gradually glide to a hault.
+	 * 2. The motor was not previously moving quickly, or is in the startup phases
+	 * 		If this is the case, then the stopMotor() function from ST is called directly, as there are less risks since the motor is already
+	 * 		moving quite slowly.
+	 *
+	 * 	It returns true if the mottor has been successfulyl stoped, and false if an error occured.
+	 */
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Performing a safe stop\r\n");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	//First check to see if the motor was moving a significant amount before this function was being called
-	if (fabsf(currentSpeedRpm) > 250){
+	if (fabsf(currentSpeedRpm) > 250 && motorState != START && motorState != SWITCH_OVER){
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("Motor is being guided to a stop\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		//Slow down through a speed ramp
 		float rampTarget = (currentSpeedRpm > 0) ? 100.0f : -100.0f;
@@ -298,13 +574,13 @@ void safeStopMotor(float currentSpeedRpm){
 		// Slowly ramp down to target before stopping
 		for (int i = 1; i <= rampDownDivisions; i++) {
 			float intermediateTarget = currentSpeedRpm - (stepSize * i);
-			uint16_t rampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), intermediateTarget);
+			uint16_t rampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), intermediateTarget, false);
 			MC_ProgramSpeedRampMotor1_F(intermediateTarget, rampTime);
 			HAL_Delay(rampTime);  // Wait for ramp to apply before next one
 		}
 
 		// Final ramp to fixed low-speed value to soften the last deceleration step
-		uint16_t finalRampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), rampTarget);
+		uint16_t finalRampTime = computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), rampTarget, false);
 		MC_ProgramSpeedRampMotor1_F(rampTarget, finalRampTime);
 
 		// Wait for motor speed to reach near 100 --> Use timeout in case this runs into an issue
@@ -315,29 +591,84 @@ void safeStopMotor(float currentSpeedRpm){
 		}
 
 	    MC_StopMotor1();
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("Motor is now stopped\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		s_previousDirection = 0;
-		g_lastCommandedSpeed = 0;
+		//  Wait for motor to become IDLE
+	    tStart = HAL_GetTick();
+		while (1) {
+			HAL_Delay(5); // poll the state until it IDLE
+			MCI_State_t currState = MC_GetSTMStateMotor1();
+//			int currentFaults = MC_GetOccurredFaultsMotor1();
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+//			 uart_debug_print("current state is %d\r\n", currState);
+//			 uart_debug_print("current fault is %d\r\n", currentFaults);
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			if (currState == IDLE && MC_GetAverageMecSpeedMotor1_F() == 0) {
+				HAL_Delay(WAIT_AFTER_STOP); // Tune this value for seemless transition
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				 uart_debug_print("Motor is now stopped \r\n");
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				s_previousDirection = 0;
+				g_lastCommandedSpeed = 0;
+				return true;
+			}
+
+		    if (HAL_GetTick() - tStart > 1000) { //use 1 sec for timeout period
+		        uart_debug_print("Motor failed to stop in time!!\r\n");
+			    s_previousDirection = 0;
+			    g_lastCommandedSpeed = 0;
+		        MCI_FaultProcessing(&Mci[0], MC_DP_FAULT, 0);
+		        return false;
+		    }
+		}
 	}
 
 	else{
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		 uart_debug_print("Motor is moving slowly or is in a startup phase, so it is not being guided to a stop\r\n");
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		//Motor is already moving slowly/on startup
 	    MC_StopMotor1();
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("Motor is now stopped\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-	    s_previousDirection = 0;
-	    g_lastCommandedSpeed = 0;
+
+		//  Wait for motor to become IDLE
+		uint32_t tStart = HAL_GetTick();
+		while (1) {
+			HAL_Delay(5); // poll the state until it IDLE
+			MCI_State_t currState = MC_GetSTMStateMotor1();
+//			int currentFaults = MC_GetOccurredFaultsMotor1();
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			 uart_debug_print("current state is %d\r\n", currState);
+//			 uart_debug_print("current fault is %d\r\n", currentFaults);
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			if (currState == IDLE && MC_GetAverageMecSpeedMotor1_F() == 0) {
+				HAL_Delay(WAIT_AFTER_STOP); // Tune this value for seemless transition
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				 uart_debug_print("Motor is now stopped \r\n");
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				s_previousDirection = 0;
+				g_lastCommandedSpeed = 0;
+				return true;
+			}
+
+		    if (HAL_GetTick() - tStart > 1000) { //use 1 sec for timeout period
+		        uart_debug_print("Motor failed to stop in time!!\r\n");
+			    s_previousDirection = 0;
+			    g_lastCommandedSpeed = 0;
+		        MCI_FaultProcessing(&Mci[0], MC_DP_FAULT, 0);
+		        return false;
+		    }
+		}
 	}
 }
 
-void checkReversing(float speedCmd){
-	 // If previous direction was positive but new speed is negative (or opposite)
-	// then first ramp to 0 before allowing opposite sign.
 
-	//First if its in run state, then make sure the offset is applied (edge case on startup)
+bool checkReversing(float speedCmd){
+	/* This function is used to check if the motor is changing directions. If the motor received a setpoint which is in the opposite
+	 * direction, then true is returned, otherwise false.
+	*/
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Checking reversing...\r\n");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool reversing = false;
 	if (s_previousDirection > 0 && speedCmd < 0) {
@@ -347,168 +678,51 @@ void checkReversing(float speedCmd){
 		reversing = true;
 	}
 
-	if (reversing) {
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("REVERSING DETECTED!\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		// Stop motor in order to bring it back to zero
-		 safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("hit1\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-		//  Wait for motor to become IDLE
-		uint32_t tStart = HAL_GetTick();
-		while (1) {
-			HAL_Delay(5); // poll the state until it IDLE
-			MCI_State_t currState = MC_GetSTMStateMotor1();
-			int currentFaults = MC_GetOccurredFaultsMotor1();
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-//			 uart_debug_print("current state is %d\r\n", currState);
-//			 uart_debug_print("current fault is %d\r\n", currentFaults);
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			if (currState == IDLE && MC_GetAverageMecSpeedMotor1_F() == 0) {
-				HAL_Delay(500); // Tune this value for seemless transition, but
-				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				 uart_debug_print("Motor is now stopped after direction Change\r\n");
-				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				 break;
-			}
-
-		    if (HAL_GetTick() - tStart > 1000) { //use 1 sec for timeout period
-		        uart_debug_print("Motor failed to stop in time!!\r\n");
-			    s_previousDirection = 0;
-			    g_lastCommandedSpeed = 0;
-		        MCI_FaultProcessing(&Mci[0], MC_DP_FAULT, 0);
-		        break;
-		    }
-
-		}
-	}
-	return;
-
-}
-// This function is used in order to run a single motor at a given setpoint.
-void runSingleMotor(float newSpeed) {
-
-    float speedCmd = newSpeed;
-    MCI_State_t motorState = MC_GetSTMStateMotor1();
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Running Single Motor...\r\n");
-	 uart_debug_print("Setpoint %d RPM\r\n", (int)speedCmd);
-	 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	 //First Check if the speed command needs any changing
-	 speedCmd = speedCheck(speedCmd); // adjust in case the inserted speed is not an option
-	 if (motorState == RUN){ //account for clipping in case the next command is too crazy
-		 speedCmd = clippingCheck(speedCmd);
-	 }
-
-    //Check if there is a reversal happening
-    // If the motor is currently in RUN, or startup, or any ready state --> check for reversal
-    if (motorState != IDLE)
-    {
-       checkReversing(speedCmd);
-    }
-
-    // Handle case where motor is not running
-    motorState = MC_GetSTMStateMotor1();
-    if (motorState != RUN) // This means it is in IDLE state, or startup
-    {
-    	checkReversing(speedCmd);
-   	    speedCmd = speedCheck(speedCmd); // adjust in case the inserted speed is not an option
-        if (speedCmd != 0.0f)
-        {
-            // Start from IDLE
-            uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), speedCmd); // TODO Chrck why its 0.0f
-
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-        	 uart_debug_print("Motor was not moving previously\r\n");
-        	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
-        	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
-            s_previousDirection = (speedCmd > 0) ? 1 : -1; //update the previous direction global var
-            g_lastCommandedSpeed = speedCmd;
-            if (!MC_StartMotor1()) {
-            	////////////////////////////////////////////////////////////////////////////////////////////////////////
-            	 uart_debug_print("Start Failed");
-            	////////////////////////////////////////////////////////////////////////////////////////////////////////
-                return; // start failed
-            }
-
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-        	 uart_debug_print("Motor has been started\r\n");
-        	 uart_debug_print("Direction has been updated to: %d\r\n", (int)s_previousDirection);
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-        }
-        else { // setpoint was zero while idle...
-
-            // speedCmd is 0, remain IDLE
-            s_previousDirection = 0;
-            g_lastCommandedSpeed = 0;
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-        	 uart_debug_print("Speed Command was considered to be or is 0\r\n");
-        	 uart_debug_print("Direction has been updated to: %d\r\n", (int)s_previousDirection);
-        	////////////////////////////////////////////////////////////////////////////////////////////////////////
-        }
-    }
-    else
-    	//Motor was already running, in the same direction too
-    {
-    	if (speedCmd == 0){
-    		safeStopMotor(MC_GetAverageMecSpeedMotor1_F());
-
-			//  Wait for motor to become IDLE
-			while (1) {
-				HAL_Delay(5); // poll the state until it IDLE
-				MCI_State_t currState = MC_GetSTMStateMotor1();
-				if (currState == IDLE && MC_GetAverageMecSpeedMotor1_F() == 0) {
-					s_previousDirection =0;
-					////////////////////////////////////////////////////////////////////////////////////////////////////////
-					 uart_debug_print("Motor is now stopped after receiving 0 setpoint\r\n");
-		        	 uart_debug_print("Direction has been updated to: %d\r\n", (int)s_previousDirection);
-					////////////////////////////////////////////////////////////////////////////////////////////////////////
-					 break;
-				}
-				HAL_Delay(350); // Tune this value for seemless transition, but
-			}
-    	}
-    	else{
-
-			// Motor is running in same direction
-			s_previousDirection = (speedCmd > 0) ? 1 : -1;
-			uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetAverageMecSpeedMotor1_F(), speedCmd);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			 uart_debug_print("Motor is already moving, change setpoint in same direction\r\n");
-			 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
-			 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
-			 uart_debug_print("Direction is %d ms\r\n", s_previousDirection);
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
-            g_lastCommandedSpeed = speedCmd;
-    	}
-    }
-
-    return;
+	return reversing;
 }
 
 
-/*
- Function used to send back data from ESCs to the master. The ID of the information that is being sent back is identical to the one
- that was sent to the esc, except the MSB is now 1, indicating that it is the esc which is sending data back to the master. In turn, this also
- makes sure that no other escs begin processing the message that the current esc is trying to send.
 
- */
+uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm, bool isStartup){
+
+    // Convert from RPM to rad/s
+    float w1 = currentSpeedRpm * 2.0f * (float)M_PI / 60.0f;
+    float w2 = targetSpeedRpm * 2.0f * (float)M_PI / 60.0f;
+
+    // If the magnitude is below threshold, treat as 0 for more stable math
+    if (fabsf(currentSpeedRpm) < g_speedThresh) {
+        w1 = 0.0f;
+    }
+    if (fabsf(targetSpeedRpm) < g_speedThresh) {
+        w2 = 0.0f;
+    }
+
+    // Max acceleration alpha = T_max / J
+    float alpha = (isStartup ? g_startupTorque : g_maxTorque) / g_inertia;// [rad/s^2]
+
+    // Time (seconds) = delta_omega / alpha
+    float deltaW = fabsf(w2 - w1);
+    float timeSec = deltaW / alpha;
+
+    // Convert to milliseconds
+    float timeMs = timeSec * 1000.0f;
+
+    // For safety, clamp time to at least 200 ms or so
+    float tMin = isStartup ? RAMP_MIN_MS_STARTUP : RAMP_MIN_MS_RUN;
+    if (timeMs < tMin)   timeMs = tMin;
+    if (timeMs > 5000.0f) timeMs = 5000.0f;      // 5 s ceiling – tune as desired
+    return (uint16_t)(timeMs + 0.5f);
+}
+
+
 void sendCANResponse(ParsedCANID *CANMessageID, float information){
+
+	/*
+	 Function used to send back data from ESCs to the master. The ID of the information that is being sent back is identical to the one
+	 that was sent to the esc, except the MSB is now 1, indicating that it is the esc which is sending data back to the master. In turn, this also
+	 makes sure that no other escs begin processing the message that the current one is trying to send.
+
+	 */
 
     FDCAN_TxHeaderTypeDef txHeader;
     uint16_t txID = 0;
@@ -553,44 +767,6 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
     }
 }
 
-
-uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm){
-
-    // Convert from RPM to rad/s
-    float w1 = currentSpeedRpm * 2.0f * (float)M_PI / 60.0f;
-    float w2 = targetSpeedRpm * 2.0f * (float)M_PI / 60.0f;
-
-    // If the magnitude is below threshold, treat as 0 for more stable math
-    if (fabsf(currentSpeedRpm) < g_speedThresh) {
-        w1 = 0.0f;
-    }
-    if (fabsf(targetSpeedRpm) < g_speedThresh) {
-        w2 = 0.0f;
-    }
-
-    // Max acceleration alpha = T_max / J
-    float alpha = g_maxTorque / g_inertia; // [rad/s^2]
-
-    // Time (seconds) = delta_omega / alpha
-    float deltaW = fabsf(w2 - w1);
-    float timeSec = deltaW / alpha;
-
-    // Convert to milliseconds
-    float timeMs = timeSec * 1000.0f;
-
-    // For safety, clamp time to at least 200 ms or so
-    if (timeMs < 200.0f) {
-        timeMs = 200.0f;
-    }
-    // Also clamp to an upper limit if you do not want extremely large times
-    if (timeMs > 2000.0f) {
-        timeMs = 2000.0f; // 20 sec max
-    }
-
-    return (uint16_t)(timeMs);
-}
-
-
 // Extracts a float from a CAN data buffer that is expected to be in little-Endian
 float SingleExtractFloatFromCAN(uint8_t *data) {
     float value;
@@ -607,9 +783,9 @@ float SingleExtractFloatFromCAN(uint8_t *data) {
 }
 
 
-
-
-
-
-
+int16_t extract_multiple_speeds(const uint8_t *rxData){
+    uint16_t offset = ESC_ID * 2;
+    int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
+    return value;
+}
 

@@ -18,10 +18,6 @@
 extern int s_previousDirection;
 
 
-//Motor parameters --> Get these from the profiled motor!!
-static float g_maxTorque   = 0.400f;    // [N·m]  conservative value
-static float g_inertia     = 0.00001242f; // [kg·m^2]
-static float g_speedThresh = 50.0f;    // threshold below which we treat speed as zero
 
 extern int ESC_ID;
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -90,18 +86,26 @@ typedef struct {
 
 
 
-//Function prototypes
+//CAN Interaction prototypes
 void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData);
 void Process_Multiple_ESC_Command (ParsedCANID *parsedMessageID, uint8_t *rxData);
 void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData);
 void sendCANResponse(ParsedCANID *CANMessageID, float information);
 float SingleExtractFloatFromCAN(uint8_t *data);
-void runSingleMotor(float newSpeed);
+
+// Motor control prototypes
+void ControlSingleMotor(float newSpeed);
+void runSingleMotorV2(float newSpeed); //TODO remove V part
+void IdleSingleMotor(float newSpeed);
+void StartSingleMotor(float newSpeed);
+
+bool checkReversing(float speedCmd);
+bool safeStopMotor(float currentSpeedRpm, MCI_State_t motorState);
+//helper function prototypes
+
 float speedCheck (float targetSpeed);
-void checkReversing(float speedCmd);
-void safeStopMotor(float currentSpeedRpm);
 float clippingCheck(float currentSpeedSetpoint);
 int16_t extract_multiple_speeds(const uint8_t *rxData);
-uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm);
+uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm, bool isStartup);
 
 
