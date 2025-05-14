@@ -1,5 +1,5 @@
 ../Core/Src/pid.c:28:6:resetPID	4	static
 ../Core/Src/pid.c:40:6:updatePID	32	static
-../Core/Src/pid.c:88:6:setPIDGoalD	16	static
-../Core/Src/pid.c:95:6:setPIDGoalA	24	static
-../Core/Src/pid.c:102:8:PIDdone	4	static
+../Core/Src/pid.c:87:6:setPIDGoalD	16	static
+../Core/Src/pid.c:94:6:setPIDGoalA	32	static
+../Core/Src/pid.c:101:8:PIDdone	4	static

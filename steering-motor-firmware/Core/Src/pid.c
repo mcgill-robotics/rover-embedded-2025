@@ -18,8 +18,8 @@ int oldAngleError = 0;
 #define HALF_COUNTS 16512
 
 
-float kPw = 0.5;
-float kDw = 0;
+float kPw = 1.5;
+float kDw = 8;
 
 // FIGURE OUT HOW LOCK FREE ATOMIC INTS WORK
 // This is probably the problem behind the goalAngle not updating
@@ -55,7 +55,7 @@ void updatePID() {
 	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
-	int angleError = goalAngle - get_counts();
+	int angleError = atomic_load(&goalAngle) - get_counts();
 	if (abs(angleError) > HALF_COUNTS) { // the units need to be fixed but this gets the best path
 		if (angleError > 0) {
 			angleError = angleError - MAX_COUNTS;
@@ -65,18 +65,17 @@ void updatePID() {
 		}
 	}
 
-	if (abs(angleError) < 5){
-		/*set_motor_speed(0);*/
+	if (abs(angleError) <  100){
+		set_motor_speed(0);
 		return;
 	}
 	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
-	printf("correction %d\r\n", angleCorrection);
+//	printf("correction %d\r\n", angleCorrection);
 	if (angleCorrection < 0){
 		set_motor_direction(0);
 	} else{
 		set_motor_direction(1);
 	}
-	int clampedAngleCorrection = angleCorrection;
 	if (abs(angleCorrection) > 100) {
 		angleCorrection = 100;
 	}
@@ -93,10 +92,10 @@ void setPIDGoalD(int16_t distance) {
 }
 
 void setPIDGoalA(double angle) {
-	printf("set goal %f\r\n", angle);
-	goalAngle = angle_to_count(angle);
-
-	printf("goal %d\r\n", goalAngle);
+//	printf("set goal %f\r\n", angle);
+	int counts = angle_to_count(angle);
+	atomic_store(&goalAngle, angle_to_count(counts));
+//	printf("goal %d\r\n", goalAngle);
 }
 
 int8_t PIDdone(void) { // There is no bool type in C. True/False values are represented as 1 or 0.
