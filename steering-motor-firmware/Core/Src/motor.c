@@ -4,7 +4,7 @@
 #include "main.h"
 
 void set_motor_speed(int n){
-	TIM8->CCR2 = n;
+	TIM8->CCR1 = n;
 }
 void set_motor_direction(int n){
 

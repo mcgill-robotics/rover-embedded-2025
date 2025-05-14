@@ -124,9 +124,9 @@ int main(void)
   MX_CAN2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
-//  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+//  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
   set_motor_speed(0);
   set_motor_direction(0);
   TIM2->CNT = 0;
@@ -143,12 +143,15 @@ int main(void)
   TxHeader.RTR = CAN_RTR_DATA;
   TxHeader.StdId = 0x466;
 
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
+	  HAL_Delay(2000);
+	  goal = goal+3.14/4;
+	  goal= fmod(goal, 2*3.14);
+	  setPIDGoalA(goal);
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  HAL_Delay(1000);*/
@@ -564,12 +567,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : LIMIT_Pin */
+  GPIO_InitStruct.Pin = LIMIT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(LIMIT_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : DIR_Pin */
   GPIO_InitStruct.Pin = DIR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DIR_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* USER CODE END MX_GPIO_Init_2 */
@@ -594,19 +607,21 @@ PUTCHAR_PROTOTYPE
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 
-//  if (GPIO_PIN == Button_Pin)
-//  {
-////	  TIM2->CNT = 0;
-//	  /*double new_goal = 3*3.14/4.0;
-//	  printf("%f set new goal\r\n", new_goal);
-//	  setPIDGoalA(new_goal);*/
-//
-//	  //Limit switch code
-//	  set_counts(0);
-//	  setPIDGoalA(0);
+  if (GPIO_PIN == LIMIT_Pin)
+  {
+	  if (!HAL_GPIO_ReadPin (LIMIT_GPIO_Port, LIMIT_Pin)){
+		  set_counts(0);
+		  setPIDGoalA(3.14/2);
+		  TIM2->CNT = 0;
+	  }
 //	  TIM2->CNT = 0;
-//    /* Your code goes here */
-//  }
+	  /*double new_goal = 3*3.14/4.0;
+	  printf("%f set new goal\r\n", new_goal);
+	  setPIDGoalA(new_goal);*/
+
+	  //Limit switch code
+    /* Your code goes here */
+  }
 }
 
 

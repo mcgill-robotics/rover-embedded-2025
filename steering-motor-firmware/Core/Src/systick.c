@@ -6,7 +6,7 @@
 #include "pid.h"
 #include "encoder.h"
 #include "stdio.h"
-float i=0;
+//float i=0;
 void SysTickFunction(void) {
 	/*
 	 * Anything in this function body will be executed every millisecond.
@@ -15,7 +15,7 @@ void SysTickFunction(void) {
 
 	updatePID();
 	set_counts((int16_t) TIM2->CNT);
-	i=count_to_angle((int16_t) TIM2->CNT);
+//	i=count_to_angle((int16_t) TIM2->CNT);
 //	printf("%d\n\r",TIM2->CNT);
 //	printf("%f\n\r",i);
 
