@@ -149,8 +149,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1){
 	  HAL_Delay(2000);
-	  goal = goal+3.14/4;
-	  goal= fmod(goal, 2*3.14);
+	  goal = goal + 3.14/4;
+	  goal = fmod(goal, 2*3.14);
 	  setPIDGoalA(goal);
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
