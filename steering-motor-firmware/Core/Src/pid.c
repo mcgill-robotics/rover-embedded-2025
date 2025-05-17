@@ -12,13 +12,15 @@
 #include <stdatomic.h>
 
 int angleError = 0;
+int angleCorrection = 0;
 int oldAngleError = 0;
+int branch = 0;
 
 #define MAX_COUNTS 33024
 #define HALF_COUNTS 16512
 
 
-float kPw = 1.5;
+float kPw = 1;
 float kDw = 8;
 
 // FIGURE OUT HOW LOCK FREE ATOMIC INTS WORK
@@ -55,21 +57,21 @@ void updatePID() {
 	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
-	int angleError = atomic_load(&goalAngle) - get_counts();
+	angleError = atomic_load(&goalAngle) - get_counts();
 	if (abs(angleError) > HALF_COUNTS) { // the units need to be fixed but this gets the best path
 		if (angleError > 0) {
 			angleError = angleError - MAX_COUNTS;
+			branch = 0;
 		}
 		else {
 			angleError = angleError + MAX_COUNTS;
+			branch = 1;
 		}
 	}
+	else { branch = 2; }
 
-	if (abs(angleError) <  100){
-		set_motor_speed(0);
-		return;
-	}
-	int angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
+
+    angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
 //	printf("correction %d\r\n", angleCorrection);
 	if (angleCorrection < 0){
 		set_motor_direction(0);
@@ -80,6 +82,16 @@ void updatePID() {
 		angleCorrection = 100;
 	}
 	oldAngleError = angleError;
+	if (abs(angleError) <  100){
+		set_motor_speed(0);
+		return;
+	}
+	if (goalAngle == 0) {
+		if (abs(angleError) < 300) {
+			set_motor_speed(0);
+			return;
+		}
+	}
 	set_motor_speed(angleCorrection);
 
 }
