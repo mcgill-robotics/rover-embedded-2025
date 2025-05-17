@@ -128,7 +128,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
   set_motor_speed(0);
-  set_motor_direction(0);
+  set_motor_direction(1);
   TIM2->CNT = 0;
   double goal = 3.14/2;
 //  printf("goal %f\r\n");

@@ -3,16 +3,31 @@
 
 #include "main.h"
 
+int direction = 1;
+int actual_direction = 1;
+//0 ccw
+//1 cw
+
 void set_motor_speed(int n){
 	TIM8->CCR1 = n;
 }
-void set_motor_direction(int n){
 
+int get_actual_motor_direction(){
+	return actual_direction;
+}
+
+void set_actual_motor_direction(int n){
+	actual_direction = n;
+}
+
+
+void set_motor_direction(int n){
+	direction = n;
 	/*for (int i = 100 ; i>0 ; i--) {
 				set_motor_speed(i);
 				delay_us(100);
 	}*/
-	if (n == 1) {
+	if (n == 1 && actual_direction || n==0 && actual_direction) {
 		HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
 //		HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
 	}

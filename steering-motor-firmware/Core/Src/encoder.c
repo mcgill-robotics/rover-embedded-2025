@@ -6,10 +6,28 @@
 
 int counts;
 
-void set_counts(int n){
+int set_counts(int n){
 	int max_count = 16*516*4.0;
-	counts = ((n%max_count)+max_count)%max_count;
+	newcounts = ((n%max_count)+max_count)%max_count;
+	int diff = newcounts-counts;
+	int direction;
+	if (diff > 0 && abs(diff) > max_counts/2){
+		// ccw
+		direction = 0;
+	} else if (diff > 0 && abs(diff) < max_counts/2) {
+		// cw
+		direction = 1;
+	} else if (diff < 0 && abs(diff) > max_counts/2) {
+		// cw
+		direction = 1;
+	}else {
+		// ccw
+		direction = 0;
+	}
+	counts = newcounts;
+	return direction;
 }
+
 int get_counts(){
 	return counts;
 }
