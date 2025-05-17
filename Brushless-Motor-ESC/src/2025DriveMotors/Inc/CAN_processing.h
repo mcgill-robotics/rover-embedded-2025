@@ -84,6 +84,12 @@ typedef struct {
 	MotorID			motorID;
 } ParsedCANID;
 
+//Watchdog for start condition!
+typedef struct {
+    uint32_t    firstTick;
+    uint8_t     attempts;
+} StartWatchdog;
+
 
 
 //CAN Interaction prototypes

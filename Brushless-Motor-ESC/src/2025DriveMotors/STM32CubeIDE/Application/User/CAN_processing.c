@@ -23,8 +23,14 @@
 #define MSG_SPECIFICATION_SHIFT			(4U)
 #define ID_DEVICE_MASK					(0x000f)// 0b000000001111
 
+
+//Ramp up "torque" parameters
 #define RAMP_MIN_MS_RUN      100   // small tweaks while already running
-#define RAMP_MIN_MS_STARTUP  500   // zero → set-point, or after stop
+#define RAMP_MIN_MS_STARTUP  750   // zero → set-point, or after stop
+
+//Startup Watchdog parameters
+#define START_WD_WINDOW_MS   5000   // length of rolling window
+#define START_WD_THRESHOLD   3     // # kicks that trigger a fault
 
 // For print statements
 extern UART_HandleTypeDef huart2;
@@ -35,13 +41,19 @@ int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backwar
 int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands
 const float SPEED_ZERO_THR = 50.0f; // Threshold to consider "almost zero" / unreliable speed feedback point
 const float MAX_SPEED_THR = 3200.0f;
-const int WAIT_AFTER_STOP = 1000; // amountin ms motor will wait after it has issued a stopMotor command
+const int WAIT_AFTER_STOP = 250; // amountin ms motor will wait after it has issued a stopMotor command
 const int SAFE_STOP_SPEED_THRESHOLD = 400;
+
 //Motor parameters --> Get these from the profiled motor!!
 static float g_maxTorque   = 0.30f;    // [N·m]  conservative value
 const float g_startupTorque = 0.15f;   // typical open-loop pull-in
 static float g_inertia     = 0.00001242f; // [kg·m^2]
 static float g_speedThresh = 50.0f;    // threshold below which we treat speed as zero
+
+static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
+
+
+
 
 
 //The next functions here are to retrieve the correct pattern of bits from the received CAN message
@@ -60,7 +72,7 @@ uint8_t get_CAN_motor_type (uint16_t CAN_ID) {
 uint8_t get_CAN_SPEC (uint16_t CAN_ID) {
 	return (CAN_ID & MSG_SPECIFICATION_DEVICE_MASK) >> MSG_SPECIFICATION_SHIFT;
 }
-int get_CAN_device_ID (int CAN_ID) {
+int get_CAN_device_ID (uint16_t CAN_ID) {
 	return (CAN_ID & ID_DEVICE_MASK);
 }
 
@@ -202,7 +214,8 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 				float feedback = 69;// ;)
 				sendCANResponse(CANMessageID, feedback);
 				break;
-		break; // ignore if not one of the options
+		default:
+			break;
 		}
 
 	}
@@ -236,7 +249,8 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 
 	 	 	safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
 			break;
-	break;
+	default:
+		break;
 	}
 
 
@@ -404,8 +418,32 @@ void IdleSingleMotor(float newSpeed){
 		return;
 	}
 
-	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetMecSpeedReferenceMotor1_F(), speedCmd, true);
+	// Watchdog for any experience of multiple start requests at the same time
+    uint32_t now = HAL_GetTick();
 
+    if (now - s_startWd.firstTick > START_WD_WINDOW_MS) {
+        /* window expired – start a new one */
+    	////////////////////////////////////////////////////////////////////////////////////////////////////////
+    	 uart_debug_print("Safe amount of time since last start!\r\n");
+    	 uart_debug_print("Amount of time since last start: %d \r\n", (int) now - s_startWd.firstTick );
+
+    	////////////////////////////////////////////////////////////////////////////////////////////////////////
+        s_startWd.firstTick = now; // sets last time start was issued
+        s_startWd.attempts  = 0;
+    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	 uart_debug_print("Amount of start attempts within 1s of eachother: %d\r\n", s_startWd.attempts);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    if (++s_startWd.attempts >= START_WD_THRESHOLD) {
+        MCI_FaultProcessing(&Mci[0], MC_DP_FAULT, 0);
+        s_startWd.attempts = 0;
+        return;
+    }
+
+    // watchdog check over
+
+	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetMecSpeedReferenceMotor1_F(), speedCmd, true);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 uart_debug_print("Motor will begin to ramp!\r\n");
 	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
@@ -414,7 +452,6 @@ void IdleSingleMotor(float newSpeed){
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Motor startup sequence
-
 	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime); // Must set a setpoint before startup --> otherwise unpredictable behavior
 	if (!MC_StartMotor1()) {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -691,7 +728,6 @@ bool checkReversing(float speedCmd){
 
 	return reversing;
 }
-
 
 
 uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm, bool isStartup){
