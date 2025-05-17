@@ -7,13 +7,13 @@ INTERFACE = "slcan"
 CHANNEL   = "COM12"
 BITRATE   = 500000
 
-MAX_SPEED = 2000.0
-MAX_RAMP_DELTA = 100.0  # adjust as needed
+MAX_SPEED = 1500.0
+MAX_RAMP_DELTA = 200.0  # adjust as needed
 
 
-DEAD_ZONE = 70.0
-MESSAGE_DELAY = 0.1      # Seconds between motor commands
-TEST_DELAY = 0.1         # Seconds between test prints
+DEAD_ZONE = 100
+MESSAGE_DELAY = 0.1   # Seconds between motor commands
+TEST_DELAY = 0.5        # Seconds between test prints
 
 # ==== Helper Functions ====
 
@@ -82,14 +82,9 @@ def run_ps4_drive_loop():
             target_left = apply_dead_zone(target_left, DEAD_ZONE)
             target_right = apply_dead_zone(target_right, DEAD_ZONE)
 
-            # Apply software ramping (simple linear ramp)
-            def smooth_command(prev, target):
-                if abs(target - prev) < MAX_RAMP_DELTA:
-                    return target
-                return prev + MAX_RAMP_DELTA if target > prev else prev - MAX_RAMP_DELTA
 
-            left_cmd = smooth_command(prev_left_cmd, target_left)
-            right_cmd = smooth_command(prev_right_cmd, target_right)
+            left_cmd = target_left
+            right_cmd = target_right
 
             # Save for next iteration
             prev_left_cmd = left_cmd
