@@ -339,8 +339,48 @@ class DriveInterface:
         """ This function is simply used to make sure there is reliable feedback with the esc in the ID"""
         self.esc.read(ReadSpec.GET_PING, MotorType.DRIVE, node, is_single=True)
 
+    def getAllMotorStatus(self):
+        time.sleep(0.2)
+        motor_names = ['RF Drive', 'RB Drive', 'LB Drive', 'LF Drive']
+        nodes       = [
+            NodeID.RF_DRIVE,
+            NodeID.RB_DRIVE,
+            NodeID.LB_DRIVE,
+            NodeID.LF_DRIVE
+        ]
 
+        status_list = []
 
+        for node in nodes:
+            # ask ESC to send its fault count
+            self.read_all_faults(node)
+
+            # wait for up to 20ms for a reply
+            info = self.esc.station.recv_msg(timeout=0.025)
+
+            # if we got nothing, treat it as a fault
+            if info is None:
+                ok = False
+            else:
+                # info is [node_id, spec_string, value]
+                ok = (info[2] == 0.0)
+
+            status_list.append(ok)
+
+        # pretty-print
+        print("\nMotor Fault Status:")
+        for name, ok in zip(motor_names, status_list):
+            symbol = 'ONLINE' if ok else 'NOT AVAILABLE'
+            print(f"  {symbol}  {name}")
+        print()
+
+        return status_list
+    
+    def acknowledgeAllMotorFaults(self):
+        for node in [NodeID.RF_DRIVE, NodeID.RB_DRIVE, NodeID.LB_DRIVE, NodeID.LF_DRIVE]:
+            drive.acknowledge_motor_fault(node)
+            time.sleep(0.05)
+    
 if __name__ == "__main__":
 
     # Example usage
@@ -352,28 +392,27 @@ if __name__ == "__main__":
     # Create Drive interface for high-level drive control
     drive = DriveInterface(escInterface)
     # drive.read_all_faults(NodeID.RF_DRIVE)
-    # drive.acknowledge_motor_fault(NodeID.RF_DRIVE)
-    # drive.ping_motor(NodeID.RF_DRIVE)
 
-    
+    ## CODE BELOW HERE
+    # drive.getAllMotorStatus()
 
-   
+    # drive.read_all_faults(NodeID.LB_DRIVE)
+    # drive.acknowledgeAllMotorFaults()
+
+    # drive.broadcast_multi_motor_speeds([1000,-1000,-1000,1000])
+    # time.sleep(7)
+    # drive.broadcast_multi_motor_stop()
+
+    # drive.run_motor(NodeID.LB_DRIVE, -1500)
+    # time.sleep(10)
+    # drive.broadcast_multi_motor_stop()
+
+
     # drive.stop_motor(NodeID.RF_DRIVE)
-    # drive.read_all_faults(NodeID.RF_DRIVE)
-    # test14()
+    # drive.read_all_faults(NodeID.LB_DRIVE)
 
-    # drive.read_speed(NodeID.RF_DRIVE)
-    
-    # drive.stop_motor(NodeID.RF_DRIVE)
-    # drive.run_motor(NodeID.RF_DRIVE, 200)
-
-    # drive.ping_motor(NodeID.RF_DRIVE)
-    
-    # drive.broadcast_multi_momtor_speeds([100,200,300,400])
-    # drive.acknowledge_motor_fault(NodeID.LB_DRIVE)
-    # drive.run_motor(NodeID.LB_DRIVE, 500)
-    # drive.read_speed(NodeID.RF_DRIVE)
-    station.recv_msg(0.02)
+    station.recv_msg(0.03)
     
     station.close()
+
 
