@@ -1,0 +1,2 @@
+../Application/User/uart_debug.c:16:6:uart_debug_print	5
+../Application/User/uart_debug.c:47:6:HAL_UART_TxCpltCallback	2

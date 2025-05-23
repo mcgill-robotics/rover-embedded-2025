@@ -1,0 +1,7 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:32:9:RI_SetRegisterGlobal	4	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:166:9:RI_SetRegisterMotor1	24	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:520:9:RI_GetRegisterGlobal	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:665:11:RI_GetRegisterMotor1	80	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:1136:9:RI_MovString	4	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:1162:9:RI_GetIDSize	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/register_interface.c:1197:16:RI_GetPtrReg	0	static
