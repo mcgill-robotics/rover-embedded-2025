@@ -16,12 +16,6 @@ namespace pantilt {
   const double MAX_PITCH_DEG = 180;
   const double MAX_YAW_DEG = 360;
 
-  void set_pantilt(double yaw_deg, double pitch_deg)
-  {
-    yaw_spin(yaw_deg);
-    pitch_spin(pitch_deg);
-  }
-
   void pitch_spin(double deg)
   {
     if (deg < MIN_PITCH_DEG)
@@ -52,5 +46,11 @@ namespace pantilt {
     {
       pitch.write(deg);
     }
+  }
+
+  void set_pantilt(double yaw_deg, double pitch_deg)
+  {
+    yaw_spin(yaw_deg);
+    pitch_spin(pitch_deg);
   }
 }

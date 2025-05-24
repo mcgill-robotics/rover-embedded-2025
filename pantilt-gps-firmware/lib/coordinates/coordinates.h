@@ -11,7 +11,7 @@ using namespace std;
 // "[deg1];[deg2]" ex."[25];[40]"
 
 namespace coordinates {
-    std::tuple<double, double> process_coords(string coords)
+    std::tuple<double, double> receive_coords(string coords)
     {
       // Don't forget to do the error handling
         stringstream ss(coords);
@@ -25,5 +25,7 @@ namespace coordinates {
         return;
     }
 }
+
+
 
 #endif

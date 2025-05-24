@@ -1,97 +1,3 @@
-// #include <Arduino.h>
-// #include "pantilt_servo.h"
-// /*
-// 	SERVO CODE
-	
-// 	Input number into serial terminal to move servo to said angle
-
-
-// */
-
-// #include <Arduino.h>
-// #include <Servo.h>
-
-// Servo myServo;
-// Servo myServo2;
-// const int servoPin = 22; // other servo pwm pin is 23 i think
-// String input = "";
-// int currentAngle = 0;
-// int currentAngle2 = 0;
-
-// void pantilt_servo_setup() {
-//     Serial.begin(9600);
-//     myServo.attach(servoPin);
-//     myServo2.attach(23);
-//     Serial.println("Ready to receive servo angle (0-180)");
-    
-
-//     myServo.write(currentAngle);
-//     myServo2.write(currentAngle2);
-//     input = "";
-// }
-
-
-
-// // void pantilt_servo_loop() { //won't loop on its own, need to call
-// //     if (Serial.available()) {
-// //         String input = Serial.readStringUntil('\n');
-// //         input.trim();
-        
-// //         int angle = input.toInt();
-// //         if (angle >= 0 && angle <= 180) {
-// //             myServo.write(angle);
-// //             myServo2.write(angle);
-// //             Serial.print("Servo set to: ");
-// //             Serial.println(angle);
-// //         } else {
-// //             Serial.println("Error: Angle out of range (0-180)");
-// //         }
-// //     }
-// // }
-
-// void pantilt_servo_loop() { //won't loop on its own, need to call
-//     if (Serial.available()) {
-//         input = "";
-//         input = Serial.readStringUntil('\n');
-        
-//         input.trim();y
-        
-//         // if (Serial.available()) {
-//         //     String input = Serial.read();  // Read the latest character
-//         // }
-
-//         // int currentAngle = 0;
-//         // int currentAngle2 = 0;
-
-//         if (input == 'a' && currentAngle < 180) {
-//             currentAngle = currentAngle + 5;            
-//             myServo.write(currentAngle);
-//             Serial.print("Servo set to: ");
-//             Serial.println(currentAngle);
-//         }
-
-//         if (input == 'd' && currentAngle > 0) {
-//             currentAngle = currentAngle - 5;
-//             myServo.write(currentAngle);
-//             Serial.print("Servo set to: ");
-//             Serial.println(currentAngle);
-//         }
-//         if (input == 'w' && currentAngle2 < 180) {
-//             currentAngle2 = currentAngle2 + 5;
-//             myServo2.write(currentAngle2);
-//             Serial.print("Servo set to: ");
-//             Serial.println(currentAngle2);
-//         }
-//         if (input == 's' && currentAngle2 > 0) {
-//             currentAngle2 = currentAngle2 - 5;
-//             myServo2.write(currentAngle2);
-//             Serial.print("Servo set to: ");
-//             Serial.println(currentAngle2);
-//         }
-        
-
-//     }
-// }
 #include <Servo.h>
 #include <Arduino.h>
 #include <Servo.h>
@@ -115,58 +21,70 @@ void pantilt_servo_setup() {
   panServo.write(panAngle);
   tiltServo.write(tiltAngle);
 
-  Serial.println("Servo control initialized. Send 'w', 'a', 's', or 'd'.");
+  Serial.println("Servo control initialized. Send 'w', 'a', 's', or 'd'. followed by angle number");
 }
 
 void pantilt_servo_loop() {
-  if (Serial.available() > 0) {
-    char command = Serial.read();
+  static String inputBuffer = "";  // Declare buffer to store incoming command
 
-    switch (command) {
-      case 'w':
-        tiltAngle += angleIncrement;
-        if (tiltAngle > 180) {
-          tiltAngle = 180;
+  while (Serial.available() > 0) {
+    char incomingChar = Serial.read();
+
+    if (incomingChar == '\n') {
+      inputBuffer.trim();  // Remove whitespace
+
+      if (inputBuffer.length() >= 2) {
+        char command = inputBuffer.charAt(0);
+        int value = inputBuffer.substring(1).toInt();
+
+        switch (command) {
+          case 'a':  // Pan left
+            panAngle -= value;
+            if (panAngle < 0) panAngle = 0;
+            panServo.write(panAngle);
+            Serial.print("Panned left, current angle: ");
+            Serial.println(panAngle);
+            break;
+
+          case 'd':  // Pan right
+            panAngle += value;
+            if (panAngle > 180) panAngle = 180;
+            panServo.write(panAngle);
+            Serial.print("Panned right, current angle: ");
+            Serial.println(panAngle);
+            break;
+
+          case 'w':  // Tilt up
+            tiltAngle += value;
+            if (tiltAngle > 180) tiltAngle = 180;
+            tiltServo.write(tiltAngle);
+            Serial.print("Tilted up, current angle: ");
+            Serial.println(tiltAngle);
+            break;
+
+          case 's':  // Tilt down
+            tiltAngle -= value;
+            if (tiltAngle < 0) tiltAngle = 0;
+            tiltServo.write(tiltAngle);
+            Serial.print("Tilted down, current angle: ");
+            Serial.println(tiltAngle);
+            break;
+
+          default:
+            Serial.print("Unknown command: ");
+            Serial.println(inputBuffer);
+            break;
         }
-        tiltServo.write(tiltAngle);
-        Serial.print("Tilt up. Tilt: ");
-        Serial.println(tiltAngle);
-        break;
+      } else {
+        Serial.println("Invalid input format. Correct format example: a10 or w5");
+      }
 
-      case 's':
-        tiltAngle -= angleIncrement;
-        if (tiltAngle < 0) {
-          tiltAngle = 0;
-        }
-        tiltServo.write(tiltAngle);
-        Serial.print("Tilt down. Tilt: ");
-        Serial.println(tiltAngle);
-        break;
-
-      case 'a':
-        panAngle -= angleIncrement;
-        if (panAngle < 0) {
-          panAngle = 0;
-        }
-        panServo.write(panAngle);
-        Serial.print("Pan left. Pan: ");
-        Serial.println(panAngle);
-        break;
-
-      case 'd':
-        panAngle += angleIncrement;
-        if (panAngle > 180) {
-          panAngle = 180;
-        }
-        panServo.write(panAngle);
-        Serial.print("Pan right. Pan: ");
-        Serial.println(panAngle);
-        break;
-
-      default:
-        // Handle other characters or ignore them
-        break;
+      inputBuffer = "";  // Clear buffer after processing
+    } 
+    else {
+      inputBuffer += incomingChar;  // Append to buffer
     }
   }
-  delay(15); // Small delay to prevent jitter
+
+  delay(15);
 }

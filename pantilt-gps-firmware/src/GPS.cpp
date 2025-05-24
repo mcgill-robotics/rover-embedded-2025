@@ -28,7 +28,7 @@ TinyGPSPlus gps;
 // SoftwareSerial ss(RXPin, TXPin);
 
 
-void GPSsetup()
+void GPSSetup()
 {
   // Serial.begin(115200);
   while(!SerialUSB);
