@@ -12,14 +12,10 @@ const unsigned long panTiltInterval = 15; // Run pantilt_servo_loop() every 15ms
 const unsigned long GPSInterval = 500;    // Run GPSloop() every 500ms
 
 void setup() {
-  Serial.begin(9600);  // Start serial communication
+  SerialUSB.begin(9600);  // Start serial communication
   GPSsetup();            // Initialize GPS
   imusetup();            // Initialize IMU (if needed)
   pantilt_servo_setup(); // Initialize pan-tilt servos
-}
-
-int main(){
-  loop();
 }
 
 void loop() {
@@ -31,7 +27,7 @@ void loop() {
   //Serial.println("imuloop");
   delay(250);
   GPSloop();
-  GPSdisplayInfo();
+  // GPSdisplayInfo();
   //Serial.println("GPS loop");
   delay(250);
 
@@ -43,3 +39,4 @@ void loop() {
   //     Serial.println("GPS loop");
   // }
 }
+

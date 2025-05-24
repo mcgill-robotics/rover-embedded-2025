@@ -28,13 +28,11 @@ TinyGPSPlus gps;
 // SoftwareSerial ss(RXPin, TXPin);
 
 
-void GPSSetup()
+void GPSsetup()
 {
   // Serial.begin(115200);
-  while(!SerialUSB);
+  // while(!SerialUSB);
   Serial1.begin(GPSBaud);
-
-
   // SerialUSB.println(F("DeviceExample.ino"));
   // SerialUSB.println(F("A simple demonstration of TinyGPSPlus with an attached GPS module"));
   // SerialUSB.print(F("Testing TinyGPSPlus library v. ")); SerialUSB.println(TinyGPSPlus::libraryVersion());
@@ -45,14 +43,15 @@ void GPSSetup()
 
 void GPSdisplayInfo()
 {
-  gps.encode(Serial1.read());
+  // char rcv = Serial1.read();
+  // gps.encode(rcv);
 
   // SerialUSB.print(F("GPS: "));
   if (gps.location.isValid())
   {
-    SerialUSB.print(gps.location.lat(), 6);
-    SerialUSB.print(F(","));
-    SerialUSB.print(gps.location.lng(), 6);
+    // SerialUSB.print(gps.location.lat(), 6);
+    // SerialUSB.print(F(","));
+    // SerialUSB.print(gps.location.lng(), 6);
     double latitude = gps.location.lat();
     double longitude = gps.location.lng();
     SerialUSB.print("GPS:");
@@ -64,6 +63,7 @@ void GPSdisplayInfo()
   }
   else
   {
+    // SerialUSB.print(rcv);
     SerialUSB.print("[");
     SerialUSB.print(F("INVALID, INVALID"));
     SerialUSB.print("]");
