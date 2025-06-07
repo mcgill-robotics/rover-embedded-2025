@@ -8,17 +8,16 @@
 #include "stdio.h"
 #include "motor.h"
 
-int counts = 0;
-
 void SysTickFunction(void) {
 	/*
 	 * Anything in this function body will be executed every millisecond.
 	 * Call you PID update function here.
 	 */
 
+
+	updatePID();
 	int movementDir = set_counts((int16_t) TIM2->CNT);
 	set_actual_motor_direction(movementDir);
-	updatePID();
 //	i=count_to_angle((int16_t) TIM2->CNT);
 //	printf("%d\n\r",TIM2->CNT);
 //	printf("%f\n\r",i);

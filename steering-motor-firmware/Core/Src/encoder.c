@@ -8,16 +8,16 @@ int counts;
 
 int set_counts(int n){
 	int max_count = 16*516*4.0;
-	newcounts = ((n%max_count)+max_count)%max_count;
+	int newcounts = ((n%max_count)+max_count)%max_count;
 	int diff = newcounts-counts;
 	int direction;
-	if (diff > 0 && abs(diff) > max_counts/2){
+	if (diff > 0 && abs(diff) > max_count/2){
 		// ccw
 		direction = 0;
-	} else if (diff > 0 && abs(diff) < max_counts/2) {
+	} else if (diff > 0 && abs(diff) < max_count/2) {
 		// cw
 		direction = 1;
-	} else if (diff < 0 && abs(diff) > max_counts/2) {
+	} else if (diff < 0 && abs(diff) > max_count/2) {
 		// cw
 		direction = 1;
 	}else {

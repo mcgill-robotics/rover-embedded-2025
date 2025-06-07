@@ -68,10 +68,6 @@ void Error_Handler(void);
 #define PWM_GPIO_Port GPIOA
 #define DIR_Pin GPIO_PIN_7
 #define DIR_GPIO_Port GPIOA
-#define CAN_RX_Pin GPIO_PIN_12
-#define CAN_RX_GPIO_Port GPIOB
-#define CAN_TX_Pin GPIO_PIN_13
-#define CAN_TX_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

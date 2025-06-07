@@ -22,12 +22,11 @@ void set_actual_motor_direction(int n){
 
 
 void set_motor_direction(int n){
-	direction = n;
 	/*for (int i = 100 ; i>0 ; i--) {
 				set_motor_speed(i);
 				delay_us(100);
 	}*/
-	if (n == 1 && actual_direction || n==0 && actual_direction) {
+	if (n) {
 		HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
 //		HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
 	}
@@ -39,5 +38,6 @@ void set_motor_direction(int n){
 					set_motor_speed(i);
 					delay_us(100);
 	}*/
+	direction = n;
 }
 #endif
