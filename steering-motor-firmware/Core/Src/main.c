@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "CAN_processing.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -80,11 +81,20 @@ uint8_t RxData[8];
 int datacheck = 0;
 
 // putting some CAN receiving code here //
+
+//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
+//	if (RxHeader.DLC == 2) {
+//		datacheck = 1;
+//	}
+//}
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-	if (RxHeader.DLC == 2) {
-		datacheck = 1;
-	}
+    // Keep reading until FIFO is empty, but only keep the last message
+    while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData);
+    }
+    datacheck = 1;
 }
 /* USER CODE END 0 */
 
@@ -124,6 +134,9 @@ int main(void)
   MX_CAN2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
+
+
 //  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
@@ -135,6 +148,22 @@ int main(void)
   setPIDGoalA(goal);
 
   /* CAN initialization below */
+  CAN_FilterTypeDef canfilterconfig;
+
+    canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+    canfilterconfig.FilterBank = 10;  // anything between 0 to SlaveStartFilterBank
+    canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+    canfilterconfig.FilterIdHigh = 0x123<<5;
+  //  canfilterconfig.FilterIdHigh = 0x0000;
+    canfilterconfig.FilterIdLow = 0x0000; // comment out if we don't need filter in the end
+    canfilterconfig.FilterMaskIdHigh = 0x7FF<<5;
+  //  canfilterconfig.FilterMaskIdHigh = 0x0;
+    canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
+    canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    canfilterconfig.SlaveStartFilterBank = 0;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+
+  HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
   TxHeader.DLC = 2;
@@ -152,6 +181,7 @@ int main(void)
 	  goal = goal + 3.14/4;
 	  goal = fmod(goal, 2*3.14);
 	  setPIDGoalA(goal);
+
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  HAL_Delay(1000);*/
@@ -176,13 +206,18 @@ int main(void)
 
 
 
-	  /*if (datacheck) {
+	  if (datacheck) {
+
+
+
+
+
 		  for(int i = 0; i < RxData[1]; i++) {
 			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			  HAL_Delay(RxData[0]);
 		  }
 		  datacheck = 0;
-	  }*/
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -270,20 +305,7 @@ static void MX_CAN2_Init(void)
   /* USER CODE BEGIN CAN2_Init 2 */
 
 
-  CAN_FilterTypeDef canfilterconfig;
 
-  canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-  canfilterconfig.FilterBank = 10;
-  canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  canfilterconfig.FilterIdHigh = 0x103<<5;
-  canfilterconfig.FilterIdLow = 0;
-  canfilterconfig.FilterMaskIdHigh = 0x7FF<<5;
-  canfilterconfig.FilterMaskIdLow = 0x0000;
-  canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-  canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  canfilterconfig.SlaveStartFilterBank = 0;
-
-  HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
 
   /* USER CODE END CAN2_Init 2 */
 
