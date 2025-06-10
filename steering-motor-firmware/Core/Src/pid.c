@@ -14,7 +14,6 @@
 int angleError = 0;
 int angleCorrection = 0;
 int oldAngleError = 0;
-int branch = 0;
 
 #define MAX_COUNTS 33024
 #define HALF_COUNTS 16512
@@ -61,14 +60,11 @@ void updatePID() {
 	if (abs(angleError) > HALF_COUNTS) { // the units need to be fixed but this gets the best path
 		if (angleError > 0) {
 			angleError = angleError - MAX_COUNTS;
-			branch = 0;
 		}
 		else {
 			angleError = angleError + MAX_COUNTS;
-			branch = 1;
 		}
 	}
-	else { branch = 2; }
 
 
     angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);

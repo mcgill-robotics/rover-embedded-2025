@@ -19,7 +19,7 @@ extern int s_previousDirection;
 
 
 
-extern int ESC_ID;
+extern int STEERING_ID;
 extern CAN_HandleTypeDef hcan2;
 
 
