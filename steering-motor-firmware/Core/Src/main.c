@@ -153,11 +153,11 @@ int main(void)
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
     canfilterconfig.FilterBank = 10;  // anything between 0 to SlaveStartFilterBank
     canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-    canfilterconfig.FilterIdHigh = 0x123<<5;
-  //  canfilterconfig.FilterIdHigh = 0x0000;
+//    canfilterconfig.FilterIdHigh = 0x123<<5;
+    canfilterconfig.FilterIdHigh = 0x0000;
     canfilterconfig.FilterIdLow = 0x0000; // comment out if we don't need filter in the end
-    canfilterconfig.FilterMaskIdHigh = 0x7FF<<5;
-  //  canfilterconfig.FilterMaskIdHigh = 0x0;
+//    canfilterconfig.FilterMaskIdHigh = 0x7FF<<5;
+    canfilterconfig.FilterMaskIdHigh = 0x0000;
     canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
     canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
