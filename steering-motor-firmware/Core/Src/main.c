@@ -20,6 +20,7 @@
 #include "main.h"
 #include "CAN_processing.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -51,6 +52,7 @@ TIM_HandleTypeDef htim8;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+uint8_t rxData[8];
 volatile int on_off  = 0;
 /* USER CODE END PV */
 
@@ -73,10 +75,8 @@ static void MX_USART2_UART_Init(void);
 #include "motor.h"
 #include "pid.h"
 
-CAN_TxHeaderTypeDef TxHeader;
+
 CAN_RxHeaderTypeDef RxHeader;
-uint32_t TxMailbox;
-uint8_t TxData[8];
 uint8_t RxData[8];
 int datacheck = 0;
 
@@ -92,7 +92,7 @@ int datacheck = 0;
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     // Keep reading until FIFO is empty, but only keep the last message
     while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
-        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData);
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rxData);
     }
     datacheck = 1;
 }
@@ -166,11 +166,7 @@ int main(void)
   HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
-  TxHeader.DLC = 2;
-  TxHeader.ExtId = 0;
-  TxHeader.IDE = CAN_ID_STD;
-  TxHeader.RTR = CAN_RTR_DATA;
-  TxHeader.StdId = 0x466;
+
 
   /* USER CODE END 2 */
 
