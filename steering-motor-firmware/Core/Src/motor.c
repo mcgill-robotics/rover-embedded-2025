@@ -2,11 +2,19 @@
 #define MOTOR_H
 
 #include "main.h"
+#include "encoder.h"
+#include "pid.h"
 
 int direction = 1;
 int actual_direction = 1;
 //0 ccw
 //1 cw
+
+void stop_motor(){
+	int counts = get_counts();
+	setPIDGoalA(counts);
+	set_motor_speed(0);
+}
 
 void set_motor_speed(int n){
 	TIM8->CCR1 = n;

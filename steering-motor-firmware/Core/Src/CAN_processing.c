@@ -8,6 +8,9 @@
 #include "CAN_processing.h"
 //#include "uart_debugging.h"
 #include <stdbool.h>
+#include "pid.h"
+#include "motor.h"
+#include "encoder.h"
 
 
 // Define the bit masks to retrieve the relevent portions of data from the CAN id
@@ -97,7 +100,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 	//Check to make sure the command is directed toward the ESC
 	CANMessage.motorType = (MotorType) get_CAN_motor_type(msg_ID);
-	if (CANMessage.motorType == STEERING_MOTOR){
+	if (CANMessage.motorType == DRIVE_MOTOR){
 		return;
 	}
 
@@ -122,13 +125,13 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	CANMessage.motorConfig = (MotorConfig) get_CAN_motor_mov_type(msg_ID);
 	if (CANMessage.motorConfig == SINGLE_MOTOR){
 		CANMessage.motorID = (MotorID) get_CAN_device_ID(msg_ID);
-		if (CANMessage.motorID == ESC_ID){
+		if (CANMessage.motorID == STEERING_ID){
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			uart_debug_print("Processing Single Command\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			Process_Single_ESC_Command(&CANMessage, rxData);
+			Process_Single_Steering_Motor_Command(&CANMessage, rxData);
 		}
 		else {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +146,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 		uart_debug_print("Processing Multiple Commands\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Process_Multiple_ESC_Command(&CANMessage, rxData);
+		Process_Multiple_Steering_Motor_Command(&CANMessage, rxData);
 	}
 
 }
@@ -161,19 +164,29 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
+//				safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
+				stop_motor();
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
-				MC_AcknowledgeFaultMotor1();
+//				MC_AcknowledgeFaultMotor1();
 				break;
 
-		case (RUN_SPEED):
-				uart_debug_print("In case RUN_SPEED\r\n");
+//		case (RUN_SPEED):
+//				uart_debug_print("In case RUN_SPEED\r\n");
+////				MC_AcknowledgeFaultMotor1(); // ensuring there is no fault on run <-- sketch
+//				////////////////////////////////////////////////////////////////////////////////////////////////////////
+//				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
+//				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+//				////////////////////////////////////////////////////////////////////////////////////////////////////////
+//				ControlSingleMotor(information);
+//				break;
+		case (RUN_POSITION):
+//				uart_debug_print("In case RUN_SPEED\r\n");
 //				MC_AcknowledgeFaultMotor1(); // ensuring there is no fault on run <-- sketch
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
-				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+//				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
+//				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				ControlSingleMotor(information);
 				break;
@@ -187,25 +200,25 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 		// We are now in a read command
 		switch(CANMessageID->readSpec){
 
-		case(READ_SPEED):
-				float currentSpeed = MC_GetMecSpeedReferenceMotor1_F();
-				sendCANResponse(CANMessageID, currentSpeed);
+		case(READ_POSITION):
+				float currentPosition = count_to_angle(get_counts());
+				sendCANResponse(CANMessageID, currentPosition);
 				break;
 		case(VOLTAGE):
-				float phaseVoltage = MC_GetPhaseVoltageAmplitudeMotor1();
-				sendCANResponse(CANMessageID, phaseVoltage);
+//				float phaseVoltage = MC_GetPhaseVoltageAmplitudeMotor1();
+//				sendCANResponse(CANMessageID, phaseVoltage);
 				break;
 		case(CURRENT):
-				float phaseCurrent = MC_GetPhaseCurrentAmplitudeMotor1();
-				sendCANResponse(CANMessageID, phaseCurrent);
+//				float phaseCurrent = MC_GetPhaseCurrentAmplitudeMotor1();
+//				sendCANResponse(CANMessageID, phaseCurrent);
 				break;
 		case(GET_ALL_FAULTS):
-				float currentFaults = MC_GetOccurredFaultsMotor1();
-				sendCANResponse(CANMessageID, currentFaults);
+//				float currentFaults = MC_GetOccurredFaultsMotor1();
+//				sendCANResponse(CANMessageID, currentFaults);
 				break;
 		case(GET_CURRENT_STATE):
-				float currentState = MC_GetSTMStateMotor1();
-				sendCANResponse(CANMessageID, currentState);
+//				float currentState = MC_GetSTMStateMotor1();
+//				sendCANResponse(CANMessageID, currentState);
 				break;
 		case(GET_TEMPERATURE):
 				//TODO --> need to poll the gpio, check the datasheet later for whichever pin this is
@@ -221,7 +234,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 	}
 }
 
-void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
+void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 uart_debug_print("Running Multiple Motors...\r\n");
@@ -257,8 +270,8 @@ void Process_Multiple_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 }
 
 
-void ControlSingleMotor(float newSpeed){
-
+void ControlSingleMotor(float angle){
+	setPIDGoalA(angle);
 //	MCI_State_t motorState =  MC_GetSTMStateMotor1();
 //
 //	switch (motorState){
@@ -846,7 +859,7 @@ float SingleExtractFloatFromCAN(uint8_t *data) {
 
 
 int16_t extract_multiple_speeds(const uint8_t *rxData){
-    uint16_t offset = ESC_ID * 2;
+    uint16_t offset = STEERING_ID * 2;
     int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
     return value;
 }
