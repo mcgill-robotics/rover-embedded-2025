@@ -93,7 +93,7 @@ int datacheck = 0;
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     // Keep reading until FIFO is empty, but only keep the last message
     while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
-        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData);
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
     }
     datacheck = 1;
 }
@@ -144,9 +144,8 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(1);
   TIM2->CNT = 0;
-  double goal = 3.14/2;
-//  printf("goal %f\r\n");
-  setPIDGoalA(goal);
+//  double goal = 3.14/2; //Tony: These are commented out because I need this board to receive custom commands,
+//  setPIDGoalA(goal); // not make up its own
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
@@ -178,10 +177,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-	  HAL_Delay(2000);
-	  goal = goal + 3.14/4;
-	  goal = fmod(goal, 2*3.14);
-	  setPIDGoalA(goal);
+
+
+
+//	  HAL_Delay(2000);
+//	  goal = goal + 3.14/4;
+//	  goal = fmod(goal, 2*3.14); //Tony: This code was for when the board was making up its
+//	  setPIDGoalA(goal); // own direction to go. Not anymore, that's cringe now.
 
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -210,7 +212,7 @@ int main(void)
 	  if (datacheck) {
 
 
-
+		  CAN_Parse_MSG (RxHeader, RxData);
 
 
 		  for(int i = 0; i < RxData[1]; i++) {

@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "mc_interface.h"
+//#include "mc_interface.h"
 #include <string.h>
 #include <math.h>
-#include "stm32g4xx_hal_can.h"
+#include "stm32f4xx_hal.h"
 
 // Defines
 #ifndef CAN_processing_H
@@ -93,7 +93,7 @@ typedef struct {
 
 
 //CAN Interaction prototypes
-void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData);
+void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData);
 void Process_Multiple_ESC_Command (ParsedCANID *parsedMessageID, uint8_t *rxData);
 void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData);
 void sendCANResponse(ParsedCANID *CANMessageID, float information);
@@ -106,7 +106,7 @@ void IdleSingleMotor(float newSpeed);
 void StartSingleMotor(float newSpeed);
 
 bool checkReversing(float speedCmd);
-bool safeStopMotor(float currentSpeedRpm, MCI_State_t motorState);
+//bool safeStopMotor(float currentSpeedRpm, MCI_State_t motorState);
 //helper function prototypes
 
 float speedCheck (float targetSpeed);

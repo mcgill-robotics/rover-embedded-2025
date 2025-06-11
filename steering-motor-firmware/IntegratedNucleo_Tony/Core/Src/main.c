@@ -20,6 +20,7 @@
 #include "main.h"
 #include "CAN_processing.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -65,6 +66,14 @@ static void MX_CAN2_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+
+// Tony: Defining the parameters needed for sending a can message to our steering board
+#define MASTER_TRANSMITTER    1
+#define ACTION_RUN           0
+#define SINGLE_MOTOR         0
+#define STEERING_MOTOR       1
+#define RUN_SPEED            2
+#define TARGET_ESC_ID        1
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -92,7 +101,7 @@ int datacheck = 0;
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     // Keep reading until FIFO is empty, but only keep the last message
     while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
-        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData);
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
     }
     datacheck = 1;
 }
@@ -135,6 +144,14 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+// Tony: Here is the creation of the CAN ID that I am transmitting to our board from
+  uint16_t canId = (MASTER_TRANSMITTER << 10) |    // Bit 10: Sender
+                   (ACTION_RUN << 9) |             // Bit 9: Action type
+                   (SINGLE_MOTOR << 8) |           // Bit 8: Single/Multi
+                   (STEERING_MOTOR << 7) |         // Bit 7: Motor type
+                   (RUN_SPEED << 4) |              // Bits 6-4: Command spec
+                   (TARGET_ESC_ID);                // Bits 3-0: Device ID
+
 
 
 //  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -143,9 +160,8 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(1);
   TIM2->CNT = 0;
-  double goal = 3.14/2;
-//  printf("goal %f\r\n");
-  setPIDGoalA(goal);
+//  double goal = 3.14/2; //Tony: These are commented out because I need this board to receive custom commands,
+//  setPIDGoalA(goal); // not make up its own
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
@@ -166,21 +182,26 @@ int main(void)
   HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
-  TxHeader.DLC = 2;
+  TxHeader.DLC = 4; //changed to four for float
   TxHeader.ExtId = 0;
   TxHeader.IDE = CAN_ID_STD;
   TxHeader.RTR = CAN_RTR_DATA;
-  TxHeader.StdId = 0x466;
+//  TxHeader.StdId = 0x466; //Tony: I changed this to the ID above
+  TxHeader.StfId = canId;
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-	  HAL_Delay(2000);
-	  goal = goal + 3.14/4;
-	  goal = fmod(goal, 2*3.14);
-	  setPIDGoalA(goal);
+
+
+
+//	  HAL_Delay(2000);
+//	  goal = goal + 3.14/4;
+//	  goal = fmod(goal, 2*3.14); //Tony: This code was for when the board was making up its
+//	  setPIDGoalA(goal); // own direction to go. Not anymore, that's cringe now.
 
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -209,7 +230,7 @@ int main(void)
 	  if (datacheck) {
 
 
-
+		  CAN_Parse_MSG (RxHeader, RxData);
 
 
 		  for(int i = 0; i < RxData[1]; i++) {
