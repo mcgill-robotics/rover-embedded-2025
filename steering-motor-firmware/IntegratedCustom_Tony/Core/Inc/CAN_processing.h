@@ -3,7 +3,7 @@
 #include "mc_interface.h"
 #include <string.h>
 #include <math.h>
-#include "stm32g4xx_hal_fdcan.h"
+#include "stm32g4xx_hal_can.h"
 
 // Defines
 #ifndef CAN_processing_H
@@ -20,7 +20,7 @@ extern int s_previousDirection;
 
 
 extern int ESC_ID;
-extern FDCAN_HandleTypeDef hfdcan1;
+extern CAN_HandleTypeDef hcan2;
 
 
 // Enumaeration classes for different possible CAN Message casess
