@@ -4,14 +4,14 @@ from driveCANCommunication import CANStation, ESCInterface, DriveInterface, Node
 
 # ==== Configuration ====
 INTERFACE      = "slcan"
-CHANNEL        = "COM12"
+CHANNEL        = "COM6"
 BITRATE        = 500000
 
-MAX_SPEED      = 2000.0
-MAX_RAMP_DELTA = 200.0  # adjust as needed
+MAX_SPEED      = 3000.0
+MAX_RAMP_DELTA = 500.0  # adjust as needed
 
 DEAD_ZONE   = 100
-MESSAGE_DELAY = 0.1   # Seconds between motor commands
+MESSAGE_DELAY = 0.05   # Seconds between motor commands
 TEST_DELAY    = 0.5   # Seconds between test prints
 
 # ==== Helper Functions ====

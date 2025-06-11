@@ -384,35 +384,25 @@ class DriveInterface:
 if __name__ == "__main__":
 
     # Example usage
-    station = CANStation(interface="slcan", channel="COM12", bitrate=500000)
+    # print(can.interface.detect_available_configs())
+    station = CANStation(interface="slcan", channel="COM6", bitrate=500000) #channel must be 0 as zig
 
     # Create an ESCs class
     escInterface = ESCInterface(station)
 
     # Create Drive interface for high-level drive control
     drive = DriveInterface(escInterface)
-    # drive.read_all_faults(NodeID.RF_DRIVE)
+
 
     ## CODE BELOW HERE
-    # drive.getAllMotorStatus()
+    # drive.stop_motor(NodeID.LF_DRIVE)
 
-    # drive.read_all_faults(NodeID.LB_DRIVE)
-    # drive.acknowledgeAllMotorFaults()
+    # drive.run_motor(NodeID.LF_DRIVE, 1500)
+    # drive.read_all_faults(NodeID.LF_DRIVE)
+    # drive.stop_motor(NodeID.LF_DRIVE)
 
-    # drive.broadcast_multi_motor_speeds([1000,-1000,-1000,1000])
-    # time.sleep(7)
-    # drive.broadcast_multi_motor_stop()
-
-    # drive.run_motor(NodeID.LB_DRIVE, -1500)
-    # time.sleep(10)
-    # drive.broadcast_multi_motor_stop()
-
-
-    # drive.stop_motor(NodeID.RF_DRIVE)
-    # drive.read_all_faults(NodeID.LB_DRIVE)
-
-    station.recv_msg(0.03)
     
+    station.recv_msg(0.01)
     station.close()
 
 
