@@ -168,17 +168,34 @@ int main(void)
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 
+  uint16_t canID = 0;
+  canID |= (0 & 0x01) << 10;    // SENDER_DEVICE: 0 = Master
+  canID |= (0 & 0x01) << 9;     // ACTION: 0 = RUN command
+  canID |= (0 & 0x01) << 8;     // MOTOR_CONFIG: 0 = Single motor
+  canID |= (0 & 0x01) << 7;     // MOTOR_TYPE: 0 = Steering motor
+  canID |= (2 & 0x07) << 4;     // MSG_SPEC: 2 = RUN_POSITION
+  canID |= (4 & 0x0F); // MOTOR_ID //Tony: front right for testing
+// This is some claude generated code that encodes our desired behaviour into the CAN header.
+  RxHeader.StdId = canID;
+  RxHeader.IDE = CAN_ID_STD;
+  RxHeader.RTR = CAN_RTR_DATA;
+  RxHeader.DLC = 8;
+// The above as well.
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-	  HAL_Delay(2000);
-	  goal = goal + 3.14/4;
-	  goal = fmod(goal, 2*3.14);
-	  setPIDGoalA(goal);
+// Sup Vincent again I'm gonna be commenting the below block out cause it kind of
+// ruins the point of testing can communication.
 
-//	  print("%d\n\r", );
+//	  HAL_Delay(2000);
+//	  goal = goal + 3.14/4;
+//	  goal = fmod(goal, 2*3.14);
+//	  setPIDGoalA(goal);
+
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  HAL_Delay(1000);*/
 
@@ -190,30 +207,43 @@ int main(void)
 //	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
 
 
-//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	  setPIDGoalA(90);
-//	  HAL_Delay(500);
-//	  setPIDGoalA(180);
-//	  HAL_Delay(500);
-//	  setPIDGoalA(0);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	  HAL_Delay(500);
+
+ if (datacheck) {
+// Sup Vincent this is Tony. I'm commenting out the below for loop block because with the message
+// structure we have now it does not really make sense. Replaced with what's farther below.
 
 
+//		  for(int i = 0; i < RxData[1]; i++) {
+//			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//			  HAL_Delay(RxData[0]);
+//		  }
 
-	  if (datacheck) {
-
-
-
-
-
-		  for(int i = 0; i < RxData[1]; i++) {
-			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			  HAL_Delay(RxData[0]);
-		  }
-		  datacheck = 0;
+	  for(int i = 0; i < 10; i++) {
+		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		  HAL_Delay(100);
 	  }
+		  datacheck = 0;
+ }
+
+// Ok this is what I'm gonna do now. Below is a sending block. I'm going to be uncommenting it
+// when I'm flashing the Nucleo. The receiving code is going to be in the if(datacheck)
+// block always.
+
+//float position = 1;
+//memcpy(TxData, &position, sizeof(float));
+//HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
+//HAL_Delay(2000);
+//position = position + 1;
+//HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
+//HAL_Delay(2000);
+//position = position - 1;
+//HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
+//HAL_Delay(2000);
+	  // the header is defined far above. I am pretty much copying the behaviour from before.
+	  // That is, turning 45 degrees (1/4pi = 0.785) every two seconds.
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
