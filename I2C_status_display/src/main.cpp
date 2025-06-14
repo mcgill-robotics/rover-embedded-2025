@@ -8,25 +8,19 @@ INA230 ina230;
 void setup() {
     Serial.begin(115200);
     Wire.begin();  // Initialize I2C
-    ina230.begin();
+    ina230.setup();
 }
 
 void loop() {
-    float voltage = ina230.getBusVoltage();
-    float current = ina230.getCurrent();
-    float power = ina230.getPower();
+  float current = readCurrent();      // amps
+  float busVoltage = readBusVoltage(); // volts
 
-    Serial.print("Voltage: ");
-    Serial.print(voltage);
-    Serial.println(" V");
+  Serial.println(pow(2,15));
+  Serial.println(CURRENT_LSB, 15);
+  Serial.print("Current (A): ");
+  Serial.print(current, 3);
+  Serial.print("\tBus Voltage (V): ");
+  Serial.println(busVoltage, 3);
 
-    Serial.print("Current: ");
-    Serial.print(current);
-    Serial.println(" A");
-
-    Serial.print("Power: ");
-    Serial.print(power);
-    Serial.println(" W");
-
-    delay(1000);
+  delay(1000);
 }
