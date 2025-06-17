@@ -1,0 +1,291 @@
+/*
+ * cat25.cpp
+ *
+ *  Created on: Jun 12, 2025
+ *      Author: vince
+ */
+
+#include "cat25.h"
+
+// Constructor
+CAT25160::CAT25160(SPI_HandleTypeDef* hspi, GPIO_TypeDef* cs_port, uint16_t cs_pin)
+    : _hspi(hspi), _cs_port(cs_port), _cs_pin(cs_pin) {
+    // Ensure CS is initially high (inactive)
+    chipSelect(false);
+}
+
+// Destructor (if needed for cleanup, usually not critical for embedded)
+CAT25160::~CAT25160() {
+    // Any cleanup if necessary
+}
+
+// Internal helper to control Chip Select
+void CAT25160::chipSelect(bool enable) {
+    if (enable) {
+        HAL_GPIO_WritePin(_cs_port, _cs_pin, GPIO_PIN_RESET); // CS active low
+    } else {
+        HAL_GPIO_WritePin(_cs_port, _cs_pin, GPIO_PIN_SET);   // CS inactive high
+    }
+}
+
+// Internal helper to wait for write completion
+CAT25160_StatusTypeDef CAT25160::waitForWriteCompletion(uint32_t timeout_ms) {
+    uint32_t status_reg;
+    uint32_t start_time = HAL_GetTick();
+
+    while (isBusy()) {
+        if ((HAL_GetTick() - start_time) > timeout_ms) {
+            return CAT25160_TIMEOUT;
+        }
+    }
+    return CAT25160_OK;
+}
+
+// Internal helper to send an instruction
+CAT25160_StatusTypeDef CAT25160::sendInstruction(uint8_t instruction) {
+    HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(_hspi, &instruction, 1, HAL_MAX_DELAY);
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+    return CAT25160_OK;
+}
+
+// Internal helper to send an address
+CAT25160_StatusTypeDef CAT25160::sendAddress(uint16_t address) {
+    // CAT25160 is 16-kbit, so address is 11 bits. Upper 5 bits are 0.
+    // Send as two bytes: MSB first (0x0X, where X are the 3 upper bits of address) then LSB.
+    uint8_t addr_bytes[2];
+    addr_bytes[0] = (uint8_t)((address >> 8) & 0x07); // 3 upper bits
+    addr_bytes[1] = (uint8_t)(address & 0xFF);        // 8 lower bits
+
+    HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(_hspi, addr_bytes, 2, HAL_MAX_DELAY);
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+    return CAT25160_OK;
+}
+
+
+// Initialize the EEPROM (optional)
+CAT25160_StatusTypeDef CAT25160::init() {
+    uint8_t status;
+    if (readStatusRegister(&status) != CAT25160_OK) {
+        return CAT25160_ERROR; // Failed to read status register
+    }
+    // You can add more checks here, e.g., if specific status bits are set
+    return CAT25160_OK;
+}
+
+// Read a single byte
+CAT25160_StatusTypeDef CAT25160::readByte(uint16_t address, uint8_t* data) {
+    if (address >= CAT25160_TOTAL_SIZE_BYTES) {
+        return CAT25160_INVALID_ADDRESS;
+    }
+
+    chipSelect(true); // Enable CS
+
+    if (sendInstruction(CAT25160_INSTR_READ) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    if (sendAddress(address) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+
+    HAL_StatusTypeDef hal_status = HAL_SPI_Receive(_hspi, data, 1, HAL_MAX_DELAY);
+
+    chipSelect(false); // Disable CS
+
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+    return CAT25160_OK;
+}
+
+// Write a single byte
+CAT25160_StatusTypeDef CAT25160::writeByte(uint16_t address, uint8_t data) {
+    if (address >= CAT25160_TOTAL_SIZE_BYTES) {
+        return CAT25160_INVALID_ADDRESS;
+    }
+
+    // Ensure write enable latch is set
+    chipSelect(true);
+    if (sendInstruction(CAT25160_INSTR_WREN) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    chipSelect(false);
+
+    // Wait for WREN to complete (it's usually very fast, but good practice)
+    HAL_Delay(1); // Small delay to allow WREN to process if needed by hardware
+
+    chipSelect(true); // Enable CS
+
+    if (sendInstruction(CAT25160_INSTR_WRITE) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    if (sendAddress(address) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+
+    HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(_hspi, &data, 1, HAL_MAX_DELAY);
+
+    chipSelect(false); // Disable CS
+
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+
+    // Wait for the write cycle to complete
+    return waitForWriteCompletion();
+}
+
+// Read multiple bytes
+CAT25160_StatusTypeDef CAT25160::read(uint16_t address, uint8_t* data, uint16_t size) {
+    if (address >= CAT25160_TOTAL_SIZE_BYTES || (address + size) > CAT25160_TOTAL_SIZE_BYTES) {
+        return CAT25160_INVALID_ADDRESS;
+    }
+    if (size == 0) {
+        return CAT25160_INVALID_SIZE;
+    }
+
+    chipSelect(true); // Enable CS
+
+    if (sendInstruction(CAT25160_INSTR_READ) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    if (sendAddress(address) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+
+    HAL_StatusTypeDef hal_status = HAL_SPI_Receive(_hspi, data, size, HAL_MAX_DELAY);
+
+    chipSelect(false); // Disable CS
+
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+    return CAT25160_OK;
+}
+
+// Write multiple bytes (handles page writes)
+CAT25160_StatusTypeDef CAT25160::write(uint16_t address, const uint8_t* data, uint16_t size) {
+    if (address >= CAT25160_TOTAL_SIZE_BYTES || (address + size) > CAT25160_TOTAL_SIZE_BYTES) {
+        return CAT25160_INVALID_ADDRESS;
+    }
+    if (size == 0) {
+        return CAT25160_INVALID_SIZE;
+    }
+
+    uint16_t current_address = address;
+    uint16_t bytes_to_write = size;
+    const uint8_t* current_data = data;
+
+    while (bytes_to_write > 0) {
+        // Calculate bytes remaining in the current page
+        uint16_t page_offset = current_address % CAT25160_PAGE_SIZE_BYTES;
+        uint16_t bytes_in_page = CAT25160_PAGE_SIZE_BYTES - page_offset;
+        uint16_t chunk_size = (bytes_to_write > bytes_in_page) ? bytes_in_page : bytes_to_write;
+
+        // 1. Send Write Enable (WREN)
+        chipSelect(true);
+        if (sendInstruction(CAT25160_INSTR_WREN) != CAT25160_OK) {
+            chipSelect(false);
+            return CAT25160_ERROR;
+        }
+        chipSelect(false);
+        HAL_Delay(1); // Small delay
+
+        // 2. Send Write instruction, address, and data
+        chipSelect(true);
+        if (sendInstruction(CAT25160_INSTR_WRITE) != CAT25160_OK) {
+            chipSelect(false);
+            return CAT25160_ERROR;
+        }
+        if (sendAddress(current_address) != CAT25160_OK) {
+            chipSelect(false);
+            return CAT25160_ERROR;
+        }
+
+        HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(_hspi, (uint8_t*)current_data, chunk_size, HAL_MAX_DELAY);
+        chipSelect(false);
+
+        if (hal_status != HAL_OK) {
+            return CAT25160_ERROR;
+        }
+
+        // 3. Wait for write cycle to complete
+        CAT25160_StatusTypeDef wait_status = waitForWriteCompletion();
+        if (wait_status != CAT25160_OK) {
+            return wait_status;
+        }
+
+        // Update pointers and counters
+        current_address += chunk_size;
+        current_data += chunk_size;
+        bytes_to_write -= chunk_size;
+    }
+
+    return CAT25160_OK;
+}
+
+// Read the Status Register
+CAT25160_StatusTypeDef CAT25160::readStatusRegister(uint8_t* status) {
+    chipSelect(true); // Enable CS
+
+    if (sendInstruction(CAT25160_INSTR_RDSR) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+
+    HAL_StatusTypeDef hal_status = HAL_SPI_Receive(_hspi, status, 1, HAL_MAX_DELAY);
+
+    chipSelect(false); // Disable CS
+
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+    return CAT25160_OK;
+}
+
+// Write the Status Register
+CAT25160_StatusTypeDef CAT25160::writeStatusRegister(uint8_t status) {
+    // This command needs WREN first
+    chipSelect(true);
+    if (sendInstruction(CAT25160_INSTR_WREN) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    chipSelect(false);
+    HAL_Delay(1); // Small delay
+
+    chipSelect(true); // Enable CS
+
+    if (sendInstruction(CAT25160_INSTR_WRSR) != CAT25160_OK) {
+        chipSelect(false);
+        return CAT25160_ERROR;
+    }
+    HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(_hspi, &status, 1, HAL_MAX_DELAY);
+
+    chipSelect(false); // Disable CS
+
+    if (hal_status != HAL_OK) {
+        return CAT25160_ERROR;
+    }
+
+    return waitForWriteCompletion();
+}
+
+// Check if the EEPROM is busy
+bool CAT25160::isBusy() {
+    uint32_t status_reg;
+    if (readStatusRegister(&status_reg) == CAT25160_OK) {
+        return (status_reg & CAT25160_SR_WIP) != 0; // WIP bit is 1 when busy
+    }
+    return true; // Assume busy or error if read fails
+}

@@ -1,0 +1,22 @@
+{
+    "configurations": [
+      {
+        "name": "STM32",
+        "compilerPath": "/opt/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/arm-none-eabi-gcc",
+        "includePath": [
+          "${workspaceFolder}/Core/Inc",
+          "${workspaceFolder}/Drivers/STM32F4xx_HAL_Driver/Inc",
+          "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+          "${workspaceFolder}/Drivers/CMSIS/Include"
+        ],
+        "defines": [
+          "USE_HAL_DRIVER",
+          "STM32F446xx"  // Change this to match your MCU
+        ],
+        "intelliSenseMode": "gcc-arm",
+        "cStandard": "c11",
+        "cppStandard": "c++17"
+      }
+    ],
+    "version": 4
+  }
