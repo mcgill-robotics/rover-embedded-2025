@@ -242,24 +242,36 @@ void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t
 
 	switch(CANMessageID->runSpec){
 
+//	case (RUN_SPEED):
+//
+//			int16_t curESCSpeed = extract_multiple_speeds(rxData);
+//
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+//			 uart_debug_print("Running This Motor\r\n");
+//			 uart_debug_print("Setpoint %d RPM\r\n", (int)curESCSpeed);
+//			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//			ControlSingleMotor(curESCSpeed);
+//			break;
+
 	case (RUN_SPEED):
 
-			int16_t curESCSpeed = extract_multiple_speeds(rxData);
+			int16_t curSteeringMotorPosition = extract_multiple_speeds(rxData);
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			 uart_debug_print("Running This Motor\r\n");
-			 uart_debug_print("Setpoint %d RPM\r\n", (int)curESCSpeed);
-			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+			 uart_debug_print("Setpoint %d RPM\r\n", (int)curSteeringMotorPosition);
+//			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			ControlSingleMotor(curESCSpeed);
+			ControlSingleMotor(curSteeringMotorPosition);
 			break;
-
 	case (RUN_STOP):
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+			stop_motor();
 //	 	 	safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
 			break;
 	default:
@@ -832,9 +844,9 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 	// Send the response
 
-	if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox) != HAL_OK) {
-		Error_Handler();
-	}
+//	if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox) != HAL_OK) {
+//		Error_Handler();
+//	}
 
 //    // Send the response
 //    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
