@@ -143,9 +143,9 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(1);
   TIM2->CNT = 0;
-  double goal = 3.14/2;
+//  double goal = 3.14/2;
 //  printf("goal %f\r\n");
-  setPIDGoalA(goal);
+//  setPIDGoalA(goal);
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
@@ -173,10 +173,10 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-	  HAL_Delay(2000);
-	  goal = goal + 3.14/4;
-	  goal = fmod(goal, 2*3.14);
-	  setPIDGoalA(goal);
+//	  HAL_Delay(2000);
+//	  goal = goal + 3.14/4;
+//	  goal = fmod(goal, 2*3.14);
+//	  setPIDGoalA(goal);
 
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
