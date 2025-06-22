@@ -114,4 +114,3 @@ float clippingCheck(float currentSpeedSetpoint);
 int16_t extract_multiple_speeds(const uint8_t *rxData);
 uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm, bool isStartup);
 
-

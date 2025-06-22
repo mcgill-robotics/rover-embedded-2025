@@ -27,27 +27,27 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  0000e434  2**0
                   CONTENTS, READONLY
- 12 .debug_line   00052691  00000000  00000000  0000e464  2**0
+ 12 .debug_line   00052693  00000000  00000000  0000e464  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_line_str 000000ad  00000000  00000000  00060af5  2**0
+ 13 .debug_line_str 000000ad  00000000  00000000  00060af7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_info   000519ed  00000000  00000000  00060ba2  2**0
+ 14 .debug_info   000519ed  00000000  00000000  00060ba4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_abbrev 0000a078  00000000  00000000  000b258f  2**0
+ 15 .debug_abbrev 0000a078  00000000  00000000  000b2591  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_aranges 000023d8  00000000  00000000  000bc608  2**3
+ 16 .debug_aranges 000023d8  00000000  00000000  000bc610  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_str    00110610  00000000  00000000  000be9e0  2**0
+ 17 .debug_str    0011061d  00000000  00000000  000be9e8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_rnglists 00003bbb  00000000  00000000  001ceff0  2**0
+ 18 .debug_rnglists 00003bbb  00000000  00000000  001cf005  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_loclists 00021120  00000000  00000000  001d2bab  2**0
+ 19 .debug_loclists 00021120  00000000  00000000  001d2bc0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_macro  000309bd  00000000  00000000  001f3ccb  2**0
+ 20 .debug_macro  000309c3  00000000  00000000  001f3ce0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .comment      00000043  00000000  00000000  00224688  2**0
+ 21 .comment      00000043  00000000  00000000  002246a3  2**0
                   CONTENTS, READONLY
- 22 .debug_frame  00006664  00000000  00000000  002246cc  2**2
+ 22 .debug_frame  00006664  00000000  00000000  002246e8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -13358,6 +13358,7 @@ void uart_debug_print(const char *format, ...) {
  8005772:	b570      	push	{r4, r5, r6, lr}
  8005774:	f5ad 6d81 	sub.w	sp, sp, #1032	@ 0x408
  8005778:	f50d 6383 	add.w	r3, sp, #1048	@ 0x418
+#ifdef DEBUG_PRINT
     char buffer[UART_TX_BUFFER_SIZE];
 
     va_list args;
@@ -13378,11 +13379,11 @@ void uart_debug_print(const char *format, ...) {
  8005790:	1e42      	subs	r2, r0, #1
  8005792:	429a      	cmp	r2, r3
  8005794:	d905      	bls.n	80057a2 <uart_debug_print+0x32>
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET); // LED ON = error
         } else {
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6); // blink on success
         }
     }
+#endif
 }
  8005796:	f50d 6d81 	add.w	sp, sp, #1032	@ 0x408
  800579a:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}

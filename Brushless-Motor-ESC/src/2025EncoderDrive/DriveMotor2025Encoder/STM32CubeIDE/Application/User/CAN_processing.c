@@ -836,4 +836,3 @@ int16_t extract_multiple_speeds(const uint8_t *rxData){
     int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
     return value;
 }
-

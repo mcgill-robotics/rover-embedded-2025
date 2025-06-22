@@ -1,7 +1,7 @@
 #include "uart_debugging.h"
 #include <string.h>
 #include "main.h"
-
+#define DEBUG_PRINT
 
 // IN ORDER TO DEBUG THINGS, UNCOMMENT THE DEFINE OF MX_USART2_UART_INIT IN MAIN.H, NAD MANUALLY REMOVE STATIC TO THE ONES IN MAIN.C --> UNDO THIS FOR NON-DEBUG
 
@@ -14,6 +14,7 @@ volatile bool uartTxDone = true;
 extern void MX_USART2_UART_Init(void);
 
 void uart_debug_print(const char *format, ...) {
+#ifdef DEBUG_PRINT
     char buffer[UART_TX_BUFFER_SIZE];
 
     va_list args;
@@ -39,6 +40,7 @@ void uart_debug_print(const char *format, ...) {
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6); // blink on success
         }
     }
+#endif
 }
 
 
