@@ -36,7 +36,7 @@
 #define START_WD_THRESHOLD   3     // # kicks that trigger a fault
 
 // For print statements
-extern UART_HandleTypeDef huart2;
+//extern UART_HandleTypeDef huart2;
 
 // Variable declarations
 static float g_lastCommandedSpeed = 0; // Previous speed setpoint given to the esc
@@ -52,6 +52,13 @@ static float g_maxTorque   = 0.30f;    // [N·m]  conservative value
 const float g_startupTorque = 0.15f;   // typical open-loop pull-in
 static float g_inertia     = 0.00001242f; // [kg·m^2]
 static float g_speedThresh = 50.0f;    // threshold below which we treat speed as zero
+
+// Tony debugging
+int whatsmymotorid = 0;
+int whatsmymotortype = 0;
+int whatsmyaction = 0;
+int whatsmyreadrunspec = 0;
+int johnyangle = 0;
 
 static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
 
@@ -85,12 +92,18 @@ int get_CAN_device_ID (uint16_t CAN_ID) {
 void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	uart_debug_print("Parsing the ID...\r\n");
+//	uart_debug_print("Parsing the ID...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	ParsedCANID CANMessage; //initialize a struct for the received message
 	uint16_t msg_ID = rxHeader->StdId;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
+	whatsmymotorid = CANMessage.motorID;
+	whatsmymotortype = CANMessage.motorType;
+	whatsmyaction = CANMessage.commandType;
+	whatsmyreadrunspec = CANMessage.runSpec;
+	setPIDGoalA(rxData[0]);
+	johnyangle = rxData[0];
 
 	// First check to see who is transmitting --> ESCS cannot command other ECSs
 	CANMessage.messageSender = (Transmitter) get_CAN_transmitter(msg_ID);
@@ -107,15 +120,16 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	// Check the type of action to determine which field of the struct needs to be filled in
 	CANMessage.commandType = (Action) get_CAN_action(msg_ID);
 	if (CANMessage.commandType == ACTION_RUN){
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uart_debug_print("Run Command Detected\r\n");
+//		uart_debug_print("Run Command Detected\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			CANMessage.runSpec = (RunSpec) get_CAN_SPEC(msg_ID);
 	}
 	else{
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uart_debug_print("Read Command Detected\r\n");
+//		uart_debug_print("Read Command Detected\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		CANMessage.readSpec = (ReadSpec) get_CAN_SPEC(msg_ID);
@@ -126,16 +140,15 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	if (CANMessage.motorConfig == SINGLE_MOTOR){
 		CANMessage.motorID = (MotorID) get_CAN_device_ID(msg_ID);
 		if (CANMessage.motorID == STEERING_ID){
-
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			uart_debug_print("Processing Single Command\r\n");
+//			uart_debug_print("Processing Single Command\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			Process_Single_Steering_Motor_Command(&CANMessage, rxData);
 		}
 		else {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			 uart_debug_print("Not My IDr\n");
+//			 uart_debug_print("Not My IDr\n");
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////
 			return;
@@ -143,7 +156,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	}
 	else{
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uart_debug_print("Processing Multiple Commands\r\n");
+//		uart_debug_print("Processing Multiple Commands\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Process_Multiple_Steering_Motor_Command(&CANMessage, rxData);
@@ -162,7 +175,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 
 		case (RUN_STOP):
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				uart_debug_print("Motor Stopped \r\n");
+//				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
 				stop_motor();
@@ -237,41 +250,29 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Running Multiple Motors...\r\n");
+//	 uart_debug_print("Running Multiple Motors...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	switch(CANMessageID->runSpec){
 
-//	case (RUN_SPEED):
-//
-//			int16_t curESCSpeed = extract_multiple_speeds(rxData);
-//
-//			////////////////////////////////////////////////////////////////////////////////////////////////////////
+	case (RUN_SPEED):
+
+			int16_t curESCSpeed = extract_multiple_speeds(rxData);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			 uart_debug_print("Running This Motor\r\n");
 //			 uart_debug_print("Setpoint %d RPM\r\n", (int)curESCSpeed);
 //			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
-//			////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//			ControlSingleMotor(curESCSpeed);
-//			break;
-
-	case (RUN_SPEED):
-
-			int16_t curSteeringMotorPosition = extract_multiple_speeds(rxData);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			 uart_debug_print("Running This Motor\r\n");
-			 uart_debug_print("Setpoint %d RPM\r\n", (int)curSteeringMotorPosition);
-//			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			ControlSingleMotor(curSteeringMotorPosition);
+			ControlSingleMotor(curESCSpeed);
 			break;
+
 	case (RUN_STOP):
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			 uart_debug_print("Stop this motor\r\n");
+//			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			stop_motor();
+
 //	 	 	safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
 			break;
 	default:
@@ -407,11 +408,11 @@ void runSingleMotorV2(float newSpeed){
 	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetMecSpeedReferenceMotor1_F(), speedCmd, false);
 	float currentSpeed = MC_GetMecSpeedReferenceMotor1_F();
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Motor is already moving, change setpoint in same direction\r\n");
-	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
-	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
-	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
-	 uart_debug_print("Current actual speed is %d\r\n", (int)currentSpeed);
+//	 uart_debug_print("Motor is already moving, change setpoint in same direction\r\n");
+//	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
+//	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
+//	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
+//	 uart_debug_print("Current actual speed is %d\r\n", (int)currentSpeed);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
@@ -438,8 +439,8 @@ void IdleSingleMotor(float newSpeed){
 
 	if (fabsf(speedCmd) < 0.001){
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uart_debug_print("Motor received command that is or was considered to be 0, so nothing happens\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+//		uart_debug_print("Motor received command that is or was considered to be 0, so nothing happens\r\n");
+//		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		return;
 	}
 
@@ -449,15 +450,15 @@ void IdleSingleMotor(float newSpeed){
     if (now - s_startWd.firstTick > START_WD_WINDOW_MS) {
         /* window expired – start a new one */
     	////////////////////////////////////////////////////////////////////////////////////////////////////////
-    	 uart_debug_print("Safe amount of time since last start!\r\n");
-    	 uart_debug_print("Amount of time since last start: %d \r\n", (int) now - s_startWd.firstTick );
+//    	 uart_debug_print("Safe amount of time since last start!\r\n");
+//    	 uart_debug_print("Amount of time since last start: %d \r\n", (int) now - s_startWd.firstTick );
 
     	////////////////////////////////////////////////////////////////////////////////////////////////////////
         s_startWd.firstTick = now; // sets last time start was issued
         s_startWd.attempts  = 0;
     }
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Amount of start attempts within 1s of eachother: %d\r\n", s_startWd.attempts);
+//	 uart_debug_print("Amount of start attempts within 1s of eachother: %d\r\n", s_startWd.attempts);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (++s_startWd.attempts >= START_WD_THRESHOLD) {
@@ -470,17 +471,17 @@ void IdleSingleMotor(float newSpeed){
 
 	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetMecSpeedReferenceMotor1_F(), speedCmd, true);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Motor will begin to ramp!\r\n");
-	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
-	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
-	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
+//	 uart_debug_print("Motor will begin to ramp!\r\n");
+//	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
+//	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
+//	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Motor startup sequence
 	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime); // Must set a setpoint before startup --> otherwise unpredictable behavior
 	if (!MC_StartMotor1()) {
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		 uart_debug_print("Start Failed...");
+//		 uart_debug_print("Start Failed...");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		return; // start failed
 	}
@@ -512,8 +513,8 @@ void StartSingleMotor (float newSpeed){
 	if (fabs(speedCmd) < 0.001){
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		uart_debug_print("Motor received command that is or was considered to be 0\r\n");
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
+//		uart_debug_print("Motor received command that is or was considered to be 0\r\n");
+//		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		if (safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), START)){
 //			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			 uart_debug_print("Safe Stop has executed successfully \r\n");
@@ -553,7 +554,7 @@ float speedCheck(float targetSpeed){
 	 */
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Checking speed...\r\n");
+//	 uart_debug_print("Checking speed...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Deadzone for small speeds
@@ -579,7 +580,7 @@ float clippingCheck(float currentSpeedSetpoint){
 	 */
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("Checking clipping...\r\n");
+//	 uart_debug_print("Checking clipping...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float delta = currentSpeedSetpoint - g_lastCommandedSpeed;
@@ -810,19 +811,23 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 
     // Configure the ID of the message according to what was received
-    txID |= (1 & 0x01) << SENDER_DEVICE_SHIFT; // This calue is now always 1 since the esc is sending data.
+    txID |= (0 & 0x01) << SENDER_DEVICE_SHIFT;
+    // TONY: I changed this to zero since I want the sent can response to act as a master
+    // This caluevis now always 1 since the esc is sending data.
     txID |= (CANMessageID->motorType & 0x01) << NDRIVE_STEERING_SHIFT;
     txID |= (CANMessageID->motorConfig & 0x01) << NMULTI_SINGLE_SHIFT;
     txID |= (CANMessageID->commandType & 0x01) << NACTION_READ_ID_DEVICE_SHIFT;
     txID |= (CANMessageID->readSpec & 0x07) << MSG_SPECIFICATION_SHIFT;
     txID |= (CANMessageID->motorID & 0x0f);
 
+    //TONY: I want the txID to be exactly what I specified in main.c
+    txID = CANMessageID;
     // Move the information into the data paylaod
     memcpy(txData, &information, sizeof(float)); // data[0] --> data[3] now stores float
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	 uart_debug_print("CAN Command Sent back!\r\n");
+//	 uart_debug_print("CAN Command Sent back!\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //format other message peripherals
@@ -844,9 +849,9 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 	// Send the response
 
-//	if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox) != HAL_OK) {
-//		Error_Handler();
-//	}
+	if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox) != HAL_OK) {
+		Error_Handler();
+	}
 
 //    // Send the response
 //    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &txHeader, txData) != HAL_OK) {
