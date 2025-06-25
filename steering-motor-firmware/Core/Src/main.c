@@ -18,12 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "CAN_processing.h"
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "CAN_processing.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +50,13 @@ TIM_HandleTypeDef htim8;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+CAN_TxHeaderTypeDef TxHeader;
+CAN_RxHeaderTypeDef RxHeader;
+uint8_t txData[8];
 uint8_t rxData[8];
+uint32_t TxMailbox;
 volatile int on_off  = 0;
+int STEERING_ID = RF_STEER; // Change based on what motor is being controlled!
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,27 +78,9 @@ static void MX_USART2_UART_Init(void);
 #include "motor.h"
 #include "pid.h"
 
-
-CAN_RxHeaderTypeDef RxHeader;
-uint8_t RxData[8];
 int datacheck = 0;
 
-// putting some CAN receiving code here //
 
-//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	if (RxHeader.DLC == 2) {
-//		datacheck = 1;
-//	}
-//}
-
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-    // Keep reading until FIFO is empty, but only keep the last message
-    while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
-        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rxData);
-    }
-    datacheck = 1;
-}
 /* USER CODE END 0 */
 
 /**
@@ -143,15 +128,15 @@ int main(void)
   set_motor_speed(0);
   set_motor_direction(1);
   TIM2->CNT = 0;
-//  double goal = 3.14/2;
+  double goal = 3.14/2;
 //  printf("goal %f\r\n");
-//  setPIDGoalA(goal);
+  setPIDGoalA(goal);
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
 
     canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-    canfilterconfig.FilterBank = 10;  // anything between 0 to SlaveStartFilterBank
+    canfilterconfig.FilterBank = 14;  // anything between 0 to SlaveStartFilterBank for can1. can 2 opposite.
     canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
 //    canfilterconfig.FilterIdHigh = 0x123<<5;
     canfilterconfig.FilterIdHigh = 0x0000;
@@ -161,59 +146,58 @@ int main(void)
     canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
     canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
     canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    canfilterconfig.SlaveStartFilterBank = 0;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+    canfilterconfig.SlaveStartFilterBank = 14;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+
+
 
   HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 
+  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
 
+  TxHeader.StdId = 0x321;
+  TxHeader.ExtId = 0x01;
+  TxHeader.RTR = CAN_RTR_DATA;
+  TxHeader.IDE = CAN_ID_STD;
+  TxHeader.DLC = 1;
+  TxHeader.TransmitGlobalTime = DISABLE;
+  txData[0] = 1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
-//	  HAL_Delay(2000);
-//	  goal = goal + 3.14/4;
-//	  goal = fmod(goal, 2*3.14);
-//	  setPIDGoalA(goal);
+	  HAL_Delay(2000);
+	  goal = goal + 3.14/4;
+	  goal = fmod(goal, 2*3.14);
+	  setPIDGoalA(goal);
 
 //	  print("%d\n\r", );
 	  /*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  HAL_Delay(1000);*/
 
-//	  TxData[0] = 100;
-//	  HAL_Delay(500);
-//	  TxData[1] = 10;
-//
-//
-//	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox);
 
 
-//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox);
+
+
+
 //	  setPIDGoalA(90);
 //	  HAL_Delay(500);
+
+	  if (datacheck == 1) {
+		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		  datacheck = 0;
+	  }
+
+
 //	  setPIDGoalA(180);
 //	  HAL_Delay(500);
 //	  setPIDGoalA(0);
 //	  HAL_Delay(500);
 //	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //	  HAL_Delay(500);
-
-
-
-	  if (datacheck) {
-
-
-
-
-
-		  for(int i = 0; i < RxData[1]; i++) {
-			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			  HAL_Delay(RxData[0]);
-		  }
-		  datacheck = 0;
-	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -240,13 +224,7 @@ void SystemClock_Config(void)
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 72;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
-  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -256,12 +234,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -283,7 +261,7 @@ static void MX_CAN2_Init(void)
 
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 18;
+  hcan2.Init.Prescaler = 4;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_2TQ;
@@ -461,8 +439,6 @@ static void MX_TIM8_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
   /* USER CODE BEGIN TIM8_Init 1 */
 
@@ -483,42 +459,15 @@ static void MX_TIM8_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
-  {
-    Error_Handler();
-  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM8_Init 2 */
 
   /* USER CODE END TIM8_Init 2 */
-  HAL_TIM_MspPostInit(&htim8);
 
 }
 
@@ -575,9 +524,6 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
-
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -585,28 +531,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LIMIT_Pin */
-  GPIO_InitStruct.Pin = LIMIT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(LIMIT_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : DIR_Pin */
-  GPIO_InitStruct.Pin = DIR_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DIR_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+
+//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+//	HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, rxData);
+//	datacheck = 1;
+//}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    // Keep reading until FIFO is empty, but only keep the last message
+    while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0) {
+        HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rxData);
+    }
+    // Tony: Parse the CAN message
+    CAN_Parse_MSG(&RxHeader, rxData);
+    datacheck = 1;
+}
 
 /**
   * @brief  Retargets the C library printf function to the USART.
@@ -625,21 +569,30 @@ PUTCHAR_PROTOTYPE
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 
-  if (GPIO_PIN == LIMIT_Pin)
-  {
-	  if (!HAL_GPIO_ReadPin (LIMIT_GPIO_Port, LIMIT_Pin)){
-		  set_counts(0);
-		  setPIDGoalA(3.14/2);
-		  TIM2->CNT = 0;
-	  }
-//	  TIM2->CNT = 0;
-	  /*double new_goal = 3*3.14/4.0;
-	  printf("%f set new goal\r\n", new_goal);
-	  setPIDGoalA(new_goal);*/
+//  if (GPIO_PIN == NUCLEO_BUTTON_Pin)
+//  {
+//	  ParsedCANID canID = {
+//			  .messageSender = MASTER,
+//			  .motorType = STEERING_MOTOR,
+//			  .motorConfig = SINGLE_MOTOR,
+//			  .commandType = ACTION_RUN,
+//			  .readSpec = READ_SPEED,
+//			  .runSpec = RUN_POSITION,
+//			  .motorID = RF_STEER,
+//	  };
+//	  HAL_GPIO_TogglePin(NUCLEO_LED_GPIO_Port, NUCLEO_LED_Pin);
+//	  sendCANResponse(&canID, 1.0);
 
-	  //Limit switch code
-    /* Your code goes here */
-  }
+	  //Adding some junk code below to test if a basic message sends
+//	  uint8_t				TxData[8];
+//	  TxHeader.DLC = 8;
+//	  	 TxHeader.ExtId = 0;
+//	  	 TxHeader.IDE = CAN_ID_STD;
+//	  	 TxHeader.RTR = CAN_RTR_DATA;
+//	  	 TxHeader.StdId = txID;
+//
+//	  HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox);
+//  }
 }
 
 

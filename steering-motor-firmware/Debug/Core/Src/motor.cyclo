@@ -2,4 +2,4 @@
 ../Core/Src/motor.c:19:6:set_motor_speed	1
 ../Core/Src/motor.c:23:5:get_actual_motor_direction	1
 ../Core/Src/motor.c:27:6:set_actual_motor_direction	1
-../Core/Src/motor.c:32:6:set_motor_direction	2
+../Core/Src/motor.c:32:6:set_motor_direction	1

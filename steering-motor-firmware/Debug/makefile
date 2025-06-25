@@ -60,8 +60,8 @@ all: main-build
 main-build: steering-motor-firmware.elf secondary-outputs
 
 # Tool invocations
-steering-motor-firmware.elf steering-motor-firmware.map: $(OBJS) $(USER_OBJS) C:\Users\Vincent\Documents\Programming\Projects\McGill\ Robotics\rover-embedded-2025\steering-motor-firmware\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "steering-motor-firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Vincent\Documents\Programming\Projects\McGill Robotics\rover-embedded-2025\steering-motor-firmware\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="steering-motor-firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+steering-motor-firmware.elf steering-motor-firmware.map: $(OBJS) $(USER_OBJS) C:\Github\Drugs\steering-motor-firmware\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "steering-motor-firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Github\Drugs\steering-motor-firmware\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="steering-motor-firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
