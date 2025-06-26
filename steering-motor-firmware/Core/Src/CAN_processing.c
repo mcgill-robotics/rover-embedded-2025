@@ -59,6 +59,7 @@ int whatsmymotortype = 0;
 int whatsmyaction = 0;
 int whatsmyreadrunspec = 0;
 int johnyangle = 0;
+int amitriggering = 0;
 
 static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
 
@@ -120,6 +121,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	// Check the type of action to determine which field of the struct needs to be filled in
 	CANMessage.commandType = (Action) get_CAN_action(msg_ID);
 	if (CANMessage.commandType == ACTION_RUN){
+		amitriggering = 1;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Run Command Detected\r\n");
