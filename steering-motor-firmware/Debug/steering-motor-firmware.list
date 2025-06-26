@@ -21,31 +21,31 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   8 .data         000001e8  20000000  08008f78  0000a000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00000370  200001e8  08009160  0000a1e8  2**2
+  9 .bss          00000374  200001e8  08009160  0000a1e8  2**2
                   ALLOC
- 10 ._user_heap_stack 00000600  20000558  08009160  0000a558  2**0
+ 10 ._user_heap_stack 00000604  2000055c  08009160  0000a55c  2**0
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  0000a1e8  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00011167  00000000  00000000  0000a218  2**0
+ 12 .debug_info   00011178  00000000  00000000  0000a218  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00002a04  00000000  00000000  0001b37f  2**0
+ 13 .debug_abbrev 00002a04  00000000  00000000  0001b390  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00001008  00000000  00000000  0001dd88  2**3
+ 14 .debug_aranges 00001008  00000000  00000000  0001dd98  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00000c80  00000000  00000000  0001ed90  2**0
+ 15 .debug_rnglists 00000c80  00000000  00000000  0001eda0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0002416c  00000000  00000000  0001fa10  2**0
+ 16 .debug_macro  0002416c  00000000  00000000  0001fa20  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00013658  00000000  00000000  00043b7c  2**0
+ 17 .debug_line   00013656  00000000  00000000  00043b8c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000d76ca  00000000  00000000  000571d4  2**0
+ 18 .debug_str    000d76e0  00000000  00000000  000571e2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0012e89e  2**0
+ 19 .comment      00000043  00000000  00000000  0012e8c2  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00005334  00000000  00000000  0012e8e4  2**2
+ 20 .debug_frame  00005334  00000000  00000000  0012e908  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000056  00000000  00000000  00133c18  2**0
+ 21 .debug_line_str 0000009a  00000000  00000000  00133c3c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1413,354 +1413,355 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 
 	ParsedCANID CANMessage; //initialize a struct for the received message
-	uint16_t msg_ID = rxHeader->StdId;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
+	uint16_t msg_ID = rxHeader->StdId & 0x07ff;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
  8001086:	687b      	ldr	r3, [r7, #4]
  8001088:	681b      	ldr	r3, [r3, #0]
- 800108a:	82fb      	strh	r3, [r7, #22]
+ 800108a:	b29b      	uxth	r3, r3
+ 800108c:	f3c3 030a 	ubfx	r3, r3, #0, #11
+ 8001090:	82fb      	strh	r3, [r7, #22]
 	whatsmymotorid = CANMessage.motorID;
- 800108c:	7cbb      	ldrb	r3, [r7, #18]
- 800108e:	461a      	mov	r2, r3
- 8001090:	4b38      	ldr	r3, [pc, #224]	@ (8001174 <CAN_Parse_MSG+0xf8>)
- 8001092:	601a      	str	r2, [r3, #0]
-	whatsmymotortype = CANMessage.motorType;
- 8001094:	7b7b      	ldrb	r3, [r7, #13]
- 8001096:	461a      	mov	r2, r3
- 8001098:	4b37      	ldr	r3, [pc, #220]	@ (8001178 <CAN_Parse_MSG+0xfc>)
- 800109a:	601a      	str	r2, [r3, #0]
+ 8001092:	7cbb      	ldrb	r3, [r7, #18]
+ 8001094:	461a      	mov	r2, r3
+ 8001096:	4b34      	ldr	r3, [pc, #208]	@ (8001168 <CAN_Parse_MSG+0xec>)
+ 8001098:	601a      	str	r2, [r3, #0]
 	whatsmyaction = CANMessage.commandType;
- 800109c:	7bfb      	ldrb	r3, [r7, #15]
- 800109e:	461a      	mov	r2, r3
- 80010a0:	4b36      	ldr	r3, [pc, #216]	@ (800117c <CAN_Parse_MSG+0x100>)
- 80010a2:	601a      	str	r2, [r3, #0]
+ 800109a:	7bfb      	ldrb	r3, [r7, #15]
+ 800109c:	461a      	mov	r2, r3
+ 800109e:	4b33      	ldr	r3, [pc, #204]	@ (800116c <CAN_Parse_MSG+0xf0>)
+ 80010a0:	601a      	str	r2, [r3, #0]
 	whatsmyreadrunspec = CANMessage.runSpec;
- 80010a4:	7c7b      	ldrb	r3, [r7, #17]
- 80010a6:	461a      	mov	r2, r3
- 80010a8:	4b35      	ldr	r3, [pc, #212]	@ (8001180 <CAN_Parse_MSG+0x104>)
- 80010aa:	601a      	str	r2, [r3, #0]
-	setPIDGoalA(rxData[0]);
- 80010ac:	683b      	ldr	r3, [r7, #0]
+ 80010a2:	7c7b      	ldrb	r3, [r7, #17]
+ 80010a4:	461a      	mov	r2, r3
+ 80010a6:	4b32      	ldr	r3, [pc, #200]	@ (8001170 <CAN_Parse_MSG+0xf4>)
+ 80010a8:	601a      	str	r2, [r3, #0]
+//	setPIDGoalA(rxData[0]);
+	johnyangle = rxData[7];
+ 80010aa:	683b      	ldr	r3, [r7, #0]
+ 80010ac:	3307      	adds	r3, #7
  80010ae:	781b      	ldrb	r3, [r3, #0]
- 80010b0:	4618      	mov	r0, r3
- 80010b2:	f7ff fa47 	bl	8000544 <__aeabi_ui2d>
- 80010b6:	4602      	mov	r2, r0
- 80010b8:	460b      	mov	r3, r1
- 80010ba:	ec43 2b10 	vmov	d0, r2, r3
- 80010be:	f000 ff3b 	bl	8001f38 <setPIDGoalA>
-	johnyangle = rxData[0];
- 80010c2:	683b      	ldr	r3, [r7, #0]
- 80010c4:	781b      	ldrb	r3, [r3, #0]
- 80010c6:	461a      	mov	r2, r3
- 80010c8:	4b2e      	ldr	r3, [pc, #184]	@ (8001184 <CAN_Parse_MSG+0x108>)
- 80010ca:	601a      	str	r2, [r3, #0]
+ 80010b0:	461a      	mov	r2, r3
+ 80010b2:	4b30      	ldr	r3, [pc, #192]	@ (8001174 <CAN_Parse_MSG+0xf8>)
+ 80010b4:	601a      	str	r2, [r3, #0]
 
 	// First check to see who is transmitting --> ESCS cannot command other ECSs
 	CANMessage.messageSender = (Transmitter) get_CAN_transmitter(msg_ID);
- 80010cc:	8afb      	ldrh	r3, [r7, #22]
- 80010ce:	4618      	mov	r0, r3
- 80010d0:	f7ff ff70 	bl	8000fb4 <get_CAN_transmitter>
- 80010d4:	4603      	mov	r3, r0
- 80010d6:	733b      	strb	r3, [r7, #12]
+ 80010b6:	8afb      	ldrh	r3, [r7, #22]
+ 80010b8:	4618      	mov	r0, r3
+ 80010ba:	f7ff ff7b 	bl	8000fb4 <get_CAN_transmitter>
+ 80010be:	4603      	mov	r3, r0
+ 80010c0:	733b      	strb	r3, [r7, #12]
 	if (CANMessage.messageSender == SLAVE){
- 80010d8:	7b3b      	ldrb	r3, [r7, #12]
- 80010da:	2b01      	cmp	r3, #1
- 80010dc:	d042      	beq.n	8001164 <CAN_Parse_MSG+0xe8>
+ 80010c2:	7b3b      	ldrb	r3, [r7, #12]
+ 80010c4:	2b01      	cmp	r3, #1
+ 80010c6:	d046      	beq.n	8001156 <CAN_Parse_MSG+0xda>
 		return;
 	}
 
 	//Check to make sure the command is directed toward the ESC
 	CANMessage.motorType = (MotorType) get_CAN_motor_type(msg_ID);
- 80010de:	8afb      	ldrh	r3, [r7, #22]
- 80010e0:	4618      	mov	r0, r3
- 80010e2:	f7ff ff9a 	bl	800101a <get_CAN_motor_type>
- 80010e6:	4603      	mov	r3, r0
- 80010e8:	737b      	strb	r3, [r7, #13]
+ 80010c8:	8afb      	ldrh	r3, [r7, #22]
+ 80010ca:	4618      	mov	r0, r3
+ 80010cc:	f7ff ffa5 	bl	800101a <get_CAN_motor_type>
+ 80010d0:	4603      	mov	r3, r0
+ 80010d2:	737b      	strb	r3, [r7, #13]
+	whatsmymotortype = CANMessage.motorType;
+ 80010d4:	7b7b      	ldrb	r3, [r7, #13]
+ 80010d6:	461a      	mov	r2, r3
+ 80010d8:	4b27      	ldr	r3, [pc, #156]	@ (8001178 <CAN_Parse_MSG+0xfc>)
+ 80010da:	601a      	str	r2, [r3, #0]
 	if (CANMessage.motorType == DRIVE_MOTOR){
- 80010ea:	7b7b      	ldrb	r3, [r7, #13]
- 80010ec:	2b00      	cmp	r3, #0
- 80010ee:	d03b      	beq.n	8001168 <CAN_Parse_MSG+0xec>
+ 80010dc:	7b7b      	ldrb	r3, [r7, #13]
+ 80010de:	2b00      	cmp	r3, #0
+ 80010e0:	d03b      	beq.n	800115a <CAN_Parse_MSG+0xde>
 		return;
 	}
 
 	// Check the type of action to determine which field of the struct needs to be filled in
 	CANMessage.commandType = (Action) get_CAN_action(msg_ID);
- 80010f0:	8afb      	ldrh	r3, [r7, #22]
- 80010f2:	4618      	mov	r0, r3
- 80010f4:	f7ff ff6f 	bl	8000fd6 <get_CAN_action>
- 80010f8:	4603      	mov	r3, r0
- 80010fa:	73fb      	strb	r3, [r7, #15]
+ 80010e2:	8afb      	ldrh	r3, [r7, #22]
+ 80010e4:	4618      	mov	r0, r3
+ 80010e6:	f7ff ff76 	bl	8000fd6 <get_CAN_action>
+ 80010ea:	4603      	mov	r3, r0
+ 80010ec:	73fb      	strb	r3, [r7, #15]
 	if (CANMessage.commandType == ACTION_RUN){
- 80010fc:	7bfb      	ldrb	r3, [r7, #15]
- 80010fe:	2b00      	cmp	r3, #0
- 8001100:	d106      	bne.n	8001110 <CAN_Parse_MSG+0x94>
+ 80010ee:	7bfb      	ldrb	r3, [r7, #15]
+ 80010f0:	2b00      	cmp	r3, #0
+ 80010f2:	d106      	bne.n	8001102 <CAN_Parse_MSG+0x86>
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Run Command Detected\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			CANMessage.runSpec = (RunSpec) get_CAN_SPEC(msg_ID);
- 8001102:	8afb      	ldrh	r3, [r7, #22]
- 8001104:	4618      	mov	r0, r3
- 8001106:	f7ff ff99 	bl	800103c <get_CAN_SPEC>
- 800110a:	4603      	mov	r3, r0
- 800110c:	747b      	strb	r3, [r7, #17]
- 800110e:	e005      	b.n	800111c <CAN_Parse_MSG+0xa0>
+ 80010f4:	8afb      	ldrh	r3, [r7, #22]
+ 80010f6:	4618      	mov	r0, r3
+ 80010f8:	f7ff ffa0 	bl	800103c <get_CAN_SPEC>
+ 80010fc:	4603      	mov	r3, r0
+ 80010fe:	747b      	strb	r3, [r7, #17]
+ 8001100:	e005      	b.n	800110e <CAN_Parse_MSG+0x92>
 	else{
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Read Command Detected\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		CANMessage.readSpec = (ReadSpec) get_CAN_SPEC(msg_ID);
- 8001110:	8afb      	ldrh	r3, [r7, #22]
- 8001112:	4618      	mov	r0, r3
- 8001114:	f7ff ff92 	bl	800103c <get_CAN_SPEC>
- 8001118:	4603      	mov	r3, r0
- 800111a:	743b      	strb	r3, [r7, #16]
+ 8001102:	8afb      	ldrh	r3, [r7, #22]
+ 8001104:	4618      	mov	r0, r3
+ 8001106:	f7ff ff99 	bl	800103c <get_CAN_SPEC>
+ 800110a:	4603      	mov	r3, r0
+ 800110c:	743b      	strb	r3, [r7, #16]
 	}
 
 	// Determine if the command effects a single, or mulitple motors, and call the appropriate helper functions
 	CANMessage.motorConfig = (MotorConfig) get_CAN_motor_mov_type(msg_ID);
- 800111c:	8afb      	ldrh	r3, [r7, #22]
- 800111e:	4618      	mov	r0, r3
- 8001120:	f7ff ff6a 	bl	8000ff8 <get_CAN_motor_mov_type>
- 8001124:	4603      	mov	r3, r0
- 8001126:	73bb      	strb	r3, [r7, #14]
+ 800110e:	8afb      	ldrh	r3, [r7, #22]
+ 8001110:	4618      	mov	r0, r3
+ 8001112:	f7ff ff71 	bl	8000ff8 <get_CAN_motor_mov_type>
+ 8001116:	4603      	mov	r3, r0
+ 8001118:	73bb      	strb	r3, [r7, #14]
 	if (CANMessage.motorConfig == SINGLE_MOTOR){
- 8001128:	7bbb      	ldrb	r3, [r7, #14]
- 800112a:	2b01      	cmp	r3, #1
- 800112c:	d113      	bne.n	8001156 <CAN_Parse_MSG+0xda>
+ 800111a:	7bbb      	ldrb	r3, [r7, #14]
+ 800111c:	2b01      	cmp	r3, #1
+ 800111e:	d113      	bne.n	8001148 <CAN_Parse_MSG+0xcc>
 		CANMessage.motorID = (MotorID) get_CAN_device_ID(msg_ID);
- 800112e:	8afb      	ldrh	r3, [r7, #22]
- 8001130:	4618      	mov	r0, r3
- 8001132:	f7ff ff94 	bl	800105e <get_CAN_device_ID>
- 8001136:	4603      	mov	r3, r0
- 8001138:	b2db      	uxtb	r3, r3
- 800113a:	74bb      	strb	r3, [r7, #18]
+ 8001120:	8afb      	ldrh	r3, [r7, #22]
+ 8001122:	4618      	mov	r0, r3
+ 8001124:	f7ff ff9b 	bl	800105e <get_CAN_device_ID>
+ 8001128:	4603      	mov	r3, r0
+ 800112a:	b2db      	uxtb	r3, r3
+ 800112c:	74bb      	strb	r3, [r7, #18]
 		if (CANMessage.motorID == STEERING_ID){
- 800113c:	7cbb      	ldrb	r3, [r7, #18]
- 800113e:	461a      	mov	r2, r3
- 8001140:	4b11      	ldr	r3, [pc, #68]	@ (8001188 <CAN_Parse_MSG+0x10c>)
- 8001142:	681b      	ldr	r3, [r3, #0]
- 8001144:	429a      	cmp	r2, r3
- 8001146:	d111      	bne.n	800116c <CAN_Parse_MSG+0xf0>
+ 800112e:	7cbb      	ldrb	r3, [r7, #18]
+ 8001130:	461a      	mov	r2, r3
+ 8001132:	4b12      	ldr	r3, [pc, #72]	@ (800117c <CAN_Parse_MSG+0x100>)
+ 8001134:	681b      	ldr	r3, [r3, #0]
+ 8001136:	429a      	cmp	r2, r3
+ 8001138:	d111      	bne.n	800115e <CAN_Parse_MSG+0xe2>
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			uart_debug_print("Processing Single Command\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			Process_Single_Steering_Motor_Command(&CANMessage, rxData);
- 8001148:	f107 030c 	add.w	r3, r7, #12
- 800114c:	6839      	ldr	r1, [r7, #0]
- 800114e:	4618      	mov	r0, r3
- 8001150:	f000 f81c 	bl	800118c <Process_Single_Steering_Motor_Command>
- 8001154:	e00b      	b.n	800116e <CAN_Parse_MSG+0xf2>
+ 800113a:	f107 030c 	add.w	r3, r7, #12
+ 800113e:	6839      	ldr	r1, [r7, #0]
+ 8001140:	4618      	mov	r0, r3
+ 8001142:	f000 f81d 	bl	8001180 <Process_Single_Steering_Motor_Command>
+ 8001146:	e00b      	b.n	8001160 <CAN_Parse_MSG+0xe4>
 	else{
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Processing Multiple Commands\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Process_Multiple_Steering_Motor_Command(&CANMessage, rxData);
- 8001156:	f107 030c 	add.w	r3, r7, #12
- 800115a:	6839      	ldr	r1, [r7, #0]
- 800115c:	4618      	mov	r0, r3
- 800115e:	f000 f86f 	bl	8001240 <Process_Multiple_Steering_Motor_Command>
- 8001162:	e004      	b.n	800116e <CAN_Parse_MSG+0xf2>
+ 8001148:	f107 030c 	add.w	r3, r7, #12
+ 800114c:	6839      	ldr	r1, [r7, #0]
+ 800114e:	4618      	mov	r0, r3
+ 8001150:	f000 f870 	bl	8001234 <Process_Multiple_Steering_Motor_Command>
+ 8001154:	e004      	b.n	8001160 <CAN_Parse_MSG+0xe4>
 		return;
- 8001164:	bf00      	nop
- 8001166:	e002      	b.n	800116e <CAN_Parse_MSG+0xf2>
+ 8001156:	bf00      	nop
+ 8001158:	e002      	b.n	8001160 <CAN_Parse_MSG+0xe4>
 		return;
- 8001168:	bf00      	nop
- 800116a:	e000      	b.n	800116e <CAN_Parse_MSG+0xf2>
+ 800115a:	bf00      	nop
+ 800115c:	e000      	b.n	8001160 <CAN_Parse_MSG+0xe4>
 			return;
- 800116c:	bf00      	nop
+ 800115e:	bf00      	nop
 	}
 
 }
- 800116e:	3718      	adds	r7, #24
- 8001170:	46bd      	mov	sp, r7
- 8001172:	bd80      	pop	{r7, pc}
- 8001174:	20000204 	.word	0x20000204
+ 8001160:	3718      	adds	r7, #24
+ 8001162:	46bd      	mov	sp, r7
+ 8001164:	bd80      	pop	{r7, pc}
+ 8001166:	bf00      	nop
+ 8001168:	20000204 	.word	0x20000204
+ 800116c:	2000020c 	.word	0x2000020c
+ 8001170:	20000210 	.word	0x20000210
+ 8001174:	20000214 	.word	0x20000214
  8001178:	20000208 	.word	0x20000208
- 800117c:	2000020c 	.word	0x2000020c
- 8001180:	20000210 	.word	0x20000210
- 8001184:	20000214 	.word	0x20000214
- 8001188:	20000000 	.word	0x20000000
+ 800117c:	20000000 	.word	0x20000000
 
-0800118c <Process_Single_Steering_Motor_Command>:
+08001180 <Process_Single_Steering_Motor_Command>:
 
 
 void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
- 800118c:	b580      	push	{r7, lr}
- 800118e:	b086      	sub	sp, #24
- 8001190:	af00      	add	r7, sp, #0
- 8001192:	6078      	str	r0, [r7, #4]
- 8001194:	6039      	str	r1, [r7, #0]
+ 8001180:	b580      	push	{r7, lr}
+ 8001182:	b086      	sub	sp, #24
+ 8001184:	af00      	add	r7, sp, #0
+ 8001186:	6078      	str	r0, [r7, #4]
+ 8001188:	6039      	str	r1, [r7, #0]
 
 	//single information will always come as a float (signed 4 bytes)
 	float information = SingleExtractFloatFromCAN(rxData);
- 8001196:	6838      	ldr	r0, [r7, #0]
- 8001198:	f000 f8fa 	bl	8001390 <SingleExtractFloatFromCAN>
- 800119c:	ed87 0a05 	vstr	s0, [r7, #20]
+ 800118a:	6838      	ldr	r0, [r7, #0]
+ 800118c:	f000 f900 	bl	8001390 <SingleExtractFloatFromCAN>
+ 8001190:	ed87 0a05 	vstr	s0, [r7, #20]
 
 	if (CANMessageID->commandType == ACTION_RUN){
- 80011a0:	687b      	ldr	r3, [r7, #4]
- 80011a2:	78db      	ldrb	r3, [r3, #3]
- 80011a4:	2b00      	cmp	r3, #0
- 80011a6:	d112      	bne.n	80011ce <Process_Single_Steering_Motor_Command+0x42>
+ 8001194:	687b      	ldr	r3, [r7, #4]
+ 8001196:	78db      	ldrb	r3, [r3, #3]
+ 8001198:	2b00      	cmp	r3, #0
+ 800119a:	d112      	bne.n	80011c2 <Process_Single_Steering_Motor_Command+0x42>
 		switch(CANMessageID->runSpec){
- 80011a8:	687b      	ldr	r3, [r7, #4]
- 80011aa:	795b      	ldrb	r3, [r3, #5]
- 80011ac:	2b03      	cmp	r3, #3
- 80011ae:	d009      	beq.n	80011c4 <Process_Single_Steering_Motor_Command+0x38>
- 80011b0:	2b03      	cmp	r3, #3
- 80011b2:	dc39      	bgt.n	8001228 <Process_Single_Steering_Motor_Command+0x9c>
- 80011b4:	2b00      	cmp	r3, #0
- 80011b6:	d002      	beq.n	80011be <Process_Single_Steering_Motor_Command+0x32>
- 80011b8:	2b01      	cmp	r3, #1
- 80011ba:	d037      	beq.n	800122c <Process_Single_Steering_Motor_Command+0xa0>
+ 800119c:	687b      	ldr	r3, [r7, #4]
+ 800119e:	795b      	ldrb	r3, [r3, #5]
+ 80011a0:	2b03      	cmp	r3, #3
+ 80011a2:	d009      	beq.n	80011b8 <Process_Single_Steering_Motor_Command+0x38>
+ 80011a4:	2b03      	cmp	r3, #3
+ 80011a6:	dc39      	bgt.n	800121c <Process_Single_Steering_Motor_Command+0x9c>
+ 80011a8:	2b00      	cmp	r3, #0
+ 80011aa:	d002      	beq.n	80011b2 <Process_Single_Steering_Motor_Command+0x32>
+ 80011ac:	2b01      	cmp	r3, #1
+ 80011ae:	d037      	beq.n	8001220 <Process_Single_Steering_Motor_Command+0xa0>
 //				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				ControlSingleMotor(information);
 				break;
 		default:
 			break;
- 80011bc:	e034      	b.n	8001228 <Process_Single_Steering_Motor_Command+0x9c>
+ 80011b0:	e034      	b.n	800121c <Process_Single_Steering_Motor_Command+0x9c>
 				stop_motor();
- 80011be:	f000 fdc7 	bl	8001d50 <stop_motor>
+ 80011b2:	f000 fdcd 	bl	8001d50 <stop_motor>
 				break;
- 80011c2:	e036      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 80011b6:	e036      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 				ControlSingleMotor(information);
- 80011c4:	ed97 0a05 	vldr	s0, [r7, #20]
- 80011c8:	f000 f85c 	bl	8001284 <ControlSingleMotor>
+ 80011b8:	ed97 0a05 	vldr	s0, [r7, #20]
+ 80011bc:	f000 f862 	bl	8001284 <ControlSingleMotor>
 				break;
- 80011cc:	e031      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 80011c0:	e031      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 		//otherwise ignore whatever was received :)
 	}
 
 	else{
 		// We are now in a read command
 		switch(CANMessageID->readSpec){
- 80011ce:	687b      	ldr	r3, [r7, #4]
- 80011d0:	791b      	ldrb	r3, [r3, #4]
- 80011d2:	3b01      	subs	r3, #1
- 80011d4:	2b06      	cmp	r3, #6
- 80011d6:	d82b      	bhi.n	8001230 <Process_Single_Steering_Motor_Command+0xa4>
- 80011d8:	a201      	add	r2, pc, #4	@ (adr r2, 80011e0 <Process_Single_Steering_Motor_Command+0x54>)
- 80011da:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
- 80011de:	bf00      	nop
- 80011e0:	080011fd 	.word	0x080011fd
- 80011e4:	08001231 	.word	0x08001231
- 80011e8:	08001231 	.word	0x08001231
- 80011ec:	08001231 	.word	0x08001231
- 80011f0:	08001231 	.word	0x08001231
- 80011f4:	08001231 	.word	0x08001231
- 80011f8:	08001219 	.word	0x08001219
+ 80011c2:	687b      	ldr	r3, [r7, #4]
+ 80011c4:	791b      	ldrb	r3, [r3, #4]
+ 80011c6:	3b01      	subs	r3, #1
+ 80011c8:	2b06      	cmp	r3, #6
+ 80011ca:	d82b      	bhi.n	8001224 <Process_Single_Steering_Motor_Command+0xa4>
+ 80011cc:	a201      	add	r2, pc, #4	@ (adr r2, 80011d4 <Process_Single_Steering_Motor_Command+0x54>)
+ 80011ce:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
+ 80011d2:	bf00      	nop
+ 80011d4:	080011f1 	.word	0x080011f1
+ 80011d8:	08001225 	.word	0x08001225
+ 80011dc:	08001225 	.word	0x08001225
+ 80011e0:	08001225 	.word	0x08001225
+ 80011e4:	08001225 	.word	0x08001225
+ 80011e8:	08001225 	.word	0x08001225
+ 80011ec:	0800120d 	.word	0x0800120d
 
 		case(READ_POSITION):
 				float currentPosition = count_to_angle(get_counts());
- 80011fc:	f000 f966 	bl	80014cc <get_counts>
- 8001200:	4603      	mov	r3, r0
- 8001202:	4618      	mov	r0, r3
- 8001204:	f000 f970 	bl	80014e8 <count_to_angle>
- 8001208:	ed87 0a03 	vstr	s0, [r7, #12]
+ 80011f0:	f000 f96c 	bl	80014cc <get_counts>
+ 80011f4:	4603      	mov	r3, r0
+ 80011f6:	4618      	mov	r0, r3
+ 80011f8:	f000 f976 	bl	80014e8 <count_to_angle>
+ 80011fc:	ed87 0a03 	vstr	s0, [r7, #12]
 				sendCANResponse(CANMessageID, currentPosition);
- 800120c:	ed97 0a03 	vldr	s0, [r7, #12]
- 8001210:	6878      	ldr	r0, [r7, #4]
- 8001212:	f000 f849 	bl	80012a8 <sendCANResponse>
+ 8001200:	ed97 0a03 	vldr	s0, [r7, #12]
+ 8001204:	6878      	ldr	r0, [r7, #4]
+ 8001206:	f000 f84f 	bl	80012a8 <sendCANResponse>
 				break;
- 8001216:	e00c      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 800120a:	e00c      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 				break;
 		case(GET_TEMPERATURE):
 				//TODO --> need to poll the gpio, check the datasheet later for whichever pin this is
 				break;
 		case(GET_PING):
 				float feedback = 69;// ;)
- 8001218:	4b08      	ldr	r3, [pc, #32]	@ (800123c <Process_Single_Steering_Motor_Command+0xb0>)
- 800121a:	613b      	str	r3, [r7, #16]
+ 800120c:	4b08      	ldr	r3, [pc, #32]	@ (8001230 <Process_Single_Steering_Motor_Command+0xb0>)
+ 800120e:	613b      	str	r3, [r7, #16]
 				sendCANResponse(CANMessageID, feedback);
- 800121c:	ed97 0a04 	vldr	s0, [r7, #16]
- 8001220:	6878      	ldr	r0, [r7, #4]
- 8001222:	f000 f841 	bl	80012a8 <sendCANResponse>
+ 8001210:	ed97 0a04 	vldr	s0, [r7, #16]
+ 8001214:	6878      	ldr	r0, [r7, #4]
+ 8001216:	f000 f847 	bl	80012a8 <sendCANResponse>
 				break;
- 8001226:	e004      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 800121a:	e004      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 			break;
- 8001228:	bf00      	nop
- 800122a:	e002      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 800121c:	bf00      	nop
+ 800121e:	e002      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 				break;
- 800122c:	bf00      	nop
- 800122e:	e000      	b.n	8001232 <Process_Single_Steering_Motor_Command+0xa6>
+ 8001220:	bf00      	nop
+ 8001222:	e000      	b.n	8001226 <Process_Single_Steering_Motor_Command+0xa6>
 		default:
 			break;
- 8001230:	bf00      	nop
+ 8001224:	bf00      	nop
 		}
 
 	}
 }
- 8001232:	bf00      	nop
- 8001234:	3718      	adds	r7, #24
- 8001236:	46bd      	mov	sp, r7
- 8001238:	bd80      	pop	{r7, pc}
- 800123a:	bf00      	nop
- 800123c:	428a0000 	.word	0x428a0000
+ 8001226:	bf00      	nop
+ 8001228:	3718      	adds	r7, #24
+ 800122a:	46bd      	mov	sp, r7
+ 800122c:	bd80      	pop	{r7, pc}
+ 800122e:	bf00      	nop
+ 8001230:	428a0000 	.word	0x428a0000
 
-08001240 <Process_Multiple_Steering_Motor_Command>:
+08001234 <Process_Multiple_Steering_Motor_Command>:
 
 void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
- 8001240:	b580      	push	{r7, lr}
- 8001242:	b084      	sub	sp, #16
- 8001244:	af00      	add	r7, sp, #0
- 8001246:	6078      	str	r0, [r7, #4]
- 8001248:	6039      	str	r1, [r7, #0]
+ 8001234:	b580      	push	{r7, lr}
+ 8001236:	b084      	sub	sp, #16
+ 8001238:	af00      	add	r7, sp, #0
+ 800123a:	6078      	str	r0, [r7, #4]
+ 800123c:	6039      	str	r1, [r7, #0]
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	 uart_debug_print("Running Multiple Motors...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	switch(CANMessageID->runSpec){
- 800124a:	687b      	ldr	r3, [r7, #4]
- 800124c:	795b      	ldrb	r3, [r3, #5]
- 800124e:	2b00      	cmp	r3, #0
- 8001250:	d011      	beq.n	8001276 <Process_Multiple_Steering_Motor_Command+0x36>
- 8001252:	2b02      	cmp	r3, #2
- 8001254:	d111      	bne.n	800127a <Process_Multiple_Steering_Motor_Command+0x3a>
+ 800123e:	687b      	ldr	r3, [r7, #4]
+ 8001240:	795b      	ldrb	r3, [r3, #5]
+ 8001242:	2b00      	cmp	r3, #0
+ 8001244:	d014      	beq.n	8001270 <Process_Multiple_Steering_Motor_Command+0x3c>
+ 8001246:	2b03      	cmp	r3, #3
+ 8001248:	d114      	bne.n	8001274 <Process_Multiple_Steering_Motor_Command+0x40>
 
-	case (RUN_SPEED):
-
+	case (RUN_POSITION):
+			amitriggering = 1;
+ 800124a:	4b0d      	ldr	r3, [pc, #52]	@ (8001280 <Process_Multiple_Steering_Motor_Command+0x4c>)
+ 800124c:	2201      	movs	r2, #1
+ 800124e:	601a      	str	r2, [r3, #0]
 			int16_t curESCSpeed = extract_multiple_speeds(rxData);
- 8001256:	6838      	ldr	r0, [r7, #0]
- 8001258:	f000 f8b6 	bl	80013c8 <extract_multiple_speeds>
- 800125c:	4603      	mov	r3, r0
- 800125e:	81fb      	strh	r3, [r7, #14]
+ 8001250:	6838      	ldr	r0, [r7, #0]
+ 8001252:	f000 f8b9 	bl	80013c8 <extract_multiple_speeds>
+ 8001256:	4603      	mov	r3, r0
+ 8001258:	81fb      	strh	r3, [r7, #14]
 //			 uart_debug_print("Running This Motor\r\n");
 //			 uart_debug_print("Setpoint %d RPM\r\n", (int)curESCSpeed);
 //			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			ControlSingleMotor(curESCSpeed);
- 8001260:	f9b7 300e 	ldrsh.w	r3, [r7, #14]
- 8001264:	ee07 3a90 	vmov	s15, r3
- 8001268:	eef8 7ae7 	vcvt.f32.s32	s15, s15
- 800126c:	eeb0 0a67 	vmov.f32	s0, s15
- 8001270:	f000 f808 	bl	8001284 <ControlSingleMotor>
+ 800125a:	f9b7 300e 	ldrsh.w	r3, [r7, #14]
+ 800125e:	ee07 3a90 	vmov	s15, r3
+ 8001262:	eef8 7ae7 	vcvt.f32.s32	s15, s15
+ 8001266:	eeb0 0a67 	vmov.f32	s0, s15
+ 800126a:	f000 f80b 	bl	8001284 <ControlSingleMotor>
 			break;
- 8001274:	e002      	b.n	800127c <Process_Multiple_Steering_Motor_Command+0x3c>
+ 800126e:	e002      	b.n	8001276 <Process_Multiple_Steering_Motor_Command+0x42>
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //	 	 	safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
 			break;
- 8001276:	bf00      	nop
- 8001278:	e000      	b.n	800127c <Process_Multiple_Steering_Motor_Command+0x3c>
+ 8001270:	bf00      	nop
+ 8001272:	e000      	b.n	8001276 <Process_Multiple_Steering_Motor_Command+0x42>
 	default:
 		break;
- 800127a:	bf00      	nop
+ 8001274:	bf00      	nop
 	}
 
 
 }
- 800127c:	bf00      	nop
- 800127e:	3710      	adds	r7, #16
- 8001280:	46bd      	mov	sp, r7
- 8001282:	bd80      	pop	{r7, pc}
+ 8001276:	bf00      	nop
+ 8001278:	3710      	adds	r7, #16
+ 800127a:	46bd      	mov	sp, r7
+ 800127c:	bd80      	pop	{r7, pc}
+ 800127e:	bf00      	nop
+ 8001280:	20000218 	.word	0x20000218
 
 08001284 <ControlSingleMotor>:
 
@@ -1939,7 +1940,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
  8001386:	46bd      	mov	sp, r7
  8001388:	bd80      	pop	{r7, pc}
  800138a:	bf00      	nop
- 800138c:	2000021c 	.word	0x2000021c
+ 800138c:	20000220 	.word	0x20000220
 
 08001390 <SingleExtractFloatFromCAN>:
 
@@ -2132,7 +2133,7 @@ int set_counts(int n){
  80014c0:	f85d 7b04 	ldr.w	r7, [sp], #4
  80014c4:	4770      	bx	lr
  80014c6:	bf00      	nop
- 80014c8:	20000218 	.word	0x20000218
+ 80014c8:	2000021c 	.word	0x2000021c
 
 080014cc <get_counts>:
 
@@ -2148,7 +2149,7 @@ int get_counts(){
  80014d8:	f85d 7b04 	ldr.w	r7, [sp], #4
  80014dc:	4770      	bx	lr
  80014de:	bf00      	nop
- 80014e0:	20000218 	.word	0x20000218
+ 80014e0:	2000021c 	.word	0x2000021c
  80014e4:	00000000 	.word	0x00000000
 
 080014e8 <count_to_angle>:
@@ -2456,11 +2457,11 @@ int main(void)
  800170e:	e7fd      	b.n	800170c <main+0xd4>
  8001710:	51eb851f 	.word	0x51eb851f
  8001714:	3ff91eb8 	.word	0x3ff91eb8
- 8001718:	2000028c 	.word	0x2000028c
- 800171c:	2000031c 	.word	0x2000031c
- 8001720:	2000021c 	.word	0x2000021c
- 8001724:	200003ac 	.word	0x200003ac
- 8001728:	200003e0 	.word	0x200003e0
+ 8001718:	20000290 	.word	0x20000290
+ 800171c:	20000320 	.word	0x20000320
+ 8001720:	20000220 	.word	0x20000220
+ 8001724:	200003b0 	.word	0x200003b0
+ 8001728:	200003e4 	.word	0x200003e4
 
 0800172c <SystemClock_Config>:
 /**
@@ -2660,7 +2661,7 @@ static void MX_CAN2_Init(void)
  800184a:	bf00      	nop
  800184c:	bd80      	pop	{r7, pc}
  800184e:	bf00      	nop
- 8001850:	2000021c 	.word	0x2000021c
+ 8001850:	20000220 	.word	0x20000220
  8001854:	40006800 	.word	0x40006800
 
 08001858 <MX_TIM1_Init>:
@@ -2774,7 +2775,7 @@ static void MX_TIM1_Init(void)
  80018ea:	3718      	adds	r7, #24
  80018ec:	46bd      	mov	sp, r7
  80018ee:	bd80      	pop	{r7, pc}
- 80018f0:	20000244 	.word	0x20000244
+ 80018f0:	20000248 	.word	0x20000248
  80018f4:	40010000 	.word	0x40010000
 
 080018f8 <MX_TIM2_Init>:
@@ -2898,7 +2899,7 @@ static void MX_TIM2_Init(void)
  8001996:	46bd      	mov	sp, r7
  8001998:	bd80      	pop	{r7, pc}
  800199a:	bf00      	nop
- 800199c:	2000028c 	.word	0x2000028c
+ 800199c:	20000290 	.word	0x20000290
 
 080019a0 <MX_TIM5_Init>:
   * @brief TIM5 Initialization Function
@@ -3008,7 +3009,7 @@ static void MX_TIM5_Init(void)
  8001a2e:	46bd      	mov	sp, r7
  8001a30:	bd80      	pop	{r7, pc}
  8001a32:	bf00      	nop
- 8001a34:	200002d4 	.word	0x200002d4
+ 8001a34:	200002d8 	.word	0x200002d8
  8001a38:	40000c00 	.word	0x40000c00
 
 08001a3c <MX_TIM8_Init>:
@@ -3219,7 +3220,7 @@ static void MX_TIM8_Init(void)
  8001b6e:	46bd      	mov	sp, r7
  8001b70:	bd80      	pop	{r7, pc}
  8001b72:	bf00      	nop
- 8001b74:	2000031c 	.word	0x2000031c
+ 8001b74:	20000320 	.word	0x20000320
  8001b78:	40010400 	.word	0x40010400
 
 08001b7c <MX_USART2_UART_Init>:
@@ -3286,7 +3287,7 @@ static void MX_USART2_UART_Init(void)
  8001bc2:	bf00      	nop
  8001bc4:	bd80      	pop	{r7, pc}
  8001bc6:	bf00      	nop
- 8001bc8:	20000364 	.word	0x20000364
+ 8001bc8:	20000368 	.word	0x20000368
  8001bcc:	40004400 	.word	0x40004400
 
 08001bd0 <MX_GPIO_Init>:
@@ -3485,9 +3486,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
  8001d0a:	46bd      	mov	sp, r7
  8001d0c:	bd80      	pop	{r7, pc}
  8001d0e:	bf00      	nop
- 8001d10:	200003e8 	.word	0x200003e8
- 8001d14:	200003c4 	.word	0x200003c4
- 8001d18:	200003f0 	.word	0x200003f0
+ 8001d10:	200003ec 	.word	0x200003ec
+ 8001d14:	200003c8 	.word	0x200003c8
+ 8001d18:	200003f4 	.word	0x200003f4
  8001d1c:	40020800 	.word	0x40020800
 
 08001d20 <__io_putchar>:
@@ -3517,7 +3518,7 @@ PUTCHAR_PROTOTYPE
  8001d3a:	3708      	adds	r7, #8
  8001d3c:	46bd      	mov	sp, r7
  8001d3e:	bd80      	pop	{r7, pc}
- 8001d40:	20000364 	.word	0x20000364
+ 8001d40:	20000368 	.word	0x20000368
 
 08001d44 <Error_Handler>:
 /**
@@ -3833,12 +3834,12 @@ void updatePID() {
  8001f1a:	46bd      	mov	sp, r7
  8001f1c:	bd90      	pop	{r4, r7, pc}
  8001f1e:	bf00      	nop
- 8001f20:	20000400 	.word	0x20000400
- 8001f24:	200003f4 	.word	0x200003f4
+ 8001f20:	20000404 	.word	0x20000404
+ 8001f24:	200003f8 	.word	0x200003f8
  8001f28:	2000000c 	.word	0x2000000c
- 8001f2c:	200003fc 	.word	0x200003fc
+ 8001f2c:	20000400 	.word	0x20000400
  8001f30:	20000010 	.word	0x20000010
- 8001f34:	200003f8 	.word	0x200003f8
+ 8001f34:	200003fc 	.word	0x200003fc
 
 08001f38 <setPIDGoalA>:
 	 * For assignment 3.1: this function does not need to do anything.
@@ -3879,7 +3880,7 @@ void setPIDGoalA(double angle) {
  8001f76:	46bd      	mov	sp, r7
  8001f78:	bd80      	pop	{r7, pc}
  8001f7a:	bf00      	nop
- 8001f7c:	20000400 	.word	0x20000400
+ 8001f7c:	20000404 	.word	0x20000404
 
 08001f80 <HAL_MspInit>:
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -4634,7 +4635,7 @@ void TIM8_BRK_TIM12_IRQHandler(void)
  8002362:	bf00      	nop
  8002364:	bd80      	pop	{r7, pc}
  8002366:	bf00      	nop
- 8002368:	2000031c 	.word	0x2000031c
+ 8002368:	20000320 	.word	0x20000320
 
 0800236c <TIM8_UP_TIM13_IRQHandler>:
 
@@ -4658,7 +4659,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
  8002376:	bf00      	nop
  8002378:	bd80      	pop	{r7, pc}
  800237a:	bf00      	nop
- 800237c:	2000031c 	.word	0x2000031c
+ 800237c:	20000320 	.word	0x20000320
 
 08002380 <CAN2_TX_IRQHandler>:
 
@@ -4682,7 +4683,7 @@ void CAN2_TX_IRQHandler(void)
  800238a:	bf00      	nop
  800238c:	bd80      	pop	{r7, pc}
  800238e:	bf00      	nop
- 8002390:	2000021c 	.word	0x2000021c
+ 8002390:	20000220 	.word	0x20000220
 
 08002394 <CAN2_RX0_IRQHandler>:
 
@@ -4706,7 +4707,7 @@ void CAN2_RX0_IRQHandler(void)
  800239e:	bf00      	nop
  80023a0:	bd80      	pop	{r7, pc}
  80023a2:	bf00      	nop
- 80023a4:	2000021c 	.word	0x2000021c
+ 80023a4:	20000220 	.word	0x20000220
 
 080023a8 <CAN2_RX1_IRQHandler>:
 
@@ -4730,7 +4731,7 @@ void CAN2_RX1_IRQHandler(void)
  80023b2:	bf00      	nop
  80023b4:	bd80      	pop	{r7, pc}
  80023b6:	bf00      	nop
- 80023b8:	2000021c 	.word	0x2000021c
+ 80023b8:	20000220 	.word	0x20000220
 
 080023bc <_getpid>:
 void initialise_monitor_handles()
@@ -5036,8 +5037,8 @@ void *_sbrk(ptrdiff_t incr)
  8002536:	bd80      	pop	{r7, pc}
  8002538:	20020000 	.word	0x20020000
  800253c:	00000400 	.word	0x00000400
- 8002540:	20000404 	.word	0x20000404
- 8002544:	20000558 	.word	0x20000558
+ 8002540:	20000408 	.word	0x20000408
+ 8002544:	20000560 	.word	0x20000560
 
 08002548 <SystemInit>:
   *         configuration.
@@ -5197,7 +5198,7 @@ LoopFillZerobss:
   ldr r2, =_sbss
  80025dc:	200001e8 	.word	0x200001e8
   ldr r4, =_ebss
- 80025e0:	20000558 	.word	0x20000558
+ 80025e0:	2000055c 	.word	0x2000055c
 
 080025e4 <ADC_IRQHandler>:
  * @retval None       
@@ -5360,7 +5361,7 @@ __weak void HAL_IncTick(void)
  80026a8:	4770      	bx	lr
  80026aa:	bf00      	nop
  80026ac:	2000001c 	.word	0x2000001c
- 80026b0:	20000408 	.word	0x20000408
+ 80026b0:	2000040c 	.word	0x2000040c
 
 080026b4 <HAL_GetTick>:
   * @note This function is declared as __weak to be overwritten in case of other 
@@ -5380,7 +5381,7 @@ __weak uint32_t HAL_GetTick(void)
  80026c0:	f85d 7b04 	ldr.w	r7, [sp], #4
  80026c4:	4770      	bx	lr
  80026c6:	bf00      	nop
- 80026c8:	20000408 	.word	0x20000408
+ 80026c8:	2000040c 	.word	0x2000040c
 
 080026cc <HAL_CAN_Init>:
   * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
@@ -14665,11 +14666,6 @@ static void UART_EndRxTransfer(UART_HandleTypeDef *huart)
  8005a98:	681b      	ldr	r3, [r3, #0]
  8005a9a:	330c      	adds	r3, #12
  8005a9c:	637b      	str	r3, [r7, #52]	@ 0x34
- */
-__STATIC_FORCEINLINE uint32_t __LDREXW(volatile uint32_t *addr)
-{
-    uint32_t result;
-
    __ASM volatile ("ldrex %0, %1" : "=r" (result) : "Q" (*addr) );
  8005a9e:	6b7b      	ldr	r3, [r7, #52]	@ 0x34
  8005aa0:	e853 3f00 	ldrex	r3, [r3]
@@ -14684,11 +14680,6 @@ __STATIC_FORCEINLINE uint32_t __LDREXW(volatile uint32_t *addr)
  8005ab4:	6cfa      	ldr	r2, [r7, #76]	@ 0x4c
  8005ab6:	643a      	str	r2, [r7, #64]	@ 0x40
  8005ab8:	63fb      	str	r3, [r7, #60]	@ 0x3c
- */
-__STATIC_FORCEINLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
-{
-   uint32_t result;
-
    __ASM volatile ("strex %0, %2, %1" : "=&r" (result), "=Q" (*addr) : "r" (value) );
  8005aba:	6bf9      	ldr	r1, [r7, #60]	@ 0x3c
  8005abc:	6c3a      	ldr	r2, [r7, #64]	@ 0x40
@@ -16229,7 +16220,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006944:	08006a8f 	.word	0x08006a8f
  8006948:	08006ac7 	.word	0x08006ac7
  800694c:	08006aeb 	.word	0x08006aeb
- 8006950:	2000040c 	.word	0x2000040c
+ 8006950:	20000410 	.word	0x20000410
 
 08006954 <stdio_exit_handler>:
  8006954:	4a02      	ldr	r2, [pc, #8]	@ (8006960 <stdio_exit_handler+0xc>)
@@ -16264,9 +16255,9 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006998:	f001 bc84 	b.w	80082a4 <_fflush_r>
  800699c:	bd10      	pop	{r4, pc}
  800699e:	bf00      	nop
- 80069a0:	2000040c 	.word	0x2000040c
- 80069a4:	20000474 	.word	0x20000474
- 80069a8:	200004dc 	.word	0x200004dc
+ 80069a0:	20000410 	.word	0x20000410
+ 80069a4:	20000478 	.word	0x20000478
+ 80069a8:	200004e0 	.word	0x200004e0
 
 080069ac <global_stdio_init.part.0>:
  80069ac:	b510      	push	{r4, lr}
@@ -16287,21 +16278,21 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  80069d2:	e8bd 4010 	ldmia.w	sp!, {r4, lr}
  80069d6:	2112      	movs	r1, #18
  80069d8:	f7ff bf86 	b.w	80068e8 <std>
- 80069dc:	20000544 	.word	0x20000544
- 80069e0:	2000040c 	.word	0x2000040c
+ 80069dc:	20000548 	.word	0x20000548
+ 80069e0:	20000410 	.word	0x20000410
  80069e4:	08006955 	.word	0x08006955
 
 080069e8 <__sfp_lock_acquire>:
  80069e8:	4801      	ldr	r0, [pc, #4]	@ (80069f0 <__sfp_lock_acquire+0x8>)
  80069ea:	f000 b900 	b.w	8006bee <__retarget_lock_acquire_recursive>
  80069ee:	bf00      	nop
- 80069f0:	2000054d 	.word	0x2000054d
+ 80069f0:	20000551 	.word	0x20000551
 
 080069f4 <__sfp_lock_release>:
  80069f4:	4801      	ldr	r0, [pc, #4]	@ (80069fc <__sfp_lock_release+0x8>)
  80069f6:	f000 b8fb 	b.w	8006bf0 <__retarget_lock_release_recursive>
  80069fa:	bf00      	nop
- 80069fc:	2000054d 	.word	0x2000054d
+ 80069fc:	20000551 	.word	0x20000551
 
 08006a00 <__sinit>:
  8006a00:	b510      	push	{r4, lr}
@@ -16321,7 +16312,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006a24:	e7f2      	b.n	8006a0c <__sinit+0xc>
  8006a26:	bf00      	nop
  8006a28:	0800696d 	.word	0x0800696d
- 8006a2c:	20000544 	.word	0x20000544
+ 8006a2c:	20000548 	.word	0x20000548
 
 08006a30 <_fwalk_sglue>:
  8006a30:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
@@ -16438,7 +16429,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006b22:	b103      	cbz	r3, 8006b26 <_close_r+0x1a>
  8006b24:	6023      	str	r3, [r4, #0]
  8006b26:	bd38      	pop	{r3, r4, r5, pc}
- 8006b28:	20000548 	.word	0x20000548
+ 8006b28:	2000054c 	.word	0x2000054c
 
 08006b2c <_lseek_r>:
  8006b2c:	b538      	push	{r3, r4, r5, lr}
@@ -16456,7 +16447,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006b46:	b103      	cbz	r3, 8006b4a <_lseek_r+0x1e>
  8006b48:	6023      	str	r3, [r4, #0]
  8006b4a:	bd38      	pop	{r3, r4, r5, pc}
- 8006b4c:	20000548 	.word	0x20000548
+ 8006b4c:	2000054c 	.word	0x2000054c
 
 08006b50 <_read_r>:
  8006b50:	b538      	push	{r3, r4, r5, lr}
@@ -16474,7 +16465,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006b6a:	b103      	cbz	r3, 8006b6e <_read_r+0x1e>
  8006b6c:	6023      	str	r3, [r4, #0]
  8006b6e:	bd38      	pop	{r3, r4, r5, pc}
- 8006b70:	20000548 	.word	0x20000548
+ 8006b70:	2000054c 	.word	0x2000054c
 
 08006b74 <_write_r>:
  8006b74:	b538      	push	{r3, r4, r5, lr}
@@ -16492,7 +16483,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8006b8e:	b103      	cbz	r3, 8006b92 <_write_r+0x1e>
  8006b90:	6023      	str	r3, [r4, #0]
  8006b92:	bd38      	pop	{r3, r4, r5, pc}
- 8006b94:	20000548 	.word	0x20000548
+ 8006b94:	2000054c 	.word	0x2000054c
 
 08006b98 <__errno>:
  8006b98:	4b01      	ldr	r3, [pc, #4]	@ (8006ba0 <__errno+0x8>)
@@ -17866,7 +17857,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8007932:	e7ca      	b.n	80078ca <_free_r+0x22>
  8007934:	bd38      	pop	{r3, r4, r5, pc}
  8007936:	bf00      	nop
- 8007938:	20000554 	.word	0x20000554
+ 8007938:	20000558 	.word	0x20000558
 
 0800793c <malloc>:
  800793c:	4b02      	ldr	r3, [pc, #8]	@ (8007948 <malloc+0xc>)
@@ -17904,7 +17895,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8007986:	d1f2      	bne.n	800796e <sbrk_aligned+0x22>
  8007988:	e7ef      	b.n	800796a <sbrk_aligned+0x1e>
  800798a:	bf00      	nop
- 800798c:	20000550 	.word	0x20000550
+ 800798c:	20000554 	.word	0x20000554
 
 08007990 <_malloc_r>:
  8007990:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
@@ -18014,19 +18005,19 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8007a86:	6005      	str	r5, [r0, #0]
  8007a88:	e7d6      	b.n	8007a38 <_malloc_r+0xa8>
  8007a8a:	bf00      	nop
- 8007a8c:	20000554 	.word	0x20000554
+ 8007a8c:	20000558 	.word	0x20000558
 
 08007a90 <__malloc_lock>:
  8007a90:	4801      	ldr	r0, [pc, #4]	@ (8007a98 <__malloc_lock+0x8>)
  8007a92:	f7ff b8ac 	b.w	8006bee <__retarget_lock_acquire_recursive>
  8007a96:	bf00      	nop
- 8007a98:	2000054c 	.word	0x2000054c
+ 8007a98:	20000550 	.word	0x20000550
 
 08007a9c <__malloc_unlock>:
  8007a9c:	4801      	ldr	r0, [pc, #4]	@ (8007aa4 <__malloc_unlock+0x8>)
  8007a9e:	f7ff b8a7 	b.w	8006bf0 <__retarget_lock_release_recursive>
  8007aa2:	bf00      	nop
- 8007aa4:	2000054c 	.word	0x2000054c
+ 8007aa4:	20000550 	.word	0x20000550
 
 08007aa8 <_Balloc>:
  8007aa8:	b570      	push	{r4, r5, r6, lr}
@@ -18902,7 +18893,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  800830a:	b103      	cbz	r3, 800830e <_sbrk_r+0x1a>
  800830c:	6023      	str	r3, [r4, #0]
  800830e:	bd38      	pop	{r3, r4, r5, pc}
- 8008310:	20000548 	.word	0x20000548
+ 8008310:	2000054c 	.word	0x2000054c
 
 08008314 <memcpy>:
  8008314:	440a      	add	r2, r1
@@ -19479,7 +19470,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  800882a:	6023      	str	r3, [r4, #0]
  800882c:	bd38      	pop	{r3, r4, r5, pc}
  800882e:	bf00      	nop
- 8008830:	20000548 	.word	0x20000548
+ 8008830:	2000054c 	.word	0x2000054c
 
 08008834 <_getpid_r>:
  8008834:	f7f9 bdc2 	b.w	80023bc <_getpid>
@@ -19582,7 +19573,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8008916:	6023      	str	r3, [r4, #0]
  8008918:	bd38      	pop	{r3, r4, r5, pc}
  800891a:	bf00      	nop
- 800891c:	20000548 	.word	0x20000548
+ 800891c:	2000054c 	.word	0x2000054c
 
 08008920 <_isatty_r>:
  8008920:	b538      	push	{r3, r4, r5, lr}
@@ -19598,7 +19589,7 @@ static void UART_SetConfig(UART_HandleTypeDef *huart)
  8008936:	b103      	cbz	r3, 800893a <_isatty_r+0x1a>
  8008938:	6023      	str	r3, [r4, #0]
  800893a:	bd38      	pop	{r3, r4, r5, pc}
- 800893c:	20000548 	.word	0x20000548
+ 800893c:	2000054c 	.word	0x2000054c
 
 08008940 <fmod>:
  8008940:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
