@@ -98,13 +98,12 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 
 	ParsedCANID CANMessage; //initialize a struct for the received message
-	uint16_t msg_ID = rxHeader->StdId;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
+	uint16_t msg_ID = rxHeader->StdId & 0x07ff;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
 	whatsmymotorid = CANMessage.motorID;
-	whatsmymotortype = CANMessage.motorType;
 	whatsmyaction = CANMessage.commandType;
 	whatsmyreadrunspec = CANMessage.runSpec;
-	setPIDGoalA(rxData[0]);
-	johnyangle = rxData[0];
+//	setPIDGoalA(rxData[0]);
+	johnyangle = rxData[7];
 
 	// First check to see who is transmitting --> ESCS cannot command other ECSs
 	CANMessage.messageSender = (Transmitter) get_CAN_transmitter(msg_ID);
@@ -114,6 +113,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 
 	//Check to make sure the command is directed toward the ESC
 	CANMessage.motorType = (MotorType) get_CAN_motor_type(msg_ID);
+	whatsmymotortype = CANMessage.motorType;
 	if (CANMessage.motorType == DRIVE_MOTOR){
 		return;
 	}
@@ -121,7 +121,7 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	// Check the type of action to determine which field of the struct needs to be filled in
 	CANMessage.commandType = (Action) get_CAN_action(msg_ID);
 	if (CANMessage.commandType == ACTION_RUN){
-		amitriggering = 1;
+
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Run Command Detected\r\n");
@@ -257,8 +257,8 @@ void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t
 
 	switch(CANMessageID->runSpec){
 
-	case (RUN_SPEED):
-
+	case (RUN_POSITION):
+			amitriggering = 1;
 			int16_t curESCSpeed = extract_multiple_speeds(rxData);
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
