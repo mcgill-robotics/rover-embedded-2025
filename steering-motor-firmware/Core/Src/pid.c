@@ -14,6 +14,7 @@
 int angleError = 0;
 int angleCorrection = 0;
 int oldAngleError = 0;
+int motorStop = 0;
 
 #define MAX_COUNTS 33024
 #define HALF_COUNTS 16512
@@ -39,6 +40,11 @@ void resetPID() {
 }
 
 void updatePID() {
+
+	if (motorStop) {
+		stop_motor();
+		motorStop = 0;
+	}
 	/*
 	 * This function will do the heavy lifting PID logic. It should do the following: read the encoder counts to determine an error,
 	 * use that error along with some PD constants you determine in order to determine how to set the motor speeds, and then actually
@@ -115,6 +121,10 @@ int8_t PIDdone(void) { // There is no bool type in C. True/False values are repr
 	 */
 
 	return 1;
+}
+
+void stopPlease() {
+	motorStop = 1;
 }
 
 #endif

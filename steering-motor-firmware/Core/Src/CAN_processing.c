@@ -58,7 +58,7 @@ int whatsmymotorid = 0;
 int whatsmymotortype = 0;
 int whatsmyaction = 0;
 int whatsmyreadrunspec = 0;
-int johnyangle = 0;
+float johnyangle = 0;
 int amitriggering = 0;
 
 static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
@@ -95,7 +95,8 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	uart_debug_print("Parsing the ID...\r\n");
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	float information = SingleExtractFloatFromCAN(rxData);
+	johnyangle = information;
 
 	ParsedCANID CANMessage; //initialize a struct for the received message
 	uint16_t msg_ID = rxHeader->StdId & 0x07ff;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
@@ -103,7 +104,6 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	whatsmyaction = CANMessage.commandType;
 	whatsmyreadrunspec = CANMessage.runSpec;
 //	setPIDGoalA(rxData[0]);
-	johnyangle = rxData[7];
 
 	// First check to see who is transmitting --> ESCS cannot command other ECSs
 	CANMessage.messageSender = (Transmitter) get_CAN_transmitter(msg_ID);
@@ -172,6 +172,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 	//single information will always come as a float (signed 4 bytes)
 	float information = SingleExtractFloatFromCAN(rxData);
 
+
 	if (CANMessageID->commandType == ACTION_RUN){
 		switch(CANMessageID->runSpec){
 
@@ -180,7 +181,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 //				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				safeStopMotor( MC_GetMecSpeedReferenceMotor1_F(), MC_GetSTMStateMotor1());
-				stop_motor();
+				stopPlease();
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
@@ -236,7 +237,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 //				sendCANResponse(CANMessageID, currentState);
 				break;
 		case(GET_TEMPERATURE):
-				//TODO --> need to poll the gpio, check the datasheet later for whichever pin this is
+				// --> need to poll the gpio, check the datasheet later for whichever pin this is
 				break;
 		case(GET_PING):
 				float feedback = 69;// ;)
@@ -813,8 +814,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 
     // Configure the ID of the message according to what was received
-    txID |= (0 & 0x01) << SENDER_DEVICE_SHIFT;
-    // TONY: I changed this to zero since I want the sent can response to act as a master
+    txID |= (1 & 0x01) << SENDER_DEVICE_SHIFT;
     // This caluevis now always 1 since the esc is sending data.
     txID |= (CANMessageID->motorType & 0x01) << NDRIVE_STEERING_SHIFT;
     txID |= (CANMessageID->motorConfig & 0x01) << NMULTI_SINGLE_SHIFT;
@@ -823,7 +823,6 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
     txID |= (CANMessageID->motorID & 0x0f);
 
     //TONY: I want the txID to be exactly what I specified in main.c
-    txID = CANMessageID;
     // Move the information into the data paylaod
     memcpy(txData, &information, sizeof(float)); // data[0] --> data[3] now stores float
 
@@ -882,4 +881,3 @@ int16_t extract_multiple_speeds(const uint8_t *rxData){
     int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
     return value;
 }
-

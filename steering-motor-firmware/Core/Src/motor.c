@@ -7,13 +7,15 @@
 
 int direction = 1;
 int actual_direction = 1;
+int whatsmycounts = 0;
 //0 ccw
 //1 cw
 
 void stop_motor(){
-	int counts = get_counts();
-	setPIDGoalA(counts);
 	set_motor_speed(0);
+	int counts = get_counts();
+	whatsmycounts = counts;
+	setPIDGoalA(count_to_angle(counts));
 }
 
 void set_motor_speed(int n){
