@@ -1,6 +1,0 @@
-../Core/Src/pid.c:30:6:resetPID	1
-../Core/Src/pid.c:42:6:updatePID	11
-../Core/Src/pid.c:101:6:setPIDGoalD	1
-../Core/Src/pid.c:108:6:setPIDGoalA	1
-../Core/Src/pid.c:115:8:PIDdone	1
-../Core/Src/pid.c:126:6:stopPlease	1
