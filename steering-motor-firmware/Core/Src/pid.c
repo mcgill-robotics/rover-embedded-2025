@@ -11,20 +11,16 @@
 #include "math.h"
 #include <stdatomic.h>
 
+// PID parameters
+#define kPw 1
+#define kDw 8
+#define ALLOWED_ERROR 100
+#define ALLOWED_ERROR_ZERO 300
+
 int angleError = 0;
 int angleCorrection = 0;
 int oldAngleError = 0;
-int motorStop = 0;
 
-#define MAX_COUNTS 33024
-#define HALF_COUNTS 16512
-
-
-float kPw = 1;
-float kDw = 8;
-
-// FIGURE OUT HOW LOCK FREE ATOMIC INTS WORK
-// This is probably the problem behind the goalAngle not updating
 static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
 
 void resetPID() {
@@ -37,14 +33,13 @@ void resetPID() {
 	 *
 	 * You should additionally set your distance and error goal values (and your oldDistanceError and oldAngleError) to zero.
 	 */
+	angleError = 0;
+	angleCorrection = 0;
+	oldAngleError = 0;
 }
 
 void updatePID() {
 
-	if (motorStop) {
-		stop_motor();
-		motorStop = 0;
-	}
 	/*
 	 * This function will do the heavy lifting PID logic. It should do the following: read the encoder counts to determine an error,
 	 * use that error along with some PD constants you determine in order to determine how to set the motor speeds, and then actually
@@ -63,7 +58,8 @@ void updatePID() {
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
 	angleError = atomic_load(&goalAngle) - get_counts();
-	if (abs(angleError) > HALF_COUNTS) { // the units need to be fixed but this gets the best path
+	// Find optimal direction
+	if (abs(angleError) > MAX_COUNTS/2) {
 		if (angleError > 0) {
 			angleError = angleError - MAX_COUNTS;
 		}
@@ -71,10 +67,8 @@ void updatePID() {
 			angleError = angleError + MAX_COUNTS;
 		}
 	}
-
-
     angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
-//	printf("correction %d\r\n", angleCorrection);
+    // Set direction based on allowed error
 	if (angleCorrection < 0){
 		set_motor_direction(0);
 	} else{
@@ -84,12 +78,15 @@ void updatePID() {
 		angleCorrection = 100;
 	}
 	oldAngleError = angleError;
-	if (abs(angleError) <  100){
+	// Stop if within error
+	if (abs(angleError) <  ALLOWED_ERROR){
 		set_motor_speed(0);
 		return;
 	}
+
+	// Handle strange oscillations near 0 degrees with higher allowed error
 	if (goalAngle == 0) {
-		if (abs(angleError) < 300) {
+		if (abs(angleError) < ALLOWED_ERROR_ZERO) {
 			set_motor_speed(0);
 			return;
 		}
@@ -98,33 +95,8 @@ void updatePID() {
 
 }
 
-void setPIDGoalD(int16_t distance) {
-	/*
-	 * For assignment 3.1: this function does not need to do anything.
-	 * For assignment 3.2: this function should set a variable that stores the goal distance.
-	 */
-}
-
 void setPIDGoalA(double angle) {
-//	printf("set goal %f\r\n", angle);
-	int counts = angle_to_count(angle);
-	atomic_store(&goalAngle, angle_to_count(counts));
-//	printf("goal %d\r\n", goalAngle);
-}
-
-int8_t PIDdone(void) { // There is no bool type in C. True/False values are represented as 1 or 0.
-	/*
-	 * For assignment 3.1: this function does not need to do anything (your rat should just drive straight indefinitely)
-	 * For assignment 3.2:This function should return true if the rat has achieved the set goal. One way to do this by having updatePID() set some variable when
-	 * the error is zero (realistically, have it set the variable when the error is close to zero, not just exactly zero). You will have better results if you make
-	 * PIDdone() return true only if the error has been sufficiently close to zero for a certain number, say, 50, of SysTick calls in a row.
-	 */
-
-	return 1;
-}
-
-void stopPlease() {
-	motorStop = 1;
+	atomic_store(&goalAngle, angle_to_count(angle));
 }
 
 #endif
