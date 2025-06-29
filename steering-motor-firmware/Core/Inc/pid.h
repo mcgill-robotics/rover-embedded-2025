@@ -5,13 +5,12 @@
 #ifndef INC_PID_H_
 #define INC_PID_H_
 
-#include "main.h"
+#define kPw 1
+#define kDw 8
+#define ALLOWED_ERROR 100
+#define ALLOWED_ERROR_ZERO 300
 
-void resetPID(void);
 void updatePID(void);
-void setPIDGoalD(int16_t distance);
 void setPIDGoalA(double angle);
-int8_t PIDdone(void); // There is no bool type in C. True/False values are represented as 1 or 0.
-void stopPlease();
 
 #endif /* INC_PID_H_ */

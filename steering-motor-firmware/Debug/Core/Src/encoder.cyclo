@@ -1,0 +1,5 @@
+../Core/Src/encoder.c:9:6:set_counts	1
+../Core/Src/encoder.c:13:5:get_counts	1
+../Core/Src/encoder.c:17:7:count_to_angle	2
+../Core/Src/encoder.c:26:5:angle_to_count	1
+../Core/Src/encoder.c:32:6:calibrate_encoder	1

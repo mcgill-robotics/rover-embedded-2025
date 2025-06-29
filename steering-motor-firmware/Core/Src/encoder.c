@@ -28,3 +28,7 @@ int angle_to_count(double n){
 	int c = MAX_COUNTS;
 	return (int) ((new_n/(360))*MAX_COUNTS);
 }
+
+void calibrate_encoder(){
+	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
+}

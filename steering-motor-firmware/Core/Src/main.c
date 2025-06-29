@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "CAN_processing.h"
+#include "encoder.h"
+#include "motor.h"
+#include "pid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,9 +56,6 @@ UART_HandleTypeDef huart2;
 CAN_RxHeaderTypeDef RxHeader;
 uint8_t rxData[8];
 
-int STEERING_ID = RF_STEER; // Change based on what motor is being controlled!
-#define LIMIT_SWITCH_RESET_ANGLE 180
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,9 +73,6 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#include "encoder.h"
-#include "motor.h"
-#include "pid.h"
 
 int datacheck = 0;
 
@@ -526,12 +523,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : LIMIT_Pin */
+  GPIO_InitStruct.Pin = LIMIT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(LIMIT_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : DIR_Pin */
   GPIO_InitStruct.Pin = DIR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DIR_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* USER CODE END MX_GPIO_Init_2 */
@@ -565,8 +572,8 @@ PUTCHAR_PROTOTYPE
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 	set_counts(0);
-	if (GPIO_PIN == GPIO_PIN_3){
-		set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
+	if (GPIO_PIN == LIMIT_Pin){
+		calibrate_encoder();
 	}
 }
 
