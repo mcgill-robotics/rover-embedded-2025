@@ -9,13 +9,12 @@
 #include "encoder.h"
 #include "motor.h"
 #include "math.h"
+#include "pid.h"
 #include <stdatomic.h>
+#include <stdlib.h>
 
 // PID parameters
-#define kPw 1
-#define kDw 8
-#define ALLOWED_ERROR 100
-#define ALLOWED_ERROR_ZERO 300
+
 
 int angleError = 0;
 int angleCorrection = 0;
@@ -23,20 +22,6 @@ int oldAngleError = 0;
 
 static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
 
-void resetPID() {
-	/*
-	 * For assignment 3.1: This function does not need to do anything
-	 * For assignment 3.2: This function should reset all the variables you define in this file to help with PID to their default
-	 *  values. You should also reset your motors and encoder counts (if you tell your rat to turn 90 degrees, there will be a big
-	 * difference in encoder counts after it turns. If you follow that by telling your rat to drive straight without first
-	 * resetting the encoder counts, your rat is going to see a huge angle error and be very unhappy).
-	 *
-	 * You should additionally set your distance and error goal values (and your oldDistanceError and oldAngleError) to zero.
-	 */
-	angleError = 0;
-	angleCorrection = 0;
-	oldAngleError = 0;
-}
 
 void updatePID() {
 
