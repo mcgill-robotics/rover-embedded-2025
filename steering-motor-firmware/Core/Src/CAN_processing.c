@@ -56,9 +56,6 @@ static float g_speedThresh = 50.0f;    // threshold below which we treat speed a
 static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
 
 
-
-
-
 //The next functions here are to retrieve the correct pattern of bits from the received CAN message
 uint8_t get_CAN_transmitter (uint16_t CAN_ID) {
 	return (CAN_ID & SENDER_DEVICE_MASK) >> SENDER_DEVICE_SHIFT;
