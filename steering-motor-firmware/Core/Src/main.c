@@ -25,6 +25,7 @@
 #include "encoder.h"
 #include "motor.h"
 #include "pid.h"
+#include "TestList.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -158,6 +159,11 @@ int main(void)
 		    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		    datacheck = 0;
 	  }
+
+
+#ifdef TESTING_MODE
+	  AssortedTests();
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

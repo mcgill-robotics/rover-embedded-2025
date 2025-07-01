@@ -12,6 +12,7 @@
 #include "pid.h"
 #include <stdatomic.h>
 #include <stdlib.h>
+#include "TestList.h"
 
 // PID parameters
 
