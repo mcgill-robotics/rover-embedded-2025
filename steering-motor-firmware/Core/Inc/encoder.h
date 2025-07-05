@@ -1,9 +1,11 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-# define MAX_COUNTS 33024//16*516*4.0
-#define LIMIT_SWITCH_RESET_ANGLE 180
+#define MAX_COUNTS 33024//16*516*4.0
+#define LIMIT_SWITCH_RESET_ANGLE 0
 
+int is_debouncing();
+void set_debounce(int debounce_state);
 void set_counts(int n);
 int get_counts();
 float count_to_angle(int n);

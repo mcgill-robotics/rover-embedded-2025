@@ -162,7 +162,7 @@ int main(void)
 
 
 #ifdef TESTING_MODE
-	  AssortedTests();
+//	  AssortedTests();
 #endif
     /* USER CODE END WHILE */
 
@@ -579,7 +579,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 	set_counts(0);
 	if (GPIO_PIN == LIMIT_Pin){
-		calibrate_encoder();
+		int switch_state = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
+		if (!switch_state){
+			calibrate_encoder();
+		}
 	}
 }
 
