@@ -104,6 +104,10 @@ Reads all cell voltages from the selected bms chip. Note that the cell voltage a
     - **i2c_addr (byte):** I2C address of the BMS chip with which to communicate.
     - **cell_voltage_array (int array):** Array of cell voltages to modify (in-place).
     - **array_len (int):** Length of the array to modify.
+## _read_register 
+when i have time ill add the params and everytjing for these two fxns too
+## _write_register
+
 ## Registers
 The *Registers.h* file contains the addresses for each bms chip's corresponding registers. It's a simple layer of abstraction that allows for easier development when interfacing directly with the bms chips.
 ## Setpoints
