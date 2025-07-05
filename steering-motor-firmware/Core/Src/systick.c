@@ -5,8 +5,8 @@
 #include "main.h"
 #include "pid.h"
 #include "encoder.h"
-#include "stdio.h"
-#include "motor.h"
+
+int systick_counts = 0;
 
 void SysTickFunction(void) {
 	/*
@@ -14,4 +14,10 @@ void SysTickFunction(void) {
 	 */
 	updatePID();
 	set_counts((int16_t) TIM2->CNT);
+	if (is_debouncing()){
+		if(systick_counts++==100){
+			systick_counts=0;
+			set_debounce(0);
+		}
+	}
 }

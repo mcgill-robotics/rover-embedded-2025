@@ -9,5 +9,5 @@
 ../Core/Src/main.c:507:13:MX_GPIO_Init	1
 ../Core/Src/main.c:556:6:HAL_CAN_RxFifo0MsgPendingCallback	2
 ../Core/Src/main.c:569:1:__io_putchar	1
-../Core/Src/main.c:578:6:HAL_GPIO_EXTI_Callback	2
-../Core/Src/main.c:593:6:Error_Handler	1
+../Core/Src/main.c:578:6:HAL_GPIO_EXTI_Callback	3
+../Core/Src/main.c:596:6:Error_Handler	1

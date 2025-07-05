@@ -1,5 +1,7 @@
-../Core/Src/encoder.c:9:6:set_counts	16	static
-../Core/Src/encoder.c:13:5:get_counts	4	static
-../Core/Src/encoder.c:17:7:count_to_angle	24	static
-../Core/Src/encoder.c:26:5:angle_to_count	24	static
-../Core/Src/encoder.c:32:6:calibrate_encoder	8	static
+../Core/Src/encoder.c:11:5:is_debouncing	4	static
+../Core/Src/encoder.c:15:6:set_debounce	16	static
+../Core/Src/encoder.c:19:6:set_counts	16	static
+../Core/Src/encoder.c:23:5:get_counts	4	static
+../Core/Src/encoder.c:27:7:count_to_angle	24	static
+../Core/Src/encoder.c:36:5:angle_to_count	24	static
+../Core/Src/encoder.c:42:6:calibrate_encoder	8	static

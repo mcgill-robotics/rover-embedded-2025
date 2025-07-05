@@ -5,6 +5,16 @@
 #include "encoder.h"
 
 int counts;
+int need_debounce = 0;
+int limit_calls = 0;
+
+int is_debouncing(){
+	return need_debounce;
+}
+
+void set_debounce(int debounce_state){
+	need_debounce = debounce_state;
+}
 
 void set_counts(int n){
 	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
@@ -30,5 +40,10 @@ int angle_to_count(double n){
 }
 
 void calibrate_encoder(){
-	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
+	if (!is_debouncing()){
+		limit_calls++;
+		set_debounce(1);
+		TIM2->CNT = LIMIT_SWITCH_RESET_ANGLE;
+	}
+//	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
 }
