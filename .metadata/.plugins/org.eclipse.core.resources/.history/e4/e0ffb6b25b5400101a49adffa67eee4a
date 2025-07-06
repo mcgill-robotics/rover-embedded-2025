@@ -1,0 +1,175 @@
+#include "brushed_comms.h"
+#include "usbd_cdc_if.h"
+#include <string.h>
+
+#define MAX_PACKET_SIZE 64
+
+static uint8_t rx_buffer[MAX_PACKET_SIZE];
+static uint8_t rx_index = 0;
+static uint8_t expected_length = 0;
+
+static FeedbackData* feedback_ptr = NULL;
+
+// External API to register feedback pointer
+void BrushedComms_RegisterFeedback(FeedbackData* fb) {
+    feedback_ptr = fb;
+}
+
+// Call this to initialize (currently a stub)
+void BrushedComms_Init(void) {
+    // Any USB initialization is handled by CubeMX & USB stack
+}
+
+// Called when data is received over USB
+// This is called from CDC_Receive_FS()
+void BrushedComms_ReceiveByte(uint8_t byte) {
+    if (rx_index == 0 && byte != START_BYTE)
+        return; // Wait for start byte
+
+    rx_buffer[rx_index++] = byte;
+
+    // Once we have the Length byte, store expected full packet length
+    if (rx_index == 3)
+        expected_length = 3 + rx_buffer[2] + 1; // Start + Cmd + Len + Data + CRC
+
+    // Once we have a full packet
+    if (expected_length > 0 && rx_index >= expected_length) {
+        // Validate CRC
+        uint8_t calc_crc = BrushedComms_CalculateCRC(&rx_buffer[1], expected_length - 2);
+        uint8_t recv_crc = rx_buffer[expected_length - 1];
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8); // for debug
+
+        if (calc_crc == recv_crc) {
+            uint8_t cmd = rx_buffer[1];
+            uint8_t* data = &rx_buffer[3];
+            uint8_t len = rx_buffer[2];
+
+            switch (cmd) {
+                case CMD_SETPOINT:
+                    BrushedComms_HandleSetpoint(data, len);
+                    break;
+                case CMD_COMMAND:
+                    BrushedComms_HandleCommand(data, len);
+                    break;
+                default:
+                    BrushedComms_ReportError(0x80 | cmd); // Unknown command
+                    break;
+            }
+        } else {
+            BrushedComms_ReportError(0x06); // Comms CRC error
+        }
+
+        rx_index = 0;
+        expected_length = 0;
+    }
+
+    // Overflow protection
+    if (rx_index >= MAX_PACKET_SIZE) {
+        rx_index = 0;
+        expected_length = 0;
+        BrushedComms_ReportError(0x07); // Buffer overflow
+    }
+}
+
+// This is called by main() or timer at desired feedback rate
+void BrushedComms_Process(void) {
+    if (feedback_ptr) {
+        BrushedComms_SendFeedback(feedback_ptr);
+    }
+}
+
+// Send feedback (as before)
+void BrushedComms_SendFeedback(const FeedbackData* feedback) {
+    if (!feedback) return;
+
+    uint8_t packet[MAX_PACKET_SIZE];
+    uint8_t index = 0;
+
+    packet[index++] = START_BYTE;
+    packet[index++] = CMD_FEEDBACK;
+
+    uint8_t dataLen = 9;
+    packet[index++] = dataLen;
+
+    memcpy(&packet[index], feedback->motor_position, 4); index += 4;
+    memcpy(&packet[index], feedback->motor_current, 4); index += 4;
+    packet[index++] = feedback->error_code;
+
+    uint8_t crc = BrushedComms_CalculateCRC(&packet[1], dataLen + 2);
+    packet[index++] = crc;
+
+    CDC_Transmit_FS(packet, index);
+}
+
+// Report error packet
+void BrushedComms_ReportError(uint8_t error_code) {
+    uint8_t packet[5];
+    packet[0] = START_BYTE;
+    packet[1] = CMD_ERROR;
+    packet[2] = 1;
+    packet[3] = error_code;
+    packet[4] = BrushedComms_CalculateCRC(&packet[1], 3);
+    CDC_Transmit_FS(packet, 5);
+}
+
+void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length) {
+    // TODO: Apply setpoints to control logic
+    // Example debug:
+    // uint16_t wp_target = (data[0] << 8) | data[1];
+    // uint16_t wr_target = (data[2] << 8) | data[3];
+}
+
+void BrushedComms_SendEcho(const uint8_t* data, uint16_t len) {
+    if (!data || len == 0 || len > 60) return;
+
+    uint8_t packet[MAX_PACKET_SIZE];
+    uint8_t index = 0;
+
+    packet[index++] = START_BYTE;
+    packet[index++] = CMD_ECHO;
+    packet[index++] = len;
+
+    memcpy(&packet[index], data, len);
+    index += len;
+
+    uint8_t crc = BrushedComms_CalculateCRC(&packet[1], len + 2);
+    packet[index++] = crc;
+
+    CDC_Transmit_FS(packet, index);
+}
+
+void BrushedComms_HandleCommand(const uint8_t* data, uint16_t length) {
+    if (!data || length == 0) return;
+
+    uint8_t subcommand = data[0];
+
+    switch (subcommand) {
+        case CMD_ECHO:
+            BrushedComms_SendEcho(data + 1, length - 1); // Echo payload only
+            break;
+
+        case CMD_FEEDBACK:
+        	BrushedComms_SendFeedback(feedback_ptr);
+        	break;
+
+        // Add future cases here
+        // case CMD_RESET:
+        //     HandleReset(data + 1, length - 1);
+        //     break;
+
+        default:
+            BrushedComms_ReportError(0x81); // Unknown subcommand
+            break;
+    }
+}
+
+// CRC-8 polynomial 0x07
+uint8_t BrushedComms_CalculateCRC(uint8_t* data, uint16_t length) {
+    uint8_t crc = 0x00;
+    while (length--) {
+        crc ^= *data++;
+        for (uint8_t i = 0; i < 8; ++i)
+            crc = (crc & 0x80) ? (crc << 1) ^ 0x07 : (crc << 1);
+    }
+    return crc;
+}

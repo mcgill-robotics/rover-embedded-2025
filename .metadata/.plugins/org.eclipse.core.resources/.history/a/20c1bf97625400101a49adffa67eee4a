@@ -1,0 +1,42 @@
+/*
+ * stspin948.h
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+#ifndef INC_STSPIN948_H_
+#define INC_STSPIN948_H_
+
+struct BrushedDriverConfig {
+	uint8_t phase_a_port;
+	uint8_t phase_a_pin;
+	uint8_t phase_b_port;
+	uint8_t phase_b_pin;
+	TIM_HandleTypeDef* pwm_a_inst;
+	uint8_t pwm_a_channel;
+	TIM_HandleTypeDef* pwm_b_inst;
+	uint8_t pwm_b_channel;
+};
+
+struct BrushedDriver {
+	// outputs
+	uint32_t pwm_a;
+	uint32_t pwm_b;
+	uint8_t phase_a;
+	uint8_t phase_b;
+	uin16_t dacRef_a;
+	uint16_t dacRef_b;
+
+	//inputs
+	uint8_t enFault_a;
+	uint8_t enFault_b;
+	uint16_t cur_a;
+	uint16_t cur_b;
+
+};
+
+void readInputs(struct BrushedDriver* driverInstance);
+void setOutputs()
+
+#endif /* INC_STSPIN948_H_ */

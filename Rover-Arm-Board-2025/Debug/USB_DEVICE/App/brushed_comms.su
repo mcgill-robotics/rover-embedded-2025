@@ -1,0 +1,7 @@
+../USB_DEVICE/App/brushed_comms.cpp:8:6:void BrushedComms_Init()	4	static
+../USB_DEVICE/App/brushed_comms.cpp:14:6:void BrushedComms_Process()	4	static
+../USB_DEVICE/App/brushed_comms.cpp:20:6:void BrushedComms_SendFeedback(const FeedbackData*)	16	static
+../USB_DEVICE/App/brushed_comms.cpp:35:6:void BrushedComms_HandleSetpoint(const uint8_t*, uint16_t)	16	static
+../USB_DEVICE/App/brushed_comms.cpp:45:6:void BrushedComms_HandleCommand(const uint8_t*, uint16_t)	16	static
+../USB_DEVICE/App/brushed_comms.cpp:55:6:void BrushedComms_ReportError(uint8_t)	16	static
+../USB_DEVICE/App/brushed_comms.cpp:64:9:uint8_t BrushedComms_CalculateCRC(uint8_t*, uint16_t)	24	static

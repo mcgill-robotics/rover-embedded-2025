@@ -1,0 +1,86 @@
+/*
+ * stspin948.h
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+#ifndef INC_STSPIN948_H_
+#define INC_STSPIN948_H_
+
+#define MAX_PWM_VALUE 4095
+#define INTEGRAL_MAX 1000.0f
+#define PID_MAX_DUTY (float)(MAX_PWM_VALUE)
+#define PID_MIN_DUTY (-1)*(float)(MAX_PWM_VALUE)
+
+struct BrushedDriverConfig {
+	uint8_t phase_a_port;
+	uint8_t phase_a_pin;
+	uint8_t phase_b_port;
+	uint8_t phase_b_pin;
+	uint8_t enFault_a_port;
+	uint8_t enFault_a_pin;
+	uint8_t enFault_b_port;
+	uint8_t enFault_b_pin;
+	TIM_HandleTypeDef* pwm_a_inst;
+	uint8_t pwm_a_channel;
+	TIM_HandleTypeDef* pwm_b_inst;
+	uint8_t pwm_b_channel;
+	DAC_HandleTypeDef* dacRef_a_inst;
+	DAC_HandleTypeDef* dacRef_b_inst;
+	uint8_t dacRef_a_channel;
+	uint8_t dacRef_b_channel;
+	uint16_t dacRef_a;
+	uint16_t dacRef_b;
+	ADC_HandleTypeDef* cur_inst;
+	float cur_a_factor;
+	float cur_b_factor;
+
+	float kp_a;
+	float ki_a;
+	float kd_a;
+	float kp_b;
+	float ki_b;
+	float kd_b;
+
+};
+
+struct PIDValues {
+	float setpoint;
+	float position;
+	float error;
+	float prev_error;
+	float integral;
+	float derivative;
+};
+
+struct BrushedDriver {
+	// outputs
+	uint32_t pwm_a;
+	uint32_t pwm_b;
+	uint8_t phase_a;
+	uint8_t phase_b;
+
+	//inputs
+	uint8_t enFault_a;
+	uint8_t enFault_b;
+	float cur_a;
+	float cur_b;
+	volatile uint16_t raw_cur[2];
+
+	float setpoint_a;
+	float setpoint_b;
+
+	//config
+	struct BrushedDriverConfig* config;
+
+};
+
+void STSPIN948_Init(struct BrushedDriver* driverInstance);
+void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance);
+void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance);
+void STSPIN948_SetPwmValues(struct BrushedDriver* driverInstance, uint32_t pwm_a, uint32_t pwm_b);
+void STSPIN948_SetDirections(struct BrushedDriver* driverInstance, uint8_t phase_a, uint8_t phase_b);
+void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance);
+
+#endif /* INC_STSPIN948_H_ */

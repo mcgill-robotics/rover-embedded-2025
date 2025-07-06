@@ -1,0 +1,55 @@
+#ifndef BRUSHED_COMMS_H
+#define BRUSHED_COMMS_H
+
+#include <stdint.h>
+
+// Communication protocol constants
+#define CMD_SETPOINT 0x01
+#define CMD_COMMAND  0x02
+#define CMD_ERROR    0x03
+#define CMD_FEEDBACK 0x04
+
+#define START_BYTE 0xAA // Start byte for communication protocol
+
+/***
+ * @details
+ * Communication protocol for the Arm Brushed Board.
+ * -----------------------------------------------------------------------
+ * | Start Byte 1 | Command | Length |          Data        |  Checksum  |
+ * -----------------------------------------------------------------------
+ * | 0xAA         | 1 byte  | 1 byte |      1-60 bytes      |   1 byte   |
+ * -----------------------------------------------------------------------
+ */
+
+// Feedback structure
+typedef struct {
+    uint16_t motor_position[2]; // WP, WR
+    uint16_t motor_current[2]; // WP, WR
+
+    /**
+     * @brief Error code indicating the status of the motor.
+     * This is a one-hot encoded value where each bit represents a specific error condition.
+     * - Bit 0: End-Effector Limit
+     * - Bit 1: WP Fault
+     * - Bit 2: WR Fault
+     * - Bit 3: WP Limit
+     * - Bit 4: WR Limit
+     * - Bit 5: Comms Error
+     * - Bit 6: Undefined
+     * - Bit 7: Undefined
+     */
+    uint8_t error_code;
+} FeedbackData;
+
+// Function prototypes
+void BrushedComms_Init(void); // Initialize communication
+void BrushedComms_Process(void); // Process incoming and outgoing data
+void BrushedComms_SendFeedback(const FeedbackData* feedback); // Send feedback to PC
+void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length); // Handle setpoint data from PC
+void BrushedComms_HandleCommand(const uint8_t* data, uint16_t length); // Handle commands from PC
+void BrushedComms_ReportError(uint8_t error_code); // Report error to PC
+uint8_t BrushedComms_CalculateCRC(uint8_t* data, uint16_t length); // Calculate CRC for data integrity
+void BrushedComms_ReceiveByte(uint8_t byte);
+void BrushedComms_RegisterFeedback(FeedbackData* fb);
+
+#endif // BRUSHED_COMMS_H

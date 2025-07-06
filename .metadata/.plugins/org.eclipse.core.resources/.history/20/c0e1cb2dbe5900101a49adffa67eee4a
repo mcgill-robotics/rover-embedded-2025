@@ -1,0 +1,39 @@
+/*
+ * stspin948.c
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+
+#include "stspin948.h"
+
+void STSPIN948_Init(struct BrushedDriver* driverInstance){
+	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel);
+	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel);
+
+	//DAC Outputs don't change
+	HAL_DAC_SetValue(driverInstance->config->dacRef_a_inst,driverInstance->config->dacRef_a_channel, DAC_ALIGN_12B_R, driverInstance->config->dacRef_a);
+	HAL_DAC_SetValue(driverInstance->config->dacRef_b_inst,driverInstance->config->dacRef_b_channel, DAC_ALIGN_12B_R, driverInstance->config->dacRef_b);
+
+	STSPIN948_SetOutputs(driverInstance);
+	STSPIN948_ReadInputs(driverInstance);
+}
+
+void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance){
+
+	// update driver enable inputs
+	driverInstance->enFault_a = HAL_GPIO_ReadPin(driverInstance->config->enFault_a_port,driverInstance->config->enFault_a_pin);
+	driverInstance->enFault_b = HAL_GPIO_ReadPin(driverInstance->config->enFault_b_port,driverInstance->config->enFault_b_pin);
+
+	// update currents
+	driverInstance->cur_a = ((float)driverInstance->raw_cur[0]/4095.0) * driverInstance->config->cur_a_factor;
+	driverInstance->cur_b = ((float)driverInstance->raw_cur[1]/4095.0) * driverInstance->config->cur_b_factor;
+}
+
+void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance){
+	__HAL_TIM_SET_COMPARE(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel, driverInstance->pwm_a);
+	__HAL_TIM_SET_COMPARE(driverInstance->config->pwm_b_inst, driverInstance->config->pwm_b_channel, driverInstance->pwm_b);
+	HAL_GPIO_WritePin(driverInstance->config->enFault_a_port,driverInstance->config->enFault_a_pin, driverInstance->phase_a);
+	HAL_GPIO_WritePin(driverInstance->config->enFault_b_port,driverInstance->config->enFault_b_pin, driverInstance->phase_b);
+}

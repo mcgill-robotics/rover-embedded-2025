@@ -1,0 +1,25 @@
+/*
+ * encoder_conf.h
+ *
+ *  Created on: Jul 5, 2025
+ *      Author: vince
+ */
+
+#ifndef INC_ENCODER_CONF_H_
+#define INC_ENCODER_CONF_H_
+
+struct MotorEncoder {
+	volatile int32_t min_limit_counts;
+	volatile int32_t max_limit_counts;
+	volatile int32_t total_counts_range;
+	volatile float angle_range;
+	volatile uint8_t is_homed;
+};
+
+int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim){
+	return (int32_t)__HAL_TIM_GET_COUNTER(htim);
+}
+
+float NewPosition(struct MotorEncoder* menc);
+
+#endif /* INC_ENCODER_CONF_H_ */

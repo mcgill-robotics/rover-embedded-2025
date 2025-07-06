@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "brushed_comms.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -146,7 +146,7 @@ USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 
 /* Private functions ---------------------------------------------------------*/
 /**
-  * @brief  Initializes the CDC media low layer over the FS USB IP    
+  * @brief  Initializes the CDC media low layer over the FS USB IP
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
 static int8_t CDC_Init_FS(void)
@@ -261,6 +261,9 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  for (uint32_t i = 0; i < *Len; i++) {
+	BrushedComms_ReceiveByte(Buf[i]);
+  }
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

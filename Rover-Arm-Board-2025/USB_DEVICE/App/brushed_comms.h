@@ -5,9 +5,14 @@
 
 // Communication protocol constants
 #define CMD_SETPOINT 0x01
-#define CMD_COMMAND  0x02
-#define CMD_ERROR    0x03
-#define CMD_FEEDBACK 0x04
+#define CMD_FEEDBACK 0x02
+#define CMD_ECHO    0x03
+#define CMD_HOME	0x04
+#define CMD_ERROR	0x05
+
+#define ERROR_UNKNOWN_COMMAND 0x80
+#define ERROR_INVALID_CRC 0x06
+#define ERROR_BUFFER_OVERFLOW 0x07
 
 #define START_BYTE 0xAA // Start byte for communication protocol
 
@@ -41,6 +46,18 @@ typedef struct {
     uint8_t error_code;
 } FeedbackData;
 
+enum EE_Command{
+	EE_OFF = 0,
+	EE_OPEN = 1,
+	EE_CLOSE = 2,
+	EE_HOLD = 3
+};
+
+typedef struct {
+	uint16_t motor_setpoints[2];
+	uint8_t ee_command;
+} SetpointData;
+
 // Function prototypes
 void BrushedComms_Init(void); // Initialize communication
 void BrushedComms_Process(void); // Process incoming and outgoing data
@@ -49,5 +66,7 @@ void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length); // Handl
 void BrushedComms_HandleCommand(const uint8_t* data, uint16_t length); // Handle commands from PC
 void BrushedComms_ReportError(uint8_t error_code); // Report error to PC
 uint8_t BrushedComms_CalculateCRC(uint8_t* data, uint16_t length); // Calculate CRC for data integrity
+void BrushedComms_ReceiveByte(uint8_t byte);
+void BrushedComms_RegisterFeedback(FeedbackData* fb);
 
 #endif // BRUSHED_COMMS_H

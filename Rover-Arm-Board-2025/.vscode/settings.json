@@ -1,0 +1,7 @@
+{
+    "stm32-for-vscode.openOCDPath": false,
+    "stm32-for-vscode.makePath": false,
+    "files.associations": {
+        "usbd_cdc_if.h": "c"
+    }
+}

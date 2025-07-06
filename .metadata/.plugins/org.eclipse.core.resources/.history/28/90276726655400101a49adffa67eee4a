@@ -1,0 +1,13 @@
+/*
+ * stspin948.c
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+
+#include "stspin948.h"
+
+void STSPIN948_readInputs(struct BrushedDriver* driverInstance){
+
+}

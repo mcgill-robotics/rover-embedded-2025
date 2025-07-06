@@ -1,0 +1,15 @@
+/*
+ * stspin948.h
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+#ifndef INC_STSPIN948_H_
+#define INC_STSPIN948_H_
+
+struct BrushedDriver {
+	uint32_t pwm;
+};
+
+#endif /* INC_STSPIN948_H_ */

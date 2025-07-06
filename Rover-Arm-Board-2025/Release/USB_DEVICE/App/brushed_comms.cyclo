@@ -1,0 +1,10 @@
+../USB_DEVICE/App/brushed_comms.c:14:6:BrushedComms_RegisterFeedback	1
+../USB_DEVICE/App/brushed_comms.c:19:6:BrushedComms_Init	1
+../USB_DEVICE/App/brushed_comms.c:115:6:BrushedComms_HandleSetpoint	1
+../USB_DEVICE/App/brushed_comms.c:167:9:BrushedComms_CalculateCRC	4
+../USB_DEVICE/App/brushed_comms.c:82:6:BrushedComms_SendFeedback	2
+../USB_DEVICE/App/brushed_comms.c:75:6:BrushedComms_Process	2
+../USB_DEVICE/App/brushed_comms.c:105:6:BrushedComms_ReportError	1
+../USB_DEVICE/App/brushed_comms.c:122:6:BrushedComms_SendEcho	3
+../USB_DEVICE/App/brushed_comms.c:141:6:BrushedComms_HandleCommand	5
+../USB_DEVICE/App/brushed_comms.c:25:6:BrushedComms_ReceiveByte	10

@@ -1,0 +1,23 @@
+/*
+ * encoder_conf.c
+ *
+ *  Created on: Jul 5, 2025
+ *      Author: vince
+ */
+
+
+int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim){
+	return (int32_t)__HAL_TIM_GET_COUNTER(htim);
+}
+
+void NewPosition(struct MotorEncoder* menc){
+	menc->count = ReadEncoderCounts(menc->htim);
+	if (menc->min_limit_counts == menc->max_limit_counts) menc->angle = -1.0;
+	if (menc->count < menc->min_limit_counts) menc->count = menc->min_limit_counts;
+	else if (menc->count > menc->max_limit_counts) menc->count = menc->max_limit_counts;
+	menc->angle = ((float)(menc->count - menc->min_limit_counts) / menc->total_counts_range) * menc->angle_range;
+}
+
+void MotorEncoder_Init(struct MotorEncoder* menc){
+	HAL_TIM_Encoder_Start(menc->htim, Channel)
+}

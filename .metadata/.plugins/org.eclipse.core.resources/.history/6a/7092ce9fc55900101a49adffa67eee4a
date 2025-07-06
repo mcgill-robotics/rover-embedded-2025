@@ -1,0 +1,84 @@
+/*
+ * stspin948.c
+ *
+ *  Created on: Jun 28, 2025
+ *      Author: vince
+ */
+
+
+#include "stspin948.h"
+
+void STSPIN948_Init(struct BrushedDriver* driverInstance){
+	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel);
+	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel);
+
+	//Start ADC DMA transfers
+	HAL_ADC_Start_DMA(driverInstance->config->cur_inst, driverInstance->raw_cur, 2);
+
+	//DAC Outputs don't change
+	HAL_DAC_SetValue(driverInstance->config->dacRef_a_inst,driverInstance->config->dacRef_a_channel, DAC_ALIGN_12B_R, driverInstance->config->dacRef_a);
+	HAL_DAC_SetValue(driverInstance->config->dacRef_b_inst,driverInstance->config->dacRef_b_channel, DAC_ALIGN_12B_R, driverInstance->config->dacRef_b);
+
+	STSPIN948_SetOutputs(driverInstance);
+	STSPIN948_ReadInputs(driverInstance);
+}
+
+void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance){
+
+	// update driver enable inputs
+	driverInstance->enFault_a = HAL_GPIO_ReadPin(driverInstance->config->enFault_a_port,driverInstance->config->enFault_a_pin);
+	driverInstance->enFault_b = HAL_GPIO_ReadPin(driverInstance->config->enFault_b_port,driverInstance->config->enFault_b_pin);
+
+	// update currents
+	driverInstance->cur_a = ((float)driverInstance->raw_cur[0]/4095.0) * driverInstance->config->cur_a_factor;
+	driverInstance->cur_b = ((float)driverInstance->raw_cur[1]/4095.0) * driverInstance->config->cur_b_factor;
+}
+
+void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance){
+	__HAL_TIM_SET_COMPARE(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel, driverInstance->pwm_a);
+	__HAL_TIM_SET_COMPARE(driverInstance->config->pwm_b_inst, driverInstance->config->pwm_b_channel, driverInstance->pwm_b);
+	HAL_GPIO_WritePin(driverInstance->config->enFault_a_port,driverInstance->config->enFault_a_pin, driverInstance->phase_a);
+	HAL_GPIO_WritePin(driverInstance->config->enFault_b_port,driverInstance->config->enFault_b_pin, driverInstance->phase_b);
+}
+
+void STSPIN948_SetPwmValues(struct BrushedDriver* driverInstance, uint32_t pwm_a, uint32_t pwm_b){
+
+	if (pwm_a > MAX_PWM_VALUE){
+		driverInstance->pwm_a = MAX_PWM_VALUE;
+	}else{
+		driverInstance->pwm_a = pwm_a;
+	}
+	if (pwm_b > MAX_PWM_VALUE){
+		driverInstance->pwm_b = MAX_PWM_VALUE;
+	}else{
+		driverInstance->pwm_b = pwm_b;
+	}
+}
+
+
+void STSPIN948_SetDirections(struct BrushedDriver* driverInstance, uint8_t phase_a, uint8_t phase_b){
+	if (phase_a > 1){
+		driverInstance->phase_a = 1;
+	}else{
+		driverInstance->phase_a = phase_a;
+	}
+	if (phase_b > 1){
+			driverInstance->phase_b = 1;
+		}else{
+			driverInstance->phase_b = phase_a;
+		}
+}
+
+void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance, float pos_a, float pos_b){
+	driverInstance->pid_a->error = driverInstance->pid_a->setpoint - pos_a;
+	driverInstance->pid_b->error = driverInstance->pid_b->setpoint - pos_b;
+
+	driverInstance->pid_a->integral += driverInstance->pid_a->error;
+	driverInstance->pid_b->integral += driverInstance->pid_b->error;
+
+	if (driverInstance->pid_a->integral > INTEGRAL_MAX) driverInstance->pid_a->integral = INTEGRAL_MAX;
+	else if (driverInstance->pid_a->integral < -INTEGRAL_MAX) driverInstance->pid_a->integral = -INTEGRAL_MAX;
+
+	if (driverInstance->pid_b->integral > INTEGRAL_MAX) driverInstance->pid_b->integral = INTEGRAL_MAX;
+	else if (driverInstance->pid_b->integral < -INTEGRAL_MAX) driverInstance->pid_b->integral = -INTEGRAL_MAX;
+}

@@ -1,0 +1,19 @@
+/*
+ * encoder_conf.c
+ *
+ *  Created on: Jul 5, 2025
+ *      Author: vince
+ */
+
+
+int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim){
+	return (int32_t)__HAL_TIM_GET_COUNTER(htim);
+}
+
+void NewPosition(struct MotorEncoder* menc){
+
+}
+
+void HomingSequence(struct BrushedDriver* driverInstance, struct MotorEncoder* menc){
+
+}

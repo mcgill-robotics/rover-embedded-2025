@@ -1,0 +1,67 @@
+#include "cat25160.h"
+
+static SPI_HandleTypeDef *eeprom_spi;
+
+void CAT25160_Init(SPI_HandleTypeDef *hspi) {
+    eeprom_spi = hspi;
+    CAT25160_CS_HIGH();
+}
+
+static void CAT25160_SendCommand(uint8_t cmd) {
+    CAT25160_CS_LOW();
+    HAL_SPI_Transmit(eeprom_spi, &cmd, 1, HAL_MAX_DELAY);
+    CAT25160_CS_HIGH();
+    HAL_Delay(1);
+}
+
+void CAT25160_WriteEnable(void) {
+    CAT25160_SendCommand(CAT25160_CMD_WREN);
+}
+
+CAT25160_StatusRegister CAT25160_ReadStatus(void) {
+    uint8_t cmd = CAT25160_CMD_RDSR;
+    union CAT25160_StatusRegister status;
+    CAT25160_CS_LOW();
+    HAL_SPI_Transmit(eeprom_spi, &cmd, 1, HAL_MAX_DELAY);
+    HAL_SPI_Receive(eeprom_spi, &status, 1, HAL_MAX_DELAY);
+    CAT25160_CS_HIGH();
+    return status;
+}
+
+HAL_StatusTypeDef CAT25160_Read(uint16_t addr, uint8_t *data, uint16_t len) {
+    uint8_t cmd[3];
+    cmd[0] = CAT25160_CMD_READ;
+    cmd[1] = addr >> 8;
+    cmd[2] = addr & 0xFF;
+
+    CAT25160_CS_LOW();
+    if (HAL_SPI_Transmit(eeprom_spi, cmd, 3, HAL_MAX_DELAY) != HAL_OK) return HAL_ERROR;
+    HAL_StatusTypeDef res = HAL_SPI_Receive(eeprom_spi, data, len, HAL_MAX_DELAY);
+    CAT25160_CS_HIGH();
+    return res;
+}
+
+HAL_StatusTypeDef CAT25160_WritePage(uint16_t addr, const uint8_t *data, uint16_t len) {
+    if (len > CAT25160_PAGE_SIZE || ((addr & 0x1F) + len > CAT25160_PAGE_SIZE)) {
+        return HAL_ERROR; // Page overflow
+    }
+
+    uint8_t cmd[3];
+    cmd[0] = CAT25160_CMD_WRITE;
+    cmd[1] = addr >> 8;
+    cmd[2] = addr & 0xFF;
+
+    CAT25160_WriteEnable();
+
+    CAT25160_CS_LOW();
+    if (HAL_SPI_Transmit(eeprom_spi, cmd, 3, HAL_MAX_DELAY) != HAL_OK) return HAL_ERROR;
+    if (HAL_SPI_Transmit(eeprom_spi, (uint8_t *)data, len, HAL_MAX_DELAY) != HAL_OK) return HAL_ERROR;
+    CAT25160_CS_HIGH();
+
+    // Wait for write to complete
+    while (CAT25160_ReadStatus() & 0x01) {
+        HAL_Delay(1);
+    }
+
+    return HAL_OK;
+}

@@ -1,0 +1,17 @@
+/*
+ * encoder_conf.h
+ *
+ *  Created on: Jul 5, 2025
+ *      Author: vince
+ */
+
+#ifndef INC_ENCODER_CONF_H_
+#define INC_ENCODER_CONF_H_
+
+struct MotorEncoder {
+	volatile int32_t min_limit_counts;
+	volatile int32_t max_limit_counts;
+	volatile int32_t total_counts_range;
+};
+
+#endif /* INC_ENCODER_CONF_H_ */
