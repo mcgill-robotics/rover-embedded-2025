@@ -39,6 +39,7 @@ class NodeID(Enum):
     RB_STEER = 5
     LB_STEER = 6
     LF_STEER = 7
+    WAIST = 8
 
 # Custom function which creates a proper ID for the esc.
 def build_custom_can_id(action, multi_single, drive_steer, spec, node_id):
@@ -387,22 +388,67 @@ if __name__ == "__main__":
     # print(can.interface.detect_available_configs())
     station = CANStation(interface="slcan", channel="COM6", bitrate=500000) #channel must be 0 as zig
 
+
     # Create an ESCs class
     escInterface = ESCInterface(station)
-
+    
+    #
     # Create Drive interface for high-level drive control
     drive = DriveInterface(escInterface)
 
 
     ## CODE BELOW HERE
-    # drive.stop_motor(NodeID.LF_DRIVE)
+    # drive.ping_motor(NodeID.RF_DRIVE)
+    # drive.ping_motor(NodeID.RF_DRIVE)
+    # drive.read_state(NodeID.RF_DRIVE)
+    # drive.read_all_faults(NodeID.RF_DRIVE)
+    # drive.getAllMotorStatus()
+    drive.run_motor(NodeID.RF_DRIVE,200 )
 
+
+    # drive.getAllMotorStatus()
+    # drive.read_all_faults(NodeID.RF_DRIVE)
+    # drive.read_all_faults(NodeID.RF_DRIVE)
+    # drive.acknowledgeAllMotorFaults()
+    # time.sleep(0.3)
+    # drive.run_motor(NodeID.RF_DRIVE,1000)
+    # drive.stop_motor(NodeID.RF_DRIVE)
+    # time.sleep(0.3)
+    
+    # for i in range(50):
+    #     drive.read_state(NodeID.RF_DRIVE)
+    #     station.recv_msg(0.03)
+    #     time.sleep(0.05)
+
+    # drive.ping_motor(NodeID.RF_DRIVE)
+    # drive.stop_motor(NodeID.LF_DRIVE)
+    # drive.getAllMotorStatus()
+    # drive.run_motor(NodeID.RB_DRIVE, 500)
+    # drive.ping_motor(NodeID.LB_DRIVE)
+    # drive.run_motor(NodeID.RB_DRIVE, 1000)
+    # drive.acknowledgeAllMotorFaults()
+    # for i in range(1000):
+    #     time.sleep(0.05)
+    #     drive.ping_motor(NodeID.LF_DRIVE)
+
+    # drive.getAllMotorStatus()
+    # drive.acknowledgeAllMotorFaults()
+    # drive.run_motor(NodeID.LB_DRIVE, 5000)
     # drive.run_motor(NodeID.LF_DRIVE, 1500)
     # drive.read_all_faults(NodeID.LF_DRIVE)
+    # drive.getAllMotorStatus()
+
+
+    # drive.run_motor(NodeID.LB_DRIVE, 500)
+    # drive.stop_motor(NodeID.RB_DRIVE)
+    # drive.getAllMotorStatus()
+    # drive.run_motor(NodeID.RB_DRIVE, 1000)
+    # time.sleep(0.01)
+    # drive.run_motor(NodeID.LF_DRIVE, 1000)
     # drive.stop_motor(NodeID.LF_DRIVE)
 
     
-    station.recv_msg(0.01)
+    station.recv_msg(0.03)
     station.close()
 
 

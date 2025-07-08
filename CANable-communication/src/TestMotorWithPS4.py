@@ -96,7 +96,7 @@ def run_ps4_drive_loop():
                 get_all_motor_status(drive, station)
             prev_square = square
 
-            # === Read analog sticks and drive ===
+            # === Read analog sticks and drive ===,llo
             target_left  = -joystick.get_axis(1) * MAX_SPEED
             target_right = -joystick.get_axis(3) * MAX_SPEED
 
@@ -109,7 +109,7 @@ def run_ps4_drive_loop():
             print(f"Left Y Setpoint: {left_cmd:.2f} | Right Y Setpoint: {right_cmd:.2f}")
 
             # Drive mapping: [RF, LF, LB, RB]
-            speeds = [right_cmd, left_cmd, left_cmd, right_cmd]
+            speeds = [-right_cmd, -left_cmd, left_cmd, right_cmd]
             drive.broadcast_multi_motor_speeds(speeds)
 
             time.sleep(MESSAGE_DELAY)
