@@ -1,0 +1,5 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/stm32_mc_common_it.c:68:6:TIM4_IRQHandler	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/stm32_mc_common_it.c:107:6:USART2_IRQHandler	14
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/stm32_mc_common_it.c:185:6:HardFault_Handler	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/stm32_mc_common_it.c:204:6:SysTick_Handler	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/stm32_mc_common_it.c:252:6:EXTI15_10_IRQHandler	2

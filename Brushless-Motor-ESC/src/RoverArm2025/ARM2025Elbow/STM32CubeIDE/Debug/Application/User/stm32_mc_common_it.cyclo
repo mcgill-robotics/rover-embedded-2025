@@ -1,0 +1,4 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Elbow/Src/stm32_mc_common_it.c:67:6:TIM4_IRQHandler	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Elbow/Src/stm32_mc_common_it.c:104:6:HardFault_Handler	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Elbow/Src/stm32_mc_common_it.c:123:6:SysTick_Handler	2
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Elbow/Src/stm32_mc_common_it.c:162:6:EXTI15_10_IRQHandler	2
