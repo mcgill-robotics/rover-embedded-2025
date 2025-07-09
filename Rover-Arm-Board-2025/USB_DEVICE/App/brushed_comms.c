@@ -48,12 +48,18 @@ void BrushedComms_ReceiveByte(uint8_t byte) {
                 case CMD_SETPOINT:
                     BrushedComms_HandleSetpoint(data, len);
                     break;
-                case CMD_COMMAND:
-                    BrushedComms_HandleCommand(data, len);
-                    break;
+                case CMD_FEEDBACK:
+					BrushedComms_SendFeedback(feedback_ptr);
+					break;
+                case CMD_ECHO:
+					BrushedComms_SendEcho(data, len); // Echo payload only
+					break;
+                case CMD_HOME:
+                	BrushedComms_HandleHoming(data, len);
+                	break;
                 default:
-                    BrushedComms_ReportError(0x80 | cmd); // Unknown command
-                    break;
+					BrushedComms_ReportError(0x80 | cmd); // Unknown command
+					break;
             }
         } else {
             BrushedComms_ReportError(0x06); // Comms CRC error
@@ -68,13 +74,6 @@ void BrushedComms_ReceiveByte(uint8_t byte) {
         rx_index = 0;
         expected_length = 0;
         BrushedComms_ReportError(0x07); // Buffer overflow
-    }
-}
-
-// This is called by main() or timer at desired feedback rate
-void BrushedComms_Process(void) {
-    if (feedback_ptr) {
-        BrushedComms_SendFeedback(feedback_ptr);
     }
 }
 
@@ -119,6 +118,10 @@ void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length) {
     // uint16_t wr_target = (data[2] << 8) | data[3];
 }
 
+void BrushedComms_HandleHoming(const uint8_t* data, uint16_t length) {
+    // TODO: Apply homing
+}
+
 void BrushedComms_SendEcho(const uint8_t* data, uint16_t len) {
     if (!data || len == 0 || len > 60) return;
 
@@ -136,31 +139,6 @@ void BrushedComms_SendEcho(const uint8_t* data, uint16_t len) {
     packet[index++] = crc;
 
     CDC_Transmit_FS(packet, index);
-}
-
-void BrushedComms_HandleCommand(const uint8_t* data, uint16_t length) {
-    if (!data || length == 0) return;
-
-    uint8_t subcommand = data[0];
-
-    switch (subcommand) {
-        case CMD_ECHO:
-            BrushedComms_SendEcho(data + 1, length - 1); // Echo payload only
-            break;
-
-        case CMD_FEEDBACK:
-        	BrushedComms_Process();
-        	break;
-
-        // Add future cases here
-        // case CMD_RESET:
-        //     HandleReset(data + 1, length - 1);
-        //     break;
-
-        default:
-            BrushedComms_ReportError(0x81); // Unknown subcommand
-            break;
-    }
 }
 
 // CRC-8 polynomial 0x07

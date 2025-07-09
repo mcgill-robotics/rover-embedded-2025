@@ -8,6 +8,8 @@
 #ifndef INC_ENCODER_CONF_H_
 #define INC_ENCODER_CONF_H_
 
+#include "stm32f4xx_hal.h"
+
 struct MotorEncoder {
 	TIM_HandleTypeDef *htim;
 	volatile int32_t count;
@@ -18,10 +20,10 @@ struct MotorEncoder {
 	volatile uint8_t is_homed;
 	volatile float angle;
 
-	volatile uint8_t lower_limit_port;
+	GPIO_TypeDef* lower_limit_port;
 	volatile uint8_t lower_limit_pin;
-	volatile uint8_t upper_limit_port;
-	volatile uint8_t upper_limit_pin;
+	GPIO_TypeDef* upper_limit_port;
+	volatile uint16_t upper_limit_pin;
 	volatile uint8_t revolute; // if revolute joint, only use lower limit
 	volatile uint8_t lower_limit_active;
 	volatile uint8_t upper_limit_active;

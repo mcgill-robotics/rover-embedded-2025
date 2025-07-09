@@ -19,12 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
+#include "brushed_comms.h"
+#include "encoder_conf.h"
+#include "stspin948.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-extern "C" {
-    #include "brushed_comms.h"
-}
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

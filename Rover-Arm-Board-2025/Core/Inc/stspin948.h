@@ -11,15 +11,18 @@
 #define MAX_PWM_VALUE 4095
 #define INTEGRAL_MAX 1000.0f
 
+#include "stm32f4xx_hal.h"
+#include <math.h>
+
 struct BrushedDriverConfig {
-	uint8_t phase_a_port;
-	uint8_t phase_a_pin;
-	uint8_t phase_b_port;
-	uint8_t phase_b_pin;
-	uint8_t enFault_a_port;
-	uint8_t enFault_a_pin;
-	uint8_t enFault_b_port;
-	uint8_t enFault_b_pin;
+	GPIO_TypeDef* phase_a_port;
+	uint16_t phase_a_pin;
+	GPIO_TypeDef* phase_b_port;
+	uint16_t phase_b_pin;
+	GPIO_TypeDef* enFault_a_port;
+	uint16_t enFault_a_pin;
+	GPIO_TypeDef* enFault_b_port;
+	uint16_t enFault_b_pin;
 	TIM_HandleTypeDef* pwm_a_inst;
 	uint8_t pwm_a_channel;
 	TIM_HandleTypeDef* pwm_b_inst;
@@ -79,7 +82,7 @@ void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance);
 void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance);
 void STSPIN948_SetPwmValues(struct BrushedDriver* driverInstance, uint32_t pwm_a, uint32_t pwm_b);
 void STSPIN948_SetDirections(struct BrushedDriver* driverInstance, uint8_t phase_a, uint8_t phase_b);
-void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance);
+void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance, float pos_a, float pos_b);
 void STSPIN948_ResetPID(struct BrushedDriver* driverInstance);
 
 #endif /* INC_STSPIN948_H_ */

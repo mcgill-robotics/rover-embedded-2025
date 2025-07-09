@@ -1,10 +1,9 @@
 ../USB_DEVICE/App/brushed_comms.c:14:6:BrushedComms_RegisterFeedback	0	static
 ../USB_DEVICE/App/brushed_comms.c:19:6:BrushedComms_Init	0	static
-../USB_DEVICE/App/brushed_comms.c:115:6:BrushedComms_HandleSetpoint	0	static
-../USB_DEVICE/App/brushed_comms.c:167:9:BrushedComms_CalculateCRC	8	static
-../USB_DEVICE/App/brushed_comms.c:82:6:BrushedComms_SendFeedback	72	static
-../USB_DEVICE/App/brushed_comms.c:75:6:BrushedComms_Process	0	static
-../USB_DEVICE/App/brushed_comms.c:105:6:BrushedComms_ReportError	16	static
-../USB_DEVICE/App/brushed_comms.c:122:6:BrushedComms_SendEcho	80	static
-../USB_DEVICE/App/brushed_comms.c:141:6:BrushedComms_HandleCommand	0	static
+../USB_DEVICE/App/brushed_comms.c:114:6:BrushedComms_HandleSetpoint	0	static
+../USB_DEVICE/App/brushed_comms.c:121:6:BrushedComms_HandleHoming	0	static
+../USB_DEVICE/App/brushed_comms.c:145:9:BrushedComms_CalculateCRC	8	static
+../USB_DEVICE/App/brushed_comms.c:81:6:BrushedComms_SendFeedback	72	static
+../USB_DEVICE/App/brushed_comms.c:104:6:BrushedComms_ReportError	16	static
+../USB_DEVICE/App/brushed_comms.c:125:6:BrushedComms_SendEcho	80	static
 ../USB_DEVICE/App/brushed_comms.c:25:6:BrushedComms_ReceiveByte	24	static

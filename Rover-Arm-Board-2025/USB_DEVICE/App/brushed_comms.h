@@ -63,7 +63,8 @@ void BrushedComms_Init(void); // Initialize communication
 void BrushedComms_Process(void); // Process incoming and outgoing data
 void BrushedComms_SendFeedback(const FeedbackData* feedback); // Send feedback to PC
 void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length); // Handle setpoint data from PC
-void BrushedComms_HandleCommand(const uint8_t* data, uint16_t length); // Handle commands from PC
+void BrushedComms_SendEcho(const uint8_t* data, uint16_t len);
+void BrushedComms_HandleHoming(const uint8_t* data, uint16_t length); // Handle homing command from PC
 void BrushedComms_ReportError(uint8_t error_code); // Report error to PC
 uint8_t BrushedComms_CalculateCRC(uint8_t* data, uint16_t length); // Calculate CRC for data integrity
 void BrushedComms_ReceiveByte(uint8_t byte);

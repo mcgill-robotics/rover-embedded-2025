@@ -70,46 +70,46 @@ void STSPIN948_SetDirections(struct BrushedDriver* driverInstance, uint8_t phase
 }
 
 void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance, float pos_a, float pos_b){
-	driverInstance->pid_a->error = driverInstance->pid_a->setpoint - pos_a;
-	driverInstance->pid_b->error = driverInstance->pid_b->setpoint - pos_b;
+	driverInstance->pid_a.error = driverInstance->pid_a.setpoint - pos_a;
+	driverInstance->pid_b.error = driverInstance->pid_b.setpoint - pos_b;
 
-	driverInstance->pid_a->integral += driverInstance->pid_a->error;
-	driverInstance->pid_b->integral += driverInstance->pid_b->error;
+	driverInstance->pid_a.integral += driverInstance->pid_a.error;
+	driverInstance->pid_b.integral += driverInstance->pid_b.error;
 
-	if (driverInstance->pid_a->integral > INTEGRAL_MAX) driverInstance->pid_a->integral = INTEGRAL_MAX;
-	else if (driverInstance->pid_a->integral < -INTEGRAL_MAX) driverInstance->pid_a->integral = -INTEGRAL_MAX;
+	if (driverInstance->pid_a.integral > INTEGRAL_MAX) driverInstance->pid_a.integral = INTEGRAL_MAX;
+	else if (driverInstance->pid_a.integral < -INTEGRAL_MAX) driverInstance->pid_a.integral = -INTEGRAL_MAX;
 
-	if (driverInstance->pid_b->integral > INTEGRAL_MAX) driverInstance->pid_b->integral = INTEGRAL_MAX;
-	else if (driverInstance->pid_b->integral < -INTEGRAL_MAX) driverInstance->pid_b->integral = -INTEGRAL_MAX;
+	if (driverInstance->pid_b.integral > INTEGRAL_MAX) driverInstance->pid_b.integral = INTEGRAL_MAX;
+	else if (driverInstance->pid_b.integral < -INTEGRAL_MAX) driverInstance->pid_b.integral = -INTEGRAL_MAX;
 
-	driverInstance->pid_a->derivative = driverInstance->pid_a->error - driverInstance->pid_a->prev_error;
-	driverInstance->pid_b->derivative = driverInstance->pid_b->error - driverInstance->pid_b->prev_error;
+	driverInstance->pid_a.derivative = driverInstance->pid_a.error - driverInstance->pid_a.prev_error;
+	driverInstance->pid_b.derivative = driverInstance->pid_b.error - driverInstance->pid_b.prev_error;
 
-	driverInstance->pid_a->output = driverInstance->config->kp_a * driverInstance->pid_a->error; // proportional
-	driverInstance->pid_a->output += driverInstance->config->ki_a * driverInstance->pid_a->integral; //integral
-	driverInstance->pid_a->output += driverInstance->config->kd_a * driverInstance->pid_a->derivative; //derivative
+	driverInstance->pid_a.output = driverInstance->config->kp_a * driverInstance->pid_a.error; // proportional
+	driverInstance->pid_a.output += driverInstance->config->ki_a * driverInstance->pid_a.integral; //integral
+	driverInstance->pid_a.output += driverInstance->config->kd_a * driverInstance->pid_a.derivative; //derivative
 
-	driverInstance->pid_b->output = driverInstance->config->kp_b * driverInstance->pid_b->error; // proportional
-	driverInstance->pid_b->output += driverInstance->config->ki_b * driverInstance->pid_b->integral; //integral
-	driverInstance->pid_b->output += driverInstance->config->kd_b * driverInstance->pid_b->derivative; //derivative
+	driverInstance->pid_b.output = driverInstance->config->kp_b * driverInstance->pid_b.error; // proportional
+	driverInstance->pid_b.output += driverInstance->config->ki_b * driverInstance->pid_b.integral; //integral
+	driverInstance->pid_b.output += driverInstance->config->kd_b * driverInstance->pid_b.derivative; //derivative
 
-	STSPIN948_SetPwmValues(driverInstance, (uint32_t)fabsf(driverInstance->pid_a->output),  (uint32_t)fabsf(driverInstance->pid_b->output));
-	STSPIN948_SetDirections(driverInstance, (uint8_t)(driverInstance->pid_a->output >= 0), (uint8_t)(driverInstance->pid_b->output >= 0));
+	STSPIN948_SetPwmValues(driverInstance, (uint32_t)fabsf(driverInstance->pid_a.output),  (uint32_t)fabsf(driverInstance->pid_b.output));
+	STSPIN948_SetDirections(driverInstance, (uint8_t)(driverInstance->pid_a.output >= 0), (uint8_t)(driverInstance->pid_b.output >= 0));
 
-	driverInstance->pid_a->prev_error = driverInstance->pid_a->error;
-	driverInstance->pid_b->prev_error = driverInstance->pid_b->error;
+	driverInstance->pid_a.prev_error = driverInstance->pid_a.error;
+	driverInstance->pid_b.prev_error = driverInstance->pid_b.error;
 }
 
 void STSPIN948_ResetPID(struct BrushedDriver* driverInstance){
-	driverInstance->pid_a->derivative = 0;
-	driverInstance->pid_a->integral = 0;
-	driverInstance->pid_a->error = 0;
-	driverInstance->pid_a->prev_error = 0;
-	driverInstance->pid_a->output = 0;
+	driverInstance->pid_a.derivative = 0;
+	driverInstance->pid_a.integral = 0;
+	driverInstance->pid_a.error = 0;
+	driverInstance->pid_a.prev_error = 0;
+	driverInstance->pid_a.output = 0;
 
-	driverInstance->pid_b->derivative = 0;
-	driverInstance->pid_b->integral = 0;
-	driverInstance->pid_b->error = 0;
-	driverInstance->pid_b->prev_error = 0;
-	driverInstance->pid_b->output = 0;
+	driverInstance->pid_b.derivative = 0;
+	driverInstance->pid_b.integral = 0;
+	driverInstance->pid_b.error = 0;
+	driverInstance->pid_b.prev_error = 0;
+	driverInstance->pid_b.output = 0;
 }
