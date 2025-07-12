@@ -78,8 +78,8 @@ Disassembly of section .text:
  800021a:	bf08      	it	eq
  800021c:	2800      	cmpeq	r0, #0
  800021e:	bf1c      	itt	ne
- 8000220:	f04f 31ff 	movne.w	r1, #4294967295	@ 0xffffffff
- 8000224:	f04f 30ff 	movne.w	r0, #4294967295	@ 0xffffffff
+ 8000220:	f04f 31ff 	movne.w	r1, #4294967295
+ 8000224:	f04f 30ff 	movne.w	r0, #4294967295
  8000228:	f000 b988 	b.w	800053c <__aeabi_idiv0>
  800022c:	f1ad 0c08 	sub.w	ip, sp, #8
  8000230:	e96d ce04 	strd	ip, lr, [sp, #-16]!
@@ -118,7 +118,7 @@ Disassembly of section .text:
  800028e:	429a      	cmp	r2, r3
  8000290:	d909      	bls.n	80002a6 <__udivmoddi4+0x62>
  8000292:	18fb      	adds	r3, r7, r3
- 8000294:	f101 30ff 	add.w	r0, r1, #4294967295	@ 0xffffffff
+ 8000294:	f101 30ff 	add.w	r0, r1, #4294967295
  8000298:	f080 80ea 	bcs.w	8000470 <__udivmoddi4+0x22c>
  800029c:	429a      	cmp	r2, r3
  800029e:	f240 80e7 	bls.w	8000470 <__udivmoddi4+0x22c>
@@ -133,7 +133,7 @@ Disassembly of section .text:
  80002ba:	459c      	cmp	ip, r3
  80002bc:	d909      	bls.n	80002d2 <__udivmoddi4+0x8e>
  80002be:	18fb      	adds	r3, r7, r3
- 80002c0:	f100 32ff 	add.w	r2, r0, #4294967295	@ 0xffffffff
+ 80002c0:	f100 32ff 	add.w	r2, r0, #4294967295
  80002c4:	f080 80d6 	bcs.w	8000474 <__udivmoddi4+0x230>
  80002c8:	459c      	cmp	ip, r3
  80002ca:	f240 80d3 	bls.w	8000474 <__udivmoddi4+0x230>
@@ -187,7 +187,7 @@ Disassembly of section .text:
  800034e:	429a      	cmp	r2, r3
  8000350:	d907      	bls.n	8000362 <__udivmoddi4+0x11e>
  8000352:	18fb      	adds	r3, r7, r3
- 8000354:	f10c 38ff 	add.w	r8, ip, #4294967295	@ 0xffffffff
+ 8000354:	f10c 38ff 	add.w	r8, ip, #4294967295
  8000358:	d202      	bcs.n	8000360 <__udivmoddi4+0x11c>
  800035a:	429a      	cmp	r2, r3
  800035c:	f200 80e0 	bhi.w	8000520 <__udivmoddi4+0x2dc>
@@ -200,7 +200,7 @@ Disassembly of section .text:
  8000374:	429c      	cmp	r4, r3
  8000376:	d907      	bls.n	8000388 <__udivmoddi4+0x144>
  8000378:	18fb      	adds	r3, r7, r3
- 800037a:	f102 30ff 	add.w	r0, r2, #4294967295	@ 0xffffffff
+ 800037a:	f102 30ff 	add.w	r0, r2, #4294967295
  800037e:	d202      	bcs.n	8000386 <__udivmoddi4+0x142>
  8000380:	429c      	cmp	r4, r3
  8000382:	f200 80ca 	bhi.w	800051a <__udivmoddi4+0x2d6>
@@ -228,7 +228,7 @@ Disassembly of section .text:
  80003ca:	fa02 f201 	lsl.w	r2, r2, r1
  80003ce:	d909      	bls.n	80003e4 <__udivmoddi4+0x1a0>
  80003d0:	193c      	adds	r4, r7, r4
- 80003d2:	f100 3aff 	add.w	sl, r0, #4294967295	@ 0xffffffff
+ 80003d2:	f100 3aff 	add.w	sl, r0, #4294967295
  80003d6:	f080 809c 	bcs.w	8000512 <__udivmoddi4+0x2ce>
  80003da:	45a6      	cmp	lr, r4
  80003dc:	f240 8099 	bls.w	8000512 <__udivmoddi4+0x2ce>
@@ -243,7 +243,7 @@ Disassembly of section .text:
  80003fc:	45a4      	cmp	ip, r4
  80003fe:	d908      	bls.n	8000412 <__udivmoddi4+0x1ce>
  8000400:	193c      	adds	r4, r7, r4
- 8000402:	f103 3eff 	add.w	lr, r3, #4294967295	@ 0xffffffff
+ 8000402:	f103 3eff 	add.w	lr, r3, #4294967295
  8000406:	f080 8082 	bcs.w	800050e <__udivmoddi4+0x2ca>
  800040a:	45a4      	cmp	ip, r4
  800040c:	d97f      	bls.n	800050e <__udivmoddi4+0x2ca>
@@ -305,7 +305,7 @@ Disassembly of section .text:
  80004aa:	b280      	uxth	r0, r0
  80004ac:	d93e      	bls.n	800052c <__udivmoddi4+0x2e8>
  80004ae:	1879      	adds	r1, r7, r1
- 80004b0:	f108 3cff 	add.w	ip, r8, #4294967295	@ 0xffffffff
+ 80004b0:	f108 3cff 	add.w	ip, r8, #4294967295
  80004b4:	d201      	bcs.n	80004ba <__udivmoddi4+0x276>
  80004b6:	4589      	cmp	r9, r1
  80004b8:	d81f      	bhi.n	80004fa <__udivmoddi4+0x2b6>
@@ -318,7 +318,7 @@ Disassembly of section .text:
  80004d0:	4542      	cmp	r2, r8
  80004d2:	d229      	bcs.n	8000528 <__udivmoddi4+0x2e4>
  80004d4:	18ba      	adds	r2, r7, r2
- 80004d6:	f109 31ff 	add.w	r1, r9, #4294967295	@ 0xffffffff
+ 80004d6:	f109 31ff 	add.w	r1, r9, #4294967295
  80004da:	d2c4      	bcs.n	8000466 <__udivmoddi4+0x222>
  80004dc:	4542      	cmp	r2, r8
  80004de:	d2c2      	bcs.n	8000466 <__udivmoddi4+0x222>
@@ -1288,7 +1288,7 @@ Disassembly of section .text:
  8000e32:	d809      	bhi.n	8000e48 <HAL_InitTick+0x38>
  8000e34:	4602      	mov	r2, r0
  8000e36:	4629      	mov	r1, r5
- 8000e38:	f04f 30ff 	mov.w	r0, #4294967295	@ 0xffffffff
+ 8000e38:	f04f 30ff 	mov.w	r0, #4294967295
  8000e3c:	f000 f9a0 	bl	8001180 <HAL_NVIC_SetPriority>
  8000e40:	4b04      	ldr	r3, [pc, #16]	@ (8000e54 <HAL_InitTick+0x44>)
  8000e42:	4620      	mov	r0, r4
@@ -1646,7 +1646,7 @@ Disassembly of section .text:
  8001192:	bf28      	it	cs
  8001194:	2304      	movcs	r3, #4
  8001196:	2d06      	cmp	r5, #6
- 8001198:	f04f 35ff 	mov.w	r5, #4294967295	@ 0xffffffff
+ 8001198:	f04f 35ff 	mov.w	r5, #4294967295
  800119c:	bf8c      	ite	hi
  800119e:	3c03      	subhi	r4, #3
  80011a0:	2400      	movls	r4, #0
@@ -7981,7 +7981,7 @@ Disassembly of section .text:
 08004fb4 <memcpy>:
  8004fb4:	440a      	add	r2, r1
  8004fb6:	4291      	cmp	r1, r2
- 8004fb8:	f100 33ff 	add.w	r3, r0, #4294967295	@ 0xffffffff
+ 8004fb8:	f100 33ff 	add.w	r3, r0, #4294967295
  8004fbc:	d100      	bne.n	8004fc0 <memcpy+0xc>
  8004fbe:	4770      	bx	lr
  8004fc0:	b510      	push	{r4, lr}

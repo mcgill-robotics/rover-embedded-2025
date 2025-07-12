@@ -13,7 +13,7 @@ void STSPIN948_Init(struct BrushedDriver* driverInstance){
 	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst, driverInstance->config->pwm_a_channel);
 
 	//Start ADC DMA transfers
-	HAL_ADC_Start_DMA(driverInstance->config->cur_inst, driverInstance->raw_cur, 2);
+	HAL_ADC_Start_DMA(driverInstance->config->cur_inst, &driverInstance->raw_cur.u32, 2);
 
 	//DAC Outputs don't change
 	HAL_DAC_SetValue(driverInstance->config->dacRef_a_inst,driverInstance->config->dacRef_a_channel, DAC_ALIGN_12B_R, driverInstance->config->dacRef_a);
@@ -30,8 +30,8 @@ void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance){
 	driverInstance->enFault_b = HAL_GPIO_ReadPin(driverInstance->config->enFault_b_port,driverInstance->config->enFault_b_pin);
 
 	// update currents
-	driverInstance->cur_a = ((float)driverInstance->raw_cur[0]/4095.0) * driverInstance->config->cur_a_factor;
-	driverInstance->cur_b = ((float)driverInstance->raw_cur[1]/4095.0) * driverInstance->config->cur_b_factor;
+	driverInstance->cur_a = ((float)driverInstance->raw_cur.u16[0]/4095.0) * driverInstance->config->cur_a_factor;
+	driverInstance->cur_b = ((float)driverInstance->raw_cur.u16[1]/4095.0) * driverInstance->config->cur_b_factor;
 }
 
 void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance){

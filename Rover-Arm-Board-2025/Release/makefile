@@ -64,8 +64,8 @@ all: main-build
 main-build: Rover-Arm-Board-2025.elf secondary-outputs
 
 # Tool invocations
-Rover-Arm-Board-2025.elf Rover-Arm-Board-2025.map: $(OBJS) $(USER_OBJS) /home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static -lm --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Rover-Arm-Board-2025.elf Rover-Arm-Board-2025.map: $(OBJS) $(USER_OBJS) C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static -lm --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

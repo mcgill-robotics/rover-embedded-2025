@@ -67,7 +67,10 @@ struct BrushedDriver {
 	uint8_t enFault_b;
 	float cur_a;
 	float cur_b;
-	volatile uint16_t raw_cur[2];
+	union {
+		uint16_t u16[2];
+		uint32_t u32;
+	} raw_cur;
 
 	struct PIDValues pid_a;
 	struct PIDValues pid_b;
