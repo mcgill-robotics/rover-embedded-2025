@@ -6,33 +6,39 @@
  */
 #include "encoder_conf.h"
 
-
-int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim){
+int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim) {
 	return (int32_t)__HAL_TIM_GET_COUNTER(htim);
 }
 
-void NewPosition(struct MotorEncoder* menc){
+void NewPosition(MotorEncoder *menc) {
 	menc->count = ReadEncoderCounts(menc->htim);
-	if (menc->min_limit_counts == menc->max_limit_counts) menc->angle = -1.0;
-	if (menc->count < menc->min_limit_counts) menc->count = menc->min_limit_counts;
-	else if (menc->count > menc->max_limit_counts) menc->count = menc->max_limit_counts;
-	menc->angle = ((float)(menc->count - menc->min_limit_counts) / menc->total_counts_range) * menc->angle_range;
+	if (menc->min_limit_counts == menc->max_limit_counts)
+		menc->angle = -1.0;
+	if (menc->count < menc->min_limit_counts)
+		menc->count = menc->min_limit_counts;
+	else if (menc->count > menc->max_limit_counts)
+		menc->count = menc->max_limit_counts;
+	menc->angle = ((float) (menc->count - menc->min_limit_counts)
+			/ menc->total_counts_range) * menc->angle_range;
 }
 
-void MotorEncoder_Init(struct MotorEncoder* menc){
+void MotorEncoder_Init(MotorEncoder *menc) {
 	HAL_TIM_Encoder_Start(menc->htim, TIM_CHANNEL_ALL);
 }
 
-void HandleUpperLimit(struct MotorEncoder* menc){
+void HandleUpperLimit(MotorEncoder *menc) {
 	menc->max_limit_counts = ReadEncoderCounts(menc->htim);
-	menc->upper_limit_active = HAL_GPIO_ReadPin(menc->upper_limit_port, menc->upper_limit_pin);
-	if (menc->is_homed == 1) menc->total_counts_range = menc->max_limit_counts - menc->min_limit_counts; // handle first total_counts separately during homing
+	menc->upper_limit_active = HAL_GPIO_ReadPin(menc->upper_limit_port,
+			menc->upper_limit_pin);
+	if (menc->is_homed == 1)
+		menc->total_counts_range = menc->max_limit_counts
+				- menc->min_limit_counts; // handle first total_counts separately during homing
 }
 
-void HandleLowerLimit(struct MotorEncoder* menc){
+void HandleLowerLimit(MotorEncoder *menc) {
 
 }
 
-void HandleLowerLimitRevolute(struct MotorEncoder* menc, uint8_t direction){
+void HandleLowerLimitRevolute(MotorEncoder *menc, uint8_t direction) {
 
 }

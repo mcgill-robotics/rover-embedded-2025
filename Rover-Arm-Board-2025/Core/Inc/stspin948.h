@@ -13,27 +13,28 @@
 
 #include "stm32f4xx_hal.h"
 #include <math.h>
+#include <stdint.h>
 
-struct BrushedDriverConfig {
-	GPIO_TypeDef* phase_a_port;
+typedef struct {
+	GPIO_TypeDef *phase_a_port;
 	uint16_t phase_a_pin;
-	GPIO_TypeDef* phase_b_port;
+	GPIO_TypeDef *phase_b_port;
 	uint16_t phase_b_pin;
-	GPIO_TypeDef* enFault_a_port;
+	GPIO_TypeDef *enFault_a_port;
 	uint16_t enFault_a_pin;
-	GPIO_TypeDef* enFault_b_port;
+	GPIO_TypeDef *enFault_b_port;
 	uint16_t enFault_b_pin;
-	TIM_HandleTypeDef* pwm_a_inst;
+	TIM_HandleTypeDef *pwm_a_inst;
 	uint8_t pwm_a_channel;
-	TIM_HandleTypeDef* pwm_b_inst;
+	TIM_HandleTypeDef *pwm_b_inst;
 	uint8_t pwm_b_channel;
-	DAC_HandleTypeDef* dacRef_a_inst;
-	DAC_HandleTypeDef* dacRef_b_inst;
+	DAC_HandleTypeDef *dacRef_a_inst;
+	DAC_HandleTypeDef *dacRef_b_inst;
 	uint8_t dacRef_a_channel;
 	uint8_t dacRef_b_channel;
 	uint16_t dacRef_a;
 	uint16_t dacRef_b;
-	ADC_HandleTypeDef* cur_inst;
+	ADC_HandleTypeDef *cur_inst;
 	float cur_a_factor;
 	float cur_b_factor;
 
@@ -44,18 +45,18 @@ struct BrushedDriverConfig {
 	float ki_b;
 	float kd_b;
 
-};
+} BrushedDriverConfig;
 
-struct PIDValues {
+typedef struct {
 	float setpoint;
 	float error;
 	float prev_error;
 	float integral;
 	float derivative;
 	float output;
-};
+} PIDValues;
 
-struct BrushedDriver {
+typedef struct {
 	// outputs
 	uint32_t pwm_a;
 	uint32_t pwm_b;
@@ -72,20 +73,29 @@ struct BrushedDriver {
 		uint32_t u32;
 	} raw_cur;
 
-	struct PIDValues pid_a;
-	struct PIDValues pid_b;
+	PIDValues pid_a;
+	PIDValues pid_b;
 
 	//config
-	struct BrushedDriverConfig* config;
+	BrushedDriverConfig *config;
 
-};
+} BrushedDriver;
 
-void STSPIN948_Init(struct BrushedDriver* driverInstance);
-void STSPIN948_ReadInputs(struct BrushedDriver* driverInstance);
-void STSPIN948_SetOutputs(struct BrushedDriver* driverInstance);
-void STSPIN948_SetPwmValues(struct BrushedDriver* driverInstance, uint32_t pwm_a, uint32_t pwm_b);
-void STSPIN948_SetDirections(struct BrushedDriver* driverInstance, uint8_t phase_a, uint8_t phase_b);
-void STSPIN948_CalculatePID(struct BrushedDriver* driverInstance, float pos_a, float pos_b);
-void STSPIN948_ResetPID(struct BrushedDriver* driverInstance);
+void
+STSPIN948_Init(BrushedDriver *driverInstance);
+void
+STSPIN948_ReadInputs(BrushedDriver *driverInstance);
+void
+STSPIN948_SetOutputs(BrushedDriver *driverInstance);
+void
+STSPIN948_SetPwmValues(BrushedDriver *driverInstance, uint32_t pwm_a,
+		uint32_t pwm_b);
+void
+STSPIN948_SetDirections(BrushedDriver *driverInstance, uint8_t phase_a,
+		uint8_t phase_b);
+void
+STSPIN948_CalculatePID(BrushedDriver *driverInstance, float pos_a, float pos_b);
+void
+STSPIN948_ResetPID(BrushedDriver *driverInstance);
 
 #endif /* INC_STSPIN948_H_ */

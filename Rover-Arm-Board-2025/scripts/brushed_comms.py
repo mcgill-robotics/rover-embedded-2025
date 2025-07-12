@@ -95,7 +95,7 @@ class BrushedBoard:
 
 # Example usage
 if __name__ == "__main__":
-    board = BrushedBoard("/dev/ttyACM1")  # Or 'COM4' on Windows
+    board = BrushedBoard("/dev/ttyACM0")  # Or 'COM4' on Windows
     try:
         echo = board.send_echo(b"test")
         print("Echoed:", echo)
