@@ -7824,3 +7824,6 @@ java.lang.NullPointerException: Cannot invoke "org.eclipse.swt.widgets.Shell.get
 
 !ENTRY org.eclipse.cdt.core 1 0 2025-07-12 01:53:19.687
 !MESSAGE Indexed 'Rover-Arm-Board-2025' (43 sources, 150 headers) in 1.98 sec: 17,501 declarations; 93,327 references; 1 unresolved inclusions; 92 syntax errors; 240 unresolved names (0.22%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-07-12 17:23:54.494
+!MESSAGE Indexed 'Rover-Arm-Board-2025' (43 sources, 150 headers) in 4.3 sec: 17,501 declarations; 93,299 references; 1 unresolved inclusions; 92 syntax errors; 240 unresolved names (0.22%)

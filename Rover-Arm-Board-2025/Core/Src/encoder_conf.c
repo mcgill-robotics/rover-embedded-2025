@@ -7,17 +7,17 @@
 #include "encoder_conf.h"
 
 int32_t ReadEncoderCounts(TIM_HandleTypeDef *htim) {
-	return (int32_t)__HAL_TIM_GET_COUNTER(htim);
+	return (int32_t) __HAL_TIM_GET_COUNTER(htim);
 }
 
 void NewPosition(MotorEncoder *menc) {
 	menc->count = ReadEncoderCounts(menc->htim);
-	if (menc->min_limit_counts == menc->max_limit_counts)
-		menc->angle = -1.0;
-	if (menc->count < menc->min_limit_counts)
-		menc->count = menc->min_limit_counts;
-	else if (menc->count > menc->max_limit_counts)
-		menc->count = menc->max_limit_counts;
+//	if (menc->min_limit_counts == menc->max_limit_counts)
+//		menc->angle = -1.0;
+//	if (menc->count < menc->min_limit_counts)
+//		menc->count = menc->min_limit_counts;
+//	else if (menc->count > menc->max_limit_counts)
+//		menc->count = menc->max_limit_counts;
 	menc->angle = ((float) (menc->count - menc->min_limit_counts)
 			/ menc->total_counts_range) * menc->angle_range;
 }

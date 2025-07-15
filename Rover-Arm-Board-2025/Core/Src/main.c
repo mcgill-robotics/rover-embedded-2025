@@ -158,7 +158,7 @@ int main(void) {
 	FeedbackData my_feedback = { 0 };
 	BrushedComms_RegisterFeedback(&my_feedback);
 
-	STSPIN948_Init(&bDriver);
+//	STSPIN948_Init(&bDriver);
 
 	bDriver.pwm_a = 700;
 
@@ -171,8 +171,8 @@ int main(void) {
 //    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 //    BrushedComms_Process();
 		NewPosition(&mEncA);
-		STSPIN948_SetOutputs(&bDriver);
-		STSPIN948_ReadInputs(&bDriver);
+//		STSPIN948_SetOutputs(&bDriver);
+//		STSPIN948_ReadInputs(&bDriver);
 		my_feedback.motor_position[0] = (uint16_t) mEncA.angle;
 		HAL_Delay(10);
 		/* USER CODE END WHILE */

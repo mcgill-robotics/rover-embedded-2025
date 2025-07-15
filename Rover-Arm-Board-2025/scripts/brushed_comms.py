@@ -61,6 +61,7 @@ class BrushedBoard:
         packet = build_packet(CMD_FEEDBACK)
         self.ser.write(packet)
         resp = wait_for_response(self.ser)
+        print(resp.hex())
         if not resp or resp[1] != CMD_FEEDBACK or resp[2] != 9:
             raise RuntimeError("Invalid feedback response")
 
@@ -95,7 +96,7 @@ class BrushedBoard:
 
 # Example usage
 if __name__ == "__main__":
-    board = BrushedBoard("/dev/ttyACM0")  # Or 'COM4' on Windows
+    board = BrushedBoard("COM4")  # Or 'COM4' on Windows
     try:
         echo = board.send_echo(b"test")
         print("Echoed:", echo)
