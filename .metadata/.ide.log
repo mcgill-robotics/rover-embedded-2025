@@ -1,1 +1,10 @@
-2025-07-12 02:10:29,399 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,868x363,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2025-07-14 21:03:09,319 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,322 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,322 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,323 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,324 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,559 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,559 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,559 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,559 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
+2025-07-14 21:03:09,560 [ERROR] AdobePublisher:162 - Exception while opening the connection: java.net.ConnectException: Connection refused
