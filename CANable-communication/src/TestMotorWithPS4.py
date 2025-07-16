@@ -89,7 +89,7 @@ def run_ps4_drive_loop():
                 print("Circle button pressed! Stopping all motors.")
                 drive.broadcast_multi_motor_stop()
 
-            # === Square Button: print status of each motor ===
+            # === Square Button: print status of each motor ===000 0 0000000000000
             square = joystick.get_button(2)  # Square button
             if square and not prev_square:
                 print("Square button pressed! Fetching motor status...")

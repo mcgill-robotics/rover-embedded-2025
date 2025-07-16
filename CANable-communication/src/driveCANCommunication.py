@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
     # Example usage
     # print(can.interface.detect_available_configs())
-    station = CANStation(interface="slcan", channel="COM6", bitrate=500000) #channel must be 0 as zig
+    station = CANStation(interface="slcan", channel="COM7", bitrate=500000) #channel must be 0 as zig
 
 
     # Create an ESCs class
@@ -401,9 +401,15 @@ if __name__ == "__main__":
     # drive.ping_motor(NodeID.RF_DRIVE)
     # drive.ping_motor(NodeID.RF_DRIVE)
     # drive.read_state(NodeID.RF_DRIVE)
+    drive.run_motor(NodeID.RF_DRIVE, 500)
     # drive.read_all_faults(NodeID.RF_DRIVE)
     # drive.getAllMotorStatus()
-    drive.run_motor(NodeID.RF_DRIVE,200 )
+    # drive.read_all_faults(NodeID.RF_DRIVE)
+    # drive.acknowledge_motor_fault(NodeID.RB_DRIVE
+    #                               )
+    # drive.getAllMotorStatus() 
+    # drive.run_motor(NodeID.RF_DRIVE,200 )
+    # drive.run_motor(NodeID.LF_DRIVE, 500)
 
 
     # drive.getAllMotorStatus()
