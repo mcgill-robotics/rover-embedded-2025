@@ -56,9 +56,9 @@ void updatePID() {
     angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
     // Set direction based on allowed error
 	if (angleCorrection < 0){
-		set_motor_direction(0);
-	} else{
 		set_motor_direction(1);
+	} else{
+		set_motor_direction(0);
 	}
 	if (abs(angleCorrection) > 100) {
 		angleCorrection = 100;
