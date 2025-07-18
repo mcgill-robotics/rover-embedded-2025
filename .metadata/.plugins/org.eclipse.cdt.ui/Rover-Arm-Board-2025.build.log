@@ -5,12 +5,9 @@ arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m
 Finished building target: Rover-Arm-Board-2025.elf
  
 arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
    text	   data	    bss	    dec	    hex	filename
   45292	    268	   9332	  54892	   d66c	Rover-Arm-Board-2025.elf
 Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
  
 
 23:15:39 Build Finished. 0 errors, 0 warnings. (took 1s.167ms)
