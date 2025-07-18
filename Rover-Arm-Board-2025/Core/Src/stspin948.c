@@ -12,22 +12,21 @@ void STSPIN948_Init(BrushedDriver *driverInstance) {
 			driverInstance->config->pwm_a_channel);
 	HAL_TIM_PWM_Start(driverInstance->config->pwm_a_inst,
 			driverInstance->config->pwm_a_channel);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
 
-	//Start ADC DMA transfers
-	HAL_ADC_Start_DMA(driverInstance->config->cur_inst,
-			&driverInstance->raw_cur.u32, 2);
-
-	//DAC Outputs don't change
-//	HAL_DAC_Start(driverInstance->config->dacRef_a_inst,
-//			driverInstance->config->dacRef_a_channel);
-//	HAL_DAC_Start(driverInstance->config->dacRef_b_inst,
-//			driverInstance->config->dacRef_b_channel);
-//	HAL_DAC_SetValue(driverInstance->config->dacRef_a_inst,
-//			driverInstance->config->dacRef_a_channel, DAC_ALIGN_12B_R,
-//			driverInstance->config->dacRef_a);
-//	HAL_DAC_SetValue(driverInstance->config->dacRef_b_inst,
-//			driverInstance->config->dacRef_b_channel, DAC_ALIGN_12B_R,
-//			driverInstance->config->dacRef_b);
+//DAC Outputs don't change
+	HAL_DAC_Start(driverInstance->config->dacRef_b_inst,
+			driverInstance->config->dacRef_b_channel);
+	HAL_Delay(3);
+	HAL_DAC_Start(driverInstance->config->dacRef_a_inst,
+			driverInstance->config->dacRef_a_channel);
+	HAL_Delay(3);
+	HAL_DAC_SetValue(driverInstance->config->dacRef_a_inst,
+			driverInstance->config->dacRef_a_channel, DAC_ALIGN_12B_R,
+			driverInstance->config->dacRef_a);
+	HAL_DAC_SetValue(driverInstance->config->dacRef_b_inst,
+			driverInstance->config->dacRef_b_channel, DAC_ALIGN_12B_R,
+			driverInstance->config->dacRef_b);
 
 	STSPIN948_SetOutputs(driverInstance);
 	STSPIN948_ReadInputs(driverInstance);
@@ -43,7 +42,7 @@ void STSPIN948_ReadInputs(BrushedDriver *driverInstance) {
 			driverInstance->config->enFault_b_port,
 			driverInstance->config->enFault_b_pin);
 
-	// update currents
+// update currents
 	driverInstance->cur_a = (((float) driverInstance->raw_cur.u16[0] - 2047.0)
 			/ 4095.0) * driverInstance->config->cur_a_factor;
 	driverInstance->cur_b = ((float) driverInstance->raw_cur.u16[1] / 4095.0)
@@ -55,10 +54,10 @@ void STSPIN948_SetOutputs(BrushedDriver *driverInstance) {
 			driverInstance->config->pwm_a_channel, driverInstance->pwm_a);
 	__HAL_TIM_SET_COMPARE(driverInstance->config->pwm_b_inst,
 			driverInstance->config->pwm_b_channel, driverInstance->pwm_b);
-	HAL_GPIO_WritePin(driverInstance->config->enFault_a_port,
-			driverInstance->config->enFault_a_pin, driverInstance->phase_a);
-	HAL_GPIO_WritePin(driverInstance->config->enFault_b_port,
-			driverInstance->config->enFault_b_pin, driverInstance->phase_b);
+	HAL_GPIO_WritePin(driverInstance->config->phase_a_port,
+			driverInstance->config->phase_a_pin, driverInstance->phase_a);
+	HAL_GPIO_WritePin(driverInstance->config->phase_b_port,
+			driverInstance->config->phase_b_pin, driverInstance->phase_b);
 }
 
 void STSPIN948_SetPwmValues(BrushedDriver *driverInstance, uint32_t pwm_a,

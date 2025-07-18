@@ -15,7 +15,7 @@ enum MotorState {
 	POSITION_FAULT,
 	HOMING_LOWER,
 	HOMING_UPPER,
-	ERROR
+	MOTOR_ERROR
 };
 
 #endif /* INC_BRUSHED_SYSTEM_H_ */

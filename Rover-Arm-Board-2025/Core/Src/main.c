@@ -19,13 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "brushed_comms.h"
-#include "encoder_conf.h"
-#include "stspin948.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stspin948.h"
+#include "brushed_system.h"
+#include "encoder_conf.h"
+#include "brushed_comms.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +46,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
-DMA_HandleTypeDef hdma_adc1;
 
 CRC_HandleTypeDef hcrc;
 
@@ -61,32 +60,20 @@ TIM_HandleTypeDef htim4;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+BrushedDriver bDriver = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void
-SystemClock_Config(void);
-static void
-MX_GPIO_Init(void);
-static void
-MX_DMA_Init(void);
-static void
-MX_ADC1_Init(void);
-static void
-MX_CRC_Init(void);
-static void
-MX_DAC_Init(void);
-static void
-MX_SPI2_Init(void);
-static void
-MX_TIM1_Init(void);
-static void
-MX_TIM2_Init(void);
-static void
-MX_TIM4_Init(void);
-static void
-MX_USART2_UART_Init(void);
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_ADC1_Init(void);
+static void MX_CRC_Init(void);
+static void MX_DAC_Init(void);
+static void MX_SPI2_Init(void);
+static void MX_TIM1_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM4_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -124,8 +111,8 @@ int main(void) {
 					&hadc1, .cur_a_factor = 1, .cur_b_factor = 1, .kp_a = 0.1,
 			.ki_a = 0.0, .kd_a = 0.0, .kp_b = 0.1, .ki_b = 0.0, .kd_b = 0.0 };
 
-	BrushedDriver bDriver = { 0 };
 	bDriver.config = &bConfig;
+	FeedbackData bFeedback = { 0 };
 
 	MotorEncoder mEncA = { 0 };
 	mEncA.htim = &htim1;
@@ -133,6 +120,13 @@ int main(void) {
 	mEncA.max_limit_counts = 500;
 	mEncA.total_counts_range = 1000;
 	mEncA.angle_range = 180.0;
+
+	MotorEncoder mEncB = { 0 };
+	mEncB.htim = &htim4;
+	mEncB.min_limit_counts = -500;
+	mEncB.max_limit_counts = 500;
+	mEncB.total_counts_range = 1000;
+	mEncB.angle_range = 180.0;
 	/* USER CODE END Init */
 
 	/* Configure the system clock */
@@ -144,7 +138,6 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	MX_DMA_Init();
 	MX_ADC1_Init();
 	MX_CRC_Init();
 	MX_DAC_Init();
@@ -155,26 +148,27 @@ int main(void) {
 	MX_USART2_UART_Init();
 	MX_USB_DEVICE_Init();
 	/* USER CODE BEGIN 2 */
-	FeedbackData my_feedback = { 0 };
-	BrushedComms_RegisterFeedback(&my_feedback);
-
-//	STSPIN948_Init(&bDriver);
-
-	bDriver.pwm_a = 700;
-
+	BrushedComms_RegisterFeedback(&bFeedback);
+	bDriver.pwm_a = 99999;
+	STSPIN948_Init(&bDriver);
 	MotorEncoder_Init(&mEncA);
+	MotorEncoder_Init(&mEncB);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-//    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 //    BrushedComms_Process();
+		HAL_ADC_Start_IT(&hadc1);
 		NewPosition(&mEncA);
-//		STSPIN948_SetOutputs(&bDriver);
-//		STSPIN948_ReadInputs(&bDriver);
-		my_feedback.motor_position[0] = (uint16_t) mEncA.angle;
-		HAL_Delay(10);
+		STSPIN948_SetOutputs(&bDriver);
+		STSPIN948_ReadInputs(&bDriver);
+		bFeedback.motor_position[0] = (uint16_t) mEncA.angle;
+		bFeedback.motor_position[1] = (uint16_t) mEncB.angle;
+		bFeedback.motor_current[0] = bDriver.raw_cur.u16[0];
+		bFeedback.motor_current[1] = bDriver.raw_cur.u16[1];
+		HAL_Delay(50);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -248,14 +242,14 @@ static void MX_ADC1_Init(void) {
 	hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
 	hadc1.Init.Resolution = ADC_RESOLUTION_12B;
 	hadc1.Init.ScanConvMode = ENABLE;
-	hadc1.Init.ContinuousConvMode = ENABLE;
+	hadc1.Init.ContinuousConvMode = DISABLE;
 	hadc1.Init.DiscontinuousConvMode = DISABLE;
 	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
 	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc1.Init.NbrOfConversion = 2;
-	hadc1.Init.DMAContinuousRequests = ENABLE;
-	hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
+	hadc1.Init.DMAContinuousRequests = DISABLE;
+	hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 	if (HAL_ADC_Init(&hadc1) != HAL_OK) {
 		Error_Handler();
 	}
@@ -264,7 +258,7 @@ static void MX_ADC1_Init(void) {
 	 */
 	sConfig.Channel = ADC_CHANNEL_6;
 	sConfig.Rank = 1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+	sConfig.SamplingTime = ADC_SAMPLETIME_15CYCLES;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
 		Error_Handler();
 	}
@@ -451,11 +445,11 @@ static void MX_TIM2_Init(void) {
 
 	/* USER CODE END TIM2_Init 1 */
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 0;
+	htim2.Init.Prescaler = 83;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim2.Init.Period = 4095;
+	htim2.Init.Period = 100000 - 1;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htim2) != HAL_OK) {
 		Error_Handler();
 	}
@@ -567,21 +561,6 @@ static void MX_USART2_UART_Init(void) {
 }
 
 /**
- * Enable DMA controller clock
- */
-static void MX_DMA_Init(void) {
-
-	/* DMA controller clock enable */
-	__HAL_RCC_DMA2_CLK_ENABLE();
-
-	/* DMA interrupt init */
-	/* DMA2_Stream0_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-
-}
-
-/**
  * @brief GPIO Initialization Function
  * @param None
  * @retval None
@@ -599,8 +578,7 @@ static void MX_GPIO_Init(void) {
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(
-	GPIOC,
+	HAL_GPIO_WritePin(GPIOC,
 			GPIO_PIN_15 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8
 					| GPIO_PIN_9 | GPIO_PIN_10, GPIO_PIN_RESET);
 
@@ -652,7 +630,11 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+	if (hadc->Instance == ADC1) {
+		bDriver.raw_cur.u32 = HAL_ADC_GetValue(hadc);
+	}
+}
 /* USER CODE END 4 */
 
 /**
