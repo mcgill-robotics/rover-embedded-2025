@@ -20,6 +20,13 @@
 int angleError = 0;
 int angleCorrection = 0;
 int oldAngleError = 0;
+int calibrationMode = 0; // if calibrating, lower the speed!
+// In Calibration.c, calibrationMode is set to one at the start
+// of the program. Once the limit switch is hit,
+// then it is set back to zero and the motor goes full speed
+// again. What's important is that the joystick can't
+// be moved while calibrating!!!!!!!!!!!!!!!!
+// I will mention this to whoever is controlling the steering.
 
 static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
 
@@ -79,10 +86,18 @@ void updatePID() {
 	}
 	set_motor_speed(angleCorrection);
 
+	if (calibrationMode == 1) {
+		set_motor_speed(20);
+	}
+
 }
 
 void setPIDGoalA(double angle) {
-	atomic_store(&goalAngle, angle_to_count(angle));
+	atomic_store(&goalAngle, -1*angle_to_count(angle));
+	// Flip the goalAngle in order for commands to match up with the unit circle
+	// convention.
+	// ( In essence, simply because our motor spins clockwise in the positive
+	// direction).
 }
 
 #endif
