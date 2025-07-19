@@ -26,6 +26,7 @@
 #include "motor.h"
 #include "pid.h"
 #include "TestList.h"
+#include "Calibration.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,6 +77,7 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 int datacheck = 0;
+extern int calibrationMode;
 
 
 /* USER CODE END 0 */
@@ -127,6 +129,7 @@ int main(void)
   set_motor_direction(1);
   set_counts(0);
   TIM2->CNT = 0;
+  CalibrateMotor(); // Calibrate the motor (see Calibration.c).
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
@@ -585,6 +588,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
 {
 	set_counts(0);
 	if (GPIO_PIN == LIMIT_Pin){
+		calibrationMode = 0;
 		int switch_state = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
 		if (!switch_state){
 			calibrate_encoder();

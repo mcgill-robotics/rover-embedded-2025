@@ -3,6 +3,8 @@
 #include "math.h"
 #include "main.h"
 #include "encoder.h"
+#include "CAN_processing.h"
+#include "pid.h"
 
 int counts;
 int need_debounce = 0;
@@ -43,7 +45,14 @@ void calibrate_encoder(){
 	if (!is_debouncing()){
 		limit_calls++;
 		set_debounce(1);
-		TIM2->CNT = LIMIT_SWITCH_RESET_ANGLE;
+		if (STEERING_ID == LF_STEER || STEERING_ID == LB_STEER) {
+			TIM2->CNT = LIMIT_SWITCH_RESET_ANGLE;
+			setPIDGoalA(90); // move wheels back to the middle!
+		}
+		if (STEERING_ID == RF_STEER || STEERING_ID == RB_STEER) {
+			TIM2->CNT = angle_to_count(180);
+			setPIDGoalA(90); // ...
+		}
 	}
 //	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
 }
