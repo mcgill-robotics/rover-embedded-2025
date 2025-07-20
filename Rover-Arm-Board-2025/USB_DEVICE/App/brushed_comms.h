@@ -28,29 +28,26 @@
 
 // Feedback structure
 typedef struct {
-    uint16_t motor_position[2]; // WP, WR
-    uint16_t motor_current[2]; // WP, WR
+	float motor_position[2]; // WP, WR
+	float motor_current[2]; // WP, WR
 
-    /**
-     * @brief Error code indicating the status of the motor.
-     * This is a one-hot encoded value where each bit represents a specific error condition.
-     * - Bit 0: End-Effector Limit
-     * - Bit 1: WP Fault
-     * - Bit 2: WR Fault
-     * - Bit 3: WP Limit
-     * - Bit 4: WR Limit
-     * - Bit 5: Comms Error
-     * - Bit 6: Undefined
-     * - Bit 7: Undefined
-     */
-    uint8_t error_code;
+	/**
+	 * @brief Error code indicating the status of the motor.
+	 * This is a one-hot encoded value where each bit represents a specific error condition.
+	 * - Bit 0: End-Effector Limit
+	 * - Bit 1: WP Fault
+	 * - Bit 2: WR Fault
+	 * - Bit 3: WP Limit
+	 * - Bit 4: WR Limit
+	 * - Bit 5: Comms Error
+	 * - Bit 6: Undefined
+	 * - Bit 7: Undefined
+	 */
+	uint8_t error_code;
 } FeedbackData;
 
-enum EE_Command{
-	EE_OFF = 0,
-	EE_OPEN = 1,
-	EE_CLOSE = 2,
-	EE_HOLD = 3
+enum EE_Command {
+	EE_OFF = 0, EE_OPEN = 1, EE_CLOSE = 2, EE_HOLD = 3
 };
 
 typedef struct {
@@ -61,13 +58,13 @@ typedef struct {
 // Function prototypes
 void BrushedComms_Init(void); // Initialize communication
 void BrushedComms_Process(void); // Process incoming and outgoing data
-void BrushedComms_SendFeedback(const FeedbackData* feedback); // Send feedback to PC
-void BrushedComms_HandleSetpoint(const uint8_t* data, uint16_t length); // Handle setpoint data from PC
-void BrushedComms_SendEcho(const uint8_t* data, uint16_t len);
-void BrushedComms_HandleHoming(const uint8_t* data, uint16_t length); // Handle homing command from PC
+void BrushedComms_SendFeedback(const FeedbackData *feedback); // Send feedback to PC
+void BrushedComms_HandleSetpoint(const uint8_t *data, uint16_t length); // Handle setpoint data from PC
+void BrushedComms_SendEcho(const uint8_t *data, uint16_t len);
+void BrushedComms_HandleHoming(const uint8_t *data, uint16_t length); // Handle homing command from PC
 void BrushedComms_ReportError(uint8_t error_code); // Report error to PC
-uint8_t BrushedComms_CalculateCRC(uint8_t* data, uint16_t length); // Calculate CRC for data integrity
+uint8_t BrushedComms_CalculateCRC(uint8_t *data, uint16_t length); // Calculate CRC for data integrity
 void BrushedComms_ReceiveByte(uint8_t byte);
-void BrushedComms_RegisterFeedback(FeedbackData* fb);
+void BrushedComms_RegisterFeedback(FeedbackData *fb);
 
 #endif // BRUSHED_COMMS_H

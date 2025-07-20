@@ -8,7 +8,7 @@
 #ifndef INC_STSPIN948_H_
 #define INC_STSPIN948_H_
 
-#define MAX_PWM_VALUE 4095
+#define MAX_PWM_VALUE 99999
 #define INTEGRAL_MAX 1000.0f
 
 #include "stm32f4xx_hal.h"
