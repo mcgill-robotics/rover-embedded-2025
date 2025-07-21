@@ -75,6 +75,7 @@ typedef struct {
 
 	PIDValues pid_a;
 	PIDValues pid_b;
+	uint32_t last_us;
 
 	//config
 	BrushedDriverConfig *config;

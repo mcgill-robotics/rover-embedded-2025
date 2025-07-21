@@ -51,7 +51,7 @@ enum EE_Command {
 };
 
 typedef struct {
-	uint16_t motor_setpoints[2];
+	float motor_setpoints[2];
 	uint8_t ee_command;
 } SetpointData;
 

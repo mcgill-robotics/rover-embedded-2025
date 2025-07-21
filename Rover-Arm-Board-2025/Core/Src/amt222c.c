@@ -84,9 +84,9 @@ AMT222C_Status AMT222C_UpdatePosition(AMT222C_Handle *encoder) {
 		return AMT222C_ERR_SPI;
 
 	encoder->ticks = (turn << 12) | raw;
-	encoder->position_continuous = fmod(
-			(float) encoder->ticks / AMT222C_MAX_TICKS / encoder->gear_ratio
-					* 360.0, 360.0);
+	encoder->position_continuous = (float) encoder->ticks / AMT222C_MAX_TICKS
+			/ encoder->gear_ratio * 360.0f;
+
 	return AMT222C_OK;
 }
 

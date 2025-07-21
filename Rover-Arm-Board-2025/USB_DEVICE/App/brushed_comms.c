@@ -9,10 +9,16 @@ static uint8_t rx_index = 0;
 static uint8_t expected_length = 0;
 
 static FeedbackData *feedback_ptr = NULL;
+static SetpointData *setpoint_ptr = NULL;
 
 // External API to register feedback pointer
 void BrushedComms_RegisterFeedback(FeedbackData *fb) {
 	feedback_ptr = fb;
+}
+
+// External API to register setpoint pointer
+void BrushedComms_RegisterSetpoint(SetpointData *sp) {
+	setpoint_ptr = sp;
 }
 
 // Call this to initialize (currently a stub)
@@ -102,6 +108,8 @@ void BrushedComms_SendFeedback(const FeedbackData *feedback) {
 	packet[index++] = crc;
 
 	CDC_Transmit_FS(packet, index);
+	uint8_t dummy = 2;
+	dummy = dummy + 2;
 }
 
 // Report error packet
@@ -116,10 +124,11 @@ void BrushedComms_ReportError(uint8_t error_code) {
 }
 
 void BrushedComms_HandleSetpoint(const uint8_t *data, uint16_t length) {
-	// TODO: Apply setpoints to control logic
-	// Example debug:
-	// uint16_t wp_target = (data[0] << 8) | data[1];
-	// uint16_t wr_target = (data[2] << 8) | data[3];
+	if (!setpoint_ptr)
+		return;
+	memcpy(&setpoint_ptr->motor_setpoints[0], data, 4);
+	memcpy(&setpoint_ptr->motor_setpoints[1], data + 4, 4);
+	memcpy(&setpoint_ptr->ee_command, data + 8, 1);
 }
 
 void BrushedComms_HandleHoming(const uint8_t *data, uint16_t length) {

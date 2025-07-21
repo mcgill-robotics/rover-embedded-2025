@@ -64,6 +64,8 @@ UART_HandleTypeDef huart2;
 BrushedDriver bDriver = { 0 };
 AMT222C_Handle mEncA = { .hspi = &hspi2, .cs_port = GPIOC, .cs_pin =
 GPIO_PIN_5, .gear_ratio = (80.0 / 28.0) * 510.0 };
+SetpointData bSetpoint = { 0 };
+FeedbackData bFeedback = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,11 +113,10 @@ int main(void) {
 			TIM_CHANNEL_2, .dacRef_a_inst = &hdac, .dacRef_a_channel =
 			DAC_CHANNEL_1, .dacRef_b_inst = &hdac, .dacRef_b_channel =
 			DAC_CHANNEL_2, .dacRef_a = 3537, .dacRef_b = 2296, .cur_inst =
-					&hadc1, .cur_a_factor = 1, .cur_b_factor = 1, .kp_a = 200,
-			.ki_a = 0.0, .kd_a = 50.0, .kp_b = 0.1, .ki_b = 0.0, .kd_b = 0.0 };
+					&hadc1, .cur_a_factor = 1, .cur_b_factor = 1, .kp_a = 10000,
+			.ki_a = 0.0, .kd_a = 0.0, .kp_b = 0.1, .ki_b = 0.0, .kd_b = 0.0 };
 
 	bDriver.config = &bConfig;
-	FeedbackData bFeedback = { 0 };
 
 	MotorEncoder mEncB = { 0 };
 	mEncB.htim = &htim4;
@@ -145,11 +146,11 @@ int main(void) {
 	MX_USB_DEVICE_Init();
 	/* USER CODE BEGIN 2 */
 	BrushedComms_RegisterFeedback(&bFeedback);
+	BrushedComms_RegisterSetpoint(&bSetpoint);
 //	bDriver.pwm_a = 99999;
 	STSPIN948_Init(&bDriver);
 	MotorEncoder_Init(&mEncB);
 	AMT222C_Init(&mEncA);
-	bDriver.pid_a.setpoint = 200.0;
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -157,16 +158,18 @@ int main(void) {
 	while (1) {
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 //    BrushedComms_Process();
+		bDriver.pid_a.setpoint = bSetpoint.motor_setpoints[0];
+		bDriver.pid_b.setpoint = bSetpoint.motor_setpoints[1];
 		HAL_ADC_Start_IT(&hadc1);
 		AMT222C_UpdatePosition(&mEncA);
 		bFeedback.motor_position[0] = AMT222C_GetPosition(&mEncA);
-		STSPIN948_SetOutputs(&bDriver);
 		STSPIN948_ReadInputs(&bDriver);
 		STSPIN948_CalculatePID(&bDriver, bFeedback.motor_position[0], 0.0);
+		STSPIN948_SetOutputs(&bDriver);
 		bFeedback.motor_position[1] = (uint16_t) mEncB.angle;
 		bFeedback.motor_current[0] = bDriver.cur_a;
 		bFeedback.motor_current[1] = bDriver.cur_b;
-		HAL_Delay(10);
+		HAL_Delay(1);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

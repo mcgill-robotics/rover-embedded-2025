@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "brushed comms",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "Rover-Arm-Board-2025/scripts/brushed_comms.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}
