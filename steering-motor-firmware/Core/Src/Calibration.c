@@ -1,14 +1,13 @@
+#ifndef CALIBRATION_H
+#define CALIBRATION_H
+
 #include "main.h"
 #include "encoder.h"
 #include "pid.h"
 #include "motor.h"
 #include "CAN_processing.h"
 #include "TestList.h"
-
-extern int calibrationMode; // see pid.c
-// Basically calibrationMode determines if
-// the motor is going to go super slowly or not.
-// see pid.c for more details.
+#include "calibration.h"
 
 // Hi, this is going to be the calibration sequence for the motors. It's going to
 // consist of a couple steps.
@@ -42,3 +41,4 @@ void CalibrateMotor() {
 // in pid.c, set to one in CalibrateMotor() (above), then
 // set back to zero in the limit switch interrupt
 
+#endif

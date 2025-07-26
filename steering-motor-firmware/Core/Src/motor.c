@@ -5,6 +5,7 @@
 #include "CAN_processing.h"
 
 int direction = 1;
+int power_limit = 100;
 
 // Change based on what motor is being controlled!
 int STEERING_ID = RF_STEER;
