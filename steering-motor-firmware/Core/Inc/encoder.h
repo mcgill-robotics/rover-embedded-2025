@@ -1,8 +1,10 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-#define MAX_COUNTS 33024//16*516*4.0
-#define LIMIT_SWITCH_RESET_ANGLE 0
+#define MAX_COUNTS 33024//16*516*4.0.
+// reset angles for left and for right motors
+#define LIMIT_SWITCH_RESET_ANGLE_RIGHT 180
+#define LIMIT_SWITCH_RESET_ANGLE_LEFT 0
 
 int is_debouncing();
 void set_debounce(int debounce_state);

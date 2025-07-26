@@ -77,7 +77,6 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 int datacheck = 0;
-extern int calibrationMode;
 
 
 /* USER CODE END 0 */
@@ -158,7 +157,9 @@ int main(void)
   while (1){
 	  // Process Message if available
 	  if (datacheck){
-		    CAN_Parse_MSG(&RxHeader, rxData);
+		  	if (!calibrationMode){
+		  		CAN_Parse_MSG(&RxHeader, rxData);
+		  	}
 		    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		    datacheck = 0;
 	  }
