@@ -28,7 +28,7 @@ void CalibrateMotor() {
 		setPIDGoalA(-179);
 	}
 	if (STEERING_ID == RF_STEER || STEERING_ID == RB_STEER) {
-		setPIDGoalA(179);
+		setPIDGoalA(-179);
 	}
 	// 179 just to mentally be sure that it's going in the right
 	// direction. Could be 170 too or whatever, probably fine

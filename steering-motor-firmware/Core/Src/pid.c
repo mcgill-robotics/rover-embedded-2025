@@ -87,7 +87,7 @@ void updatePID() {
 	set_motor_speed(angleCorrection);
 
 	if (calibrationMode == 1) {
-		set_motor_speed(40);
+		set_motor_speed(20);
 	}
 
 }
