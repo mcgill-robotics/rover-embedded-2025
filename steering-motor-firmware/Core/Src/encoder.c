@@ -46,12 +46,12 @@ void calibrate_encoder(){
 		limit_calls++;
 		set_debounce(1);
 		if (STEERING_ID == LF_STEER || STEERING_ID == LB_STEER) {
-			TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_ANGLE_LEFT);
-			setPIDGoalA(90); // move wheels back to the middle!
+			TIM2->CNT = angle_to_count(-1*LIMIT_SWITCH_RESET_ANGLE_LEFT);
+			setPIDGoalA(-90); // move wheels back to the middle!
 		}
 		if (STEERING_ID == RF_STEER || STEERING_ID == RB_STEER) {
-			TIM2->CNT =  angle_to_count(LIMIT_SWITCH_RESET_ANGLE_RIGHT);
-			setPIDGoalA(90); // ...
+			TIM2->CNT =  angle_to_count(-1*LIMIT_SWITCH_RESET_ANGLE_RIGHT);
+			setPIDGoalA(-90); // ...
 		}
 	}
 //	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
