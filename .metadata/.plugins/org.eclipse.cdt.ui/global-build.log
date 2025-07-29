@@ -1,120 +1,173 @@
-12:16:58 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../Core/Src/stspin948.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stspin948.d" -MT"Core/Src/stspin948.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stspin948.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Rover-Arm-Board-2025.elf
- 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
-   text	   data	    bss	    dec	    hex	filename
-  48944	    372	   9652	  58968	   e658	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
- 
-12:17:02 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-   text	   data	    bss	    dec	    hex	filename
-  48944	    372	   9652	  58968	   e658	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-12:21:01 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc "../Core/Src/stspin948.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stspin948.d" -MT"Core/Src/stspin948.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stspin948.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Rover-Arm-Board-2025.elf
- 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
-   text	   data	    bss	    dec	    hex	filename
-  49128	    372	   9652	  59152	   e710	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
- 
-12:21:39 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Rover-Arm-Board-2025.elf
- 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
-   text	   data	    bss	    dec	    hex	filename
-  49128	    372	   9652	  59152	   e710	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
- 
-12:23:47 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Rover-Arm-Board-2025.elf
- 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
-   text	   data	    bss	    dec	    hex	filename
-  49128	    372	   9652	  59152	   e710	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
- 
-12:24:51 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Rover-Arm-Board-2025.elf
- 
-arm-none-eabi-size  Rover-Arm-Board-2025.elf 
-arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
-   text	   data	    bss	    dec	    hex	filename
-  49128	    372	   9652	  59152	   e710	Rover-Arm-Board-2025.elf
-Finished building: default.size.stdout
- 
-Finished building: Rover-Arm-Board-2025.list
- 
-12:51:25 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
+21:36:10 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
 arm-none-eabi-gcc "../USB_DEVICE/App/brushed_comms.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"USB_DEVICE/App/brushed_comms.d" -MT"USB_DEVICE/App/brushed_comms.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "USB_DEVICE/App/brushed_comms.o"
 arm-none-eabi-gcc "../USB_DEVICE/App/usbd_cdc_if.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"USB_DEVICE/App/usbd_cdc_if.d" -MT"USB_DEVICE/App/usbd_cdc_if.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "USB_DEVICE/App/usbd_cdc_if.o"
+arm-none-eabi-gcc "../Core/Src/amt222c.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/amt222c.d" -MT"Core/Src/amt222c.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/amt222c.o"
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/stspin948.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stspin948.d" -MT"Core/Src/stspin948.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stspin948.o"
+../Core/Src/amt222c.c:24:16: warning: 'AMT222C_CalculateCheck' defined but not used [-Wunused-function]
+   24 | static uint8_t AMT222C_CalculateCheck(uint16_t value) {
+      |                ^~~~~~~~~~~~~~~~~~~~~~
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  49360	    372	   9684	  59416	   e818	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+21:58:40 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'main':
 ../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
   149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
       |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       |         BrushedComms_RegisterFeedback
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: Rover-Arm-Board-2025.elf
  
 arm-none-eabi-size  Rover-Arm-Board-2025.elf 
 arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
    text	   data	    bss	    dec	    hex	filename
-  49232	    372	   9684	  59288	   e798	Rover-Arm-Board-2025.elf
+  49448	    372	   9684	  59504	   e870	Rover-Arm-Board-2025.elf
 Finished building: default.size.stdout
  
 Finished building: Rover-Arm-Board-2025.list
  
-13:59:32 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
-arm-none-eabi-gcc "../USB_DEVICE/App/brushed_comms.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"USB_DEVICE/App/brushed_comms.d" -MT"USB_DEVICE/App/brushed_comms.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "USB_DEVICE/App/brushed_comms.o"
-arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"/home/vince/Documents/Github/rover-embedded-2025/Rover-Arm-Board-2025/STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+22:02:28 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: Rover-Arm-Board-2025.elf
  
 arm-none-eabi-size  Rover-Arm-Board-2025.elf 
 arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
    text	   data	    bss	    dec	    hex	filename
-  49248	    372	   9684	  59304	   e7a8	Rover-Arm-Board-2025.elf
+  49448	    372	   9684	  59504	   e870	Rover-Arm-Board-2025.elf
 Finished building: default.size.stdout
  
 Finished building: Rover-Arm-Board-2025.list
  
-17:28:38 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
+22:05:10 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
 arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
    text	   data	    bss	    dec	    hex	filename
-  49248	    372	   9684	  59304	   e7a8	Rover-Arm-Board-2025.elf
+  49440	    372	   9740	  59552	   e8a0	Rover-Arm-Board-2025.elf
 Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+17:59:11 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:150:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  150 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  48172	    292	   9428	  57892	   e224	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+18:26:27 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/stspin948.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stspin948.d" -MT"Core/Src/stspin948.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/stspin948.o"
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  48172	    292	   9428	  57892	   e224	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+18:27:17 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:150:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  150 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  48180	    292	   9428	  57900	   e22c	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+20:13:05 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  48164	    292	   9428	  57884	   e21c	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
+ 
+20:15:07 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
+arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
+   text	   data	    bss	    dec	    hex	filename
+  49448	    372	   9740	  59560	   e8a8	Rover-Arm-Board-2025.elf
+Finished building: default.size.stdout
+ 
+Finished building: Rover-Arm-Board-2025.list
  

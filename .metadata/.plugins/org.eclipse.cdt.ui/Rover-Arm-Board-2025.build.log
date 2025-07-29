@@ -1,10 +1,22 @@
-17:28:38 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
-make -j16 all 
+20:15:07 **** Incremental Build of configuration Debug for project Rover-Arm-Board-2025 ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:149:9: warning: implicit declaration of function 'BrushedComms_RegisterSetpoint'; did you mean 'BrushedComms_RegisterFeedback'? [-Wimplicit-function-declaration]
+  149 |         BrushedComms_RegisterSetpoint(&bSetpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         BrushedComms_RegisterFeedback
+arm-none-eabi-gcc -o "Rover-Arm-Board-2025.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\vince\Documents\GitHub\rover-embedded-2025\Rover-Arm-Board-2025\STM32F446RETX_FLASH.ld" -Wl,-Map="Rover-Arm-Board-2025.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Rover-Arm-Board-2025.elf
+ 
 arm-none-eabi-size  Rover-Arm-Board-2025.elf 
+arm-none-eabi-objdump -h -S Rover-Arm-Board-2025.elf  > "Rover-Arm-Board-2025.list"
    text	   data	    bss	    dec	    hex	filename
-  49248	    372	   9684	  59304	   e7a8	Rover-Arm-Board-2025.elf
+  49448	    372	   9740	  59560	   e8a8	Rover-Arm-Board-2025.elf
 Finished building: default.size.stdout
  
+Finished building: Rover-Arm-Board-2025.list
+ 
 
-17:28:38 Build Finished. 0 errors, 0 warnings. (took 148ms)
+20:15:08 Build Finished. 0 errors, 1 warnings. (took 1s.468ms)
 
