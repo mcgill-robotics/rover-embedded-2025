@@ -56,9 +56,8 @@ int scan_switch(){
 int try_calibrate_encoder(){
 	// return 1 if calibrated
 	if (scan_switch()){
-		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
-		set_counts((int16_t) TIM2->CNT);
-		steering_state = PID;
+		TIM2->CNT = LIMIT_SWITCH_RESET_COUNTS;
+		set_counts((uint16_t) TIM2->CNT);
 		return 1;
 	}
 	return 0;

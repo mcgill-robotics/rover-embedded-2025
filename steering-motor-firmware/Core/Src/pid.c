@@ -20,6 +20,7 @@
 int angleError = 0;
 int angleCorrection = 0;
 int oldAngleError = 0;
+int currentGoal =0;
 int calibrationMode = 0; // if calibrating, lower the speed!
 // In Calibration.c, calibrationMode is set to one at the start
 // of the program. Once the limit switch is hit,
@@ -51,17 +52,18 @@ int updatePIDImpl(int goal) {
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
 
+	currentGoal = goal;
 	//return 1 when goal reached
 	angleError = goal - get_counts();
 	// Find optimal direction
-	if (abs(angleError) > MAX_COUNTS/2) {
-		if (angleError > 0) {
-			angleError = angleError - MAX_COUNTS;
-		}
-		else {
-			angleError = angleError + MAX_COUNTS;
-		}
-	}
+//	if (abs(angleError) > MAX_COUNTS/2) {
+//		if (angleError > 0) {
+//			angleError = angleError - MAX_COUNTS;
+//		}
+//		else {
+//			angleError = angleError + MAX_COUNTS;
+//		}
+//	}
     angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
     // Set direction based on allowed error
 	if (angleCorrection < 0){
@@ -104,7 +106,7 @@ void leave_limit_switch(){
 	if(updatePIDOverrideGoal(angle_to_count(170))){
 		steering_state = PID;
 		// prevent continuously moving to the limit
-		if(atomic_load(&goalAngle) > 170){
+		if(atomic_load(&goalAngle) > angle_to_count(170)){
 			stop_motor();
 		}
 	}
