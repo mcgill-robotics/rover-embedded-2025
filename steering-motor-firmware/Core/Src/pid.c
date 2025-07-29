@@ -63,9 +63,9 @@ void updatePID() {
     angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
     // Set direction based on allowed error
 	if (angleCorrection < 0){
-		set_motor_direction(1);
-	} else{
 		set_motor_direction(0);
+	} else{
+		set_motor_direction(1);
 	}
 	if (abs(angleCorrection) > 100) {
 		angleCorrection = 100;
@@ -86,14 +86,14 @@ void updatePID() {
 	}
 	set_motor_speed(angleCorrection);
 
-	if (calibrationMode == 1) {
+	if (calibrationMode) {
 		set_motor_speed(20);
 	}
 
 }
 
 void setPIDGoalA(double angle) {
-	atomic_store(&goalAngle, -1*angle_to_count(angle));
+	atomic_store(&goalAngle, angle_to_count(angle));
 	// Flip the goalAngle in order for commands to match up with the unit circle
 	// convention.
 	// ( In essence, simply because our motor spins clockwise in the positive

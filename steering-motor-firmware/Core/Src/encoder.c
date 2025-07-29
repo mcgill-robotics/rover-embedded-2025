@@ -5,6 +5,7 @@
 #include "encoder.h"
 #include "CAN_processing.h"
 #include "pid.h"
+#include "calibration.h"
 
 int counts;
 int need_debounce = 0;
@@ -36,6 +37,13 @@ float count_to_angle(int n){
 }
 
 int angle_to_count(double n){
+	if (!calibrationMode){
+		if (n < 0){
+			n=0;
+		} else if (n > 180){
+			n = 180;
+		}
+	}
 	float new_n = fabs(fmod(n,360));
 	int c = MAX_COUNTS;
 	return (int) ((new_n/(360))*MAX_COUNTS);
@@ -46,12 +54,12 @@ void calibrate_encoder(){
 		limit_calls++;
 		set_debounce(1);
 		if (STEERING_ID == LF_STEER || STEERING_ID == LB_STEER) {
-			TIM2->CNT = angle_to_count(-1*LIMIT_SWITCH_RESET_ANGLE_LEFT);
-			setPIDGoalA(-90); // move wheels back to the middle!
+			TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_ANGLE_LEFT);
+			setPIDGoalA(90); // move wheels back to the middle!
 		}
 		if (STEERING_ID == RF_STEER || STEERING_ID == RB_STEER) {
-			TIM2->CNT =  angle_to_count(-1*LIMIT_SWITCH_RESET_ANGLE_RIGHT);
-			setPIDGoalA(-90); // ...
+			TIM2->CNT =  angle_to_count(LIMIT_SWITCH_RESET_ANGLE_RIGHT);
+			setPIDGoalA(90); // ...
 		}
 	}
 //	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
