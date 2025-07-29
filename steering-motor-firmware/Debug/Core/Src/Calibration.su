@@ -1,1 +1,2 @@
-../Core/Src/Calibration.c:25:6:CalibrateMotor	8	static
+../Core/Src/Calibration.c:24:6:CalibrateMotor	4	static
+../Core/Src/Calibration.c:35:6:set_calibration_motor_movement	8	static

@@ -1,2 +1,5 @@
-../Core/Src/pid.c:34:6:updatePID	32	static
-../Core/Src/pid.c:95:6:setPIDGoalA	24	static
+../Core/Src/pid.c:34:5:updatePIDImpl	16	static
+../Core/Src/pid.c:93:5:updatePID	16	static
+../Core/Src/pid.c:98:5:updatePIDOverrideGoal	16	static
+../Core/Src/pid.c:103:6:leave_limit_switch	16	static
+../Core/Src/pid.c:113:6:setPIDGoalA	24	static

@@ -11,7 +11,8 @@
 #define ALLOWED_ERROR_ZERO 300
 
 
-void updatePID(void);
+int updatePID(void);
 void setPIDGoalA(double angle);
+void leave_limit_switch();
 
 #endif /* INC_PID_H_ */

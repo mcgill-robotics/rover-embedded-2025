@@ -1,13 +1,12 @@
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
-
 #include "main.h"
 #include "encoder.h"
 #include "pid.h"
 #include "motor.h"
 #include "CAN_processing.h"
 #include "TestList.h"
-#include "calibration.h"
+#include "Calibration.h"
+
+SteeringState steering_state = CALIBRATION;
 
 // Hi, this is going to be the calibration sequence for the motors. It's going to
 // consist of a couple steps.
@@ -23,10 +22,7 @@
 // This function is going to trigger on startup (see call in main loop)
 
 void CalibrateMotor() {
-	calibrationMode = 1;
-	setPIDGoalA(181);
-	// 179 just to mentally be sure that it's going in the right
-	// direction. Could be 170 too or whatever, probably fine
+	steering_state = CALIBRATION;
 }
  // Note: Part 2. of the calibration sequence as described above is implemented
 // in Calibrate_endoder in encoder.c
@@ -36,4 +32,8 @@ void CalibrateMotor() {
 // in pid.c, set to one in CalibrateMotor() (above), then
 // set back to zero in the limit switch interrupt
 
-#endif
+void set_calibration_motor_movement(){
+	set_motor_direction(1);
+	set_motor_speed_percent(20);
+}
+

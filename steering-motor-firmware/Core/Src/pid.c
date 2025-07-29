@@ -13,7 +13,7 @@
 #include <stdatomic.h>
 #include <stdlib.h>
 #include "TestList.h"
-
+#include "Calibration.h"
 // PID parameters
 
 
@@ -30,8 +30,8 @@ int calibrationMode = 0; // if calibrating, lower the speed!
 
 static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
 
-
-void updatePID() {
+// PID implementation
+int updatePIDImpl(int goal) {
 
 	/*
 	 * This function will do the heavy lifting PID logic. It should do the following: read the encoder counts to determine an error,
@@ -50,7 +50,9 @@ void updatePID() {
 	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
-	angleError = atomic_load(&goalAngle) - get_counts();
+
+	//return 1 when goal reached
+	angleError = goal - get_counts();
 	// Find optimal direction
 	if (abs(angleError) > MAX_COUNTS/2) {
 		if (angleError > 0) {
@@ -67,37 +69,49 @@ void updatePID() {
 	} else{
 		set_motor_direction(1);
 	}
-	if (abs(angleCorrection) > 100) {
-		angleCorrection = 100;
-	}
 	oldAngleError = angleError;
 	// Stop if within error
 	if (abs(angleError) <  ALLOWED_ERROR){
-		set_motor_speed(0);
-		return;
+		set_motor_speed_raw(0);
+		//reset error once goal reached
+		oldAngleError = 0;
+		return 1;
 	}
 
 	// Handle strange oscillations near 0 degrees with higher allowed error
-	if (goalAngle == 0) {
-		if (abs(angleError) < ALLOWED_ERROR_ZERO) {
-			set_motor_speed(0);
-			return;
+//	if (goalAngle == 0) {
+//		if (abs(angleError) < ALLOWED_ERROR_ZERO) {
+//			set_motor_speed(0);
+//			return;
+//		}
+//	}
+	set_motor_speed_raw(angleCorrection);
+	return 0;
+}
+
+// normal pid with goal from can
+int updatePID(){
+	return updatePIDImpl(atomic_load(&goalAngle));
+}
+
+//run pid with overriden goal(to ignore goal from can when moving away from limit switch)
+int updatePIDOverrideGoal(int override){
+	return updatePIDImpl(override);
+}
+
+// use PID to move away from limit switch a little bit after switch is triggered
+void leave_limit_switch(){
+	if(updatePIDOverrideGoal(angle_to_count(170))){
+		steering_state = PID;
+		// prevent continuously moving to the limit
+		if(atomic_load(&goalAngle) > 170){
+			stop_motor();
 		}
 	}
-	set_motor_speed(angleCorrection);
-
-	if (calibrationMode) {
-		set_motor_speed(20);
-	}
-
 }
 
 void setPIDGoalA(double angle) {
 	atomic_store(&goalAngle, angle_to_count(angle));
-	// Flip the goalAngle in order for commands to match up with the unit circle
-	// convention.
-	// ( In essence, simply because our motor spins clockwise in the positive
-	// direction).
 }
 
 #endif

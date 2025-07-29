@@ -1,7 +1,9 @@
 ../Core/Src/encoder.c:14:5:is_debouncing	1
 ../Core/Src/encoder.c:18:6:set_debounce	1
 ../Core/Src/encoder.c:22:6:set_counts	1
-../Core/Src/encoder.c:26:5:get_counts	1
-../Core/Src/encoder.c:30:7:count_to_angle	2
-../Core/Src/encoder.c:39:5:angle_to_count	4
-../Core/Src/encoder.c:52:6:calibrate_encoder	6
+../Core/Src/encoder.c:27:5:get_counts	1
+../Core/Src/encoder.c:31:7:count_to_angle	1
+../Core/Src/encoder.c:38:5:angle_to_count	1
+../Core/Src/encoder.c:44:6:reset_debounce_buffer	1
+../Core/Src/encoder.c:49:5:scan_switch	1
+../Core/Src/encoder.c:56:5:try_calibrate_encoder	2

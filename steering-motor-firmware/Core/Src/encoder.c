@@ -9,7 +9,7 @@
 
 int counts;
 int need_debounce = 0;
-int limit_calls = 0;
+int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
 int is_debouncing(){
 	return need_debounce;
@@ -20,7 +20,8 @@ void set_debounce(int debounce_state){
 }
 
 void set_counts(int n){
-	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
+//	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
+	counts = n;
 }
 
 int get_counts(){
@@ -28,39 +29,45 @@ int get_counts(){
 }
 
 float count_to_angle(int n){
-	int new_n = abs(n%MAX_COUNTS);
-	float angle=((float)n/(float)MAX_COUNTS)*360;
-	if (angle<0){
-		return 360+angle;
-	}
+	int no_offset = n-(LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);
+//	int new_n = abs(no_offset%MAX_COUNTS);
+	float angle=((float)no_offset/(float)MAX_COUNTS)*360;
 	return angle;
 }
 
 int angle_to_count(double n){
-	if (!calibrationMode){
-		if (n < 0){
-			n=0;
-		} else if (n > 180){
-			n = 180;
-		}
-	}
 	float new_n = fabs(fmod(n,360));
-	int c = MAX_COUNTS;
-	return (int) ((new_n/(360))*MAX_COUNTS);
+	int offset = (LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);
+	return (int) ((new_n/(360))*MAX_COUNTS)+offset;
 }
 
-void calibrate_encoder(){
-	if (!is_debouncing()){
-		limit_calls++;
-		set_debounce(1);
-		if (STEERING_ID == LF_STEER || STEERING_ID == LB_STEER) {
-			TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_ANGLE_LEFT);
-			setPIDGoalA(90); // move wheels back to the middle!
-		}
-		if (STEERING_ID == RF_STEER || STEERING_ID == RB_STEER) {
-			TIM2->CNT =  angle_to_count(LIMIT_SWITCH_RESET_ANGLE_RIGHT);
-			setPIDGoalA(90); // ...
-		}
+void reset_debounce_buffer(){
+	debounce_buffer = 0;
+}
+
+// scan limit switch and return if considered pressed
+int scan_switch(){
+	int current_switch_reading = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
+	debounce_buffer = (debounce_buffer<<1) | current_switch_reading;
+	return debounce_buffer == 0xFFFFFFFF;
+}
+
+
+int try_calibrate_encoder(){
+	// return 1 if calibrated
+	if (scan_switch()){
+		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
+		set_counts((int16_t) TIM2->CNT);
+		steering_state = PID;
+		return 1;
 	}
-//	set_counts(angle_to_count(LIMIT_SWITCH_RESET_ANGLE));
+	return 0;
+//	if (!is_debouncing()){
+//		set_debounce(1);
+//		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
+//		if (steering_state == CALIBRATION){
+//			setPIDGoalA(90); // move wheels back to the middle!
+//		}
+//		steering_state = PID;
+//	}
 }
