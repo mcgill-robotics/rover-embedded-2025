@@ -159,55 +159,6 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
 }
 
 /**
-  * @brief TIM_Base MSP Initialization
-  * This function configures the hardware resources used in this example
-  * @param htim_base: TIM_Base handle pointer
-  * @retval None
-  */
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
-{
-  if(htim_base->Instance==TIM1)
-  {
-    /* USER CODE BEGIN TIM1_MspInit 0 */
-
-    /* USER CODE END TIM1_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM1_CLK_ENABLE();
-    /* USER CODE BEGIN TIM1_MspInit 1 */
-
-    /* USER CODE END TIM1_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM5)
-  {
-    /* USER CODE BEGIN TIM5_MspInit 0 */
-
-    /* USER CODE END TIM5_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM5_CLK_ENABLE();
-    /* USER CODE BEGIN TIM5_MspInit 1 */
-
-    /* USER CODE END TIM5_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM8)
-  {
-    /* USER CODE BEGIN TIM8_MspInit 0 */
-
-    /* USER CODE END TIM8_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM8_CLK_ENABLE();
-    /* TIM8 interrupt Init */
-    HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM8_BRK_TIM12_IRQn);
-    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
-    /* USER CODE BEGIN TIM8_MspInit 1 */
-
-    /* USER CODE END TIM8_MspInit 1 */
-  }
-
-}
-
-/**
   * @brief TIM_Encoder MSP Initialization
   * This function configures the hardware resources used in this example
   * @param htim_encoder: TIM_Encoder handle pointer
@@ -244,6 +195,44 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim_encoder)
 
 }
 
+/**
+  * @brief TIM_Base MSP Initialization
+  * This function configures the hardware resources used in this example
+  * @param htim_base: TIM_Base handle pointer
+  * @retval None
+  */
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM5)
+  {
+    /* USER CODE BEGIN TIM5_MspInit 0 */
+
+    /* USER CODE END TIM5_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM5_CLK_ENABLE();
+    /* USER CODE BEGIN TIM5_MspInit 1 */
+
+    /* USER CODE END TIM5_MspInit 1 */
+  }
+  else if(htim_base->Instance==TIM8)
+  {
+    /* USER CODE BEGIN TIM8_MspInit 0 */
+
+    /* USER CODE END TIM8_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM8_CLK_ENABLE();
+    /* TIM8 interrupt Init */
+    HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM8_BRK_TIM12_IRQn);
+    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
+    /* USER CODE BEGIN TIM8_MspInit 1 */
+
+    /* USER CODE END TIM8_MspInit 1 */
+  }
+
+}
+
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -271,54 +260,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
 }
 /**
-  * @brief TIM_Base MSP De-Initialization
-  * This function freeze the hardware resources used in this example
-  * @param htim_base: TIM_Base handle pointer
-  * @retval None
-  */
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
-{
-  if(htim_base->Instance==TIM1)
-  {
-    /* USER CODE BEGIN TIM1_MspDeInit 0 */
-
-    /* USER CODE END TIM1_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM1_CLK_DISABLE();
-    /* USER CODE BEGIN TIM1_MspDeInit 1 */
-
-    /* USER CODE END TIM1_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM5)
-  {
-    /* USER CODE BEGIN TIM5_MspDeInit 0 */
-
-    /* USER CODE END TIM5_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM5_CLK_DISABLE();
-    /* USER CODE BEGIN TIM5_MspDeInit 1 */
-
-    /* USER CODE END TIM5_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM8)
-  {
-    /* USER CODE BEGIN TIM8_MspDeInit 0 */
-
-    /* USER CODE END TIM8_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM8_CLK_DISABLE();
-
-    /* TIM8 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(TIM8_BRK_TIM12_IRQn);
-    HAL_NVIC_DisableIRQ(TIM8_UP_TIM13_IRQn);
-    /* USER CODE BEGIN TIM8_MspDeInit 1 */
-
-    /* USER CODE END TIM8_MspDeInit 1 */
-  }
-
-}
-
-/**
   * @brief TIM_Encoder MSP De-Initialization
   * This function freeze the hardware resources used in this example
   * @param htim_encoder: TIM_Encoder handle pointer
@@ -343,6 +284,43 @@ void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* htim_encoder)
     /* USER CODE BEGIN TIM2_MspDeInit 1 */
 
     /* USER CODE END TIM2_MspDeInit 1 */
+  }
+
+}
+
+/**
+  * @brief TIM_Base MSP De-Initialization
+  * This function freeze the hardware resources used in this example
+  * @param htim_base: TIM_Base handle pointer
+  * @retval None
+  */
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM5)
+  {
+    /* USER CODE BEGIN TIM5_MspDeInit 0 */
+
+    /* USER CODE END TIM5_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM5_CLK_DISABLE();
+    /* USER CODE BEGIN TIM5_MspDeInit 1 */
+
+    /* USER CODE END TIM5_MspDeInit 1 */
+  }
+  else if(htim_base->Instance==TIM8)
+  {
+    /* USER CODE BEGIN TIM8_MspDeInit 0 */
+
+    /* USER CODE END TIM8_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM8_CLK_DISABLE();
+
+    /* TIM8 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM8_BRK_TIM12_IRQn);
+    HAL_NVIC_DisableIRQ(TIM8_UP_TIM13_IRQn);
+    /* USER CODE BEGIN TIM8_MspDeInit 1 */
+
+    /* USER CODE END TIM8_MspDeInit 1 */
   }
 
 }
