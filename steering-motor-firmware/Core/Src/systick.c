@@ -38,7 +38,7 @@ void SysTickFunction(void) {
 			leave_limit_switch();
 			break;
 	}
-	set_counts((int16_t) TIM2->CNT);
+	set_counts((uint16_t) TIM2->CNT);
 //	if (is_debouncing()){
 //		if(systick_counts++==100){
 //			systick_counts=0;
