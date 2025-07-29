@@ -88,6 +88,7 @@ void loop() {
   }
 }
 
+
 /*
 void setup() {
   last_time_ms = millis();
@@ -98,10 +99,10 @@ void setup() {
   bms_controller_1.address = BMS_I2C_ADDR_1;
   bms_controller_2.name = "BMS2";
   bms_controller_2.address = BMS_I2C_ADDR_2;
-  check_and_enable_discharge(&bms_controller_1, &bms_controller_2);
+  //check_and_enable_discharge(&bms_controller_1, &bms_controller_2);
   upload_bms_setpoints(&bms_controller_1);
   upload_bms_setpoints(&bms_controller_2);
-  //check_and_enable_discharge_singular(&bms_controller_2);
+  check_and_enable_discharge_singular(&bms_controller_1);
 }
 
 void loop() {
@@ -109,8 +110,8 @@ void loop() {
   if((millis() - last_time_ms) > PUBLISH_RATE_MS){
     read_bms_data(&bms_controller_1);
     publish_bms_data(&bms_controller_1);
-    read_bms_data(&bms_controller_2);
-    publish_bms_data(&bms_controller_2);
+    //read_bms_data(&bms_controller_2);
+    //publish_bms_data(&bms_controller_2);
     // error_checking(&bms_controller_1, &bms_controller_2);
     // check_and_enable_discharge(&bms_controller_1, &bms_controller_2);
     check_and_enable_discharge_singular(&bms_controller_1);
@@ -118,8 +119,8 @@ void loop() {
     // Serial.print(bms_controller_1.name + ", " +bms_controller_1.cell_voltages[0] + ", " + bms_controller_1.address);
     last_time_ms = millis();
   }
-} */
-
+} 
+*/
 
 // Function definitions
 void run_setup(){

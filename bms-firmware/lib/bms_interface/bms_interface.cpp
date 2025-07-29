@@ -36,9 +36,6 @@ namespace bms_interface {
         _write_register(i2c_addr, SYS_CTRL1, 0x10);
     }
 
-    /**
-     * DIES RHAT DUBNWUUS
-     */
     void enable_discharge_mosfet(byte i2c_addr) {
         byte sys_ctrl2_val = _read_register(i2c_addr, SYS_CTRL2);
         _write_register(i2c_addr, SYS_CTRL2, sys_ctrl2_val | 0x02);
@@ -104,8 +101,6 @@ namespace bms_interface {
 
         int adc_offset = _adc_offset(i2c_addr);
         int adc_gain = _adc_gain(i2c_addr);
-        Serial.println(adc_offset);
-        Serial.println(adc_gain);
 
         int connected_cells = 0;
         max_and_min_cell_ids[0] = 0; //max id
@@ -142,6 +137,7 @@ namespace bms_interface {
             Serial.println("CC Ready");
             int16_t adc_val = (_read_register(i2c_addr, CC_HI_BYTE) << 8) | _read_register(i2c_addr, CC_LO_BYTE); //reads from CC_HI (0x32) and CC_LO (0x33)
             long bat_current = adc_val * 8.44/shunt_resistor_value_mOhm;
+            Serial.println("The Current is: " + bat_current);
             _write_register(i2c_addr, sys_stat_val, 0x80); //Clears CC_Ready flag
         }
     }
@@ -313,8 +309,6 @@ namespace bms_interface {
 
         }
     }
-
-
 
     void shutdown(byte i2c_addr){
         byte sys_ctrl1_value = _read_register(i2c_addr, SYS_CTRL1);
