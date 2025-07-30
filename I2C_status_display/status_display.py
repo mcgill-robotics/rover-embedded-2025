@@ -1,4 +1,4 @@
-# to run this code, type in the terminal: python teensy_reader.py
+# to run this code, type in the terminal: python status_display.py
 # Make sure you change this value correctly
 
 import serial
