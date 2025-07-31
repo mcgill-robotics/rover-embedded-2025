@@ -6,7 +6,7 @@
 #include "TestList.h"
 #include "Calibration.h"
 
-SteeringState steering_state = CALIBRATION;
+SteeringState steering_state = PID;
 
 // Hi, this is going to be the calibration sequence for the motors. It's going to
 // consist of a couple steps.
