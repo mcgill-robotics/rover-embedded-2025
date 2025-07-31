@@ -5,9 +5,9 @@
 #ifndef INC_PID_H_
 #define INC_PID_H_
 
-#define kPw 1
-#define kDw 8
-#define ALLOWED_ERROR 100
+#define kPw 50
+#define kDw 5
+#define ALLOWED_ERROR 20
 #define ALLOWED_ERROR_ZERO 300
 
 

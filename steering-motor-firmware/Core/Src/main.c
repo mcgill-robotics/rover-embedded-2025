@@ -121,10 +121,22 @@ int main(void)
   HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
 
   // Initialize motor state
+  TIM2->CNT = 33488;
   set_motor_speed_raw(0);
   set_motor_direction(1);
-  set_counts(0);
-  TIM2->CNT = 0;
+  set_counts(33488);
+//  set_motor_speed_raw(3500);
+// int goal = 0;
+// while (1){
+//	 if (goal){
+//	  setPIDGoalA(90);
+//	 } else {
+//		 setPIDGoalA(0);
+//	 }
+//	 HAL_Delay(2000);
+//	 goal = !goal;
+// }
+
   CalibrateMotor(); // Calibrate the motor (see Calibration.c).
 
   /* CAN initialization below */
@@ -154,7 +166,7 @@ int main(void)
   while (1){
 	  // Process Message if available
 	  if (datacheck){
-		  	if (steering_state == CALIBRATION){
+		  	if (steering_state != CALIBRATION){
 		  		CAN_Parse_MSG(&RxHeader, rxData);
 		  	}
 		    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);

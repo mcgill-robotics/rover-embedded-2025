@@ -6,7 +6,7 @@
 #include "math.h"
 
 int direction = 1;
-int power_limit = 2500;
+int power_limit = 4499;
 
 // Change based on what motor is being controlled!
 int STEERING_ID = RF_STEER;
