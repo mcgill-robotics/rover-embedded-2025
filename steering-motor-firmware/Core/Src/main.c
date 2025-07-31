@@ -121,10 +121,10 @@ int main(void)
   HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
 
   // Initialize motor state
-  TIM2->CNT = 33488;
+  TIM2->CNT = 41744;
   set_motor_speed_raw(0);
   set_motor_direction(1);
-  set_counts(33488);
+  set_counts(41744);
 //  set_motor_speed_raw(3500);
 // int goal = 0;
 // while (1){
@@ -137,7 +137,7 @@ int main(void)
 //	 goal = !goal;
 // }
 
-  CalibrateMotor(); // Calibrate the motor (see Calibration.c).
+//  CalibrateMotor(); // Calibrate the motor (see Calibration.c).
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
