@@ -125,6 +125,7 @@ int main(void)
   set_motor_speed_raw(0);
   set_motor_direction(1);
   set_counts(41744);
+  setPIDGoalA(90);
 //  set_motor_speed_raw(3500);
 // int goal = 0;
 // while (1){
@@ -137,7 +138,7 @@ int main(void)
 //	 goal = !goal;
 // }
 
-//  CalibrateMotor(); // Calibrate the motor (see Calibration.c).
+  CalibrateMotor(); // Calibrate the motor (see Calibration.c).
 
   /* CAN initialization below */
   CAN_FilterTypeDef canfilterconfig;
