@@ -38,6 +38,16 @@
 /* USER CODE BEGIN PD */
 #define READING_TO_CUR_CH_A(i) (((float)i / 4095.0)*3.3 - 1.65)
 #define READING_TO_CUR_CH_B(i) (((float)i / 4095.0)*3.3 - 1.65)
+
+#define SYSTICK_LOAD (SystemCoreClock/1000000U)
+#define SYSTICK_DELAY_CALIB (SYSTICK_LOAD >> 1)
+
+#define DELAY_US(us) \
+    do { \
+         uint32_t start = SysTick->VAL; \
+         uint32_t ticks = (us * SYSTICK_LOAD)-SYSTICK_DELAY_CALIB;  \
+         while((start - SysTick->VAL) < ticks); \
+    } while (0)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -62,9 +72,9 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 BrushedDriver bDriver = { 0 };
-AMT222C_Handle mEncA = { .hspi = &hspi2, .cs_port = GPIOC, .cs_pin =
+AMT222C_Handle mEncB = { .hspi = &hspi2, .cs_port = GPIOC, .cs_pin =
 GPIO_PIN_5, .gear_ratio = (80.0 / 28.0) * 510.0 };
-MotorEncoder mEncB = { 0 };
+MotorEncoder mEncA = { 0 };
 SetpointData bSetpoint = { 0 };
 FeedbackData bFeedback = { 0 };
 /* USER CODE END PV */
@@ -113,17 +123,18 @@ int main(void) {
 			TIM_CHANNEL_1, .pwm_b_inst = &htim2, .pwm_b_channel =
 			TIM_CHANNEL_2, .dacRef_a_inst = &hdac, .dacRef_a_channel =
 			DAC_CHANNEL_1, .dacRef_b_inst = &hdac, .dacRef_b_channel =
-			DAC_CHANNEL_2, .dacRef_a = 3537, .dacRef_b = 2296, .cur_inst =
-					&hadc1, .cur_a_factor = 1, .cur_b_factor = 1, .kp_a = 200.0,
-			.ki_a = 0.0, .kd_a = 0.0, .kp_b = 10000, .ki_b = 0.0, .kd_b = 0.0 };
+			DAC_CHANNEL_2, .dacRef_a = 4095, .dacRef_b = 4095, .cur_inst =
+					&hadc1, .cur_a_factor = 1, .cur_b_factor = 1, .kp_a = 600.0,
+			.ki_a = 0.0, .kd_a = 0.0, .kp_b = 1000.0, .ki_b = 0.0, .kd_b = 0.0 };
 
 	bDriver.config = &bConfig;
 
-	mEncB.htim = &htim4;
-	mEncB.min_limit_counts = 32767 - 1475;
-	mEncB.max_limit_counts = 32767 + 1475;
-	mEncB.total_counts_range = 2950;
-	mEncB.angle_range = 100.0;
+	mEncA.htim = &htim1;
+	mEncA.min_limit_counts = 32767 - 1475;
+	mEncA.max_limit_counts = 32767 + 1475;
+	mEncA.total_counts_range = 2950;
+	mEncA.count = 32767;
+	mEncA.angle_range = 100.0;
 	/* USER CODE END Init */
 
 	/* Configure the system clock */
@@ -145,41 +156,49 @@ int main(void) {
 	MX_USART2_UART_Init();
 	MX_USB_DEVICE_Init();
 	/* USER CODE BEGIN 2 */
-	BrushedComms_RegisterFeedback(&bFeedback);
-	BrushedComms_RegisterSetpoint(&bSetpoint);
+//	BrushedComms_RegisterFeedback(&bFeedback);
+//	BrushedComms_RegisterSetpoint(&bSetpoint);
 //	bDriver.pwm_a = 99999;
 	STSPIN948_Init(&bDriver);
-	MotorEncoder_Init(&mEncB);
-	AMT222C_Init(&mEncA);
-	bDriver.pid_a.setpoint = 50.0;
-	bDriver.pid_b.setpoint = 0.0;
-	__HAL_TIM_SET_COUNTER(&htim4, 32767);
-//	bDriver.pwm_a = 99999;
+	MotorEncoder_Init(&mEncA);
+	AMT222C_Init(&mEncB);
+	bDriver.pid_a.setpoint = 70.0;
+	bDriver.pid_b.setpoint = 50.0;
+	__HAL_TIM_SET_COUNTER(&htim1, 32767);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_RESET);
+	DELAY_US(10);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+	bDriver.pwm_a = 65535;
+	bDriver.pwm_b = 65535;
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	float incrementB = 0.001;
 	while (1) {
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+//		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
 //    BrushedComms_Process();
 //		bDriver.pid_a.setpoint = bSetpoint.motor_setpoints[0];
 //		bDriver.pid_b.setpoint = bSetpoint.motor_setpoints[1];
-		bDriver.pid_a.setpoint += incrementB; // add 1 degree per second
-		if (bDriver.pid_a.setpoint >= 100.0) {
-			incrementB = -0.001;
-		} else if (bDriver.pid_a.setpoint <= 0.0) {
-			incrementB = 0.001;
-		}
-		HAL_ADC_Start_IT(&hadc1);
-		AMT222C_UpdatePosition(&mEncA);
-		bFeedback.motor_position[0] = AMT222C_GetPosition(&mEncA);
-		NewPosition(&mEncB);
-		STSPIN948_ReadInputs(&bDriver);
-		STSPIN948_CalculatePID(&bDriver, bFeedback.motor_position[0],
-				mEncB.angle);
+//		bDriver.pid_a.setpoint += incrementB; // add 1 degree per second
+//		if (bDriver.pid_a.setpoint >= 100.0) {
+//			incrementB = -0.001;
+//		} else if (bDriver.pid_a.setpoint <= 0.0) {
+//			incrementB = 0.001;
+//		}
+
+//		HAL_ADC_Start_IT(&hadc1);
+//		AMT222C_UpdatePosition(&mEncB);
+//		bFeedback.motor_position[1] = AMT222C_GetPosition(&mEncB);
+//		NewPosition(&mEncA);
+//		STSPIN948_ReadInputs(&bDriver);
+//		STSPIN948_CalculatePID(&bDriver, mEncA.angle,
+//				bFeedback.motor_position[1]);
 		STSPIN948_SetOutputs(&bDriver);
-		bFeedback.motor_position[1] = (uint16_t) mEncB.angle;
+		bFeedback.motor_position[0] = (uint16_t) mEncA.angle;
 		bFeedback.motor_current[0] = bDriver.cur_a;
 		bFeedback.motor_current[1] = bDriver.cur_b;
 		HAL_Delay(1);
@@ -459,9 +478,9 @@ static void MX_TIM2_Init(void) {
 
 	/* USER CODE END TIM2_Init 1 */
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 83;
+	htim2.Init.Prescaler = 20;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim2.Init.Period = 100000 - 1;
+	htim2.Init.Period = 65535;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htim2) != HAL_OK) {
@@ -593,8 +612,8 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOC,
-			GPIO_PIN_15 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9
-					| GPIO_PIN_10, GPIO_PIN_RESET);
+			GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15 | GPIO_PIN_6 | GPIO_PIN_7
+					| GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
@@ -606,16 +625,10 @@ static void MX_GPIO_Init(void) {
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
 
-	/*Configure GPIO pins : PC13 PC14 PC11 */
-	GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_11;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-	/*Configure GPIO pins : PC15 PC6 PC7 PC8
-	 PC9 PC10 */
-	GPIO_InitStruct.Pin = GPIO_PIN_15 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8
-			| GPIO_PIN_9 | GPIO_PIN_10;
+	/*Configure GPIO pins : PC13 PC14 PC15 PC6
+	 PC7 PC8 PC9 PC10 */
+	GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15 | GPIO_PIN_6
+			| GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -647,6 +660,12 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PC11 */
+	GPIO_InitStruct.Pin = GPIO_PIN_11;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	/* USER CODE BEGIN MX_GPIO_Init_2 */
 

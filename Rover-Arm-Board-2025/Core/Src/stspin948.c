@@ -88,7 +88,7 @@ void STSPIN948_SetOutputs(BrushedDriver *driverInstance) {
 	HAL_GPIO_WritePin(driverInstance->config->phase_a_port,
 			driverInstance->config->phase_a_pin, !driverInstance->phase_a);
 	HAL_GPIO_WritePin(driverInstance->config->phase_b_port,
-			driverInstance->config->phase_b_pin, !driverInstance->phase_b);
+			driverInstance->config->phase_b_pin, driverInstance->phase_b);
 }
 
 void STSPIN948_SetPwmValues(BrushedDriver *driverInstance, uint32_t pwm_a,
@@ -116,7 +116,7 @@ void STSPIN948_SetDirections(BrushedDriver *driverInstance, uint8_t phase_a,
 	if (phase_b > 1) {
 		driverInstance->phase_b = 1;
 	} else {
-		driverInstance->phase_b = phase_a;
+		driverInstance->phase_b = phase_b;
 	}
 }
 
