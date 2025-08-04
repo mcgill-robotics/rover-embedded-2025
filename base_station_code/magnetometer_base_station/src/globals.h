@@ -2,7 +2,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-extern double localGPS_lat; // gps coords from gps attached teensy   
+extern double localGPS_lat; // gps coords from gps attached teensy
 extern double localGPS_long;
 
 extern double rover_gps_coords[2];
@@ -16,7 +16,12 @@ extern void gps_loop();
 extern void displayInfo();
 
 extern void compass_setup();
+extern void check_for_serial_input();
 extern void compass_loop();
 extern void compass_calibrate();
+
+extern bool overrideBaseGPS;
+extern bool overrideAzimuth;
+extern bool overrideServoPosition;
 
 #endif

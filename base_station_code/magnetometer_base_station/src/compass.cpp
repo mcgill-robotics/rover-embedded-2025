@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <QMC5883LCompass.h>// QMC5883L Compass Library
+#include <QMC5883LCompass.h> // QMC5883L Compass Library -> ****** CHANGE WIRE TO WIRE1 (in the cpp file which was imported)********
 
 #include "globals.h"
 
@@ -9,21 +9,24 @@
 
 int azimuth = 0; // compass pos -> [-180, 180] -> angle 0 for N, and -90 for West
 
-
 // QMC5883L Compass object
 QMC5883LCompass compass;
 
-bool calibration = false;   // set calibration as true if calibrating
+bool calibration = false; // set calibration as true if calibrating
 
-void compass_setup() {
-  //Serial.begin(9600);// Initialize the serial port. - shouldnt be needed when used as support scripts
-  Wire.begin();// Initialize I2C.
-  compass.init();// Initialize the compass.
+void compass_setup()
+{
+  // Serial.begin(9600);// Initialize the serial port. - shouldnt be needed when used as support scripts
+  Wire1.begin();  // Initialize I2C.
+  compass.init(); // Initialize the compass.
   azimuth = 0;
-  
-  if (calibration) {
+
+  if (calibration)
+  {
     compass_calibrate();
-  } else {
+  }
+  else
+  {
     // compass.setCalibrationOffsets(-23.00, 277.00, -50.00);
     // compass.setCalibrationScales(0.96, 1.00, 1.04);
     // compass.setCalibrationOffsets(-175.00, 387.00, -736.00);
@@ -33,24 +36,26 @@ void compass_setup() {
   }
 }
 
-void compass_loop() {
-  if (!calibration){
+void compass_loop()
+{
+  if (!calibration)
+  {
     // int x, y, z, a, b;
-    
+
     compass.read();
-    
+
     // x = compass.getX();
     // y = compass.getY();
     // z = compass.getZ();
-    
+
     int a = compass.getAzimuth();
-    azimuth = a; //update global vars
+    azimuth = a; // update global vars
 
     // b = compass.getBearing(a);
 
     // Convert azimuth to a 0-360 degree angle relative to true north
     // int trueNorthAngle = (a < 0) ? (a + 360) : a;
-    
+
     // Serial.print("X: ");
     // Serial.print(x);
 
@@ -75,29 +80,29 @@ void compass_loop() {
   }
 }
 
+void compass_calibrate()
+{
+  Serial.println("This will provide calibration settings for your QMC5883L chip. When prompted, move the magnetometer in all directions until the calibration is complete.");
+  Serial.println("Calibration will begin in 5 seconds.");
+  delay(5000);
 
-void compass_calibrate(){
-    Serial.println("This will provide calibration settings for your QMC5883L chip. When prompted, move the magnetometer in all directions until the calibration is complete.");
-    Serial.println("Calibration will begin in 5 seconds.");
-    delay(5000);
+  Serial.println("CALIBRATING. Keep moving your sensor...");
+  compass.calibrate();
 
-    Serial.println("CALIBRATING. Keep moving your sensor...");
-    compass.calibrate();
-
-    Serial.println("DONE. Copy the lines below and paste it into your projects sketch.);");
-    Serial.println();
-    Serial.print("compass.setCalibrationOffsets(");
-    Serial.print(compass.getCalibrationOffset(0));
-    Serial.print(", ");
-    Serial.print(compass.getCalibrationOffset(1));
-    Serial.print(", ");
-    Serial.print(compass.getCalibrationOffset(2));
-    Serial.println(");");
-    Serial.print("compass.setCalibrationScales(");
-    Serial.print(compass.getCalibrationScale(0));
-    Serial.print(", ");
-    Serial.print(compass.getCalibrationScale(1));
-    Serial.print(", ");
-    Serial.print(compass.getCalibrationScale(2));
-    Serial.println(");");
+  Serial.println("DONE. Copy the lines below and paste it into your projects sketch.);");
+  Serial.println();
+  Serial.print("compass.setCalibrationOffsets(");
+  Serial.print(compass.getCalibrationOffset(0));
+  Serial.print(", ");
+  Serial.print(compass.getCalibrationOffset(1));
+  Serial.print(", ");
+  Serial.print(compass.getCalibrationOffset(2));
+  Serial.println(");");
+  Serial.print("compass.setCalibrationScales(");
+  Serial.print(compass.getCalibrationScale(0));
+  Serial.print(", ");
+  Serial.print(compass.getCalibrationScale(1));
+  Serial.print(", ");
+  Serial.print(compass.getCalibrationScale(2));
+  Serial.println(");");
 }
