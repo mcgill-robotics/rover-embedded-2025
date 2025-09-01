@@ -1,0 +1,7 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:435:13:FOC_Clear	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:78:13:FOC_Init	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:154:6:TSK_MF_StopProcessing	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:471:13:FOC_InitAdditionalMethods	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:494:13:FOC_CalcCurrRef	2
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:172:13:TSK_MediumFrequencyTaskM1	28
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks_foc.c:549:16:FOC_HighFrequencyTask	4

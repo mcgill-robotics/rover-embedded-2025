@@ -1,0 +1,5 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/main.c:124:6:HAL_FDCAN_RxFifo0Callback	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/main.c:260:6:HAL_GPIO_EXTI_Callback	5
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/main.c:423:6:SystemClock_Config	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/main.c:298:5:main	37
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/main.c:1219:6:Error_Handler	1

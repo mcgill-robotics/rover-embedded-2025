@@ -1,0 +1,4 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/enc_align_ctrl.c:45:13:EAC_Init	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/enc_align_ctrl.c:72:13:EAC_StartAlignment	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/enc_align_ctrl.c:119:13:EAC_Exec	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/enc_align_ctrl.c:162:13:EAC_GetRestartState	1

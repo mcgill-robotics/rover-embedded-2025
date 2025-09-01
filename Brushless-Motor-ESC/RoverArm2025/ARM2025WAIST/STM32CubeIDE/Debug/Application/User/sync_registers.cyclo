@@ -1,0 +1,5 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/sync_registers.c:33:9:RI_SetRegisterGlobal	17
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/sync_registers.c:167:9:RI_SetRegisterMotor1	78
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/sync_registers.c:576:9:RI_GetRegisterGlobal	20
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/sync_registers.c:721:11:RI_GetRegisterMotor1	100
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/Src/sync_registers.c:1262:9:RI_MovString	4

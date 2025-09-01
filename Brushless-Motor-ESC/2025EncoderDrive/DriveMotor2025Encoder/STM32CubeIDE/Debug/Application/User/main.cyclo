@@ -1,0 +1,5 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/main.c:116:6:HAL_FDCAN_RxFifo0Callback	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/main.c:292:6:SystemClock_Config	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/main.c:1044:6:MX_USART2_UART_Init	5
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/main.c:189:5:main	37
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/Src/main.c:1144:6:Error_Handler	1

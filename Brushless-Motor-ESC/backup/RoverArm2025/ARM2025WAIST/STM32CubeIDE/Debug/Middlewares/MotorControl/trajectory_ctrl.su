@@ -1,0 +1,15 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:73:6:TC_Init	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:121:6:TC_MoveCommand	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:201:6:TC_FollowCommand	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:335:6:TC_MoveExecution	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:266:6:TC_PositionRegulation	16	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:422:6:TC_EncAlignmentCommand	16	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:478:6:TC_EncoderReset	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:501:7:TC_GetCurrentPosition	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:512:7:TC_GetCtrlPositionAngle	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:522:7:TC_GetTargetPosition	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:532:7:TC_GetMoveDuration	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:542:17:TC_GetControlPositionStatus	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:551:15:TC_GetAlignmentStatus	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:561:6:TC_SetCtrlPositionAngle	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025WAIST/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/trajectory_ctrl.c:570:6:TC_IncTick	0	static

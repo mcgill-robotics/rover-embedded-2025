@@ -1,0 +1,4 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/open_loop.c:50:13:OL_Init	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/open_loop.c:73:13:OL_VqdConditioning	1
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/open_loop.c:90:13:OL_Calc	3
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverDrive2025/2025EncoderDrive/DriveMotor2025Encoder/MCSDK_v6.3.0-Full/MotorControl/MCSDK/MCLib/Any/Src/open_loop.c:126:13:OL_VF	1

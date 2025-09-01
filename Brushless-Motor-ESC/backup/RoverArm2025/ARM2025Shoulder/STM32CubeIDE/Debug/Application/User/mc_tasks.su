@@ -1,0 +1,12 @@
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:84:13:MCboot	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:224:13:TSK_SetChargeBootCapDelayM1	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:235:13:TSK_ChargeBootCapDelayHasElapsedM1	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:251:13:TSK_SetStopPermanencyTimeM1	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:262:13:TSK_StopPermanencyTimeHasElapsedM1	0	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:288:16:TSK_HighFrequencyTask	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:334:13:TSK_SafetyTask_PWMOFF	24	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:311:13:TSK_SafetyTask	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:161:13:MC_RunMotorControlTasks	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:401:13:TSK_HardwareFaultTask	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:414:13:UI_HandleStartStopButton_cb	8	static
+C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/mc_tasks.c:432:13:mc_lock_pins	96	static
