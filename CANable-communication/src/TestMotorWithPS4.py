@@ -7,7 +7,7 @@ INTERFACE      = "slcan"
 CHANNEL        = "COM6"
 BITRATE        = 500000
 
-MAX_SPEED      = 3000.0
+MAX_SPEED      = 3200.0
 MAX_RAMP_DELTA = 500.0  # adjust as needed
 
 DEAD_ZONE   = 100
@@ -105,11 +105,10 @@ def run_ps4_drive_loop():
 
             left_cmd  = -target_left
             right_cmd = target_right
-
             print(f"Left Y Setpoint: {left_cmd:.2f} | Right Y Setpoint: {right_cmd:.2f}")
 
             # Drive mapping: [RF, LF, LB, RB]
-            speeds = [-right_cmd, -left_cmd, left_cmd, right_cmd]
+            speeds = [right_cmd, -left_cmd, left_cmd, -right_cmd]
             drive.broadcast_multi_motor_speeds(speeds)
 
             time.sleep(MESSAGE_DELAY)

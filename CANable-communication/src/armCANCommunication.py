@@ -157,27 +157,61 @@ class SystemInterface:
     def read_state(self, node: NodeID):
         self.read_spec(ReadSpec.GET_CURRENT_STATE, node)
 
+
+def pingCheck():
+    arm_interface.ping_motor(NodeID.ELBOW)
+    station.recv_msg(0.04)
+    time.sleep(0.05)
+    arm_interface.ping_motor(NodeID.SHOULDER)
+    station.recv_msg(0.04)
+
+def calibrateSHandEL():
+    arm_interface.calibrate_motor(NodeID.SHOULDER)
+    time.sleep(0.05)
+    arm_interface.calibrate_motor(NodeID.ELBOW)
+
+
 # Example usage
 if __name__ == "__main__":
     station = CANStation(interface="slcan", channel="COM7", bitrate=500000)
     esc_interface = ESCInterface(station)
 
     # Drive system interface
-    drive_interface = SystemInterface(esc_interface, MotorType.DRIVE)
+    # drive_interface = SystemInterface(esc_interface, MotorType.DRIVE)
 
     # Arm system interface
     arm_interface = SystemInterface(esc_interface, MotorType.STEER)
-
-    # arm_interface.ping_motor(NodeID.ELBOW)
-
-
     # arm_interface.read_all_faults(NodeID.ELBOW)
+
 # this function moves the motor to the specified position, based on the initial calibration position. For the case of our rover
 # that position is where the limits switches are
 
-    arm_interface.calibrate_motor(NodeID.ELBOW)
-    # arm_interface.read_position(NodeID.ELBOW)
+    pingCheck()
+    # calibrateSHandEL()
+
+
+    # arm_interface.ping_motor(NodeID.SHOULDER)
+    # arm_interface.stop_motor(NodeID.ELBOW)
+    # arm_interface.calibrate_motor(NodeID.SHOULDER)
     # arm_interface.ping_motor(NodeID.ELBOW)
+
+    # arm_interface.ping_motor(NodeID.ELBOW)
+    # arm_interface.calibrate_motor(NodeID.ELBOW)
+    # arm_interface.read_all_faults(NodeID.WAIST)
+    # arm_interface.read_all_faults(NodeID.SHOULDER)
+    # arm_interface.run_motor_position(NodeID.SHOULDER, 15)
+    # arm_interface.run_motor_position(NodeID.ELBOW, 80)
+    # arm_interface.stop_motor(NodeID.SHOULDER)
+    
+    # arm_interface.stop_motor(NodeID.ELBOW)
+    # arm_interface.stop_motor(NodeID.SHOULDER)
+
+
+    # arm_interface.read_position(NodeID.ELBOW)
+    # arm_interface.calibrate_motor(NodeID.ELBOW)
+    # time.sleep(0.05)
+    # arm_interface.calibrate_motor(NodeID.ELBOW)
+
 
     # arm_interface.read_all_faults(NodeID.ELBOW)
 
@@ -186,5 +220,5 @@ if __name__ == "__main__":
 # This funciton is used to make the arm move X amount of degress from its current position
     # arm_interface.run_motor_position_increment(NodeID.WAIST, 30)
   
-    station.recv_msg(0.025)
+    station.recv_msg(0.04)
     station.close()

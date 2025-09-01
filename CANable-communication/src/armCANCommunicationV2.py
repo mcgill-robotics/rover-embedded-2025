@@ -8,7 +8,7 @@ class ActionType(Enum):
     READ = 1
 
 class MotorType(Enum):
-    ARM = 1  # uses the STEER bit = 1
+    STEER = 1  # uses the STEER bit = 1
 
 class RunSpec(Enum):
     STOP = 0
@@ -106,6 +106,10 @@ class CANStation:
         msg = CANMessage(can_id, 4, list(data))
         self.send_msg(msg)
 
+    def close(self):
+        if self.bus:
+            self.bus.shutdown()
+
     def send_multi_position_command(self, pos1, pos2, pos3, spec: RunSpec):
         def float_to_half(f):
             # crude conversion
@@ -148,8 +152,35 @@ class ArmESCInterface:
     def acknowledge_faults(self, joint: ArmNodeID):
         self.station.send_STM_command(ActionType.RUN, RunSpec.ACKNOWLEDGE_FAULTS, 0.0, True, joint)
 
-    def read_position(self, joint: ArmNodeID):
-        self.station.send_STM_command(ActionType.READ, ReadSpec.POSITION, 0.0, True, joint)
+    def read_position(self, joint: ArmNodeID, retries=3):
+        for attempt in range(retries):
+            self.station.send_STM_command(ActionType.READ, ReadSpec.POSITION, 0.0, True, joint)
+            val = self.station.recv_msg(timeout=0.5)  # try longer timeout
+            if val is not None:
+                return val
+            print(f"[WARN] Retry {attempt + 1}: No response for {joint.name}")
+        print(f"[ERROR] Failed to read position from {joint.name}")
+        return 0.0  # fallback instead of None
+
+
+
+    def read_voltage(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.VOLTAGE, 0.0, True, joint)
+
+    def read_current(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.CURRENT, 0.0, True, joint)
+
+    def read_all_faults(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.GET_ALL_FAULTS, 0.0, True, joint)
+
+    def read_state(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.GET_CURRENT_STATE, 0.0, True, joint)
+
+    def read_temperature(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.GET_TEMPERATURE, 0.0, True, joint)
+
+    def read_calibration_status(self, joint: ArmNodeID):
+        self.station.send_STM_command(ActionType.READ, ReadSpec.READ_CALIBRATION, 0.0, True, joint)
 
     def ping(self, joint: ArmNodeID):
         self.station.send_STM_command(ActionType.READ, ReadSpec.GET_PING, 0.0, True, joint)
@@ -163,12 +194,31 @@ class ArmESCInterface:
     def broadcast_follower(self, waist, shoulder, elbow):
         self.station.send_multi_position_command(waist, shoulder, elbow, RunSpec.FOLLOW_POSITION)
 
+
 # Example usage
 if __name__ == "__main__":
     station = CANStation(interface="slcan", channel="COM7", bitrate=500000)
     arm = ArmESCInterface(station)
 
-    arm.ping(ArmNodeID.SHOULDER)
-    arm.run_position(ArmNodeID.ELBOW, 30)
-    arm.broadcast_positions(0, 45, -20)
-    arm.read_position(ArmNodeID.SHOULDER)
+    
+
+    # print("Sending commands to Arm ESCs...\n")
+    # arm.ping(ArmNodeID.ELBOW)
+    # arm.run_position(ArmNodeID.ELBOW, 30)
+    # arm.broadcast_positions(0, 45, -20)
+
+    # print("\nReading from SHOULDER:\n")
+    # arm.read_position(ArmNodeID.SHOULDER)
+    # arm.read_voltage(ArmNodeID.SHOULDER)
+    # arm.read_current(ArmNodeID.SHOULDER)
+    # arm.read_state(ArmNodeID.SHOULDER)
+    # arm.read_temperature(ArmNodeID.SHOULDER)
+    # arm.read_all_faults(ArmNodeID.SHOULDER)
+    # arm.ping(ArmNodeID.ELBOW)
+    arm.read_calibration_status(ArmNodeID.ELBOW)
+
+    # print("\nWaiting for any ESC responses...")
+    # for _ in range(10):
+    #     station.recv_msg(timeout=0.2)
+    station.recv_msg(timeout=0.2)
+    station.close()
