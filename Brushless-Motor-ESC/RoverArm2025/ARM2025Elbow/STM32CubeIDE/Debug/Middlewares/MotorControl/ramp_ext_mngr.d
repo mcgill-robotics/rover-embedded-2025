@@ -1,5 +1,5 @@
 Middlewares/MotorControl/ramp_ext_mngr.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/RoverArm2025/ARM2025Elbow/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/ramp_ext_mngr.c \
+ C:/School\ Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Elbow/MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Src/ramp_ext_mngr.c \
  ../../MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Inc/ramp_ext_mngr.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h \

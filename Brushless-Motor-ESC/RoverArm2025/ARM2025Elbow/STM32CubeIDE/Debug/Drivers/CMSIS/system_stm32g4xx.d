@@ -1,5 +1,5 @@
 Drivers/CMSIS/system_stm32g4xx.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/RoverArm2025/ARM2025Elbow/Src/system_stm32g4xx.c \
+ C:/School\ Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Elbow/Src/system_stm32g4xx.c \
  ../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g4xx.h \
  ../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g431xx.h \
  ../../Drivers/CMSIS/Include/core_cm4.h \

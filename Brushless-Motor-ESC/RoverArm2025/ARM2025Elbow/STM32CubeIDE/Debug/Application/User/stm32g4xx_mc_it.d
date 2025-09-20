@@ -1,5 +1,5 @@
 Application/User/stm32g4xx_mc_it.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/RoverArm2025/ARM2025Elbow/Src/stm32g4xx_mc_it.c \
+ C:/School\ Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Elbow/Src/stm32g4xx_mc_it.c \
  ../../Inc/mc_config.h \
  ../../MCSDK_v6.4.0-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \

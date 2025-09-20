@@ -1,5 +1,5 @@
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:122:6:RCM_RegisterRegConv	7
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:198:6:RCM_ExecNextConv	3
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:235:6:RCM_ReadOngoingConv	4
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:278:10:RCM_ExecRegularConv	3
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:319:6:RCM_WaitForConv	3
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:122:6:RCM_RegisterRegConv	7
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:198:6:RCM_ExecNextConv	3
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:235:6:RCM_ReadOngoingConv	4
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:278:10:RCM_ExecRegularConv	3
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/regular_conversion_manager.c:319:6:RCM_WaitForConv	3

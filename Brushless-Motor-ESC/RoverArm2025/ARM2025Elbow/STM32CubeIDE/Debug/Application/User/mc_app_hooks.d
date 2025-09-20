@@ -1,5 +1,5 @@
 Application/User/mc_app_hooks.o: \
- C:/Users/James/OneDrive/Documents/2.\ McGill\ Robotics/RoverArm2025/ARM2025Elbow/Src/mc_app_hooks.c \
+ C:/School\ Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Elbow/Src/mc_app_hooks.c \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h \
  ../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g4xx.h \

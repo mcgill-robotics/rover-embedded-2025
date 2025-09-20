@@ -1,0 +1,55 @@
+!SESSION 2025-09-20 11:37:52.946 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_CA
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-09-20 11:38:26.676
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-09-20 11:38:26.679
+!MESSAGE Log4j2 initialized with config file C:\Users\ywhsh\School Files\McGill\Robotics\rover-elect-2025\rover-embedded-2025\Brushless-Motor-ESC\RoverArm2025\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-09-20 11:38:46.093
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.core.jobs 2 2 2025-09-20 11:39:01.866
+!MESSAGE Job found still running after platform shutdown.  Jobs should be canceled by the plugin that scheduled them during shutdown: org.eclipse.ui.internal.Workbench$39 RUNNING
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.Utf8$UnsafeProcessor.encodeUtf8(Utf8.java:1471)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.Utf8.encode(Utf8.java:294)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.CodedOutputStream$ArrayEncoder.writeStringNoTag(CodedOutputStream.java:1466)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.CodedOutputStream$ArrayEncoder.writeString(CodedOutputStream.java:1225)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.GeneratedMessageV3.writeString(GeneratedMessageV3.java:3195)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.DescriptorProtos$DescriptorProto.writeTo(DescriptorProtos.java:7197)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.CodedOutputStream$ArrayEncoder.writeMessageNoTag(CodedOutputStream.java:1315)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.CodedOutputStream$ArrayEncoder.writeMessage(CodedOutputStream.java:1283)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.DescriptorProtos$FileDescriptorProto.writeTo(DescriptorProtos.java:1873)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.AbstractMessageLite.toByteString(AbstractMessageLite.java:59)
+	 at com.teamdev.jxbrowser.deps.com.google.protobuf.Descriptors$FileDescriptor.internalUpdateFileDescriptor(Descriptors.java:470)
+	 at com.teamdev.jxbrowser.ui.event.internal.rpc.UiEventsProto.<clinit>(UiEventsProto.java:401)
+	 at com.teamdev.jxbrowser.internal.rpc.ShortcutProto.<clinit>(ShortcutProto.java:47)
+	 at com.teamdev.jxbrowser.menu.internal.rpc.MenuProto.<clinit>(MenuProto.java:208)
+	 at com.teamdev.jxbrowser.internal.rpc.EngineProto.<clinit>(EngineProto.java:188)
+	 at com.teamdev.jxbrowser.internal.rpc.EngineFactoryStub.descriptorForType(EngineFactoryStub.java:56)
+	 at com.teamdev.jxbrowser.internal.rpc.EngineFactoryStub.applyLicense(EngineFactoryStub.java:37)
+	 at com.teamdev.jxbrowser.internal.rpc.transport.CommonThreadCallExecutor.execute(CommonThreadCallExecutor.java:22)
+	 at com.teamdev.jxbrowser.internal.rpc.ServiceConnectionImpl.invoke(ServiceConnectionImpl.java:213)
+	 at com.teamdev.jxbrowser.engine.internal.EngineImpl.newInstance(EngineImpl.java:263)
+	 at com.teamdev.jxbrowser.engine.Engine.newInstance(Engine.java:163)
+	 at com.st.components.swing.JxBrowserEngine.initBrowser(JxBrowserEngine.java:155)
+	 at com.st.components.swing.JxBrowserEngine.<init>(JxBrowserEngine.java:61)
+	 at com.st.components.swing.JxBrowserEngine.getInstance(JxBrowserEngine.java:125)
+	 at com.st.microxplorer.plugins.userauth.WebApp.<init>(WebApp.java:165)
+	 at com.st.microxplorer.plugins.userauth.WebApp.getInstance(WebApp.java:779)
+	 at com.st.microxplorer.plugins.userauth.UserAuth.getBrowserView(UserAuth.java:489)
+	 at com.st.microxplorer.plugins.userauth.UserAuth.activatePlugin(UserAuth.java:191)
+	 at com.st.stm32cube.common.mx.userauth.UserAuthAdapter.<init>(UserAuthAdapter.java:29)
+	 at com.st.stm32cube.common.mx.userauth.UserAuthProvider.getUserAuthAdapter(UserAuthProvider.java:16)
+	 at com.st.stm32cube.common.ecosystemintegration.ui.core.MCUEcoSystemIntegrationUiHelper.getUserAuth(MCUEcoSystemIntegrationUiHelper.java:100)
+	 at com.st.stm32cube.ide.mcu.userauth.UserAuthStartup.earlyStartup(UserAuthStartup.java:32)
+	 at org.eclipse.ui.internal.EarlyStartupRunnable.runEarlyStartup(EarlyStartupRunnable.java:79)
+	 at org.eclipse.ui.internal.EarlyStartupRunnable.run(EarlyStartupRunnable.java:55)
+	 at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	 at org.eclipse.ui.internal.Workbench$39.run(Workbench.java:2733)
+	 at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)

@@ -81,6 +81,8 @@ const float SHOULDER_CALIBRATION_ANGULAR_VELOCITY = 2.0; // Value is in degrees 
 const float ELBOW_CALIBRATION_ANGULAR_VELOCITY = 5.0; // Value is in degrees per second
 const float CALIBRATION_INCH = 270.0; // This value does not really matter directly, as it is converted into rad/s desired
 const float UPPER_LIMIT_SWITCH_HIT_BACKUP = 5.0;
+const float CALIBRATION_DEGREE_REDUCTION_SPEED = 0.1;
+const float STARTING_POS = 45;
 
 volatile bool isCalibrating = false;
 volatile bool isCalibrated = false;
@@ -560,7 +562,7 @@ bool CalibrateSingleMotor(void){
         waitForStop();
     }
 
-    MC_ProgramPositionCommandMotor1(0, 0);
+    MC_ProgramPositionCommandMotor1(positionAtCalibration, 0);
     if (!MC_StartMotor1()) {
         uart_debug_print("Start Failed...\r\n");
         return false;
@@ -568,8 +570,19 @@ bool CalibrateSingleMotor(void){
     waitForRun();
 
     // Move incrementally until limit switch triggered
+
+    int steps = 20;
+    int i = 0;
+
+    while (!switch1_opened && i < steps){
+    	ControlSingleMotorPositionFollower(positionAtCalibration - CALIBRATION_DEGREE_REDUCTION_SPEED/steps);
+    	i ++;
+        positionAtCalibration = getCurrentPosition();
+    	HAL_Delay(5);
+    }
+
     while (!switch1_opened){
-    	ControlSingleMotorPositionFollower(positionAtCalibration - 0.1);
+    	ControlSingleMotorPositionFollower(positionAtCalibration - CALIBRATION_DEGREE_REDUCTION_SPEED);
         positionAtCalibration = getCurrentPosition();
     	HAL_Delay(5);
     }
@@ -591,7 +604,7 @@ bool CalibrateSingleMotor(void){
 
     // Move incrementally away from limit switch
     while (switch1_opened){
-    	ControlSingleMotorPositionFollower(positionAtCalibration + 0.1);
+    	ControlSingleMotorPositionFollower(positionAtCalibration + CALIBRATION_DEGREE_REDUCTION_SPEED);
         positionAtCalibration = getCurrentPosition();
     	HAL_Delay(5);
     }
@@ -632,7 +645,7 @@ bool CalibrateSingleMotor(void){
     }
 
     waitForRun();
-    ControlSingleMotorPosition(45);
+    ControlSingleMotorPosition(STARTING_POS);
 
 
     return true;

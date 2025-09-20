@@ -495,7 +495,7 @@ bool CalibrateSingleMotor(void){
         waitForStop();
     }
 
-    MC_ProgramPositionCommandMotor1(0, 0);
+    MC_ProgramPositionCommandMotor1(positionAtCalibration, 0);
     if (!MC_StartMotor1()) {
         uart_debug_print("Start Failed...\r\n");
         return false;
@@ -503,6 +503,17 @@ bool CalibrateSingleMotor(void){
     waitForRun();
 
     // Move incrementally until limit switch triggered
+
+    int steps = 20;
+    int i = 0;
+
+    while (!switch1_opened && i < steps){
+    	ControlSingleMotorPositionFollower(positionAtCalibration - CALIBRATION_DEGREE_REDUCTION_SPEED/steps);
+    	i ++;
+        positionAtCalibration = getCurrentPosition();
+    	HAL_Delay(5);
+    }
+
     while (!switch1_opened){
     	ControlSingleMotorPositionFollower(positionAtCalibration - CALIBRATION_DEGREE_REDUCTION_SPEED); // adjust +/- based on esc
         positionAtCalibration = getCurrentPosition();

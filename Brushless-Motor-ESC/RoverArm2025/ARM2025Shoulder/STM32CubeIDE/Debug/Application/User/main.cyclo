@@ -1,5 +1,5 @@
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/main.c:124:6:HAL_FDCAN_RxFifo0Callback	3
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/main.c:260:6:HAL_GPIO_EXTI_Callback	5
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/main.c:422:6:SystemClock_Config	3
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/main.c:298:5:main	37
-C:/Users/James/OneDrive/Documents/2. McGill Robotics/RoverArm2025/ARM2025Shoulder/Src/main.c:1218:6:Error_Handler	1
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/main.c:124:6:HAL_FDCAN_RxFifo0Callback	3
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/main.c:260:6:HAL_GPIO_EXTI_Callback	5
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/main.c:422:6:SystemClock_Config	3
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/main.c:298:5:main	37
+C:/School Files/McGill/Robotics/rover-elect-2025/rover-embedded-2025/Brushless-Motor-ESC/RoverArm2025/ARM2025Shoulder/Src/main.c:1218:6:Error_Handler	1

@@ -186,12 +186,14 @@ if __name__ == "__main__":
 # this function moves the motor to the specified position, based on the initial calibration position. For the case of our rover
 # that position is where the limits switches are
 
-    pingCheck()
-    # calibrateSHandEL()
+    # pingCheck()
+    calibrateSHandEL()
 
 
     # arm_interface.ping_motor(NodeID.SHOULDER)
+    # arm_interface.ping_motor(NodeID.ELBOW)
     # arm_interface.stop_motor(NodeID.ELBOW)
+    # arm_interface.calibrate_motor(NodeID.ELBOW)
     # arm_interface.calibrate_motor(NodeID.SHOULDER)
     # arm_interface.ping_motor(NodeID.ELBOW)
 
@@ -199,8 +201,8 @@ if __name__ == "__main__":
     # arm_interface.calibrate_motor(NodeID.ELBOW)
     # arm_interface.read_all_faults(NodeID.WAIST)
     # arm_interface.read_all_faults(NodeID.SHOULDER)
-    # arm_interface.run_motor_position(NodeID.SHOULDER, 15)
-    # arm_interface.run_motor_position(NodeID.ELBOW, 80)
+    # arm_interface.run_motor_position(NodeID.SHOULDER, 10)
+    # arm_interface.run_motor_position(NodeID.ELBOW, 50)
     # arm_interface.stop_motor(NodeID.SHOULDER)
     
     # arm_interface.stop_motor(NodeID.ELBOW)

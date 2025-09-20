@@ -62,8 +62,8 @@ all: main-build
 main-build: ARM2025Elbow.elf secondary-outputs
 
 # Tool invocations
-ARM2025Elbow.elf ARM2025Elbow.map: $(OBJS) $(USER_OBJS) C:\Users\James\OneDrive\Documents\2.\ McGill\ Robotics\RoverArm2025\ARM2025Elbow\STM32CubeIDE\STM32G431CBUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ARM2025Elbow.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\James\OneDrive\Documents\2. McGill Robotics\RoverArm2025\ARM2025Elbow\STM32CubeIDE\STM32G431CBUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ARM2025Elbow.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ARM2025Elbow.elf ARM2025Elbow.map: $(OBJS) $(USER_OBJS) C:\School\ Files\McGill\Robotics\rover-elect-2025\rover-embedded-2025\Brushless-Motor-ESC\RoverArm2025\ARM2025Elbow\STM32CubeIDE\STM32G431CBUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ARM2025Elbow.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\School Files\McGill\Robotics\rover-elect-2025\rover-embedded-2025\Brushless-Motor-ESC\RoverArm2025\ARM2025Elbow\STM32CubeIDE\STM32G431CBUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ARM2025Elbow.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
