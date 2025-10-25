@@ -1,5 +1,34 @@
 # steering-motor-firmware
 
+## STM32 .ioc setup
+
+The firmware requires a `LIMIT` pin for the limit switch setup for interrupt use
+with `GPIO_EXTI3`, a `LED` pin setup as a `GPIO_Output`, a CAN peripheral (CAN2_RX and CAN2_TX), debug as Serial Wire, a pin for PWM with usage `TIM8_CH1N`, a DIR pin as `GPIO_Output` and 2 pins setup as a timer in encoder mode (`TIM2_CH1` and `TIM2_CH2` in encoder mode)
+
+- Debug setup
+![GPIO setup](ReadmePics/debugsetup.png)
+
+- Encoder setup
+![Encoder setup](ReadmePics/Encodersetup.png)
+
+- CAN setup
+![Can setup](ReadmePics/cansetup.png)
+
+- PWM setup
+![PWM setup](ReadmePics/pwmsetup_channel.png)
+
+- GPIO setup
+![GPIO setup](ReadmePics/gpiosetup.png)
+
+Additionally the LIMIT pin should have the GPIO pull up resistor enabled
+
+![Pull Up resistor setup](ReadmePics/pullupresistorsetup.png)
+
+The clock setup requires to set the HSE source to be 16MHz to match the crystal
+we are using and for the system clock to be generated from the PLLCLK which is itself generated from HSE.
+
+![Clock Setup](ReadmePics/clocksetup.png)
+
 ## Basic motor control
 
 The motors are controlled through a motor driver IC (DRV8874PWPR) which can be controlled through a direction pin and a pwm pin for the motor speed.
@@ -8,13 +37,20 @@ Controlling direction is simply done by setting a pin to logic high for one dire
 
 Controlling the motor speed is done through a pwm signal. This is done in stm32 cube ide by configuring a pin to have its output to be controlled by a timer. We then set up the timer to count up to 4499 which allows is 4500 levels for our speed control. This was done to have a high level of precision over the speed of the motor but also to avoid too low of a frequency which would cause excessive heating of the motor alongside audible noise.
 
-Power control can be done using `set_motor_speed_percent` which will take a number from 0 to 100 which represents a percent of the maximum power defined in `power_limit`. It can also be done using `set_motor_speed_raw` which takes the value to be given to the pwm timer. If the values is above the max value defined in `power_limit` it is clamped. If a negative value is given then the absolute value will be used.
+To set the max value of the pwm timer we set the counter period in the `.ioc` to 4499 for timer `TIM8` and channel `CH1N` with a prescaler of 0. To obtain the pwm frequency we can calculate it as F_clk/((ARR+1)(PSC+1)) where ARR is the value of the counter period, PSC is the prescaler and F_clk is the frequency of the clock driving the timer. In our case the Timer clock was setup in the clock configuration of the `.ioc` to be 72MHz.
+
+![PWM setup](ReadmePics/pwmsetup.png)
+
+Power control can be done using `set_motor_speed_percent` which will take a number from 0 to 100 which represents a percent of the maximum power defined in `power_limit`. It can also be done using `set_motor_speed_raw` which takes the value to be given to the pwm timer by setting the timer's CCR register (in our case `TIM8 -> CCR1`). If the values is above the max value defined in `power_limit` it is clamped. If a negative value is given then the absolute value will be used. Once the raw value is given to the pwm timer it creates a signal with a duty cycle of CCR/ARR where ARR is the counter period (or max value that the timer can count to) and CCR is a value <= ARR stored in the CCR register for the pwm timer channel.
 
 Stopping a motor is done by setting the motor power to 0 and setting the target for the PID loop to the current encoder count value (This prevents the PID loop from overriding the motor power setting)
 
 ## Encoder
 
-The encoders are setup using the stm32's builtin timer encoder mode. This mode configures 2 pins on the stm to be attached to the encoder. The stm32 automatically counts up whenever the encoder sends data to the board. We then fetch the count value of the encoder using `set_counts` in `encoder.c` every millisecond in using the systick function (see PID section). 
+The encoders are setup using the stm32's builtin timer encoder mode on `TIM2` (see setup in `.ioc` file). This mode configures 2 pins on the stm to be attached to the encoder. The stm32 automatically counts up whenever the encoder sends data to the board. We then fetch the count value of the encoder using `set_counts` in `encoder.c` every millisecond in using the systick function (see PID section). 
+
+- Setup for the encoder counts timer
+![Encoder Prescale setup](ReadmePics/Encodersetupprescaler.png)
 
 `encoder.c` also handles conversions between angle values and count values.
 
@@ -53,7 +89,7 @@ It is important to coordinate the direction chosen in `pid.c` and the encoder co
 
 The calibration sequence is controlled by `steering_state` in `calibration.c`. Starting calibration sets that variable to `CALIBRATION`. 
 Once the PID loop will be disabled and instead the motor will be set to turn at a slow speed in towards the limit switch (using `set_calibration_motor_movement`). 
-Once the limit switch is triggered via an interrupt, it starts polling using the systick to debounce the switch by filling a buffer (see `try_calibrate_encoder`, `scan_switch` and `is_debouncing`/`set_debouncing` in `encoder.c`). 
+Once the limit switch is triggered via an interrupt (see `HAL_GPIO_EXTI_Callback` in `main.c`), it starts polling using the systick to debounce the switch by filling a buffer (see `try_calibrate_encoder`, `scan_switch` and `is_debouncing`/`set_debouncing` in `encoder.c`). 
 If the buffer is filled with `1`s then the limit switch will be considered pressed.
 
 When it is calibrated, both the counts variable used for PID and the automatically updated count register will be set to `LIMIT_SWITCH_RESET_COUNTS` which corresponds to 180 degrees in counts (currently required to be 180 degrees due to the count to encoder conversion code).
