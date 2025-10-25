@@ -5,19 +5,19 @@
 The firmware requires a `LIMIT` pin for the limit switch setup for interrupt use
 with `GPIO_EXTI3`, a `LED` pin setup as a `GPIO_Output`, a CAN peripheral (CAN2_RX and CAN2_TX), debug as Serial Wire, a pin for PWM with usage `TIM8_CH1N`, a DIR pin as `GPIO_Output` and 2 pins setup as a timer in encoder mode (`TIM2_CH1` and `TIM2_CH2` in encoder mode)
 
-- Debug setup
+**Debug setup**
 ![GPIO setup](ReadmePics/debugsetup.png)
 
-- Encoder setup
+**Encoder setup**
 ![Encoder setup](ReadmePics/Encodersetup.png)
 
-- CAN setup
+**CAN setup**
 ![Can setup](ReadmePics/cansetup.png)
 
-- PWM setup
+**PWM setup**
 ![PWM setup](ReadmePics/pwmsetup_channel.png)
 
-- GPIO setup
+**GPIO setup**
 ![GPIO setup](ReadmePics/gpiosetup.png)
 
 Additionally the LIMIT pin should have the GPIO pull up resistor enabled
@@ -49,7 +49,7 @@ Stopping a motor is done by setting the motor power to 0 and setting the target 
 
 The encoders are setup using the stm32's builtin timer encoder mode on `TIM2` (see setup in `.ioc` file). This mode configures 2 pins on the stm to be attached to the encoder. The stm32 automatically counts up whenever the encoder sends data to the board. We then fetch the count value of the encoder using `set_counts` in `encoder.c` every millisecond in using the systick function (see PID section). 
 
-- Setup for the encoder counts timer
+**Setup for the encoder counts timer**
 ![Encoder Prescale setup](ReadmePics/Encodersetupprescaler.png)
 
 `encoder.c` also handles conversions between angle values and count values.
@@ -121,5 +121,5 @@ After a message is processed, the functions in pid.h or motor.h are used to cont
 ## Remaining issues
 
  - Limit switch continues to trigger randomly even when it is not supposed 
- to be active (we should see if it can be fixed with more agressive 
+ to be active (we should see if it can be fixed with more aggressive 
  debouncing)
