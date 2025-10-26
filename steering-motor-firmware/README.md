@@ -35,7 +35,7 @@ The motors are controlled through a motor driver IC (DRV8874PWPR) which can be c
 
 Controlling direction is simply done by setting a pin to logic high for one direction and logic low for the other. The direction that the motor will spin (counterclockwise or clockwise) depends on this but also depends on the polarity of the wiring which is why the direction in the code is simply denoted by `1` and `0`. (see `set_motor_direction` function in `motor.h`)
 
-Controlling the motor speed is done through a pwm signal. This is done in stm32 cube ide by configuring a pin to have its output to be controlled by a timer. We then set up the timer to count up to 4499 which allows is 4500 levels for our speed control. This was done to have a high level of precision over the speed of the motor but also to avoid too low of a frequency which would cause excessive heating of the motor alongside audible noise.
+Controlling the motor speed is done through a pwm signal. This is done in stm32 cube ide by configuring a pin to have its output to be controlled by a timer. We then set up the timer to count up to 4499 which allows 4500 levels for our speed control. This was done to have a high level of precision over the speed of the motor but also to avoid too low of a frequency which would cause excessive heating of the motor alongside audible noise.
 
 To set the max value of the pwm timer we set the counter period in the `.ioc` to 4499 for timer `TIM8` and channel `CH1N` with a prescaler of 0. To obtain the pwm frequency we can calculate it as F_clk/((ARR+1)(PSC+1)) where ARR is the value of the counter period, PSC is the prescaler and F_clk is the frequency of the clock driving the timer. In our case the Timer clock was setup in the clock configuration of the `.ioc` to be 72MHz.
 
@@ -58,18 +58,18 @@ The encoder counts are to mapped to degrees as a linear range.
 
 0 degrees is not mapped to 0 degrees in counts to avoid wrap around which causes instability when moving the motor to 0 degrees. This is implemented by setting the reset value (at the 180 degrees point) when the limit switch is triggered to 50000 even though the motor will only have 33024 counts for a full rotation.
 
-To convert from angle to counts we convert angles to a range between 0 and 360 using modulo then adds an offset. The offset is calculated as `(LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);` where `MAX_COUNTS` corresponds to 360 degrees in counts and `LIMIT_SWITCH_RESET_COUNTS` corrresponds to the 180 degrees point. By substracting `MAX_COUNTS/2` we substract 180 degrees in counts to obtain the 0 degrees point which is the offset.
+To convert from angles to counts we convert angles to a range between 0 and 360 using modulo then adds an offset. The offset is calculated as `(LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);` where `MAX_COUNTS` corresponds to 360 degrees in counts and `LIMIT_SWITCH_RESET_COUNTS` corresponds to the 180 degrees point. By subtracting `MAX_COUNTS/2` we subtract 180 degrees in counts to obtain the 0 degrees point which is the offset.
 
-To convert from counts to angle the offset (0 degree in counts) is substracted from the counts value. Then we divide by `MAX_COUNTS` and multiply by 360 to obtain the angle in degrees.
+To convert from counts to angles the offset (0 degree in counts) is subtracted from the counts value. Then we divide by `MAX_COUNTS` and multiply by 360 to obtain the angle in degrees.
 
 ## PID
 
 The PID Loop is implemented using the systick timer.
-In `stm32f4xx_it.c` The function SysTick_Handler is used to use the systick timer and calles the function `SysTickFunction` which processes our PID loop every ms.
+In `stm32f4xx_it.c` The function SysTick_Handler is used to use the systick timer and calls the function `SysTickFunction` which processes our PID loop every ms.
 
 `SysTickFunction` in `systick.c` runs the PID code and updates the code with the current encoder value that is automatically updated by the stm32 encoder mode.
 
-PID is setup using 4 parameters found in `pid.h`.
+PID is set up using 4 parameters found in `pid.h`.
 
 `kPw` and `kdW` are the constants for PID control.  
 
@@ -79,9 +79,9 @@ PID is setup using 4 parameters found in `pid.h`.
 
 The PID loop calculates the difference in counts between the current position and that target position `goal` which is obtained as an argument to `updatePIDImpl`. The absolute value of the difference is clamped between 0 and 4999 (maximum value for pwm) to control the motor speed. The sign of the difference is used to control if the motor spins clockwise or counterclockwise
 
-In normal operation PID is operated using `updatePID` which uses passes the `goalAngle` variable to `updatePIDImpl`.
+In normal operation PID is operated using `updatePID` which passes the `goalAngle` variable to `updatePIDImpl`.
 
-In other modes of operation the PID goal can be overriden by using other functions than `updatePID` and passing different targets as goal. (See limit switch section)
+In other modes of operation the PID goal can be overridden by using other functions than `updatePID` and passing different targets as goal. (See limit switch section)
 
 It is important to coordinate the direction chosen in `pid.c` and the encoder counting direction as the code will not automatically choose if they match
 
@@ -104,7 +104,7 @@ The CAN interface used for steering is similar to the one used on drive but with
 
 The CAN interface for controlling the motors is done through the ID of the CAN messages. This requires us to setup the filter on the CAN peripheral of the STM32 to accept all incoming connections.
 
-As we wired the CAN transceiver to the CAN2 peripheral on the STM32 it was necessary to set the SLAVEFILTERBANK to be 14 as the alues 0 to 1 are set to go to CAN1
+As we wired the CAN transceiver to the CAN2 peripheral on the STM32 it was necessary to set the SLAVEFILTERBANK to be 14 as the values 0 to 13 are set to go to CAN1
 
 As all messages are accepted, the firmware filters the messages intended for a specific motor based on some bits in the packet id.
 
@@ -116,7 +116,17 @@ When a message is received the function `HAL_CAN_RxFiFo0MsgPendingCallback` will
 
 After a message is processed, the functions in pid.h or motor.h are used to control the motor. For a new angle command `setPIDGoalA` is used. For stopping the motor `stop_motor` in `motor.c` is used. To read the current angle we use `count_to_angle` with `get_counts` and then send it back using `sendCANResponse`.
 
+## Testing things
 
+When testing and running steering make sure the encoder discs are aligned with the hall sensors. Otherwise the encoder will not work and will not update properly.
+
+**Bad motor**
+
+Notice the disk is pushed down onto the connector for the wires
+![Picture of bad motor encoder](ReadmePics/badmotor.jpg)
+
+**Good motor**
+![Picture of bad motor encoder](ReadmePics/goodmotor.jpg)
 
 ## Remaining issues
 
