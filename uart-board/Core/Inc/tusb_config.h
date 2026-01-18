@@ -47,9 +47,7 @@
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
-
 #define CFG_TUSB_MCU OPT_MCU_STM32G4
-
 // defined by board.mk
 #ifndef CFG_TUSB_MCU
 #error CFG_TUSB_MCU must be defined

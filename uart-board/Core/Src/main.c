@@ -21,9 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+// #include "device/dcd.h"
 #include "tusb.h"
 #include "serialization.h"
 #include "deserialization.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,7 +74,6 @@ static void MX_USB_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 static void cdc_task(void);
-static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count);
 /* USER CODE END 0 */
 
 /**
@@ -99,7 +100,6 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -112,11 +112,12 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+ // init device stack on configured roothub port
   tusb_rhport_init_t dev_init = {
-    .role  = TUSB_ROLE_DEVICE,
-    .speed = TUSB_SPEED_HIGH
+    .role = TUSB_ROLE_DEVICE,
+    .speed = TUSB_SPEED_AUTO
   };
-  tusb_init(0, &dev_init);
+  tusb_init(BOARD_TUD_RHPORT, &dev_init);
   const int MAX_SIZE = 256;
   char json[MAX_SIZE];
   deserialize(json, 256, "gps", 1351824120, 48.756080, 2.302038);
@@ -127,7 +128,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    tud_task();
+    printf("%s", json);
+    printf("\n");
+    tud_task(); // tinyusb device task
     cdc_task();
     /* USER CODE END WHILE */
 
@@ -152,15 +155,14 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 12;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV2;
+  RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV4;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -171,8 +173,8 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
@@ -553,8 +555,38 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+int _write(int file, char *ptr, int len)
+{
+  (void)file;
+  int DataIdx;
+
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    //__io_putchar(*ptr++);
+	  ITM_SendChar(*ptr++);
+  }
+  return len;
+}
+
+// echo to either Serial0 or Serial1
+// with Serial0 as all lower case, Serial1 as all upper case
 static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count) {
+  uint8_t const case_diff = 'a' - 'A';
+
   for (uint32_t i = 0; i < count; i++) {
+    // if (itf == 0) {
+    //   // echo back 1st port as lower case
+    //   // if (isupper(buf[i])) {
+    //   //   buf[i] += case_diff;
+    //   // }
+    // } else {
+    //   // echo back 2nd port as upper case
+    //   if (islower(buf[i])) {
+    //     buf[i] -= case_diff;
+    //   }
+    // }
+
     tud_cdc_n_write_char(itf, buf[i]);
   }
   tud_cdc_n_write_flush(itf);
@@ -576,10 +608,32 @@ static void cdc_task(void) {
       }
 
       // Press on-board button to send Uart status notification
-      // Disabled for noe
-      // static cdc_notify_uart_state_t uart_state = { .value = 0 };
-      // uart_state.dsr ^= 1;
-      // tud_cdc_notify_uart_state(&uart_state);
+      static uint32_t btn_prev = 0;
+      static cdc_notify_uart_state_t uart_state = { .value = 0 };
+      // const uint32_t btn = board_button_read();
+      // if (!btn_prev && btn) {
+      //   uart_state.dsr ^= 1;
+      //   tud_cdc_notify_uart_state(&uart_state);
+      // }
+      // btn_prev = btn;
+    }
+  }
+}
+
+// Invoked when cdc when line state changed e.g connected/disconnected
+// Use to reset to DFU when disconnect with 1200 bps
+void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
+  (void)rts;
+
+  // DTR = false is counted as disconnected
+  if (!dtr) {
+    // touch1200 only with first CDC instance (Serial)
+    if (instance == 0) {
+      cdc_line_coding_t coding;
+      tud_cdc_get_line_coding(&coding);
+      // if (coding.bit_rate == 1200) {
+      //   board_reset_to_bootloader();
+      // }
     }
   }
 }

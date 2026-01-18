@@ -23,7 +23,9 @@
  *
  */
 
+
 #include "tusb.h"
+#include "stm32g474xx.h"
 
 /* A combination of interfaces must have a unique product id, since PC will save device driver after the first plug.
  * Same VID/PID with different interface e.g MSC (first), then CDC (later) will possibly cause system error on PC.
@@ -35,7 +37,7 @@
 #define USB_PID           (0x4000 | PID_MAP(CDC, 0) | PID_MAP(MSC, 1) | PID_MAP(HID, 2) | \
                            PID_MAP(MIDI, 3) | PID_MAP(VENDOR, 4) )
 
-#define USB_VID   0x0483 // ST USB_VID
+#define USB_VID   0xCafe
 #define USB_BCD   0x0200
 
 //--------------------------------------------------------------------+
@@ -152,8 +154,8 @@ static uint8_t const desc_hs_configuration[] = {
 
 // device qualifier is mostly similar to device descriptor since we don't change configuration based on speed
 static tusb_desc_device_qualifier_t const desc_device_qualifier = {
-  .bLength            = sizeof(tusb_desc_device_qualifier_t),
-  .bDescriptorType    = TUSB_DESC_DEVICE_QUALIFIER,
+  .bLength            = sizeof(tusb_desc_device_t),
+  .bDescriptorType    = TUSB_DESC_DEVICE,
   .bcdUSB             = USB_BCD,
 
   .bDeviceClass       = TUSB_CLASS_MISC,
@@ -220,6 +222,44 @@ static char const *string_desc_arr[] = {
   "TinyUSB CDC",                 // 4: CDC Interface
 };
 
+size_t board_get_unique_id(uint8_t id[], size_t max_len) {
+  (void) max_len;
+  volatile uint32_t * stm32_uuid = (volatile uint32_t *) UID_BASE;
+  uint32_t* id32 = (uint32_t*) (uintptr_t) id;
+  uint8_t const len = 12;
+
+  id32[0] = stm32_uuid[0];
+  id32[1] = stm32_uuid[1];
+  id32[2] = stm32_uuid[2];
+
+  return len;
+}
+
+static inline size_t board_usb_get_serial(uint16_t desc_str1[], size_t max_chars) {
+  uint8_t uid[16] TU_ATTR_ALIGNED(4);
+  size_t uid_len;
+
+  // TODO work with make, but not working with esp32s3 cmake
+  uid_len = board_get_unique_id(uid, sizeof(uid));
+
+  if ( uid_len > max_chars / 2u ) {
+    uid_len = max_chars / 2u;
+  }
+
+  for ( size_t i = 0; i < uid_len; i++ ) {
+    for ( size_t j = 0; j < 2; j++ ) {
+      const unsigned char nibble_to_hex[16] = {
+          '0', '1', '2', '3', '4', '5', '6', '7',
+          '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+      };
+      const uint8_t nibble = (uint8_t) ((uid[i] >> (j * 4u)) & 0xfu);
+      desc_str1[i * 2 + (1 - j)] = nibble_to_hex[nibble]; // UTF-16-LE
+    }
+  }
+
+  return 2 * uid_len;
+}
+
 static uint16_t _desc_str[32 + 1];
 
 // Invoked when received GET STRING DESCRIPTOR request
@@ -235,8 +275,7 @@ uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
       break;
 
     case STRID_SERIAL:
-	// removed as there we dont use the bsp
-    //   chr_count = board_usb_get_serial(_desc_str + 1, 32);
+      chr_count = board_usb_get_serial(_desc_str + 1, 32);
       break;
 
     default:
