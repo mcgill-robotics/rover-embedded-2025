@@ -25,6 +25,7 @@
 #include "tusb.h"
 #include "serialization.h"
 #include "deserialization.h"
+#include <string.h>
 #include <stdio.h>
 /* USER CODE END Includes */
 
@@ -54,7 +55,12 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-
+uint8_t lpuart1_out_buf[64];
+uint8_t uart1_out_buf[64];
+uint8_t uart2_out_buf[64];
+uint8_t uart3_out_buf[64];
+uint8_t uart4_out_buf[64];
+uint8_t uart5_out_buf[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
