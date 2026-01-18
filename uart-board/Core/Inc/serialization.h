@@ -1,6 +1,9 @@
 #ifndef SERIALIZATION_H
 #define SERIALIZATION_H
 
+#include <stdint.h>
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

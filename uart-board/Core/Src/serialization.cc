@@ -1,4 +1,3 @@
-
 #include "serialization.h"
 #include "ArduinoJson.h"
 #include "ArduinoJson/Document/JsonDocument.hpp"

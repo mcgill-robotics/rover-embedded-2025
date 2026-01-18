@@ -58,17 +58,14 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
-/* USER CODE BEGIN EV */
-extern PCD_HandleTypeDef hpcd_USB_FS;
-
 extern UART_HandleTypeDef hlpuart1;
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
-
+extern PCD_HandleTypeDef hpcd_USB_FS;
+/* USER CODE BEGIN EV */
 extern uint8_t lpuart1_out_buf[64];
 extern uint8_t uart1_out_buf[64];
 extern uint8_t uart2_out_buf[64];
@@ -245,17 +242,6 @@ void USB_LP_IRQHandler(void)
   /* USER CODE END USB_LP_IRQn 1 */
 }
 
-/* USER CODE BEGIN 1 */
-void USBWakeUp_IRQ_Handler(void)
-{
-  tud_int_handler(0);
-}
-
-
-void USBWakeUp_IRQHandler(void) {
-  tud_int_handler(0);
-}
-
 /**
   * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
   */
@@ -340,6 +326,17 @@ void LPUART1_IRQHandler(void)
   send_msg(LPUART1_TOPIC, lpuart1_out_buf, UART_BUF_LEN);
 
   /* USER CODE END LPUART1_IRQn 1 */
+}
+
+/* USER CODE BEGIN 1 */
+void USBWakeUp_IRQ_Handler(void)
+{
+  tud_int_handler(0);
+}
+
+
+void USBWakeUp_IRQHandler(void) {
+  tud_int_handler(0);
 }
 
 /* USER CODE END 1 */
