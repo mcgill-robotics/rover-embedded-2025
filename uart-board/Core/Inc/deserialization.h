@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void deserialize(char* output, int maxLen, char* sensor, long time, double latitude, double longitude);
+void deserialize(char *topic_buf, size_t topic_len, uint8_t *msg_buf, size_t msg_len, char *json);
 
 #ifdef __cplusplus
 }
