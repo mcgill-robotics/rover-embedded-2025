@@ -78,9 +78,7 @@ uint8_t const *tud_descriptor_device_cb(void) {
 enum {
   ITF_NUM_CDC_0 = 0,
   ITF_NUM_CDC_0_DATA,
-  ITF_NUM_CDC_1,
-  ITF_NUM_CDC_1_DATA,
-  ITF_NUM_TOTAL = 1
+  ITF_NUM_TOTAL
 };
 
 #define CONFIG_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + CFG_TUD_CDC * TUD_CDC_DESC_LEN)

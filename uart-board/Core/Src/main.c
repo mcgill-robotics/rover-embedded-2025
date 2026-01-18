@@ -593,7 +593,6 @@ static UART_HandleTypeDef *get_huart(const char *topic) {
 
 static void cdc_task(void) {
   // We assume itf 0
-
   if (tud_cdc_n_available(0)) {
     char json[128];
     uint32_t count = tud_cdc_n_read(0,json, 128);
