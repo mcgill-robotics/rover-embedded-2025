@@ -118,18 +118,12 @@ int main(void)
     .speed = TUSB_SPEED_AUTO
   };
   tusb_init(BOARD_TUD_RHPORT, &dev_init);
-  const int MAX_SIZE = 256;
-  char json[MAX_SIZE];
-  deserialize(json, 256, "gps", 1351824120, 48.756080, 2.302038);
-  serialize(json);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    printf("%s", json);
-    printf("\n");
     tud_task(); // tinyusb device task
     cdc_task();
     /* USER CODE END WHILE */
@@ -556,70 +550,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-int _write(int file, char *ptr, int len)
-{
-  (void)file;
-  int DataIdx;
-
-  for (DataIdx = 0; DataIdx < len; DataIdx++)
-  {
-    //__io_putchar(*ptr++);
-	  ITM_SendChar(*ptr++);
-  }
-  return len;
-}
-
-// echo to either Serial0 or Serial1
-// with Serial0 as all lower case, Serial1 as all upper case
-static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count) {
-  uint8_t const case_diff = 'a' - 'A';
-
-  for (uint32_t i = 0; i < count; i++) {
-    // if (itf == 0) {
-    //   // echo back 1st port as lower case
-    //   // if (isupper(buf[i])) {
-    //   //   buf[i] += case_diff;
-    //   // }
-    // } else {
-    //   // echo back 2nd port as upper case
-    //   if (islower(buf[i])) {
-    //     buf[i] -= case_diff;
-    //   }
-    // }
-
-    tud_cdc_n_write_char(itf, buf[i]);
-  }
-  tud_cdc_n_write_flush(itf);
-}
-
-static void cdc_task(void) {
-  for (uint8_t itf = 0; itf < CFG_TUD_CDC; itf++) {
-    // connected() check for DTR bit
-    // Most but not all terminal client set this when making connection
-    // if ( tud_cdc_n_connected(itf) )
-    {
-      if (tud_cdc_n_available(itf)) {
-        uint8_t buf[64];
-        uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
-
-        // echo back to both serial ports
-        echo_serial_port(0, buf, count);
-        echo_serial_port(1, buf, count);
-      }
-
-      // Press on-board button to send Uart status notification
-      static uint32_t btn_prev = 0;
-      static cdc_notify_uart_state_t uart_state = { .value = 0 };
-      // const uint32_t btn = board_button_read();
-      // if (!btn_prev && btn) {
-      //   uart_state.dsr ^= 1;
-      //   tud_cdc_notify_uart_state(&uart_state);
-      // }
-      // btn_prev = btn;
-    }
-  }
-}
-
 // Invoked when cdc when line state changed e.g connected/disconnected
 // Use to reset to DFU when disconnect with 1200 bps
 void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
@@ -635,6 +565,44 @@ void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
       //   board_reset_to_bootloader();
       // }
     }
+  }
+}
+static UART_HandleTypeDef *get_huart(const char *topic) {
+  if (strcmp(topic, LPUART1_TOPIC) == 0) {
+    return &hlpuart1;
+  } else if (strcmp(topic, UART1_TOPIC) == 0) {
+    return &huart1;
+  } else if (strcmp(topic, UART2_TOPIC) == 0) {
+    return &huart2;
+  }else if (strcmp(topic, UART3_TOPIC) == 0) {
+    return &huart3;
+  }else if (strcmp(topic, UART4_TOPIC) == 0) {
+    return &huart4;
+  }else if (strcmp(topic, UART5_TOPIC) == 0) {
+    return &huart5;
+  }
+
+  return NULL;
+}
+
+static void cdc_task(void) {
+  // We assume itf 0
+
+  if (tud_cdc_n_available(0)) {
+    char json[128];
+    uint32_t count = tud_cdc_n_read(0,json, 128);
+    char topic[32] = {0};
+    uint8_t msg[64] = {0};
+    deserialize(topic, 32, msg, 64, json);
+    UART_HandleTypeDef *huart = get_huart(topic);
+
+    if (huart == NULL) {
+      // Malformed or missing topic??
+      return;
+    }
+
+    // Can be converted to interrupt based transmission;
+    HAL_UART_Transmit(huart, msg, 64, 500);
   }
 }
 /* USER CODE END 4 */

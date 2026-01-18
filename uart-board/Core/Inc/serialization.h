@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-void serialize(char* json);
-
+void serialize(uint8_t *output, size_t output_len, const char *topic, uint8_t *msg, size_t msg_len);
+void send_msg(const char *topic, uint8_t *msg, size_t msg_len);
 #ifdef __cplusplus
 }
 #endif

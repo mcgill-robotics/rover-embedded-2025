@@ -1,18 +1,19 @@
 
 #include "ArduinoJson.h"
+#include "ArduinoJson/Document/JsonDocument.hpp"
+#include "ArduinoJson/Json/JsonDeserializer.hpp"
 #include "ArduinoJson/Json/JsonSerializer.hpp"
+#include <cstring>
 #include "deserialization.h"
 
 extern "C" {
-	void deserialize(char* output, int maxLen, char* sensor, long time, double latitude, double longitude){
-
+	void deserialize(char *topic_buf, size_t topic_len, uint8_t *msg_buf, size_t msg_len, char *json) {
 		JsonDocument doc;
-		
+		deserializeJson(doc, json);
+		const char *topic = doc["topic"];
+		memcpy(topic_buf, topic, topic_len);
 
-		doc["sensor"] = sensor;
-		doc["time"] = maxLen;
-		doc["data"].add(latitude);
-		doc["data"].add(longitude);
-		serializeJson(doc, output, maxLen);
+		const char *msg = doc["message"];
+		memcpy(msg_buf, msg, msg_len);
 	}
 }
