@@ -479,6 +479,8 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* hpcd)
     /* USB interrupt Init */
     HAL_NVIC_SetPriority(USB_HP_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USB_HP_IRQn);
+    HAL_NVIC_SetPriority(USB_LP_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USB_LP_IRQn);
     /* USER CODE BEGIN USB_MspInit 1 */
 
     /* USER CODE END USB_MspInit 1 */
@@ -505,6 +507,7 @@ void HAL_PCD_MspDeInit(PCD_HandleTypeDef* hpcd)
 
     /* USB interrupt DeInit */
     HAL_NVIC_DisableIRQ(USB_HP_IRQn);
+    HAL_NVIC_DisableIRQ(USB_LP_IRQn);
     /* USER CODE BEGIN USB_MspDeInit 1 */
 
     /* USER CODE END USB_MspDeInit 1 */
