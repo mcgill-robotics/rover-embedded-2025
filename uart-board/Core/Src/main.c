@@ -23,9 +23,11 @@
 /* USER CODE BEGIN Includes */
 // #include "device/dcd.h"
 #include "class/cdc/cdc_device.h"
+#include "stm32g4xx_hal_uart_ex.h"
 #include "tusb.h"
 #include "serialization.h"
 #include "deserialization.h"
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -75,7 +77,6 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -125,6 +126,15 @@ int main(void)
     .speed = TUSB_SPEED_AUTO
   };
   tusb_init(BOARD_TUD_RHPORT, &dev_init);
+
+  // Start UART receive interrupts
+  HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart1, uart1_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart3, uart3_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart5, uart5_out_buf, 64);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -201,7 +211,7 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 209700;
+  hlpuart1.Init.BaudRate = 115200;
   hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
@@ -600,10 +610,32 @@ static UART_HandleTypeDef *get_huart(const char *topic) {
   return NULL;
 }
 
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
+{
+  // Check for wanted UART
+  if (huart == &hlpuart1) {
+    send_msg(LPUART1_TOPIC, lpuart1_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, lpuart1_out_buf, 64);
+  } else if (huart == &huart1) {
+    send_msg(UART1_TOPIC, uart1_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, uart1_out_buf, 64);
+  } else if (huart == &huart2) {
+    send_msg(UART2_TOPIC, uart2_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, uart2_out_buf, 64);
+  } else if (huart == &huart3) {
+    send_msg(UART3_TOPIC, uart3_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, uart3_out_buf, 64);
+  } else if (huart == &huart4) {
+    send_msg(UART4_TOPIC, uart4_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, uart4_out_buf, 64);
+  } else if (huart == &huart5) {
+    send_msg(UART5_TOPIC, uart5_out_buf, UART_BUF_LEN);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, uart5_out_buf, 64);
+  }
+}
+
 static void cdc_task(void) {
   // We assume itf 0
-  tud_cdc_n_write_str(0, "hello\n");
-    tud_cdc_n_write_flush(0);
   if (tud_cdc_n_available(0)) {
     char json[128];
     uint32_t count = tud_cdc_n_read(0,json, 128);
@@ -618,7 +650,7 @@ static void cdc_task(void) {
     }
 
     // Can be converted to interrupt based transmission;
-    HAL_UART_Transmit(huart, msg, 64, 500);
+    HAL_UART_Transmit(huart, msg, strlen(msg), 500);
   }
 }
 /* USER CODE END 4 */

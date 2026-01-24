@@ -252,7 +252,7 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-  send_msg(UART1_TOPIC, uart1_out_buf, UART_BUF_LEN);
+  
   /* USER CODE END USART1_IRQn 1 */
 }
 
@@ -266,7 +266,7 @@ void USART2_IRQHandler(void)
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
-  send_msg(UART2_TOPIC, uart2_out_buf, UART_BUF_LEN);
+  
   /* USER CODE END USART2_IRQn 1 */
 }
 
@@ -280,7 +280,7 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
-  send_msg(UART3_TOPIC, uart3_out_buf, UART_BUF_LEN);
+  
   /* USER CODE END USART3_IRQn 1 */
 }
 
@@ -294,7 +294,6 @@ void UART4_IRQHandler(void)
   /* USER CODE END UART4_IRQn 0 */
   HAL_UART_IRQHandler(&huart4);
   /* USER CODE BEGIN UART4_IRQn 1 */
-  send_msg(UART4_TOPIC, uart4_out_buf, UART_BUF_LEN);
 
   /* USER CODE END UART4_IRQn 1 */
 }
@@ -309,7 +308,7 @@ void UART5_IRQHandler(void)
   /* USER CODE END UART5_IRQn 0 */
   HAL_UART_IRQHandler(&huart5);
   /* USER CODE BEGIN UART5_IRQn 1 */
-  send_msg(UART5_TOPIC, uart5_out_buf, UART_BUF_LEN);
+
   /* USER CODE END UART5_IRQn 1 */
 }
 
@@ -323,7 +322,6 @@ void LPUART1_IRQHandler(void)
   /* USER CODE END LPUART1_IRQn 0 */
   HAL_UART_IRQHandler(&hlpuart1);
   /* USER CODE BEGIN LPUART1_IRQn 1 */
-  send_msg(LPUART1_TOPIC, lpuart1_out_buf, UART_BUF_LEN);
 
   /* USER CODE END LPUART1_IRQn 1 */
 }

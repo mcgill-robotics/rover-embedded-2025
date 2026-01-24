@@ -66,12 +66,12 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define UART_BUF_LEN 256
-#define LPUART1_TOPIC ""
-#define UART1_TOPIC ""
-#define UART2_TOPIC ""
-#define UART3_TOPIC ""
-#define UART4_TOPIC ""
-#define UART5_TOPIC ""
+#define LPUART1_TOPIC "uart0"
+#define UART1_TOPIC "uart1"
+#define UART2_TOPIC "uart2"
+#define UART3_TOPIC "uart3"
+#define UART4_TOPIC "uart4"
+#define UART5_TOPIC "uart5"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
