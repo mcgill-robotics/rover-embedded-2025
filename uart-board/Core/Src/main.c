@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "device/dcd.h"
+#include "class/cdc/cdc_device.h"
 #include "tusb.h"
 #include "serialization.h"
 #include "deserialization.h"
@@ -556,6 +557,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+
+int __io_putchar(int ch)
+{
+ // Write character to ITM ch.0
+ ITM_SendChar(ch);
+ return(ch);
+}
+
 // Invoked when cdc when line state changed e.g connected/disconnected
 // Use to reset to DFU when disconnect with 1200 bps
 void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
@@ -593,6 +602,8 @@ static UART_HandleTypeDef *get_huart(const char *topic) {
 
 static void cdc_task(void) {
   // We assume itf 0
+  tud_cdc_n_write_str(0, "hello\n");
+    tud_cdc_n_write_flush(0);
   if (tud_cdc_n_available(0)) {
     char json[128];
     uint32_t count = tud_cdc_n_read(0,json, 128);

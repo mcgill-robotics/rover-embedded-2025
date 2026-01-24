@@ -67,7 +67,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
     CFG_TUSB_DEBUG=2
-    # CFG_TUD_LOG_LEVEL=2
+    CFG_TUD_LOG_LEVEL=2
 )
 
 # Remove wrong libob.a library dependency when using cpp files
