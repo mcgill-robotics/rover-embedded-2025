@@ -1,0 +1,48 @@
+.horizontal_ctn {
+	height: auto;
+	padding: 1;
+}
+
+Select {
+	padding: 0 0 1 0;
+}
+
+.log {
+	padding: 1;
+	background: transparent;
+}
+
+Rule {
+	color: $surface;
+}
+
+#rx_all_rule{
+	margin: 0 0 0 0;
+}
+
+Button {
+	margin: 1 1 0 1;
+}
+
+Collapsible {
+	background: transparent;
+	padding: 0;
+	margin: 0;
+}
+
+SelectionList {
+	background: transparent;
+}
+
+TabbedContent {
+	height: 1fr;
+}
+
+TabPane {
+	height: 1fr;
+}
+
+.padding {
+	padding: 1;
+}
+
