@@ -174,7 +174,7 @@ class RichLogApp(App):
         if event.button.id == "send_btn":
             topic_field = self.query_one("#topic_field")
             message_field = self.query_one("#message_field")
-            self.queue.put(json.dumps({"topic":topic_field, "message":message_field}))
+            self.queue.put(json.dumps({"topic":topic_field.value, "message":message_field.value}))
 
     def action_refresh_itf(self) -> None:
         selector = self.query_one("#serial_select")
