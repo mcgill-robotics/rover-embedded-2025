@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 // #include "device/dcd.h"
 #include "class/cdc/cdc_device.h"
+#include "stm32g474xx.h"
 #include "stm32g4xx_hal_uart_ex.h"
 #include "tusb.h"
 #include "serialization.h"
@@ -58,12 +59,15 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t lpuart1_out_buf[64];
-uint8_t uart1_out_buf[64];
-uint8_t uart2_out_buf[64];
-uint8_t uart3_out_buf[64];
-uint8_t uart4_out_buf[64];
-uint8_t uart5_out_buf[64];
+uint8_t lpuart1_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint8_t uart1_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint8_t uart2_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint8_t uart3_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint8_t uart4_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint8_t uart5_out_buf[UART_BUF_LEN + UART_PAK_LEN];
+uint32_t lpuart1_read, uart1_read, uart2_read, uart3_read, uart4_read, uart5_read;
+uint32_t total_read;
+char json[JSON_BUF_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,11 +81,13 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
+void check_uart(UART_HandleTypeDef *huart);
+static void cdc_task(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void cdc_task(void);
+
 /* USER CODE END 0 */
 
 /**
@@ -128,12 +134,12 @@ int main(void)
   tusb_init(BOARD_TUD_RHPORT, &dev_init);
 
   // Start UART receive interrupts
-  HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1_out_buf, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart1, uart1_out_buf, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart3, uart3_out_buf, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4_out_buf, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart5, uart5_out_buf, 64);
+  HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart1, uart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart3, uart3_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart5, uart5_out_buf + UART_BUF_LEN, UART_PAK_LEN);
 
   /* USER CODE END 2 */
 
@@ -143,6 +149,13 @@ int main(void)
   {
     tud_task(); // tinyusb device task
     cdc_task();
+
+    check_uart(&hlpuart1);
+    check_uart(&huart1);
+    check_uart(&huart2);
+    check_uart(&huart3);
+    check_uart(&huart4);
+    check_uart(&huart5);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -592,6 +605,7 @@ void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
     }
   }
 }
+
 static UART_HandleTypeDef *get_huart(const char *topic) {
   if (strcmp(topic, LPUART1_TOPIC) == 0) {
     return &hlpuart1;
@@ -610,47 +624,122 @@ static UART_HandleTypeDef *get_huart(const char *topic) {
   return NULL;
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
-{
-  // Check for wanted UART
+static char *get_topic(const UART_HandleTypeDef *huart) {
   if (huart == &hlpuart1) {
-    send_msg(LPUART1_TOPIC, lpuart1_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, lpuart1_out_buf, 64);
+    return LPUART1_TOPIC;
   } else if (huart == &huart1) {
-    send_msg(UART1_TOPIC, uart1_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, uart1_out_buf, 64);
+    return UART1_TOPIC;
   } else if (huart == &huart2) {
-    send_msg(UART2_TOPIC, uart2_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, uart2_out_buf, 64);
-  } else if (huart == &huart3) {
-    send_msg(UART3_TOPIC, uart3_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, uart3_out_buf, 64);
-  } else if (huart == &huart4) {
-    send_msg(UART4_TOPIC, uart4_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, uart4_out_buf, 64);
-  } else if (huart == &huart5) {
-    send_msg(UART5_TOPIC, uart5_out_buf, UART_BUF_LEN);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, uart5_out_buf, 64);
+    return UART2_TOPIC;
+  }else if (huart == &huart3) {
+    return UART3_TOPIC;
+  }else if (huart == &huart4) {
+    return UART4_TOPIC;
+  }else if (huart == &huart5) {
+    return UART5_TOPIC;
   }
+
+  return NULL;
+}
+
+static uint8_t *get_buffer(const UART_HandleTypeDef *huart) {
+  if (huart == &hlpuart1) {
+    return lpuart1_out_buf;
+  } else if (huart == &huart1) {
+    return uart1_out_buf;
+  } else if (huart == &huart2) {
+    return uart2_out_buf;
+  }else if (huart == &huart3) {
+    return uart3_out_buf;
+  }else if (huart == &huart4) {
+    return uart4_out_buf;
+  }else if (huart == &huart5) {
+    return uart5_out_buf;
+  }
+
+  return NULL;
+}
+
+static uint32_t *get_read_count(const UART_HandleTypeDef *huart) {
+  if (huart == &hlpuart1) {
+    return &lpuart1_read;
+  } else if (huart == &huart1) {
+    return &uart1_read;
+  } else if (huart == &huart2) {
+    return &uart2_read;
+  }else if (huart == &huart3) {
+    return &uart3_read;
+  }else if (huart == &huart4) {
+    return &uart4_read;
+  }else if (huart == &huart5) {
+    return &uart5_read;
+  }
+
+  return NULL;
+}
+
+void check_uart(UART_HandleTypeDef *huart) {
+  uint32_t* read_ptr = get_read_count(huart);
+  uint8_t* buffer = get_buffer(huart);
+
+  if (*read_ptr == 0) return;
+  char* newline_pos = strchr((const char *)buffer, '\n');
+  if (newline_pos == NULL) return;
+
+  send_msg(get_topic(huart), buffer, newline_pos - (char *)buffer);
+
+  uint32_t leftover = *read_ptr - (newline_pos - (char *)buffer + 1);
+  memcpy(json, newline_pos + 1, leftover);
+  *read_ptr -= (newline_pos - (char *)buffer + 1);
+  buffer[*read_ptr] = '\0';
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) {
+  uint32_t* read_ptr = get_read_count(huart);
+
+  if (*read_ptr + size >= UART_BUF_LEN) return;
+  
+  uint8_t* buffer = get_buffer(huart);
+
+  memcpy(buffer + *read_ptr, buffer + UART_BUF_LEN, size);
+  *read_ptr += size;
+  buffer[*read_ptr] = '\0';
+
+  HAL_UARTEx_ReceiveToIdle_IT(huart, buffer + UART_BUF_LEN, UART_PAK_LEN);
 }
 
 static void cdc_task(void) {
   // We assume itf 0
   if (tud_cdc_n_available(0)) {
-    char json[128];
-    uint32_t count = tud_cdc_n_read(0,json, 128);
-    char topic[32] = {0};
-    uint8_t msg[64] = {0};
-    deserialize(topic, 32, msg, 64, json);
-    UART_HandleTypeDef *huart = get_huart(topic);
-
-    if (huart == NULL) {
-      // Malformed or missing topic??
+    // Read available data with a larger buffer to handle bigger JSON 
+    uint32_t count = tud_cdc_n_read(0, json + total_read, JSON_BUF_LEN - total_read);
+    total_read += count;
+    
+    if (total_read >= JSON_BUF_LEN) {
+      total_read = 0;
       return;
     }
 
-    // Can be converted to interrupt based transmission;
-    HAL_UART_Transmit(huart, msg, strlen(msg), 500);
+    json[total_read] = '\0';
+
+    char* newline_pos = strchr(json, '\n');
+
+    if (newline_pos != NULL) {
+      char topic[TOPIC_BUF_LEN] = {0};
+      uint8_t msg[UART_BUF_LEN] = {0};
+      deserialize(topic, TOPIC_BUF_LEN, msg, UART_BUF_LEN, json);
+      
+      uint32_t leftover = total_read - (newline_pos - json + 1);
+      memcpy(json, newline_pos + 1, leftover);
+      total_read -= (newline_pos - json + 1);
+      json[total_read] = '\0';
+
+      UART_HandleTypeDef *huart = get_huart(topic);
+      if (huart == NULL) return;
+
+      // Can be converted to interrupt based transmission
+      HAL_UART_Transmit(huart, msg, strlen((const char *)msg) + 1, 500);
+    }
   }
 }
 /* USER CODE END 4 */

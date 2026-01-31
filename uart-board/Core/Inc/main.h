@@ -66,6 +66,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define UART_BUF_LEN 256
+#define UART_PAK_LEN 64
+#define TOPIC_BUF_LEN 32
+#define JSON_BUF_LEN 512
 #define LPUART1_TOPIC "uart0"
 #define UART1_TOPIC "uart1"
 #define UART2_TOPIC "uart2"
