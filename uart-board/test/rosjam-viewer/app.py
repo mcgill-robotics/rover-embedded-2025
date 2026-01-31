@@ -234,6 +234,10 @@ class RichLogApp(App):
         text_log_itf = self.query_one(f"#{message.itf._internal_id}_log")
         text_log_itf.write(f"[{color}]{message.text}[/]")
 
+    def display_to_send(self, message):
+        text_log_sent = self.query_one("#sent_log")
+        text_log_sent.write(message)
+
     def print_open(self, dev):
         text_log_all = self.query_one("#all_log")
         text_log_all.write(f"-- Opened {dev} --")
@@ -282,8 +286,9 @@ class RichLogApp(App):
                 self.call_from_thread(self.print_open, dev)
                 worker = get_current_worker()
                 while not worker.is_cancelled and device.is_open:
-                    if not self.queue.empty():
-                        device.write(f"{self.queue.get()}\n")
+                    if not self.queue.qsize() == 0:
+                        device.write(f"{self.queue.get()}\n".encode("utf-8"))
+                        self.call_from_thread(self.display_to_send, f"{self.queue.get()}\n")
                     if device.in_waiting != 0:
                         message = self.get_line_info(device.readline())
                         if message.itf is None:
