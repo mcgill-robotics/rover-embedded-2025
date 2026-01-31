@@ -8,8 +8,8 @@
 extern "C" {
 #endif
 
-void serialize(uint8_t *output, size_t output_len, const char *topic, uint8_t *msg, size_t msg_len);
-void send_msg(const char *topic, uint8_t *msg, size_t msg_len);
+size_t serialize(uint8_t *output, size_t output_len, const char *topic, uint8_t *msg);
+void send_msg(const char *topic, uint8_t *msg);
 #ifdef __cplusplus
 }
 #endif

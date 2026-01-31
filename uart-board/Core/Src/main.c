@@ -686,10 +686,11 @@ void check_uart(UART_HandleTypeDef *huart) {
   char* newline_pos = strchr((const char *)buffer, '\n');
   if (newline_pos == NULL) return;
 
-  send_msg(get_topic(huart), buffer, newline_pos - (char *)buffer);
+  *newline_pos = '\0';
+  send_msg(get_topic(huart), buffer);
 
   uint32_t leftover = *read_ptr - (newline_pos - (char *)buffer + 1);
-  memcpy(json, newline_pos + 1, leftover);
+  memcpy(buffer, newline_pos + 1, leftover);
   *read_ptr -= (newline_pos - (char *)buffer + 1);
   buffer[*read_ptr] = '\0';
 }
@@ -725,8 +726,8 @@ static void cdc_task(void) {
     char* newline_pos = strchr(json, '\n');
 
     if (newline_pos != NULL) {
-      char topic[TOPIC_BUF_LEN] = {0};
-      uint8_t msg[UART_BUF_LEN] = {0};
+      char topic[TOPIC_BUF_LEN];
+      uint8_t msg[UART_BUF_LEN];
       deserialize(topic, TOPIC_BUF_LEN, msg, UART_BUF_LEN, json);
       
       uint32_t leftover = total_read - (newline_pos - json + 1);
@@ -737,8 +738,11 @@ static void cdc_task(void) {
       UART_HandleTypeDef *huart = get_huart(topic);
       if (huart == NULL) return;
 
+      uint32_t msg_len = strlen((const char *)msg);
+
       // Can be converted to interrupt based transmission
-      HAL_UART_Transmit(huart, msg, strlen((const char *)msg) + 1, 500);
+      HAL_UART_Transmit(huart, msg,  msg_len, 500);
+      HAL_UART_Transmit(huart, (uint8_t*) "\n",  1, 500);
     }
   }
 }
