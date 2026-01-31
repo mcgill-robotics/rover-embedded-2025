@@ -14,12 +14,12 @@ extern "C" {
 		if (topic_len > strlen(topic)){
 			topic_len = strlen(topic);
 		}
-		memcpy(topic_buf, topic, topic_len);
+		memcpy(topic_buf, topic, topic_len + 1);
 
 		const char *msg = doc["message"];
 		if (msg_len > strlen(msg)){
 			msg_len = strlen(msg);
 		}
-		memcpy(msg_buf, msg, msg_len);
+		memcpy(msg_buf, msg, msg_len + 1);
 	}
 }
