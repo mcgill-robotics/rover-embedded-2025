@@ -12,6 +12,8 @@ from textual import log
 from textual import color
 from textual.suggester import SuggestFromList
 
+import queue
+
 from dataclasses import dataclass
 import json
 
@@ -126,12 +128,14 @@ class SendView(Vertical):
 
     def compose(self) -> ComposeResult:
         yield Label("Topic", classes="padding")
-        yield Input(suggester=SuggestFromList([itf.topic for itf in interfaces]))
+        yield Input(suggester=SuggestFromList([itf.topic for itf in interfaces]), id="topic_field")
         yield Label("Message", classes="padding")
-        yield Input()
-        yield Button("Send", variant="primary")
+        yield Input(id="message_field")
+        yield Button("Send", variant="primary", id="send_btn")
         yield Rule(line_style="heavy")
         yield RichLog(markup=True, id="sent_log", classes="log", auto_scroll=False)
+
+
 
 class RichLogApp(App):
 
@@ -162,7 +166,15 @@ class RichLogApp(App):
 
     def on_ready(self) -> None:
         """Called  when the DOM is ready."""
+        self.queue = queue.Queue()
         self.open_serial()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        if event.button.id == "send_btn":
+            topic_field = self.query_one("#topic_field")
+            message_field = self.query_one("#message_field")
+            self.queue.put(json.dumps({"topic":topic_field, "message":message_field}))
 
     def action_refresh_itf(self) -> None:
         selector = self.query_one("#serial_select")
@@ -270,6 +282,8 @@ class RichLogApp(App):
                 self.call_from_thread(self.print_open, dev)
                 worker = get_current_worker()
                 while not worker.is_cancelled and device.is_open:
+                    if not self.queue.empty():
+                        device.write(f"{self.queue.get()}\n")
                     if device.in_waiting != 0:
                         message = self.get_line_info(device.readline())
                         if message.itf is None:
