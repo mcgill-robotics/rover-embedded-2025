@@ -58,7 +58,6 @@ void SysTick_Handler(void);
 void USB_HP_IRQHandler(void);
 void USB_LP_IRQHandler(void);
 void USART1_IRQHandler(void);
-void USART2_IRQHandler(void);
 void USART3_IRQHandler(void);
 void UART4_IRQHandler(void);
 void UART5_IRQHandler(void);
