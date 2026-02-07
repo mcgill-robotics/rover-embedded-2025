@@ -22,6 +22,6 @@ try:
             values[i] += 1
         time.sleep(0.2)
 except KeyboardInterrupt:
-    print("Stopping flood tester.")
+    print("\nStopping flood tester.")
     interface.close()
     exit(0)
