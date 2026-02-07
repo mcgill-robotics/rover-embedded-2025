@@ -17,10 +17,10 @@ except serial.SerialException as e:
 try:
     while True:
         for i in config:
-            interface.write(f'{{"topic":"{uarts[i]}","message":"{values[i]}"}}\n')
+            interface.write(f'{{"topic":"{uarts[i]}","message":"{values[i]}"}}\n'.encode())
             print(f'{{"topic":"{uarts[i]}","message":"{values[i]}"}}')
             values[i] += 1
-        time.sleep(0.1)
+        time.sleep(0.2)
 except KeyboardInterrupt:
     print("Stopping flood tester.")
     interface.close()
