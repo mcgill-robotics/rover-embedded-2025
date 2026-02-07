@@ -53,7 +53,6 @@ UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_FS;
@@ -77,7 +76,6 @@ static void MX_LPUART1_UART_Init(void);
 static void MX_UART4_Init(void);
 static void MX_UART5_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
@@ -122,7 +120,6 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
@@ -136,7 +133,7 @@ int main(void)
   // Start UART receive interrupts
   HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
   HAL_UARTEx_ReceiveToIdle_IT(&huart1, uart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf + UART_BUF_LEN, UART_PAK_LEN);
+  // HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf + UART_BUF_LEN, UART_PAK_LEN);
   HAL_UARTEx_ReceiveToIdle_IT(&huart3, uart3_out_buf + UART_BUF_LEN, UART_PAK_LEN);
   HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4_out_buf + UART_BUF_LEN, UART_PAK_LEN);
   HAL_UARTEx_ReceiveToIdle_IT(&huart5, uart5_out_buf + UART_BUF_LEN, UART_PAK_LEN);
@@ -152,7 +149,7 @@ int main(void)
 
     check_uart(&hlpuart1);
     check_uart(&huart1);
-    check_uart(&huart2);
+    // check_uart(&huart2);
     check_uart(&huart3);
     check_uart(&huart4);
     check_uart(&huart5);
@@ -400,54 +397,6 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_RS485Ex_Init(&huart2, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -543,8 +492,8 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -611,8 +560,8 @@ static UART_HandleTypeDef *get_huart(const char *topic) {
     return &hlpuart1;
   } else if (strcmp(topic, UART1_TOPIC) == 0) {
     return &huart1;
-  } else if (strcmp(topic, UART2_TOPIC) == 0) {
-    return &huart2;
+  // } else if (strcmp(topic, UART2_TOPIC) == 0) {
+  //   return &huart2;
   }else if (strcmp(topic, UART3_TOPIC) == 0) {
     return &huart3;
   }else if (strcmp(topic, UART4_TOPIC) == 0) {
@@ -629,8 +578,8 @@ static char *get_topic(const UART_HandleTypeDef *huart) {
     return LPUART1_TOPIC;
   } else if (huart == &huart1) {
     return UART1_TOPIC;
-  } else if (huart == &huart2) {
-    return UART2_TOPIC;
+  // } else if (huart == &huart2) {
+  //   return UART2_TOPIC;
   }else if (huart == &huart3) {
     return UART3_TOPIC;
   }else if (huart == &huart4) {
@@ -647,8 +596,8 @@ static uint8_t *get_buffer(const UART_HandleTypeDef *huart) {
     return lpuart1_out_buf;
   } else if (huart == &huart1) {
     return uart1_out_buf;
-  } else if (huart == &huart2) {
-    return uart2_out_buf;
+  // } else if (huart == &huart2) {
+  //   return uart2_out_buf;
   }else if (huart == &huart3) {
     return uart3_out_buf;
   }else if (huart == &huart4) {
@@ -665,8 +614,8 @@ static uint32_t *get_read_count(const UART_HandleTypeDef *huart) {
     return &lpuart1_read;
   } else if (huart == &huart1) {
     return &uart1_read;
-  } else if (huart == &huart2) {
-    return &uart2_read;
+  // } else if (huart == &huart2) {
+  //   return &uart2_read;
   }else if (huart == &huart3) {
     return &uart3_read;
   }else if (huart == &huart4) {
@@ -698,7 +647,7 @@ void check_uart(UART_HandleTypeDef *huart) {
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) {
   uint32_t* read_ptr = get_read_count(huart);
 
-  if (*read_ptr + size >= UART_BUF_LEN) return;
+  if (*read_ptr + size >= UART_BUF_LEN) *read_ptr = 0;
   
   uint8_t* buffer = get_buffer(huart);
 
