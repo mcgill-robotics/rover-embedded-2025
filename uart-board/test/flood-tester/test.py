@@ -18,6 +18,9 @@ except serial.SerialException as e:
 try:
     while True:
         line = interface.readline().decode().strip(" \n")
+        if len(line) == 0:
+            print("Data timeout")
+            continue
         try:
             message = json.loads(line)
         except json.JSONDecodeError:
@@ -37,7 +40,7 @@ try:
                 print(f"Received {value} for {topic}")
                 values[index] += 1
 except KeyboardInterrupt:
-    print(f"Final results: {failures} failures")
+    print(f"\nFinal results: {failures} failures")
     for i in range(len(uarts)):
         print(f"{uarts[i]}: {values[i]} messages, {errors[i]} dropped")
     interface.close()
