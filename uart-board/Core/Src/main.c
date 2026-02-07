@@ -638,6 +638,7 @@ void check_uart(UART_HandleTypeDef *huart) {
   *newline_pos = '\0';
   send_msg(get_topic(huart), buffer);
 
+  // TODO: Process multiple messages per call if multiple newlines are present
   uint32_t leftover = *read_ptr - (newline_pos - (char *)buffer + 1);
   memcpy(buffer, newline_pos + 1, leftover);
   *read_ptr -= (newline_pos - (char *)buffer + 1);
@@ -689,7 +690,6 @@ static void cdc_task(void) {
 
       uint32_t msg_len = strlen((const char *)msg);
 
-      // Can be converted to interrupt based transmission
       HAL_UART_Transmit(huart, msg,  msg_len, 500);
       HAL_UART_Transmit(huart, (uint8_t*) "\n",  1, 500);
     }
