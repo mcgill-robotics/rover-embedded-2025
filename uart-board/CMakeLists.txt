@@ -39,7 +39,10 @@ add_subdirectory(cmake/stm32cubemx)
 
 add_subdirectory(libs/tinyusb/src)
 
+add_subdirectory(libs/RosJamCDC/src)
+
 tinyusb_target_add(${CMAKE_PROJECT_NAME})
+rosjam_cdc_add(${CMAKE_PROJECT_NAME})
 
 add_subdirectory(libs/ArduinoJson)
 
@@ -53,9 +56,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/tinyusb/src/portable/st/stm32_fsdev/dcd_stm32_fsdev.c
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/tinyusb/src/portable/st/typec/typec_stm32.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/usb_descriptors.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/serialization.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/deserialization.cc
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/usb_descriptors.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/serialization.cc
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/deserialization.cc
 )
 
 # Add include paths

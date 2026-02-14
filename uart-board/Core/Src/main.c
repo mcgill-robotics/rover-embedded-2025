@@ -22,12 +22,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "device/dcd.h"
-#include "class/cdc/cdc_device.h"
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal_uart_ex.h"
 #include "tusb.h"
-#include "serialization.h"
-#include "deserialization.h"
+#include "json_serde/serialization.h"
+#include "json_serde/deserialization.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
