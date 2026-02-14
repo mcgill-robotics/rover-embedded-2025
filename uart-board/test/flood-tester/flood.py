@@ -3,7 +3,7 @@ import time
 import serial
 
 # Change this to the lits of wanted UARTs to test
-config = [0, 1]
+config = [0, 1, 3, 4]
 
 uarts = ["uart0", "uart1", "uart2", "uart3", "uart4", "uart5"]
 values = [0, 0, 0, 0, 0, 0]
