@@ -64,8 +64,8 @@ PCD_HandleTypeDef hpcd_USB_FS;
 /* USER CODE BEGIN PV */
 
 //for CAN
-CAN_RxHeaderTypeDef RxHeader; //header for receiving msgs
-uint8_t rxData[8]; //receiver data
+FDCAN_RxHeaderTypeDef RxHeader; //header for receiving msgs
+uint8_t RxData[64]; //receiver data
 
 /* USER CODE END PV */
 
@@ -155,22 +155,29 @@ int main(void)
 
 
     // CAN initialization
-    CAN_FilterTypeDef canfilterconfig;
+    FDCAN_FilterTypeDef canfilterconfig;
 
-      canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-      canfilterconfig.FilterBank = 14;  // anything between 0 to SlaveStartFilterBank for can1. can 2 opposite.
-      canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-      canfilterconfig.FilterIdHigh = 0x0000;
-      canfilterconfig.FilterIdLow = 0x0000; // comment out if we don't need filter in the end
-      canfilterconfig.FilterMaskIdHigh = 0x0000;
-      canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
-      canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-      canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-      canfilterconfig.SlaveStartFilterBank = 14;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+      canfilterconfig.IdType = FDCAN_STANDARD_ID;
+      //canfilterconfig.FilterBank = 14;  // anything between 0 to SlaveStartFilterBank for can1. can 2 opposite.
+      canfilterconfig.FilterIndex = 0;
+      canfilterconfig.FilterID1 = 0x0000;
+      canfilterconfig.FilterID2 = 0xFFFF; // comment out if we don't need filter in the end
+      //canfilterconfig.FilterMaskIdHigh = 0x0000;
+      //canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
+      canfilterconfig.FilterType = FDCAN_FILTER_RANGE;
+      canfilterconfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+      //canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+      //canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+      //canfilterconfig.SlaveStartFilterBank = 14;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
 
-    HAL_CAN_ConfigFilter(&hcan2, &canfilterconfig);
-    HAL_CAN_Start(&hcan2);
-    HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_FDCAN_ConfigFilter(&hfdcan2, &canfilterconfig);
+    HAL_FDCAN_Start(&hfdcan2);
+    //HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_MSG_PENDING);
+
+    if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+    {
+      Error_Handler();
+    }
 
   /* USER CODE END 2 */
 
@@ -180,11 +187,12 @@ int main(void)
   {
 	  // Process Message if available
 	  if (CAN_flag){
-		if (steering_state != CALIBRATION){
-			CAN_Parse_MSG(&RxHeader, rxData);
-		}
+		//if (steering_state != CALIBRATION){
+			CAN_Parse_MSG(&RxHeader, RxData);
+		//}
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		CAN_flag = 0;
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -324,7 +332,7 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE END FDCAN2_Init 1 */
   hfdcan2.Instance = FDCAN2;
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+  hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
   hfdcan2.Init.AutoRetransmission = DISABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
@@ -952,6 +960,26 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+void HAL_FDCAN_RxFifo0Callback (FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs){
+	  if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
+	  {
+	    /* Retrieve Rx messages from RX FIFO0 */
+	    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+	    {
+	    Error_Handler();
+	    }
+
+	    /* Display LEDx */
+	    if ((RxHeader.Identifier == 0x321) && (RxHeader.IdType == FDCAN_STANDARD_ID) && (RxHeader.DataLength == FDCAN_DLC_BYTES_2))
+	    {
+	      LED_Display(RxData[0]);
+	      ubKeyNumber = RxData[0];
+	    }
+	  }
+	}
+
 
 /* USER CODE END 4 */
 
