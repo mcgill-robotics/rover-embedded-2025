@@ -4,6 +4,8 @@ import time
 import serial
 
 latencies = []
+values = 0
+errors = 0
 
 try:
     interface = serial.Serial("/dev/ttyACM1", 115200, timeout=1)
@@ -15,7 +17,7 @@ except serial.SerialException as e:
 time.sleep(1)
 
 try:
-    interface.write('{{"topic":"uart0","message":"ping"}}\n'.encode())
+    interface.write(f'{{"topic":"uart0","message":"{values}"}}\n'.encode())
     start_time = time.time()
 
     while True:
@@ -33,15 +35,20 @@ try:
         topic = message.get("topic")
         if topic == "uart0":
             value = message.get("message")
-            if value == "ping":
+            if value != values:
+                print(f"Error: Expected {values} but got {value} for {topic}")
+                errors += 1
+                values = value + 1
+            else:
+                print(f"Received {value} for {topic}")
                 end_time = time.time()
                 latency = end_time - start_time
                 latencies.append(latency)
                 print(f"Received ping, latency: {latency:.6f} seconds")
-                interface.write('{{"topic":"uart0","message":"ping"}}\n'.encode())
+                interface.write(f'{{"topic":"uart0","message":"{values}"}}\n'.encode())
                 start_time = time.time()
-                continue
-
+                values += 1
+                
 except KeyboardInterrupt:
     interface.close()
     if latencies:
