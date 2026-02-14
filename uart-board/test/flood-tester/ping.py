@@ -4,6 +4,7 @@ import time
 import serial
 
 pending_pings = {}
+latencies = []
 ping_id = 0
 
 try:
