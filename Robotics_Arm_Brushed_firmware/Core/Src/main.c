@@ -22,7 +22,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "CAN_...h" //need to separate processing and action?
+#include "CAN.processing.h"
+#include "motorControl.c"
 #include "encoder.h"
 #include "pid.h" // use arguments to pass the specific motor used?
 
