@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "CAN.processing.h"
+#include "CAN_processing.h"
 #include "motorControl.c"
 #include "encoder.h"
 #include "pid.h" // use arguments to pass the specific motor used?
@@ -65,7 +65,7 @@ PCD_HandleTypeDef hpcd_USB_FS;
 
 //for CAN
 FDCAN_RxHeaderTypeDef RxHeader; //header for receiving msgs
-uint8_t RxData[64]; //receiver data
+uint8_t RxData[64]; //receiver data for CANFD: 64 bits
 
 /* USER CODE END PV */
 
@@ -158,26 +158,22 @@ int main(void)
     FDCAN_FilterTypeDef canfilterconfig;
 
       canfilterconfig.IdType = FDCAN_STANDARD_ID;
-      //canfilterconfig.FilterBank = 14;  // anything between 0 to SlaveStartFilterBank for can1. can 2 opposite.
       canfilterconfig.FilterIndex = 0;
-      canfilterconfig.FilterID1 = 0x0000;
-      canfilterconfig.FilterID2 = 0xFFFF; // comment out if we don't need filter in the end
-      //canfilterconfig.FilterMaskIdHigh = 0x0000;
-      //canfilterconfig.FilterMaskIdLow = 0x0; // all filters may be 0000. Figure out later.
-      canfilterconfig.FilterType = FDCAN_FILTER_RANGE;
+      canfilterconfig.FilterID1 = 0x0000; // ID
+      canfilterconfig.FilterID2 = 0x0000; // ID filtered on this value; effectively allows all
+      canfilterconfig.FilterType = FDCAN_FILTER_MASK;
       canfilterconfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-      //canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-      //canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-      //canfilterconfig.SlaveStartFilterBank = 14;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
 
-    HAL_FDCAN_ConfigFilter(&hfdcan2, &canfilterconfig);
-    HAL_FDCAN_Start(&hfdcan2);
-    //HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_FDCAN_ConfigFilter(&hfdcan2, &canfilterconfig); // apply to CANFD
+
+    HAL_FDCAN_Start(&hfdcan2); // start the filter
+
 
     if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
     {
       Error_Handler();
     }
+
 
   /* USER CODE END 2 */
 
@@ -187,11 +183,14 @@ int main(void)
   {
 	  // Process Message if available
 	  if (CAN_flag){
+
 		//if (steering_state != CALIBRATION){
-			CAN_Parse_MSG(&RxHeader, RxData);
+		CAN_Parse_MSG(&RxHeader, RxData);
 		//}
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+		// led pin to check msg processing working
 		CAN_flag = 0;
+		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	  }
     /* USER CODE END WHILE */
 
@@ -963,20 +962,18 @@ static void MX_GPIO_Init(void)
 
 
 void HAL_FDCAN_RxFifo0Callback (FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs){
+		//check that RX FIFO 0 received a new message
 	  if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
 	  {
-	    /* Retrieve Rx messages from RX FIFO0 */
+	    /* Retrieve Rx messages from RX FIFO0, stores into RxHeader and RxData */
 	    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
 	    {
 	    Error_Handler();
 	    }
 
-	    /* Display LEDx */
-	    if ((RxHeader.Identifier == 0x321) && (RxHeader.IdType == FDCAN_STANDARD_ID) && (RxHeader.DataLength == FDCAN_DLC_BYTES_2))
-	    {
-	      LED_Display(RxData[0]);
-	      ubKeyNumber = RxData[0];
-	    }
+	    //upon successful interrupt, the CAN flag is set high for main loop to catch
+	    CAN_flag = 1;
+
 	  }
 	}
 

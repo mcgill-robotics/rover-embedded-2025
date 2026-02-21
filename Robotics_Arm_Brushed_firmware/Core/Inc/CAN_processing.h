@@ -8,7 +8,7 @@
 // Defines
 #ifndef CAN_processing_H
 #define CAN_processing_H
-#endif // CAN_processing_H
+
 
 #ifndef M_PI
 # define M_PI 3.14159265358979323846
@@ -20,10 +20,10 @@ extern int s_previousDirection;
 
 
 extern int STEERING_ID;
-extern CAN_HandleTypeDef hcan2;
+extern FDCAN_HandleTypeDef hfdcan2;
 
 
-// Enumaeration classes for different possible CAN Message casess
+// Enumeration classes for different possible CAN Message cases
 typedef enum {
     MASTER				= 0,
     SLAVE				= 1
@@ -93,7 +93,7 @@ typedef struct {
 
 
 //CAN Interaction prototypes
-void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData);
+void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData);
 void Process_Multiple_ESC_Command (ParsedCANID *parsedMessageID, uint8_t *rxData);
 void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData);
 void sendCANResponse(ParsedCANID *CANMessageID, float information);
@@ -113,3 +113,5 @@ float speedCheck (float targetSpeed);
 float clippingCheck(float currentSpeedSetpoint);
 int16_t extract_multiple_speeds(const uint8_t *rxData);
 uint16_t computeRampTimeMs(float currentSpeedRpm, float targetSpeedRpm, bool isStartup);
+
+#endif // CAN_processing_H

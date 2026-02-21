@@ -4,7 +4,7 @@
 #include "encoder.h"
 #include "CAN_processing.h"
 #include "pid.h"
-#include "calibration.h"
+//#include "calibration.h"
 
 
 
@@ -50,13 +50,15 @@ void reset_debounce_buffer(){
 	debounce_buffer = 0;
 }
 
+/*
+
 // scan limit switch and return if considered pressed
 int scan_switch(){
 	int current_switch_reading = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
 	debounce_buffer = (debounce_buffer<<1) | current_switch_reading;
 	return debounce_buffer == 0xFFFFFFFF;
 }
-
+*/
 
 int try_calibrate_encoder(){
 	// return 1 if calibrated

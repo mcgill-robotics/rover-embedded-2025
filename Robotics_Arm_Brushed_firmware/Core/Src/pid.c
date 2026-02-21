@@ -7,14 +7,17 @@
 
 #include "main.h"
 #include "encoder.h"
-#include "motor.h"
+//#include "motor.h"
 #include "math.h"
 #include "pid.h"
 #include <stdatomic.h>
 #include <stdlib.h>
-#include "TestList.h"
-#include "Calibration.h"
+//#include "TestList.h"
+//#include "Calibration.h"
 // PID parameters
+
+
+
 
 
 int angleError = 0;
@@ -107,7 +110,8 @@ int updatePIDOverrideGoal(int override){
 // use PID to move away from limit switch a little bit after switch is triggered
 void leave_limit_switch(){
 	if(updatePIDOverrideGoal(angle_to_count(170))){
-		steering_state = PID;
+
+		//steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
 		// prevent continuously moving to the limit
 		if(atomic_load(&goalAngle) > angle_to_count(170)){
 			stop_motor();

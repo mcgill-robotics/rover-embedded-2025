@@ -10,7 +10,7 @@
 //#include "uart_debugging.h"
 #include <stdbool.h>
 #include "pid.h"
-#include "motor.h"
+//#include "motor.h"
 #include "encoder.h"
 
 
@@ -56,7 +56,7 @@ int get_CAN_device_ID (uint16_t CAN_ID) {
 /*
  * This function includes the main control flow for CAN commands.
  */
-void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
+void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef*rxHeader, uint8_t *rxData){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	uart_debug_print("Parsing the ID...\r\n");
@@ -65,15 +65,16 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	float information = SingleExtractFloatFromCAN(rxData);
 
 	ParsedCANID CANMessage; //initialize a struct for the received message
-	uint16_t msg_ID = rxHeader->StdId & 0x07ff;//rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
 
-	// First check to see who is transmitting --> ESCS cannot command other ECSs
+	uint16_t msg_ID = rxHeader->Identifier & 0x07ff ; // We only care about the first 11 bits here
+
+	// First check to see who is transmitting --> slaves cannot command other slaves
 	CANMessage.messageSender = (Transmitter) get_CAN_transmitter(msg_ID);
 	if (CANMessage.messageSender == SLAVE){
 		return;
 	}
 
-	//Check to make sure the command is directed toward the ESC
+	//Check to make sure the command is directed toward the motor
 	CANMessage.motorType = (MotorType) get_CAN_motor_type(msg_ID);
 	if (CANMessage.motorType == DRIVE_MOTOR){
 		return;
@@ -99,6 +100,8 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 	}
 
 	// Determine if the command effects a single, or mulitple motors, and call the appropriate helper functions
+
+	/*
 	CANMessage.motorConfig = (MotorConfig) get_CAN_motor_mov_type(msg_ID);
 	if (CANMessage.motorConfig == SINGLE_MOTOR){
 		CANMessage.motorID = (MotorID) get_CAN_device_ID(msg_ID);
@@ -125,6 +128,8 @@ void CAN_Parse_MSG (CAN_RxHeaderTypeDef *rxHeader, uint8_t *rxData){
 		Process_Multiple_Steering_Motor_Command(&CANMessage, rxData);
 	}
 
+	*/
+
 }
 
 
@@ -141,7 +146,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				stop_motor();
+				//stop_motor();
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
@@ -155,7 +160,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 //				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
 //				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				ControlSingleMotor(information);
+				// ControlSingleMotor(information);
 				break;
 		default:
 			break;
@@ -217,7 +222,7 @@ void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			 uart_debug_print("Stop this motor\r\n");
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
-			stop_motor();
+			// stop_motor();
 			break;
 	default:
 		break;
@@ -241,8 +246,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 	 */
 
-	CAN_TxHeaderTypeDef TxHeader;
-	uint32_t TxMailbox;
+	FDCAN_TxHeaderTypeDef TxHeader;
     uint16_t txID = 0;
     uint8_t txData[8];
 
@@ -254,7 +258,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
     // Configure the ID of the message according to what was received
     txID |= (1 & 0x01) << SENDER_DEVICE_SHIFT;
-    // This caluevis now always 1 since the esc is sending data.
+    // This value is now always 1 since the esc is sending data.
     txID |= (CANMessageID->motorType & 0x01) << NDRIVE_STEERING_SHIFT;
     txID |= (CANMessageID->motorConfig & 0x01) << NMULTI_SINGLE_SHIFT;
     txID |= (CANMessageID->commandType & 0x01) << NACTION_READ_ID_DEVICE_SHIFT;
@@ -262,7 +266,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
     txID |= (CANMessageID->motorID & 0x0f);
 
     //TONY: I want the txID to be exactly what I specified in main.c
-    // Move the information into the data paylaod
+    // Move the information into the data payload
     memcpy(txData, &information, sizeof(float)); // data[0] --> data[3] now stores float
 
 
@@ -272,15 +276,15 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
     //format other message peripherals
 
-	 TxHeader.DLC = 8;
-	 TxHeader.ExtId = 0;
-	 TxHeader.IDE = CAN_ID_STD;
-	 TxHeader.RTR = CAN_RTR_DATA;
-	 TxHeader.StdId = txID;
+    //reconfigured to FDCAN protocols
+	 TxHeader.DataLength = 8;
+	 TxHeader.IdType = FDCAN_STANDARD_ID;
+	 TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+	 TxHeader.Identifier = txID;
 
 	// Send the response
 
-	if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, txData, &TxMailbox) != HAL_OK) {
+	if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader, txData) != HAL_OK) {
 		Error_Handler();
 	}
 }
@@ -302,7 +306,12 @@ float SingleExtractFloatFromCAN(uint8_t *data) {
 
 
 int16_t extract_multiple_speeds(const uint8_t *rxData){
-    uint16_t offset = (STEERING_ID-4) * 2;
-    int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
-    return value;
+
+	//removed for now for testing
+
+    //uint16_t offset = (STEERING_ID-4) * 2;
+    //int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
+    //return value;
+
+	return 0;
 }

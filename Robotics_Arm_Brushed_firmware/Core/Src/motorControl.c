@@ -4,12 +4,12 @@
  *
  */
 
+/*
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "CAN_processing.h"
 #include "pid.h"
-#include "motor.h"
 #include "encoder.h"
 //#include "uart_debugging.h"
 
@@ -43,3 +43,4 @@ static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
 
 
 
+*/
