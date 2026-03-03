@@ -1,4 +1,7 @@
 #include <Arduino.h>
+#include <INA230.cpp>
+#include <INA230.hpp>
+
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
