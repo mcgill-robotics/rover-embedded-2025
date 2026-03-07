@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <INA230.cpp>
-#include <INA230.hpp>
+#include "INA230.cpp"
+#include "INA230.hpp"
 
 
 #include <Adafruit_GFX.h>
@@ -12,6 +12,7 @@
 #define TFT_RST   8
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
+INA230 value_d = INA230();
 
 void setup() {
   tft.begin();
@@ -31,6 +32,12 @@ void setup() {
   tft.drawTriangle(10, 230, 60, 150, 110, 230, ILI9341_MAGENTA);
   tft.drawLine(0, 0, 319, 239, tft.color565(255, 165, 0));
   tft.drawPixel(160, 120, ILI9341_WHITE);
+  value_d.readCurrent(0x40);
+  value_d.readBusVoltage(0x40);
+  tft.println(value_d.readCurrent(0x40));
+  tft.println(value_d.readBusVoltage(0x40));
+
+  
 }
 
 void loop() {
