@@ -23,8 +23,8 @@ const uint8_t RASPBERRY_PI_ADDRESS = 0x41;
 #define REG_CURRENT      0x04
 #define REG_CALIBRATION  0x05
 
-const double RSHUNT = 0.002; // in Ohms 
-const double MAX_EXPECTED_CURRENT = 25; // in Amps (Provided by James)  
+const double RSHUNT = 0.01; // in Ohms used to be value 0.002
+const double MAX_EXPECTED_CURRENT = 75; // in Amps (25 A Provided by James)  
 
 const double CURRENT_LSB = MAX_EXPECTED_CURRENT/(pow(2, 15)); 
 const double BUS_VOLTAGE_LSB = 0.00125;     // defined in datasheet, section 6.5

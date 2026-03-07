@@ -36,20 +36,61 @@ void loop() {
   Serial.println();
 
   // Current Line
-  Serial.print("Current: \t|");
-  Serial.printf(" %-15s | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A ",
-    "Current",
-    ina230.readCurrent(ROCKER_LEFT_ADDRESS),
-    ina230.readCurrent(ROCKER_RIGHT_ADDRESS),
-    ina230.readCurrent(ARM_ADDRESS),
-    ina230.readCurrent(ANTENNA_ADDRESS),
-    ina230.readCurrent(JETSON_ADDRESS),
-    ina230.readCurrent(RASPBERRY_PI_ADDRESS)
+  //Serial.print("Current: \t|");
+  //Serial.printf(" %-15s | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A | %-10.6f A ",
+  
+    //ina230.readCurrent(ROCKER_LEFT_ADDRESS),
+    //ina230.readCurrent(ROCKER_RIGHT_ADDRESS),
+    //ina230.readCurrent(ARM_ADDRESS),
+    //ina230.readCurrent(ANTENNA_ADDRESS),
+    //ina230.readCurrent(JETSON_ADDRESS),
+    //ina230.readCurrent(RASPBERRY_PI_ADDRESS)
+  //);
+  //Serial.println("--------------------------------------------");
+ 
+
+
+
+
+  Serial.print(
+  
+    ina230.readCurrent(JETSON_ADDRESS)
+
   );
-  Serial.println("--------------------------------------------");
- }
+  Serial.println("--------------------------------------------"); 
 
+  
+  Serial.print(
+  
+    ina230.readCurrent(ROCKER_LEFT_ADDRESS)
 
+  );
+  Serial.println("--------------------------------------------"); 
+  Serial.print(
+  
+    ina230.readCurrent(ARM_ADDRESS)
+
+  );
+  Serial.println("--------------------------------------------"); 
+  Serial.print(
+  
+    ina230.readCurrent(ANTENNA_ADDRESS)
+
+  );
+  Serial.println("--------------------------------------------"); 
+  Serial.print(
+  
+    ina230.readCurrent(ROCKER_RIGHT_ADDRESS)
+
+  );
+  Serial.println("--------------------------------------------"); 
+  Serial.print(
+  
+    ina230.readCurrent(RASPBERRY_PI_ADDRESS)
+
+  );
+  
+}
 //CODE BELOW IS TO SCAN FOR I2C DEVICES
 
 // #include <Bonezegei_I2CScan.h>
