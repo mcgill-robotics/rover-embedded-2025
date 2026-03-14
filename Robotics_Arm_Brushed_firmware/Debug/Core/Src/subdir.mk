@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/CAN_processing.c \
+../Core/Src/calibration.c \
 ../Core/Src/encoder.c \
 ../Core/Src/main.c \
 ../Core/Src/motorControl.c \
@@ -14,10 +15,12 @@ C_SRCS += \
 ../Core/Src/stm32g4xx_it.c \
 ../Core/Src/syscalls.c \
 ../Core/Src/sysmem.c \
-../Core/Src/system_stm32g4xx.c 
+../Core/Src/system_stm32g4xx.c \
+../Core/Src/systick.c 
 
 OBJS += \
 ./Core/Src/CAN_processing.o \
+./Core/Src/calibration.o \
 ./Core/Src/encoder.o \
 ./Core/Src/main.o \
 ./Core/Src/motorControl.o \
@@ -26,10 +29,12 @@ OBJS += \
 ./Core/Src/stm32g4xx_it.o \
 ./Core/Src/syscalls.o \
 ./Core/Src/sysmem.o \
-./Core/Src/system_stm32g4xx.o 
+./Core/Src/system_stm32g4xx.o \
+./Core/Src/systick.o 
 
 C_DEPS += \
 ./Core/Src/CAN_processing.d \
+./Core/Src/calibration.d \
 ./Core/Src/encoder.d \
 ./Core/Src/main.d \
 ./Core/Src/motorControl.d \
@@ -38,7 +43,8 @@ C_DEPS += \
 ./Core/Src/stm32g4xx_it.d \
 ./Core/Src/syscalls.d \
 ./Core/Src/sysmem.d \
-./Core/Src/system_stm32g4xx.d 
+./Core/Src/system_stm32g4xx.d \
+./Core/Src/systick.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -48,7 +54,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/CAN_processing.cyclo ./Core/Src/CAN_processing.d ./Core/Src/CAN_processing.o ./Core/Src/CAN_processing.su ./Core/Src/encoder.cyclo ./Core/Src/encoder.d ./Core/Src/encoder.o ./Core/Src/encoder.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/motorControl.cyclo ./Core/Src/motorControl.d ./Core/Src/motorControl.o ./Core/Src/motorControl.su ./Core/Src/pid.cyclo ./Core/Src/pid.d ./Core/Src/pid.o ./Core/Src/pid.su ./Core/Src/stm32g4xx_hal_msp.cyclo ./Core/Src/stm32g4xx_hal_msp.d ./Core/Src/stm32g4xx_hal_msp.o ./Core/Src/stm32g4xx_hal_msp.su ./Core/Src/stm32g4xx_it.cyclo ./Core/Src/stm32g4xx_it.d ./Core/Src/stm32g4xx_it.o ./Core/Src/stm32g4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g4xx.cyclo ./Core/Src/system_stm32g4xx.d ./Core/Src/system_stm32g4xx.o ./Core/Src/system_stm32g4xx.su
+	-$(RM) ./Core/Src/CAN_processing.cyclo ./Core/Src/CAN_processing.d ./Core/Src/CAN_processing.o ./Core/Src/CAN_processing.su ./Core/Src/calibration.cyclo ./Core/Src/calibration.d ./Core/Src/calibration.o ./Core/Src/calibration.su ./Core/Src/encoder.cyclo ./Core/Src/encoder.d ./Core/Src/encoder.o ./Core/Src/encoder.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/motorControl.cyclo ./Core/Src/motorControl.d ./Core/Src/motorControl.o ./Core/Src/motorControl.su ./Core/Src/pid.cyclo ./Core/Src/pid.d ./Core/Src/pid.o ./Core/Src/pid.su ./Core/Src/stm32g4xx_hal_msp.cyclo ./Core/Src/stm32g4xx_hal_msp.d ./Core/Src/stm32g4xx_hal_msp.o ./Core/Src/stm32g4xx_hal_msp.su ./Core/Src/stm32g4xx_it.cyclo ./Core/Src/stm32g4xx_it.d ./Core/Src/stm32g4xx_it.o ./Core/Src/stm32g4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g4xx.cyclo ./Core/Src/system_stm32g4xx.d ./Core/Src/system_stm32g4xx.o ./Core/Src/system_stm32g4xx.su ./Core/Src/systick.cyclo ./Core/Src/systick.d ./Core/Src/systick.o ./Core/Src/systick.su
 
 .PHONY: clean-Core-2f-Src
 

@@ -137,15 +137,32 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  //initialize motor states for all 3 motors
+  //initialize motors for all 3 motors
   Motor gripper_motor;
   Motor pitch_motor;
   Motor roll_motor;
-  motor_struct_init(&gripper_motor, TIM20, TIM3, 0);
-  motor_struct_init(&roll_motor, TIM8, TIM4, 2);
-  motor_struct_init(&pitch_motor, TIM1, TIM5, 1);
 
-  //setup for encoder and PWM
+  Motor_Encoding_Struct gripper_encoding;
+  Motor_Encoding_Struct pitch_encoding;
+  Motor_Encoding_Struct roll_encoding;
+
+  /*
+   * (int encoder_max_counts, int lm_sw_reset_counts)
+   * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
+   * - limit switch reset counts: depends how angles defined -- corresponds to 180
+   */
+  motor_encoding_struct_init(&gripper_encoding, 33024, 50000);
+  motor_encoding_struct_init(&pitch_encoding, 33024, 50000);
+  motor_encoding_struct_init(&roll_encoding, 33024, 50000);
+
+  /* (Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MoMotorID motorID, GPIO_TypeDef* DIR_port, uint16_t DIR_pin)
+   * - motorID: as defined by the motorID enum.
+   */
+  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin);
+  motor_struct_init(&roll_motor, TIM8, TIM4, &pitch_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, &roll_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin);
+
+
   //set up Encoders
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL); // roll encoder
@@ -159,7 +176,7 @@ int main(void)
 
   // Initialize motor state
 
-  //setting encoder positions (?)
+  //setting encoder positions
   //change depending on gear ratio of the motor
   /*
    * offset such that can go 180 right and 180 left without getting to 0 counts(- values)
@@ -173,9 +190,16 @@ int main(void)
   set_motor_speed_raw(&roll_motor, 0);
 
   //change to set directions for all 3 motors
-  set_motor_direction(1);
+  set_motor_direction(&gripper_motor, 1);
+  set_motor_direction(&pitch_motor, 1);
+  set_motor_direction(&roll_motor, 1);
 
-  set_counts(41744);
+
+  set_counts(&gripper_encoding, 41744);
+  set_counts(&pitch_encoding, 41744);
+  set_counts(&roll_encoding, 41744);
+
+
   setPIDGoalA(90);
 
 

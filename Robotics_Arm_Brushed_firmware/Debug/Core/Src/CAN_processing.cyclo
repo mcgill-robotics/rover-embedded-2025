@@ -5,9 +5,9 @@
 ../Core/Src/CAN_processing.c:49:9:get_CAN_SPEC	1
 ../Core/Src/CAN_processing.c:52:5:get_CAN_device_ID	1
 ../Core/Src/CAN_processing.c:59:6:CAN_Parse_MSG	4
-../Core/Src/CAN_processing.c:136:6:Process_Single_Steering_Motor_Command	4
-../Core/Src/CAN_processing.c:201:6:Process_Multiple_Steering_Motor_Command	3
-../Core/Src/CAN_processing.c:235:6:ControlSingleMotor	1
-../Core/Src/CAN_processing.c:240:6:sendCANResponse	3
-../Core/Src/CAN_processing.c:293:7:SingleExtractFloatFromCAN	1
-../Core/Src/CAN_processing.c:308:9:extract_multiple_speeds	1
+../Core/Src/CAN_processing.c:136:6:Process_Single_Steering_Motor_Command	3
+../Core/Src/CAN_processing.c:202:6:Process_Multiple_Steering_Motor_Command	3
+../Core/Src/CAN_processing.c:236:6:ControlSingleMotor	1
+../Core/Src/CAN_processing.c:241:6:sendCANResponse	3
+../Core/Src/CAN_processing.c:294:7:SingleExtractFloatFromCAN	1
+../Core/Src/CAN_processing.c:309:9:extract_multiple_speeds	1

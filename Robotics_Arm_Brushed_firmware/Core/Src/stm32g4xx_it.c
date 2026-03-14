@@ -51,13 +51,14 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#include "systick.h"
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
 
 /* USER CODE BEGIN EV */
-
+extern FDCAN_HandleTypeDef hfdcan2;
+extern TIM_HandleTypeDef htim2;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -188,6 +189,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
+  SysTickFunction();
   /* USER CODE END SysTick_IRQn 1 */
 }
 

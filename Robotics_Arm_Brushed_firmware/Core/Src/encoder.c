@@ -4,6 +4,7 @@
 #include "encoder.h"
 #include "CAN_processing.h"
 #include "pid.h"
+#include "motorControl.h"
 //#include "calibration.h"
 
 
@@ -13,42 +14,43 @@
 
 
 int counts;
-int need_debounce = 0;
-int debounce_buffer = 0; // 32 bits buffer to fill with switch state
+//int need_debounce = 0;
+//int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
-int is_debouncing(){
-	return need_debounce;
-}
 
-void set_debounce(int debounce_state){
-	need_debounce = debounce_state;
-}
+//int is_debouncing(){
+//	return need_debounce;
+//}
 
-void set_counts(int n){
+//void set_debounce(int debounce_state){
+//	need_debounce = debounce_state;
+//}
+
+void set_counts(Motor_Encoding_Struct * encoding, int n){
 //	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
-	counts = n;
+	encoding->curr_counts = n;
 }
 
 int get_counts(){
 	return counts;
 }
 
-float count_to_angle(int n){
-	int no_offset = n-(LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);
+float count_to_angle(Motor_Encoding_Struct * encoding, int n){
+	int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
 //	int new_n = abs(no_offset%MAX_COUNTS);
-	float angle=((float)no_offset/(float)MAX_COUNTS)*360;
+	float angle=((float)no_offset/(float) encoding->ENCODER_MAX_COUNTS)*360;
 	return angle;
 }
 
-int angle_to_count(double n){
+int angle_to_count(Motor_Encoding_Struct * encoding, double n){
 	float new_n = fabs(fmod(n,360));
-	int offset = (LIMIT_SWITCH_RESET_COUNTS-MAX_COUNTS/2);
-	return (int) ((new_n/(360))*MAX_COUNTS)+offset;
+	int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
+	return (int) ((new_n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
 }
 
-void reset_debounce_buffer(){
-	debounce_buffer = 0;
-}
+//void reset_debounce_buffer(){
+//	debounce_buffer = 0;
+//}
 
 /*
 
@@ -60,6 +62,7 @@ int scan_switch(){
 }
 */
 
+/*
 int try_calibrate_encoder(){
 	// return 1 if calibrated
 	if (scan_switch()){
@@ -77,3 +80,13 @@ int try_calibrate_encoder(){
 //		steering_state = PID;
 //	}
 }
+
+*/
+
+
+
+void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts, int lm_sw_reset_counts){
+	encoding->ENCODER_MAX_COUNTS = encoder_max_counts;
+	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
+}
+

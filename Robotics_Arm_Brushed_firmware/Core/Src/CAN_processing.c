@@ -173,8 +173,9 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 		switch(CANMessageID->readSpec){
 
 		case(READ_POSITION):
-				float currentPosition = count_to_angle(get_counts());
-				sendCANResponse(CANMessageID, currentPosition);
+				//TODO: Current position modify to accomodate 3 diff motors
+				//float currentPosition = count_to_angle(get_counts());
+				//sendCANResponse(CANMessageID, currentPosition);
 				break;
 		case(VOLTAGE):
 				break;

@@ -32,6 +32,6 @@ void CalibrateMotor() {
 // set back to zero in the limit switch interrupt
 
 void set_calibration_motor_movement(){
-	set_motor_direction(1);
-	set_motor_speed_percent(80);
+	//set_motor_direction(1);
+	//set_motor_speed_percent(80); **TODO: MODIFY TO SET CORRESPONDING MOTOR
 }

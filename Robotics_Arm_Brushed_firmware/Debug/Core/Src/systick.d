@@ -1,4 +1,4 @@
-Core/Src/encoder.o: ../Core/Src/encoder.c ../Core/Inc/main.h \
+Core/Src/systick.o: ../Core/Src/systick.c ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../Core/Inc/stm32g4xx_hal_conf.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -35,9 +35,8 @@ Core/Src/encoder.o: ../Core/Src/encoder.c ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../Core/Inc/encoder.h ../Core/Inc/CAN_processing.h ../Core/Inc/main.h \
- ../Core/Inc/pid.h ../Core/Inc/motorControl.h \
- ../Core/Inc/CAN_processing.h ../Core/Inc/encoder.h
+ ../Core/Inc/pid.h ../Core/Inc/encoder.h ../Core/Inc/calibration.h \
+ ../Core/Inc/main.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -75,10 +74,7 @@ Core/Src/encoder.o: ../Core/Src/encoder.c ../Core/Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
-../Core/Inc/encoder.h:
-../Core/Inc/CAN_processing.h:
-../Core/Inc/main.h:
 ../Core/Inc/pid.h:
-../Core/Inc/motorControl.h:
-../Core/Inc/CAN_processing.h:
 ../Core/Inc/encoder.h:
+../Core/Inc/calibration.h:
+../Core/Inc/main.h:

@@ -31,17 +31,21 @@ int power_limit = 4499;
 //int ROLL_ID = ROLL;
 
 
-void motor_struct_init(Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MotorID motorID){
+void motor_struct_init(Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder,
+		Motor_Encoding_Struct * encoding, MotorID motorID,  GPIO_TypeDef* DIR_port, uint16_t DIR_pin){
 	motor->motorID = motorID;
 	motor->ENCODER_type = encoder;
+	motor->Motor_Encoding_Struct = encoding;
 	motor->PWM_type = pwm;
+	motor->DIR_port = DIR_port;
+	motor->DIR_pin = DIR_pin;
 }
 
 
 void stop_motor(Motor * motor){
 	set_motor_speed_raw(motor, 0);
 	int counts = get_counts();
-	setPIDGoalA(count_to_angle(counts));
+	setPIDGoalA(count_to_angle(motor->Motor_Encoding_Struct, counts));
 }
 
 void set_motor_speed_percent(Motor * motor, float n){
@@ -57,12 +61,12 @@ void set_motor_speed_raw(Motor * motor, int n){
 }
 
 
-void set_motor_direction(int n){
+void set_motor_direction(Motor * motor, int n){
 	if (n) {
-		//HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, GPIO_PIN_RESET);
 	}
 	else {
-		//HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, GPIO_PIN_SET);
 	}
 	direction = n;
 }

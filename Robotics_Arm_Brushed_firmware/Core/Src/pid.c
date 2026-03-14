@@ -7,7 +7,7 @@
 
 #include "main.h"
 #include "encoder.h"
-//#include "motor.h"
+#include "motorControl.h"
 #include "math.h"
 #include "pid.h"
 #include <stdatomic.h>
@@ -55,6 +55,10 @@ int updatePIDImpl(int goal) {
 	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
 
+
+
+	/* TODO
+
 	currentGoal = goal;
 	//return 1 when goal reached
 	angleError = goal - get_counts();
@@ -94,6 +98,9 @@ int updatePIDImpl(int goal) {
 //		}
 //	}
 	set_motor_speed_raw(angleCorrection);
+
+
+	*/
 	return 0;
 }
 
@@ -109,6 +116,7 @@ int updatePIDOverrideGoal(int override){
 
 // use PID to move away from limit switch a little bit after switch is triggered
 void leave_limit_switch(){
+	/* TODO
 	if(updatePIDOverrideGoal(angle_to_count(170))){
 
 		//steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
@@ -117,10 +125,17 @@ void leave_limit_switch(){
 			stop_motor();
 		}
 	}
+	*/
+
 }
 
 void setPIDGoalA(double angle) {
+	/* TODO
 	atomic_store(&goalAngle, angle_to_count(angle));
+	*/
 }
+
+
+
 
 #endif
