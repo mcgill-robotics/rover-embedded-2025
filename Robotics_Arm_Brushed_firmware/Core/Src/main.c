@@ -23,7 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "CAN_processing.h"
-#include "motorControl.c"
+#include "motorControl.h"
 #include "encoder.h"
 #include "pid.h" // use arguments to pass the specific motor used?
 
@@ -137,20 +137,50 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  //setup for encoder and pwm (???)
-
-
   //initialize motor states for all 3 motors
-  /* TIM2->CNT = 41744;
-   *
-   * for all 3 motors:
-   * set_motor_speed_raw(0);
-   * set_motor_direction(1);
-   * set_counts(41744);
-   * setPIDGoalA(90);
-   *
+  Motor gripper_motor;
+  Motor pitch_motor;
+  Motor roll_motor;
+  motor_struct_init(&gripper_motor, TIM20, TIM3, 0);
+  motor_struct_init(&roll_motor, TIM8, TIM4, 2);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, 1);
+
+  //setup for encoder and PWM
+  //set up Encoders
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
+  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL); // roll encoder
+  HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL); // pitch encoder
+  	  //TIM_CHANNEL_ALL: Enable both channel needed for encoder
+
+  //Setup Motor PWM
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
+  HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1); // roll PWM
+  HAL_TIMEx_PWMN_Start(&htim20, TIM_CHANNEL_1); // gripper PWM
+
+  // Initialize motor state
+
+  //setting encoder positions (?)
+  //change depending on gear ratio of the motor
+  /*
+   * offset such that can go 180 right and 180 left without getting to 0 counts(- values)
+   */
+  gripper_motor.ENCODER_type->CNT = 41744; //gripper
+  roll_motor.ENCODER_type->CNT = 41744; //roll
+  pitch_motor.ENCODER_type->CNT = 41744; //pitch
+
+  set_motor_speed_raw(&gripper_motor, 0);
+  set_motor_speed_raw(&pitch_motor, 0);
+  set_motor_speed_raw(&roll_motor, 0);
+
+  //change to set directions for all 3 motors
+  set_motor_direction(1);
+
+  set_counts(41744);
+  setPIDGoalA(90);
+
+
+  /*
    * CalibrateMotor(); // Calibrate the motor (see Calibration.c).
-   *
    */
 
 
@@ -222,10 +252,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 12;
+  RCC_OscInitStruct.PLL.PLLN = 18;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV4;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV6;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -235,12 +265,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -373,7 +403,7 @@ static void MX_I2C3_Init(void)
 
   /* USER CODE END I2C3_Init 1 */
   hi2c3.Instance = I2C3;
-  hi2c3.Init.Timing = 0x00503D58;
+  hi2c3.Init.Timing = 0x10C18DCC;
   hi2c3.Init.OwnAddress1 = 0;
   hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;

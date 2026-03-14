@@ -4,43 +4,65 @@
  *
  */
 
-/*
+
 #include <stdint.h>
 #include <stdbool.h>
+
 
 #include "CAN_processing.h"
 #include "pid.h"
 #include "encoder.h"
+#include "motorControl.h"
+#include "main.h"
+
 //#include "uart_debugging.h"
 
 
-//Ramp up "torque" parameters
-#define RAMP_MIN_MS_RUN      100   // small tweaks while already running
-#define RAMP_MIN_MS_STARTUP  200   // zero → set-point, or after stop
-
-//Startup Watchdog parameters
-#define START_WD_WINDOW_MS   5000   // length of rolling window
-#define START_WD_THRESHOLD   3     // # kicks that trigger a fault
 
 
-// Variable declarations
-static float g_lastCommandedSpeed = 0; // Previous speed setpoint given to the esc
-int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backward
-int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands
-const float SPEED_ZERO_THR = 50.0f; // Threshold to consider "almost zero" / unreliable speed feedback point
-const float MAX_SPEED_THR = 3200.0f;
-const int WAIT_AFTER_STOP = 250; // amount in ms motor will wait after it has issued a stopMotor command
-const int SAFE_STOP_SPEED_THRESHOLD = 400;
+int direction = 1;
+int power_limit = 4499;
 
-//Motor parameters --> Get these from the profiled motor!!
-static float g_maxTorque   = 0.30f;    // [N·m]  conservative value
-const float g_startupTorque = 0.15f;   // typical open-loop pull-in
-static float g_inertia     = 0.00001242f; // [kg·m^2]
-static float g_speedThresh = 50.0f;    // threshold below which we treat speed as zero
+// Change based on what motor is being controlled!
+//int STEERING_ID = RF_STEER;
 
-static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
+//int GRIPPER_ID = GRIPPER;
+//int PITCH_ID = PITCH;
+//int ROLL_ID = ROLL;
 
 
+void motor_struct_init(Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MotorID motorID){
+	motor->motorID = motorID;
+	motor->ENCODER_type = encoder;
+	motor->PWM_type = pwm;
+}
 
 
-*/
+void stop_motor(Motor * motor){
+	set_motor_speed_raw(motor, 0);
+	int counts = get_counts();
+	setPIDGoalA(count_to_angle(counts));
+}
+
+void set_motor_speed_percent(Motor * motor, float n){
+	set_motor_speed_raw(motor, power_limit*(n/100.0f));
+}
+
+void set_motor_speed_raw(Motor * motor, int n){
+	n = abs(n);
+	if (n > power_limit){
+		n = power_limit;
+	}
+	motor->PWM_type->CCR1 = n;
+}
+
+
+void set_motor_direction(int n){
+	if (n) {
+		//HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		//HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
+	}
+	direction = n;
+}

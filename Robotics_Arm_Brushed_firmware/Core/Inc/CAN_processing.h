@@ -63,14 +63,9 @@ typedef enum {
 } ReadSpec;
 
 typedef enum {
-	RF_DRIVE = 0,
-	LF_DRIVE = 1,
-	LB_DRIVE = 2,
-	RB_DRIVE = 3,
-	RF_STEER = 4,
-	RB_STEER = 5,
-	LB_STEER = 6,
-	LF_STEER = 7
+	GRIPPER = 0,
+	PITCH = 1,
+	ROLL = 2
 } MotorID;
 
 // Struct for a CAN message ID
