@@ -1,0 +1,9 @@
+[project]
+name = "esc-can"
+version = "0.1.0"
+description = "CAN FD protocol helpers for the B-G431B-ESC1"
+requires-python = ">=3.10"
+dependencies = ["python-can>=4.0", "pyserial>=3.5"]
+
+[tool.setuptools.packages.find]
+where = ["."]
