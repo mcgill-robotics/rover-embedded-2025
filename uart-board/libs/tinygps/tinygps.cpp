@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include "tinygps.hpp"
+#include "tinygps.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -506,4 +507,56 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, in
 
    pElt->next = *ppelt;
    *ppelt = pElt;
+}
+
+extern "C" {
+
+// C STUFF
+// Returns a TinyGPSPlus class as void pointer
+void *init_gps() { return new TinyGPSPlus(); }
+// Encode one character at a time
+bool encode(void *gps, char c) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->encode(c);
+}
+// TinyGPSAltitude
+double alt_meters(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->altitude.meters();
+}
+double alt_feet(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->altitude.feet();
+}
+// TinyGPSSpeed
+double mph(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->speed.mph();
+}
+
+}
+double mps(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->speed.mps();
+}
+double kmph(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->speed.kmph();
+}
+// TinyGPSLocation
+const struct RawDegrees rawLat(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->location.rawLat();
+}
+const struct RawDegrees rawLng(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->location.rawLng();
+}
+double lat(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->location.lat();
+}
+double lng(void *gps) {
+  TinyGPSPlus *g = (TinyGPSPlus*)gps;
+  return g->location.lng();
 }

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <inttypes.h>
 #include <limits.h>
 #include "stm32g4xx_hal.h"
+#include "tinygps.h"
 
 #define _GPS_VERSION "1.1.0" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
@@ -48,16 +49,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
-
-struct RawDegrees
-{
-   uint16_t deg;
-   uint32_t billionths;
-   bool negative;
-public:
-   RawDegrees() : deg(0), billionths(0), negative(false)
-   {}
-};
 
 struct TinyGPSLocation
 {
