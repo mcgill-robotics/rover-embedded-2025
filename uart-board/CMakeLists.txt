@@ -41,6 +41,9 @@ add_subdirectory(libs/tinyusb/src)
 
 add_subdirectory(libs/RosJamCDC/src)
 
+add_subdirectory(libs/tinygps)
+tiny_gps_add(${CMAKE_PROJECT_NAME})
+
 tinyusb_target_add(${CMAKE_PROJECT_NAME})
 rosjam_cdc_add(${CMAKE_PROJECT_NAME})
 
