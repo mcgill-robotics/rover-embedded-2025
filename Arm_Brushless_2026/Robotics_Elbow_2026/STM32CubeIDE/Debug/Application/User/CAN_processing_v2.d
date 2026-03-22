@@ -1,6 +1,5 @@
 Application/User/CAN_processing_v2.o: \
- ../Application/User/CAN_processing_v2.c \
- ../Application/User/CAN_processing_v2.h \
+ ../Application/User/CAN_processing_v2.c ../../Inc/CAN_processing_v2.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../../Inc/stm32g4xx_hal_conf.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -41,7 +40,7 @@ Application/User/CAN_processing_v2.o: \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h
-../Application/User/CAN_processing_v2.h:
+../../Inc/CAN_processing_v2.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h:

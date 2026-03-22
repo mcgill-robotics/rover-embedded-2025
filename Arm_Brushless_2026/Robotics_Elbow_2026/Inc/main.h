@@ -86,6 +86,8 @@ void Error_Handler(void);
 #define M1_TEMPERATURE_GPIO_Port GPIOB
 #define M1_PWM_WL_Pin GPIO_PIN_15
 #define M1_PWM_WL_GPIO_Port GPIOB
+#define LED_STATUS_Pin GPIO_PIN_6
+#define LED_STATUS_GPIO_Port GPIOC
 #define M1_PWM_UH_Pin GPIO_PIN_8
 #define M1_PWM_UH_GPIO_Port GPIOA
 #define M1_PWM_VH_Pin GPIO_PIN_9
