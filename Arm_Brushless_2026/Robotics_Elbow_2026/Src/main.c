@@ -181,11 +181,11 @@ int main(void) {
 	}
 
 	/* Reject frames that don't match any filter (safety net) */
-	if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan1,
-	FDCAN_REJECT, FDCAN_REJECT,
-	FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE) != HAL_OK) {
-		Error_Handler();
-	}
+//	if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan1,
+//	FDCAN_REJECT, FDCAN_REJECT,
+//	FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE) != HAL_OK) {
+//		Error_Handler();
+//	}
 
 	/* Activate RX FIFO0 new message notification */
 	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
@@ -219,7 +219,7 @@ int main(void) {
 	while (1) {
 		if (can_rx_ready) {
 			can_rx_ready = 0;
-
+			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 			CAN_Parse_MSG(&can_rx_header, can_rx_data);
 		}
 
@@ -1072,7 +1072,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM6) {
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 		if (can_rx_flag) {
 			can_rx_flag = 0;
 			can_rx_ready = 1;
