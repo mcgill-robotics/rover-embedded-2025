@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 // #include "device/dcd.h"
 #include "stm32g474xx.h"
+#include "stm32g4xx_hal.h"
 #include "stm32g4xx_hal_uart_ex.h"
 #include "tusb.h"
 #include "json_serde/serialization.h"
@@ -143,6 +144,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // int tick = HAL_GetTick();
+    // printf("%d\n", tick);
+    if (HAL_GetTick()%1000==0){
+        HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
+    }
     tud_task(); // tinyusb device task
     cdc_task();
 
@@ -179,10 +185,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV2;
-  RCC_OscInitStruct.PLL.PLLN = 8;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+  RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV4;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -194,11 +200,11 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -635,7 +641,7 @@ void check_uart(UART_HandleTypeDef *huart) {
   if (newline_pos == NULL) return;
 
   *newline_pos = '\0';
-  send_msg(get_topic(huart), buffer);
+  // send_msg(get_topic(huart), buffer);
 
   // TODO: Process multiple messages per call if multiple newlines are present
   uint32_t leftover = *read_ptr - (newline_pos - (char *)buffer + 1);
@@ -677,7 +683,7 @@ static void cdc_task(void) {
     if (newline_pos != NULL) {
       char topic[TOPIC_BUF_LEN];
       uint8_t msg[UART_BUF_LEN];
-      deserialize(topic, TOPIC_BUF_LEN, msg, UART_BUF_LEN, json);
+      // deserialize(topic, TOPIC_BUF_LEN, msg, UART_BUF_LEN, json);
       
       uint32_t leftover = total_read - (newline_pos - json + 1);
       memcpy(json, newline_pos + 1, leftover);

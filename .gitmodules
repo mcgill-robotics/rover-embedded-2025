@@ -1,6 +1,6 @@
-[submodule "uart-board/libs/tinyusb"]
-	path = uart-board/libs/tinyusb
-	url = https://github.com/hathach/tinyusb
-[submodule "uart-board/libs/ArduinoJson"]
-	path = uart-board/libs/ArduinoJson
+[submodule "ROSJam2/libs/ArduinoJson"]
+	path = ROSJam2/libs/ArduinoJson
 	url = https://github.com/bblanchon/ArduinoJson
+[submodule "ROSJam2/libs/tinyusb"]
+	path = ROSJam2/libs/tinyusb
+	url = https://github.com/hathach/tinyusb

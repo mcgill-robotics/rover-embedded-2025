@@ -19,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the project name
-set(CMAKE_PROJECT_NAME UartBoard)
+set(CMAKE_PROJECT_NAME ROSJam2)
 
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -29,7 +29,7 @@ project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Enable CMake support for ASM and C languages
-enable_language(C ASM CXX)
+enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
@@ -37,21 +37,7 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
-# add_subdirectory(libs/tinyusb/src)
-
-# set(STM32_CUBE_MX
-#     stm32cubemx
-# )
-
-add_subdirectory(../ROSJam2/src "${CMAKE_CURRENT_BINARY_DIR}/ROSJam2_build")
-
-add_subdirectory(libs/tinygps)
-tiny_gps_add(${CMAKE_PROJECT_NAME})
-
-# tinyusb_target_add(${CMAKE_PROJECT_NAME})
-# rosjam_cdc_add(${CMAKE_PROJECT_NAME})
-
-# add_subdirectory(libs/ArduinoJson)
+add_subdirectory(src)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -61,11 +47,6 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
-    # ${CMAKE_CURRENT_SOURCE_DIR}/libs/tinyusb/src/portable/st/stm32_fsdev/dcd_stm32_fsdev.c
-    # ${CMAKE_CURRENT_SOURCE_DIR}/libs/tinyusb/src/portable/st/typec/typec_stm32.c
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/usb_descriptors.c
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/serialization.cc
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/deserialization.cc
 )
 
 # Add include paths
@@ -76,8 +57,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add project symbols (macros)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
-    CFG_TUSB_DEBUG=2
-    CFG_TUD_LOG_LEVEL=2
+    CFG_TUSB_DEBUG=0
+    CFG_TUD_LOG_LEVEL=0
 )
 
 # Remove wrong libob.a library dependency when using cpp files
@@ -86,7 +67,6 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-    # ArduinoJson
     rosjam2
     # Add user defined libraries
 )
