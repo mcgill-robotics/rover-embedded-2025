@@ -73,11 +73,9 @@ class RunSpec(IntEnum):
     STOP               = 0
     ACKNOWLEDGE_FAULTS = 1
     SPEED              = 2
-    POSITION_INCREMENT = 3
-    POSITION           = 4
-    CALIBRATION        = 5
-    FOLLOW_POSITION    = 6
-    # 7 reserved
+    POSITION           = 3
+    CALIBRATION        = 4
+    # 5–7 reserved
 
 
 class ReadSpec(IntEnum):
@@ -90,10 +88,10 @@ class ReadSpec(IntEnum):
     POSITION       = 1
     VOLTAGE        = 2
     CURRENT        = 3
-    ALL_FAULTS     = 4
-    CURRENT_STATE  = 5
-    TEMPERATURE    = 6
-    PING           = 7
+    CURRENT_STATE  = 4
+    TEMPERATURE    = 5
+    PING           = 6
+    CONTROL_MODE   = 7
 
 
 class MotorID(IntEnum):

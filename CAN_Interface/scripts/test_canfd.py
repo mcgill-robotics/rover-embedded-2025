@@ -38,7 +38,7 @@ def open_bus(port: str) -> can.BusABC:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Ping an ESC over CAN FD")
-    parser.add_argument("--port", default="COM3", help="CANable serial port (default: COM3)")
+    parser.add_argument("--port", default="COM4", help="CANable serial port (default: COM3)")
     parser.add_argument("--id", type=int, default=0, help="Target ESC device ID 0–15 (default: 0)")
     args = parser.parse_args()
 
