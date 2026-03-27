@@ -31,6 +31,7 @@
 #include <math.h>
 #include "stm32g4xx_hal.h"
 
+
 #ifndef M_PI
 # define M_PI 3.14159265358979323846
 #endif
@@ -38,7 +39,7 @@
 /* External variables (defined elsewhere, e.g. main.c) */
 extern int ESC_ID;
 extern FDCAN_HandleTypeDef hfdcan1;
-
+extern ADC_HandleTypeDef hadc1;
 /* CAN ID enumeration types */
 
 typedef enum {
@@ -65,21 +66,19 @@ typedef enum {
     RUN_STOP                = 0,
     RUN_ACKNOWLEDGE_FAULTS  = 1,
     RUN_SPEED               = 2,
-    RUN_POSITION_INCREMENT  = 3,
-    RUN_POSITION            = 4,
-    RUN_CALIBRATION         = 5,
-    RUN_FOLLOW_POSITION     = 6
+    RUN_POSITION            = 3,
+    RUN_CALIBRATION         = 4,
 } RunSpec;
 
 typedef enum {
     READ_CALIBRATION    = 0,
     READ_POSITION       = 1,
-    VOLTAGE             = 2,
-    CURRENT             = 3,
-    GET_ALL_FAULTS      = 4,
-    GET_CURRENT_STATE   = 5,
-    GET_TEMPERATURE     = 6,
-    GET_PING            = 7
+    READ_VOLTAGE             = 2,
+    READ_CURRENT             = 3,
+    READ_CURRENT_STATE   = 4,
+    READ_TEMPERATURE     = 5,
+    READ_PING            = 6,
+	READ_CONTROL_MODE 		= 7
 } ReadSpec;
 
 typedef enum {
@@ -113,6 +112,10 @@ float    SingleExtractFloatFromCAN(uint8_t *data);
 int16_t  extract_multiple_speeds(const uint8_t *rxData);
 float    extract_multiple_positions_arm(const uint8_t *rxData);
 float    half_to_float(uint16_t half);
+
+float Read_Temperature_Celsius(void);
+float Read_VBUS_Voltage(void);
+
 
 /* Stub command handlers (to be implemented later) */
 void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info);

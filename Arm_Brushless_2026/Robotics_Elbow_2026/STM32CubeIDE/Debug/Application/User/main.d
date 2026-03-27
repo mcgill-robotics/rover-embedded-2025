@@ -87,7 +87,8 @@ Application/User/main.o: \
  ../../Inc/parameters_conversion.h ../../Inc/mc_math.h \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
- ../../Inc/mc_api.h ../../Inc/CAN_processing_v2.h
+ ../../Inc/mc_api.h ../../Inc/CAN_processing_v2.h \
+ ../../Inc/mc_config_common.h
 ../../Inc/main.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
@@ -186,3 +187,4 @@ Application/User/main.o: \
 ../../Inc/pmsm_motor_parameters.h:
 ../../Inc/mc_api.h:
 ../../Inc/CAN_processing_v2.h:
+../../Inc/mc_config_common.h:

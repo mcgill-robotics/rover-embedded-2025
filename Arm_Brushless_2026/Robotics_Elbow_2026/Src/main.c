@@ -22,6 +22,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "CAN_processing_v2.h"
+#include "encoder_speed_pos_fdbk.h"
+#include "speed_pos_fdbk.h"
+#include "mc_config_common.h"
+#include <math.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -179,13 +184,6 @@ int main(void) {
 	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &filter) != HAL_OK) {
 		Error_Handler();
 	}
-
-	/* Reject frames that don't match any filter (safety net) */
-//	if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan1,
-//	FDCAN_REJECT, FDCAN_REJECT,
-//	FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE) != HAL_OK) {
-//		Error_Handler();
-//	}
 
 	/* Activate RX FIFO0 new message notification */
 	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
@@ -1078,6 +1076,41 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 	}
 }
+
+/**
+ * @brief  Read the motor shaft mechanical angle directly from the encoder,
+ *         returned in radians.
+ *
+ * Uses SPD_GetMecAngle() on the encoder's SpeednPosFdbk base handle — the
+ * same value the FOC speed/torque controller and MCI_ExecPositionCommand use.
+ *
+ * SPD_GetMecAngle() returns a 32-bit value in s16degree units, where one full
+ * mechanical revolution = 65536 counts (the int16 range, sign-extended to 32).
+ * Conversion:  radians = s16angle * (2π / 65536)
+ *
+ * The ST SDK defines RADTOS16 = 65536 / (2π) ≈ 10430.2, so:
+ *   radians = s16angle / RADTOS16
+ *
+ * @retval float  Mechanical angle in radians
+ */
+float Read_Encoder_Position_Rad(void)
+{
+    int32_t mec_angle_s16 = SPD_GetMecAngle(&ENCODER_M1._Super);
+    float position_rad = (float)mec_angle_s16 / (float)RADTOS16;
+    return position_rad;
+}
+
+float degreesToRad(float positionDegrees){
+	return positionDegrees*(M_PI /180.0f);
+}
+
+float radToDegrees(float positionRad){
+	return (positionRad*180/M_PI);
+
+}
+
+
+
 
 /* USER CODE END 4 */
 
