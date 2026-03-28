@@ -12,6 +12,7 @@ void init_uart(uart* uart, UART_HandleTypeDef* huart, uint8_t *topic) {
     uart->huart = huart;
     uart->topic = topic;
     uart->buf.capacity = RECON_BUF_LEN;
+    uart->buf.size = 0;
     uart->active_rx = 0;
     uart->data_size = 0;
     HAL_UARTEx_ReceiveToIdle_DMA(huart, uart->rx[uart->active_rx], UART_BUF_LEN);
@@ -29,12 +30,12 @@ uint8_t* get_buffer_write_pointer(uart_buf* buf, uint32_t size) {
 	uint32_t size_with_padding = size+(4-(size%4))%4;
 	uint32_t to_reserve = size_with_padding+metadata_size;
 	
-	if (size > buf->capacity){
+	if (size > buf->capacity) {
 		return NULL;
 	}
 	int available = buf->capacity - buf->size;
 	uint8_t* write_position;
-	if (available < to_reserve){
+	if (available < to_reserve) {
 		// Drop everything currently in buffer
 		buf-> read_offset = 0;
 		buf -> size = to_reserve;
@@ -52,16 +53,14 @@ void process_uart() {
     for (int i = 0; i < 6; i++) {
         if (uarts[i].data_size) {
             uint8_t buffer = !uarts[i].active_rx;
-
-            int i = 0;
-            for (int j = 0; j < uarts[i].data_size; j++) {
-                if (uarts[i].rx[buffer][j] == '\n') {
-                    uint8_t* write_start = get_buffer_write_pointer(&uarts[i].buf, j - i);
-                    memcpy(write_start, &uarts[i].rx[buffer][i], j - i);
-                    i = j + 1;
+            int start = 0;
+            for (int end = 0; end < uarts[i].data_size; end++) {
+                if (uarts[i].rx[buffer][end] == '\n') {
+                    uint8_t* write_start = get_buffer_write_pointer(&uarts[i].buf, end - start);
+                    memcpy(write_start, &uarts[i].rx[buffer][start], end - start);
+                    start = end + 1;
                 }
             }
-
             uarts[i].data_size = 0;
         }
     }
