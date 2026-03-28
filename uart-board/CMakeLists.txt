@@ -66,6 +66,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/usb_descriptors.c
     # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/serialization.cc
     # ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/deserialization.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/uart.c
 )
 
 # Add include paths
