@@ -41,7 +41,7 @@ typedef struct RosjamRxBuffer {
 	uint8_t buf[ENDPOINT_BUF_LEN*ENDPOINT_COUNT];
 } RosjamRxBuffer;
 
-uint8_t* get_write_space(Buffer* buf, int size);
+uint8_t* get_write_space(Buffer* buf, uint32_t size);
 
 
 typedef struct RosjamEndpoint {

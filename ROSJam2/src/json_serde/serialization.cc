@@ -21,11 +21,11 @@ size_t serialize(Buffer* buffer, const char *topic, uint8_t *msg) {
         return 0;
     }
     // update buffer size with json size
-    uint8_t* write_head = get_write_space(buffer, json_size+2); // +2 for null terminator and newline
+    uint8_t* write_head = get_write_space(buffer, json_size+1); // +1 and newline
     if (write_head != NULL){
         int size = serializeJson(doc, (void*) write_head, json_size)+2;
         *(write_head+json_size) = '\n';
-        *(write_head+json_size+1) = '\0';
+        // *(write_head+json_size+1) = '\0';
         return size;
     } else {
         return 0;

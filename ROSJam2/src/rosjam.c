@@ -25,6 +25,25 @@ void setup(){
   	tusb_init(BOARD_TUD_RHPORT, &dev_init);
 }
 
+uint32_t get_size_with_pad(uint32_t size){
+	// ensure alignment
+	return size+(4-(size%4))%4;
+	
+}
+
+int get_first_message(Buffer* buf, int* str_size, uint8_t** start){
+	if (buf->read_offset < buf->size){
+		int offset = buf ->read_offset;
+		uint8_t* message_start = buf->buf+offset;
+		*str_size = ((uint32_t*) message_start)[0];
+		*start = message_start+4;
+		int size_with_padding = get_size_with_pad(*str_size);
+		return size_with_padding+4;
+	}
+	return 0;
+	
+}
+
 void mark_read(Buffer* buf, int read){
 	(buf ->read_offset)+=read;
 }
@@ -33,22 +52,30 @@ void mark_read_global(RosjamRxBuffer* buf, int read){
 	(buf ->read_offset)+=read;
 }
 
-uint8_t* get_write_space(Buffer* buf, int size){
+uint8_t* get_write_space(Buffer* buf, uint32_t size){
+	uint32_t metadata_size = 4; //+4 for metadata about string size
+	uint32_t size_with_padding = get_size_with_pad(size);
+	uint32_t to_reserve = size_with_padding+metadata_size;
+	
 	if (size > buf->capacity){
 		return NULL;
 	}
 	int available = buf->capacity - buf->size;
-	if (available < size){
+	uint8_t* write_position;
+	if (available < to_reserve){
 		// drop everything currently in buffer
 		buf-> read_offset = 0;
-		buf -> size = size;
-		return buf -> buf;
+		buf -> size = to_reserve;
+		write_position = buf -> buf;
 	} else {
-		uint8_t* write_position = buf -> buf+buf -> size;
-		buf -> size += size;
-		return write_position;
+		write_position = buf -> buf+buf -> size;
+		buf -> size += to_reserve;
 	}
+	((uint32_t*) write_position)[0] = size;
+	write_position = write_position+metadata_size;
+	return write_position;
 }
+
 
 uint8_t* get_write_space_global(RosjamRxBuffer* buf, int size){
 	if (size > buf->capacity){
@@ -109,68 +136,115 @@ void send_next_messages(){
 		return;
 	}
 	// Find next non empty endpoint in round robin fashion
+	// int first_endpoint_to_try = currentEndpoints.nextTxEndpoint;
+	// int next_endpoint_idx = first_endpoint_to_try;
+	// Buffer* buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
+
+	// while (buf->size == 0){
+	// 	next_endpoint_idx=(next_endpoint_idx+1)%currentEndpoints.size;
+	// 	// Came back to first tried endpoint
+	// 	if (next_endpoint_idx==first_endpoint_to_try){
+			
+	// 		return;
+	// 	}
+	// 	buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
+	// }
+	// // update to current endpoint if needs multiple tries
+	// currentEndpoints.nextTxEndpoint = next_endpoint_idx;
+
+	// compute how many message can be sent and size in bytes
+	// or find size of message if larger than available
+	// int sent_count = 0;
+	int can_send = tud_cdc_n_write_available(USB_CDC_ITF);
+	// int bytes_to_send = 0;
+	// int i = 0;
+	// while ((i<can_send || sent_count==0)&&buf->read_offset+i<buf->size){
+	// 	char current_char = (buf->buf+buf->read_offset)[i];
+	// 	if (current_char == '\n'){
+	// 		bytes_to_send = i+1; //+1 because i starts at 0
+	// 		if (i<can_send){
+	// 			sent_count++;
+	// 		} else {
+	// 			sent_count = 1;
+	// 		}
+	// 	}
+	// 	i++;
+	// }
+
+	
+	int str_size;
+	uint8_t* start;
+	int empty_count = 0;
+	// Find next non empty endpoint in round robin fashion
 	int first_endpoint_to_try = currentEndpoints.nextTxEndpoint;
 	int next_endpoint_idx = first_endpoint_to_try;
 	Buffer* buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
 
-	while (buf->size == 0){
-		next_endpoint_idx=(next_endpoint_idx+1)%currentEndpoints.size;
-		// Came back to first tried endpoint
-		if (next_endpoint_idx==first_endpoint_to_try){
-			
-			return;
-		}
-		buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
-	}
-	// update to current endpoint if needs multiple tries
-	currentEndpoints.nextTxEndpoint = next_endpoint_idx;
+	int msg_bytes_actual = get_first_message(buf, &str_size, &start);
 
-	// compute how many message can be sent and size in bytes
-	// or find size of message if larger than available
-	int sent_count = 0;
-	int can_send = tud_cdc_n_write_available(USB_CDC_ITF);
-	int bytes_to_send = 0;
-	int i = 0;
-	while ((i<can_send || sent_count==0)&&buf->read_offset+i<buf->size){
-		char current_char = (buf->buf+buf->read_offset)[i];
-		if (current_char == '\0'){
-			bytes_to_send = i+1; //+1 because i starts at 0
-			if (i<can_send){
-				sent_count++;
-			} else {
-				sent_count = 1;
-			}
-		}
-		i++;
-	}
-
-	if (sent_count == 0){
-		// if message too big for one transfer try immediately sending it
-		if (bytes_to_send>CFG_TUD_CDC_TX_BUFSIZE){
-			tud_cdc_n_write_flush(USB_CDC_ITF); // flush buffer
-			int bytes_sent = 0;
-			while (bytes_to_send>0){
-				int sent = tud_cdc_n_write(USB_CDC_ITF, buf->buf+buf->read_offset+bytes_sent, bytes_to_send);
-				tud_cdc_n_write_flush(USB_CDC_ITF);
-				bytes_sent += sent;
-				bytes_to_send-=bytes_sent;
-			}
-			mark_read(buf, bytes_sent);
+	while (empty_count<currentEndpoints.size){
+		if (msg_bytes_actual == 0){
+			empty_count++;
 		} else {
-			// Message larger than available (wait till flushed and space becomes available)
-			return;
+			empty_count = 0;
+
+			if (str_size>CFG_TUD_CDC_TX_BUFSIZE){
+				tud_cdc_n_write_flush(USB_CDC_ITF); // flush buffer
+				int bytes_sent = 0;
+				int bytes_to_send = str_size;
+				while (bytes_to_send>0){
+					int sent = tud_cdc_n_write(USB_CDC_ITF, start, bytes_to_send);
+					tud_cdc_n_write_flush(USB_CDC_ITF);
+					bytes_sent += sent;
+					bytes_to_send-=bytes_sent;
+				}
+				mark_read(buf, msg_bytes_actual);
+				currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
+				return;
+			} else if (str_size>can_send){
+				// Message larger than available (wait till flushed and space becomes available)
+				return;
+			}
+			
+			// send as many complete messages as possible
+			tud_cdc_n_write(USB_CDC_ITF, start, str_size);
+			can_send-=str_size;
+			mark_read(buf, msg_bytes_actual);
+			// message sent so we can move to next available interface
+			currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
+			next_endpoint_idx = currentEndpoints.nextTxEndpoint;
+			buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
+			msg_bytes_actual = get_first_message(buf, &str_size, &start);
+			
 		}
-	} else {
-		// send as many complete messages as possible
-		tud_cdc_n_write(USB_CDC_ITF, buf->buf, bytes_to_send);
-		mark_read(buf, bytes_to_send);
 	}
-	// message sent so we can move to next available interface
-	currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
+	// if (sent_count == 0){
+	// 	// if message too big for one transfer try immediately sending it
+	// 	if (bytes_to_send>CFG_TUD_CDC_TX_BUFSIZE){
+	// 		tud_cdc_n_write_flush(USB_CDC_ITF); // flush buffer
+	// 		int bytes_sent = 0;
+	// 		while (bytes_to_send>0){
+	// 			int sent = tud_cdc_n_write(USB_CDC_ITF, buf->buf+buf->read_offset+bytes_sent, bytes_to_send);
+	// 			tud_cdc_n_write_flush(USB_CDC_ITF);
+	// 			bytes_sent += sent;
+	// 			bytes_to_send-=bytes_sent;
+	// 		}
+	// 		mark_read(buf, bytes_sent);
+	// 	} else {
+	// 		// Message larger than available (wait till flushed and space becomes available)
+	// 		return;
+	// 	}
+	// } else {
+	// 	// send as many complete messages as possible
+	// 	tud_cdc_n_write(USB_CDC_ITF, buf->buf, bytes_to_send);
+	// 	mark_read(buf, bytes_to_send);
+	// }
+	// // message sent so we can move to next available interface
+	// currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
 }
 
 __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message){
-
+	printf("Received: topic: %d, msg: %d\n", endpoint->topic, message);
 }
 
 
