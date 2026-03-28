@@ -65,8 +65,7 @@ void Error_Handler(void);
 #define DP_PULLUP_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-#define TOPIC_BUF_LEN 32
-#define JSON_BUF_LEN 512
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
