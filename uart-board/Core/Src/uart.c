@@ -1,5 +1,6 @@
 #include "uart.h"
 #include "main.h"
+#include "rosjam.h"
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal_uart.h"
 #include "stm32g4xx_hal_uart_ex.h"
@@ -10,6 +11,7 @@ uart uarts[6];
 void init_uart(uart* uart, UART_HandleTypeDef* huart, uint8_t *topic) {
     uart->huart = huart;
     uart->topic = topic;
+    uart->buf.capacity = RECON_BUF_LEN;
     uart->active_rx = 0;
     uart->data_size = 0;
     HAL_UARTEx_ReceiveToIdle_DMA(huart, uart->rx[uart->active_rx], UART_BUF_LEN);
@@ -22,16 +24,44 @@ uart* get_uart(UART_HandleTypeDef *huart) {
     return NULL;
 }
 
+uint8_t* get_buffer_write_pointer(uart_buf* buf, uint32_t size) {
+	uint32_t metadata_size = 4; // 4 for metadata about string size
+	uint32_t size_with_padding = size+(4-(size%4))%4;
+	uint32_t to_reserve = size_with_padding+metadata_size;
+	
+	if (size > buf->capacity){
+		return NULL;
+	}
+	int available = buf->capacity - buf->size;
+	uint8_t* write_position;
+	if (available < to_reserve){
+		// Drop everything currently in buffer
+		buf-> read_offset = 0;
+		buf -> size = to_reserve;
+		write_position = buf -> buf;
+	} else {
+		write_position = buf -> buf+buf -> size;
+		buf -> size += to_reserve;
+	}
+	((uint32_t*) write_position)[0] = size;
+	write_position = write_position+metadata_size;
+	return write_position;
+}
+
 void process_uart() {
     for (int i = 0; i < 6; i++) {
         if (uarts[i].data_size) {
             uint8_t buffer = !uarts[i].active_rx;
+
+            int i = 0;
             for (int j = 0; j < uarts[i].data_size; j++) {
                 if (uarts[i].rx[buffer][j] == '\n') {
-                    uarts[i].rx[buffer][j] = '\0';
+                    uint8_t* write_start = get_buffer_write_pointer(&uarts[i].buf, j - i);
+                    memcpy(write_start, &uarts[i].rx[buffer][i], j - i);
+                    i = j + 1;
                 }
             }
-            memcpy(uarts[i].process, uarts[i].rx[buffer], uarts[i].data_size);
+
             uarts[i].data_size = 0;
         }
     }
