@@ -65,16 +65,8 @@ void Error_Handler(void);
 #define DP_PULLUP_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-#define UART_BUF_LEN 256
-#define UART_PAK_LEN 64
 #define TOPIC_BUF_LEN 32
 #define JSON_BUF_LEN 512
-#define LPUART1_TOPIC "uart0"
-#define UART1_TOPIC "uart1"
-#define UART2_TOPIC "uart2"
-#define UART3_TOPIC "uart3"
-#define UART4_TOPIC "uart4"
-#define UART5_TOPIC "uart5"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
