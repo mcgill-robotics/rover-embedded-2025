@@ -250,7 +250,7 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
   /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(LImit_switch_6_Pin);
+  HAL_GPIO_EXTI_IRQHandler(Limit_switch_6_Pin);
   HAL_GPIO_EXTI_IRQHandler(Limit_switch_5_Pin);
   HAL_GPIO_EXTI_IRQHandler(Limit_switch_4_Pin);
   HAL_GPIO_EXTI_IRQHandler(FAULT_pitch_Pin);

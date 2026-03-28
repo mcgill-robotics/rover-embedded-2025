@@ -5,7 +5,7 @@
 #include "CAN_processing.h"
 #include "Calibration.h"
 
-SteeringState steering_state = PID;
+//SteeringState steering_state = PID;
 
 // Hi, this is going to be the calibration sequence for the motors. It's going to
 // consist of a couple steps.
@@ -20,8 +20,8 @@ SteeringState steering_state = PID;
 
 // This function is going to trigger on startup (see call in main loop)
 
-void CalibrateMotor() {
-	steering_state = CALIBRATION;
+void CalibrateMotor(Motor * motor) {
+	motor->steering_state = CALIBRATION;
 }
  // Note: Part 2. of the calibration sequence as described above is implemented
 // in Calibrate_endoder in encoder.c
@@ -31,7 +31,7 @@ void CalibrateMotor() {
 // in pid.c, set to one in CalibrateMotor() (above), then
 // set back to zero in the limit switch interrupt
 
-void set_calibration_motor_movement(){
-	//set_motor_direction(1);
-	//set_motor_speed_percent(80); **TODO: MODIFY TO SET CORRESPONDING MOTOR
+void set_calibration_motor_movement(Motor * motor){
+	set_motor_direction(motor, 1);
+	set_motor_speed_percent(motor, 80);
 }

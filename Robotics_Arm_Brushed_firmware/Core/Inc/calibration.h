@@ -2,14 +2,16 @@
 #define CALIBRATION_H
 
 #include "main.h"
+#include "motorControl.h"
 
-typedef enum {
-    PID = 0,
-    CALIBRATION = 1,
-	LEAVE_LIMIT = 2
-} SteeringState;
+//typedef enum {
+//    PID = 0,
+//    CALIBRATION = 1,
+//	LEAVE_LIMIT = 2
+//} SteeringState;
 
-extern SteeringState steering_state;
+//extern SteeringState steering_state;
+//***moved to motorControl.h
 
 
 // Basically calibrationMode determines if
@@ -19,7 +21,7 @@ extern SteeringState steering_state;
 
 void CalibrateMotor();
 
-void set_calibration_motor_movement();
+void set_calibration_motor_movement(Motor * motor);
 
 
 #endif

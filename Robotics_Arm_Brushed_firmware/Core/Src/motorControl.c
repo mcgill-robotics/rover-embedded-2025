@@ -9,7 +9,7 @@
 #include <stdbool.h>
 
 
-#include "CAN_processing.h"
+//#include "CAN_processing.h"
 #include "pid.h"
 #include "encoder.h"
 #include "motorControl.h"
@@ -32,20 +32,25 @@ int power_limit = 4499;
 
 
 void motor_struct_init(Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder,
-		Motor_Encoding_Struct * encoding, MotorID motorID,  GPIO_TypeDef* DIR_port, uint16_t DIR_pin){
-	motor->motorID = motorID;
+		Motor_Encoding_Struct * encoding, MotorName motorName,  GPIO_TypeDef* DIR_port, uint16_t DIR_pin,
+		int kPw, int kDw){
+	motor->motorName = motorName;
 	motor->ENCODER_type = encoder;
 	motor->Motor_Encoding_Struct = encoding;
 	motor->PWM_type = pwm;
 	motor->DIR_port = DIR_port;
 	motor->DIR_pin = DIR_pin;
+	motor->kPw = kPw;
+	motor->kDw = kDw;
+
+	motor->steering_state = PID; // initialize the state to PID
 }
 
 
 void stop_motor(Motor * motor){
 	set_motor_speed_raw(motor, 0);
-	int counts = get_counts();
-	setPIDGoalA(count_to_angle(motor->Motor_Encoding_Struct, counts));
+	int counts = get_counts(motor->Motor_Encoding_Struct);
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, counts));
 }
 
 void set_motor_speed_percent(Motor * motor, float n){

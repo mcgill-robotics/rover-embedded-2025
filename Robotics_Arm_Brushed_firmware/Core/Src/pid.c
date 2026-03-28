@@ -32,10 +32,12 @@ int calibrationMode = 0; // if calibrating, lower the speed!
 // be moved while calibrating!!!!!!!!!!!!!!!!
 // I will mention this to whoever is controlling the steering.
 
-static volatile atomic_int goalAngle = ATOMIC_VAR_INIT (0);
+static volatile atomic_int gripperGoalAngle = ATOMIC_VAR_INIT (0);
+static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (0);
+static volatile atomic_int rollGoalAngle = ATOMIC_VAR_INIT (0);
 
 // PID implementation
-int updatePIDImpl(int goal) {
+int updatePIDImpl(Motor * motor, int goal) {
 
 	/*
 	 * This function will do the heavy lifting PID logic. It should do the following: read the encoder counts to determine an error,
@@ -57,11 +59,9 @@ int updatePIDImpl(int goal) {
 
 
 
-	/* TODO
-
 	currentGoal = goal;
 	//return 1 when goal reached
-	angleError = goal - get_counts();
+	angleError = goal - get_counts(motor->Motor_Encoding_Struct);
 	// Find optimal direction
 //	if (abs(angleError) > MAX_COUNTS/2) {
 //		if (angleError > 0) {
@@ -74,19 +74,19 @@ int updatePIDImpl(int goal) {
 
 
 	// --> define kPw and kDw for each individual motor !
-    angleCorrection = kPw * angleError + kDw * (angleError - oldAngleError);
+    angleCorrection = motor->kPw * angleError + motor->kDw * (angleError - oldAngleError);
     // Set direction based on allowed error
 	if (angleCorrection < 0){
-		set_motor_direction(0);
+		set_motor_direction(motor, 0);
 	} else{
-		set_motor_direction(1);
+		set_motor_direction(motor, 1);
 	}
 	oldAngleError = angleError;
 	// Stop if within error
 	if (abs(angleError) <  ALLOWED_ERROR){
-		set_motor_speed_raw(0);
-		//reset error once goal reached
-		oldAngleError = 0;
+		set_motor_speed_raw(motor, 0);
+
+		oldAngleError = 0; //reset error once goal reached
 		return 1;
 	}
 
@@ -97,29 +97,39 @@ int updatePIDImpl(int goal) {
 //			return;
 //		}
 //	}
-	set_motor_speed_raw(angleCorrection);
+	set_motor_speed_raw(motor, angleCorrection);
 
 
-	*/
+
 	return 0;
 }
 
 // normal pid with goal from can
-int updatePID(){
-	return updatePIDImpl(atomic_load(&goalAngle));
+int updatePID(Motor * motor){
+	if (motor->motorName == GRIPPER){
+		return updatePIDImpl(motor, atomic_load(&gripperGoalAngle));
+	}else if (motor->motorName == PITCH){
+		return updatePIDImpl(motor, atomic_load(&pitchGoalAngle));
+	}else if (motor->motorName == ROLL){
+		return updatePIDImpl(motor, atomic_load(&rollGoalAngle));
+	}
+
+	return -1; // error motor error
 }
 
 //run pid with overriden goal(to ignore goal from can when moving away from limit switch)
-int updatePIDOverrideGoal(int override){
-	return updatePIDImpl(override);
+int updatePIDOverrideGoal(Motor * motor, int override){
+	return updatePIDImpl(motor, override);
 }
 
-// use PID to move away from limit switch a little bit after switch is triggered
-void leave_limit_switch(){
-	/* TODO
-	if(updatePIDOverrideGoal(angle_to_count(170))){
 
-		//steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
+// use PID to move away from limit switch a little bit after switch is triggered
+void leave_limit_switch(Motor * motor){
+	/*TODO FIX (is it even necessary??)
+	 *
+	if(updatePIDOverrideGoal(motor, angle_to_count(170))){
+
+		motor->steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
 		// prevent continuously moving to the limit
 		if(atomic_load(&goalAngle) > angle_to_count(170)){
 			stop_motor();
@@ -127,12 +137,17 @@ void leave_limit_switch(){
 	}
 	*/
 
+
 }
 
-void setPIDGoalA(double angle) {
-	/* TODO
-	atomic_store(&goalAngle, angle_to_count(angle));
-	*/
+void setPIDGoalA(Motor * motor, double angle) {
+	if (motor->motorName == GRIPPER){
+		atomic_store(&gripperGoalAngle, angle_to_count(motor->Motor_Encoding_Struct, angle));
+	}else if (motor->motorName == PITCH){
+		atomic_store(&pitchGoalAngle, angle_to_count(motor->Motor_Encoding_Struct, angle));
+	}else if (motor->motorName == ROLL){
+		atomic_store(&rollGoalAngle, angle_to_count(motor->Motor_Encoding_Struct, angle));
+	}
 }
 
 

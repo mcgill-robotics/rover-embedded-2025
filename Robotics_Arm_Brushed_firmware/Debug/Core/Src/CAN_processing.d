@@ -36,7 +36,8 @@ Core/Src/CAN_processing.o: ../Core/Src/CAN_processing.c \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../Core/Inc/pid.h ../Core/Inc/encoder.h
+ ../Core/Inc/motorControl.h ../Core/Inc/pid.h ../Core/Inc/motorControl.h \
+ ../Core/Inc/encoder.h ../Core/Inc/main.h
 ../Core/Inc/CAN_processing.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
@@ -75,5 +76,8 @@ Core/Src/CAN_processing.o: ../Core/Src/CAN_processing.c \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
+../Core/Inc/motorControl.h:
 ../Core/Inc/pid.h:
+../Core/Inc/motorControl.h:
 ../Core/Inc/encoder.h:
+../Core/Inc/main.h:

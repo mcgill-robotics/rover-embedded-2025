@@ -1,5 +1,5 @@
-../Core/Src/pid.c:38:5:updatePIDImpl	1
-../Core/Src/pid.c:108:5:updatePID	1
-../Core/Src/pid.c:113:5:updatePIDOverrideGoal	1
-../Core/Src/pid.c:118:6:leave_limit_switch	1
-../Core/Src/pid.c:132:6:setPIDGoalA	1
+../Core/Src/pid.c:40:5:updatePIDImpl	4
+../Core/Src/pid.c:108:5:updatePID	4
+../Core/Src/pid.c:121:5:updatePIDOverrideGoal	1
+../Core/Src/pid.c:127:6:leave_limit_switch	1
+../Core/Src/pid.c:143:6:setPIDGoalA	4

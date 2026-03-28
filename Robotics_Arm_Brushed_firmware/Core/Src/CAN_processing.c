@@ -10,8 +10,9 @@
 //#include "uart_debugging.h"
 #include <stdbool.h>
 #include "pid.h"
-//#include "motor.h"
+#include "motorControl.h"
 #include "encoder.h"
+#include "main.h"
 
 
 // Define the bit masks to retrieve the relevent portions of data from the CAN id
@@ -31,6 +32,7 @@
 
 // For print statements
 //extern UART_HandleTypeDef huart2;
+
 
 
 //The next functions here are to retrieve the correct pattern of bits from the received CAN message
@@ -76,7 +78,7 @@ void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef*rxHeader, uint8_t *rxData){
 
 	//Check to make sure the command is directed toward the motor
 	CANMessage.motorType = (MotorType) get_CAN_motor_type(msg_ID);
-	if (CANMessage.motorType == DRIVE_MOTOR){
+	if (CANMessage.motorType != ARM_BRUSHED_MOTOR){
 		return;
 	}
 
@@ -84,12 +86,11 @@ void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef*rxHeader, uint8_t *rxData){
 	CANMessage.commandType = (Action) get_CAN_action(msg_ID);
 	if (CANMessage.commandType == ACTION_RUN){
 
-
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Run Command Detected\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			CANMessage.runSpec = (RunSpec) get_CAN_SPEC(msg_ID);
+		CANMessage.runSpec = (RunSpec) get_CAN_SPEC(msg_ID);
 	}
 	else{
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,54 +100,59 @@ void CAN_Parse_MSG (FDCAN_RxHeaderTypeDef*rxHeader, uint8_t *rxData){
 		CANMessage.readSpec = (ReadSpec) get_CAN_SPEC(msg_ID);
 	}
 
-	// Determine if the command effects a single, or mulitple motors, and call the appropriate helper functions
+	// Determine if the command effects a single, or multiple motors, and call the appropriate helper functions
 
-	/*
+	Motor *gripper_motor = all_motors_list[0];
+	Motor *roll_motor = all_motors_list[2];
+	Motor *pitch_motor = all_motors_list[1];
+
 	CANMessage.motorConfig = (MotorConfig) get_CAN_motor_mov_type(msg_ID);
 	if (CANMessage.motorConfig == SINGLE_MOTOR){
 		CANMessage.motorID = (MotorID) get_CAN_device_ID(msg_ID);
-		if (CANMessage.motorID == STEERING_ID){
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
-//			uart_debug_print("Processing Single Command\r\n");
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if (CANMessage.motorID == GRIPPER_ID){
+			//uart_debug_print("Processing Single Command\r\n");
+			Process_Single_Motor_Command(gripper_motor, &CANMessage, rxData);
 
-			Process_Single_Steering_Motor_Command(&CANMessage, rxData);
-		}
-		else {
+		}else if (CANMessage.motorID == PITCH_ID){
+			Process_Single_Motor_Command(pitch_motor, &CANMessage, rxData);
+
+		}else if (CANMessage.motorID == ROLL_ID){
+			Process_Single_Motor_Command(roll_motor, &CANMessage, rxData);
+
+		}else {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 //			 uart_debug_print("Not My IDr\n");
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////
 			return;
 		}
-	}
-	else{
+	}else{ // if not single motor, then multiple motors
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 //		uart_debug_print("Processing Multiple Commands\r\n");
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Process_Multiple_Steering_Motor_Command(&CANMessage, rxData);
+		Process_Multiple_Motor_Command(&CANMessage, rxData);
 	}
 
-	*/
+
 
 }
 
 
-void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
+void Process_Single_Motor_Command (Motor * motor, ParsedCANID *CANMessageID, uint8_t *rxData){
 
 	//single information will always come as a float (signed 4 bytes)
 	float information = SingleExtractFloatFromCAN(rxData);
 
 
-	if (CANMessageID->commandType == ACTION_RUN){
+	if (CANMessageID->commandType == ACTION_RUN){ // for moving action
 		switch(CANMessageID->runSpec){
 
 		case (RUN_STOP):
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 //				uart_debug_print("Motor Stopped \r\n");
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//stop_motor();
+				stop_motor(motor);
 				break;
 
 		case (RUN_ACKNOWLEDGE_FAULTS):
@@ -155,12 +161,10 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 		case (RUN_SPEED):
 				break;
 		case (RUN_POSITION):
-//				uart_debug_print("In case RUN_SPEED\r\n");
-				////////////////////////////////////////////////////////////////////////////////////////////////////////
-//				uart_debug_print("Setpoint %d RPM\r\n", (int)information);
-//				uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
-				////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// ControlSingleMotor(information);
+				//uart_debug_print("In case RUN_SPEED\r\n");
+				//uart_debug_print("Setpoint %d RPM\r\n", (int)information);
+				//uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
+				ControlSingleMotor(motor, information);
 				break;
 		default:
 			break;
@@ -168,8 +172,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 		//otherwise ignore whatever was received :)
 	}
 
-	else{
-		// We are now in a read command
+	else{ // We are now in a read command
 		switch(CANMessageID->readSpec){
 
 		case(READ_POSITION):
@@ -199,7 +202,7 @@ void Process_Single_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *
 	}
 }
 
-void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
+void Process_Multiple_Motor_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	 uart_debug_print("Running Multiple Motors...\r\n");
@@ -216,7 +219,7 @@ void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t
 //			 uart_debug_print("Previous Direction %d\r\n", (int)s_previousDirection);
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			ControlSingleMotor(curESCSpeed);
+			//ControlSingleMotor(curESCSpeed); //TODO FIX
 			break;
 
 	case (RUN_STOP):
@@ -232,10 +235,10 @@ void Process_Multiple_Steering_Motor_Command (ParsedCANID *CANMessageID, uint8_t
 
 }
 
-
-void ControlSingleMotor(float angle){
-	setPIDGoalA(angle);
+void ControlSingleMotor(Motor * motor, float angle){
+	setPIDGoalA(motor, angle);
 }
+
 
 
 void sendCANResponse(ParsedCANID *CANMessageID, float information){

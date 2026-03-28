@@ -1,5 +1,5 @@
 ../Core/Src/motorControl.c:34:6:motor_struct_init	1
-../Core/Src/motorControl.c:45:6:stop_motor	1
-../Core/Src/motorControl.c:51:6:set_motor_speed_percent	1
-../Core/Src/motorControl.c:55:6:set_motor_speed_raw	2
-../Core/Src/motorControl.c:64:6:set_motor_direction	2
+../Core/Src/motorControl.c:50:6:stop_motor	1
+../Core/Src/motorControl.c:56:6:set_motor_speed_percent	1
+../Core/Src/motorControl.c:60:6:set_motor_speed_raw	2
+../Core/Src/motorControl.c:69:6:set_motor_direction	2

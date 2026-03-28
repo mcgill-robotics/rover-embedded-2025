@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "calibration.h"
 #include "CAN_processing.h"
 #include "motorControl.h"
 #include "encoder.h"
@@ -36,6 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 
 /* USER CODE END PD */
 
@@ -89,8 +90,15 @@ static void MX_TIM8_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+Motor * all_motors_list[NB_MOTORS];
+
 
 int CAN_flag = 0;
+int LMSW1_flag_pitch_up = 0;
+int LMSW2_flag_pitch_down = 0;
+int LMSW5_flag_roll = 0;
+int LMSW6_flag_gripper = 0;
+
 
 /* USER CODE END 0 */
 
@@ -137,6 +145,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
+
+
   //initialize motors for all 3 motors
   Motor gripper_motor;
   Motor pitch_motor;
@@ -147,7 +157,7 @@ int main(void)
   Motor_Encoding_Struct roll_encoding;
 
   /*
-   * (int encoder_max_counts, int lm_sw_reset_counts)
+   * (int encoder_max_counts, int lm_sw_reset_counts, GPIO_TypeDef* limit_port, uint16_t limit_pin)
    * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
    * - limit switch reset counts: depends how angles defined -- corresponds to 180
    */
@@ -155,13 +165,22 @@ int main(void)
   motor_encoding_struct_init(&pitch_encoding, 33024, 50000);
   motor_encoding_struct_init(&roll_encoding, 33024, 50000);
 
-  /* (Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MoMotorID motorID, GPIO_TypeDef* DIR_port, uint16_t DIR_pin)
-   * - motorID: as defined by the motorID enum.
-   */
-  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin);
-  motor_struct_init(&roll_motor, TIM8, TIM4, &pitch_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin);
-  motor_struct_init(&pitch_motor, TIM1, TIM5, &roll_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin);
 
+
+  /* (Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MotorName motorName,
+   * 		GPIO_TypeDef* DIR_port, uint16_t DIR_pin, int kPw, int kDw)
+   * - motorName: as defined by the motorName enum.
+   * - kPw; // proportional gain (how far away from goal)
+   * - kDw; //derivative gain (smoothing)
+   */
+  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 50, 5);
+  motor_struct_init(&roll_motor, TIM8, TIM4, &pitch_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 50, 5);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, &roll_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 50, 5);
+
+
+  all_motors_list[0] = &gripper_motor;
+  all_motors_list[1] = &roll_motor;
+  all_motors_list[2] = &pitch_motor;
 
   //set up Encoders
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
@@ -200,12 +219,15 @@ int main(void)
   set_counts(&roll_encoding, 41744);
 
 
-  setPIDGoalA(90);
+  setPIDGoalA(&gripper_motor, 90);
+  setPIDGoalA(&pitch_motor, 90);
+  setPIDGoalA(&roll_motor, 90);
 
 
-  /*
-   * CalibrateMotor(); // Calibrate the motor (see Calibration.c).
-   */
+
+  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
+  CalibrateMotor(&roll_motor);
+  CalibrateMotor(&pitch_motor);
 
 
     // CAN initialization
@@ -233,19 +255,129 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int LMSW1_buffer = 0;
+  int LMSW2_buffer = 0;
+  int LMSW5_buffer = 0;
+  int LMSW6_buffer = 0;
+
+  int LMSW1_isDebouncing = 0;
+  int LMSW2_isDebouncing = 0;
+  int LMSW5_isDebouncing = 0;
+  int LMSW6_isDebouncing = 0;
+
+
+
   while (1)
   {
 	  // Process Message if available
 	  if (CAN_flag){
 
+		CAN_flag = 0;
+		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+
 		//if (steering_state != CALIBRATION){
 		CAN_Parse_MSG(&RxHeader, RxData);
 		//}
-
 		// led pin to check msg processing working
-		CAN_flag = 0;
+
 		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	  }
+
+
+	  if (LMSW1_flag_pitch_up){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+			if (!switch_state){
+				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
+			}
+
+		  LMSW1_flag_pitch_up = 0;
+	  }
+
+	  if (LMSW1_isDebouncing){
+		 //check that at–– least 32 consecutive readings of switch = 1
+		 //ensures that the switch reading is stabilized
+		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+			LMSW1_buffer = (LMSW1_buffer<<1) | current_switch_reading;
+
+		 //only once stable switch reading that perform switch actions
+		 if (LMSW1_buffer == 0xFFFFFFFF){
+			LMSW1_isDebouncing = 0;
+			LMSW1_buffer = 0;
+			lmsw_pitch_up_recalibrate(&pitch_motor); // actual action to do on switch
+		 }
+	  }
+
+
+
+	  if (LMSW2_flag_pitch_down){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+			if (!switch_state){
+				LMSW2_isDebouncing = 1;
+			}
+		  LMSW2_flag_pitch_down = 0;
+	  }
+
+	  if (LMSW2_isDebouncing){
+	  		 //check that at–– least 32 consecutive readings of switch = 1
+	  		 //ensures that the switch reading is stabilized
+	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+	  			LMSW2_buffer = (LMSW2_buffer<<1) | current_switch_reading;
+
+	  		 //only once stable switch reading that perform switch actions
+	  		 if (LMSW2_buffer == 0xFFFFFFFF){
+	  			LMSW2_isDebouncing = 0;
+	  			LMSW2_buffer = 0;
+	  			lmsw_pitch_down_recalibrate(&pitch_motor); // actual action to do on switch
+	  		 }
+	  }
+
+
+
+	  if (LMSW5_flag_roll){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
+			if (!switch_state){
+				LMSW5_isDebouncing = 1;
+			}
+		  LMSW5_flag_roll = 0;
+	  }
+	  if (LMSW5_isDebouncing){
+	  		 //check that at–– least 32 consecutive readings of switch = 1
+	  		 //ensures that the switch reading is stabilized
+	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
+	  			LMSW5_buffer = (LMSW5_buffer<<1) | current_switch_reading;
+
+	  		 //only once stable switch reading that perform switch actions
+	  		 if (LMSW5_buffer == 0xFFFFFFFF){
+	  			LMSW5_isDebouncing = 0;
+	  			LMSW5_buffer = 0;
+	  			lmsw_roll_recalibrate(&roll_motor); // actual action to do on switch
+	  		 }
+	  }
+
+
+	  if (LMSW6_flag_gripper){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
+			if (!switch_state){
+				LMSW6_isDebouncing = 1;
+			}
+		  LMSW6_flag_gripper = 0;
+	  }
+
+	  if (LMSW6_isDebouncing){
+	  		 //check that at–– least 32 consecutive readings of switch = 1
+	  		 //ensures that the switch reading is stabilized
+	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
+	  			LMSW6_buffer = (LMSW6_buffer<<1) | current_switch_reading;
+
+	  		 //only once stable switch reading that perform switch actions
+	  		 if (LMSW6_buffer == 0xFFFFFFFF){
+	  			LMSW6_isDebouncing = 0;
+	  			LMSW6_buffer = 0;
+	  			lmsw_gripper_recalibrate(&gripper_motor); // actual action to do on switch
+	  		 }
+	  }
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -939,10 +1071,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, DIR_roll_Pin|LED_comms_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : FAULT_pitch_Pin FAULT_roll_Pin LImit_switch_6_Pin Limit_switch_5_Pin
-                           Limit_switch_4_Pin */
-  GPIO_InitStruct.Pin = FAULT_pitch_Pin|FAULT_roll_Pin|LImit_switch_6_Pin|Limit_switch_5_Pin
-                          |Limit_switch_4_Pin;
+  /*Configure GPIO pins : FAULT_pitch_Pin FAULT_roll_Pin */
+  GPIO_InitStruct.Pin = FAULT_pitch_Pin|FAULT_roll_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -969,11 +1099,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DIR_gripper_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ToF_int_Pin Limit_switch_2_Pin Limit_switch_1_Pin */
-  GPIO_InitStruct.Pin = ToF_int_Pin|Limit_switch_2_Pin|Limit_switch_1_Pin;
+  /*Configure GPIO pin : ToF_int_Pin */
+  GPIO_InitStruct.Pin = ToF_int_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(ToF_int_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIR_roll_Pin LED_comms_Pin */
   GPIO_InitStruct.Pin = DIR_roll_Pin|LED_comms_Pin;
@@ -988,11 +1118,23 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(VBUS_sense_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : Limit_switch_6_Pin Limit_switch_5_Pin Limit_switch_4_Pin */
+  GPIO_InitStruct.Pin = Limit_switch_6_Pin|Limit_switch_5_Pin|Limit_switch_4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pin : Limit_switch_3_Pin */
   GPIO_InitStruct.Pin = Limit_switch_3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Limit_switch_3_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Limit_switch_2_Pin Limit_switch_1_Pin */
+  GPIO_InitStruct.Pin = Limit_switch_2_Pin|Limit_switch_1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
@@ -1030,6 +1172,20 @@ void HAL_FDCAN_RxFifo0Callback (FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs
 
 	  }
 	}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if (GPIO_Pin == Limit_switch_1_Pin){
+		LMSW1_flag_pitch_up = 1;
+	}else if (GPIO_Pin == Limit_switch_2_Pin){
+		LMSW2_flag_pitch_down = 1;
+	}else if (GPIO_Pin == Limit_switch_5_Pin){
+		LMSW5_flag_roll = 1;
+	}else if (GPIO_Pin == Limit_switch_6_Pin){
+		LMSW6_flag_gripper = 1;
+	}else{
+		__NOP(); //callback problem
+	}
+}
 
 
 /* USER CODE END 4 */

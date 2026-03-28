@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "motorControl.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -111,9 +111,9 @@ void Error_Handler(void);
 #define VBUS_sense_GPIO_Port GPIOA
 #define Lazer_ctrl_Pin GPIO_PIN_10
 #define Lazer_ctrl_GPIO_Port GPIOA
-#define LImit_switch_6_Pin GPIO_PIN_10
-#define LImit_switch_6_GPIO_Port GPIOC
-#define LImit_switch_6_EXTI_IRQn EXTI15_10_IRQn
+#define Limit_switch_6_Pin GPIO_PIN_10
+#define Limit_switch_6_GPIO_Port GPIOC
+#define Limit_switch_6_EXTI_IRQn EXTI15_10_IRQn
 #define Limit_switch_5_Pin GPIO_PIN_11
 #define Limit_switch_5_GPIO_Port GPIOC
 #define Limit_switch_5_EXTI_IRQn EXTI15_10_IRQn
@@ -135,6 +135,8 @@ void Error_Handler(void);
 #define Encoder_B_roll_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+#define NB_MOTORS 3
+extern Motor * all_motors_list[NB_MOTORS];
 
 /* USER CODE END Private defines */
 

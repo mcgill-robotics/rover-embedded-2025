@@ -13,31 +13,45 @@
 
 
 
-int counts;
+//int counts;
 //int need_debounce = 0;
-//int debounce_buffer = 0; // 32 bits buffer to fill with switch state
+int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
 
-//int is_debouncing(){
-//	return need_debounce;
+void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
+		int lm_sw_reset_counts){
+	encoding->ENCODER_MAX_COUNTS = encoder_max_counts;
+	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
+	encoding->curr_counts = 0;
+	encoding->need_debounce = 0;
+}
+
+
+//
+//int is_debouncing(Motor_Encoding_Struct * encoding){
+//	return encoding->need_debounce;
 //}
+//* integrated into main loop
 
-//void set_debounce(int debounce_state){
-//	need_debounce = debounce_state;
+//void set_debounce(Motor_Encoding_Struct * encoding, int debounce_state){
+//	encoding->need_debounce = debounce_state;
 //}
+//* integrated into main loop
 
 void set_counts(Motor_Encoding_Struct * encoding, int n){
 //	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
 	encoding->curr_counts = n;
 }
 
-int get_counts(){
-	return counts;
+int get_counts(Motor_Encoding_Struct * encoding){
+	return encoding->curr_counts;
 }
 
 float count_to_angle(Motor_Encoding_Struct * encoding, int n){
+	//remove the offset from the angle to get the raw count
 	int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
 //	int new_n = abs(no_offset%MAX_COUNTS);
+
 	float angle=((float)no_offset/(float) encoding->ENCODER_MAX_COUNTS)*360;
 	return angle;
 }
@@ -51,26 +65,59 @@ int angle_to_count(Motor_Encoding_Struct * encoding, double n){
 //void reset_debounce_buffer(){
 //	debounce_buffer = 0;
 //}
+//*integrated into main loop
 
-/*
 
 // scan limit switch and return if considered pressed
-int scan_switch(){
-	int current_switch_reading = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
-	debounce_buffer = (debounce_buffer<<1) | current_switch_reading;
-	return debounce_buffer == 0xFFFFFFFF;
-}
-*/
+//int scan_switch(){
+//	int current_switch_reading = HAL_GPIO_ReadPin(LIMIT_GPIO_Port, LIMIT_Pin);
+//	debounce_buffer = (debounce_buffer<<1) | current_switch_reading;
+//	return debounce_buffer == 0xFFFFFFFF;
+//}
+//*integrated into main
 
-/*
-int try_calibrate_encoder(){
-	// return 1 if calibrated
-	if (scan_switch()){
-		TIM2->CNT = LIMIT_SWITCH_RESET_COUNTS;
-		set_counts((uint16_t) TIM2->CNT);
+
+
+int lmsw_pitch_up_recalibrate(Motor * motor){
+	//reset the maximum number of counts
+	//set the current number of counts to the MAX
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	set_counts(motor->Motor_Encoding_Struct, (uint16_t) TIM2->CNT);
+	return 1;
+}
+
+int lmsw_pitch_down_recalibrate(Motor * motor){
+	//reset to minimum number of counts
+	//TODO: ITS NOT SUPPOSED TO BE 0, WHATS THE ACTUAL MIN VALUE????
+	int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+	set_counts(motor->Motor_Encoding_Struct, offset);
+	return 1;
+}
+
+int lmsw_roll_recalibrate(Motor * motor){
+	//reset to minimum number of counts
+		//reset counts to 0 -> offset-ed
+		int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+		set_counts(motor->Motor_Encoding_Struct, offset);
 		return 1;
-	}
-	return 0;
+}
+
+int lmsw_gripper_recalibrate(Motor * motor){
+	//reset calibration & set current number of counts to MAX
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	set_counts(motor->Motor_Encoding_Struct, (uint16_t) TIM2->CNT);
+	return 1;
+}
+
+//int try_calibrate_encoder(){
+//	// return 1 if calibrated
+//	//if (scan_switch()){
+//		TIM2->CNT = LIMIT_SWITCH_RESET_COUNTS;
+//		set_counts((uint16_t) TIM2->CNT);
+//		return 1;
+//	//}
+//	//return 0;
+
 //	if (!is_debouncing()){
 //		set_debounce(1);
 //		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
@@ -79,14 +126,9 @@ int try_calibrate_encoder(){
 //		}
 //		steering_state = PID;
 //	}
-}
-
-*/
+//}
 
 
 
-void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts, int lm_sw_reset_counts){
-	encoding->ENCODER_MAX_COUNTS = encoder_max_counts;
-	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
-}
+
 

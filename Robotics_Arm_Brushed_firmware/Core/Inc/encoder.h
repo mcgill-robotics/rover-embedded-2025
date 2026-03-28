@@ -7,26 +7,26 @@
 //^ now given in motor struct in main upon initialization
 
 //reset angles for left and for right motors
-#define LIMIT_SWITCH_RESET_COUNTS 50000 //(depends how angles defined -- corresponds to 180)
+//#define LIMIT_SWITCH_RESET_COUNTS 50000 //(depends how angles defined -- corresponds to 180)
 
 
-typedef struct {
-	int 		ENCODER_MAX_COUNTS;
-	int 		LMSW_RESET_COUNTS;
-	int			curr_counts;
 
-} Motor_Encoding_Struct;
-
-void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts, int lm_sw_reset_counts);
+void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
+		int lm_sw_reset_counts);
 
 
-//int is_debouncing();
-//void set_debounce(int debounce_state);
+//int is_debouncing(Motor_Encoding_Struct * encoding);
+//void set_debounce(Motor_Encoding_Struct * encoding, int debounce_state);
 void set_counts(Motor_Encoding_Struct * encoding, int n);
-int get_counts();
+int get_counts(Motor_Encoding_Struct * encoding);
 float count_to_angle(Motor_Encoding_Struct * encoding, int n);
 int angle_to_count(Motor_Encoding_Struct * encoding, double n);
-//int try_calibrate_encoder();
+int try_calibrate_encoder();
 //void reset_debounce_buffer();
+
+int lmsw_pitch_up_recalibrate(Motor * motor);
+int lmsw_pitch_down_recalibrate(Motor * motor);
+int lmsw_roll_recalibrate(Motor * motor);
+int lmsw_gripper_recalibrate(Motor * motor);
 
 #endif
