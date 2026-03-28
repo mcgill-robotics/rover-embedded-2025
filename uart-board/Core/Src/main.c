@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,31 +54,38 @@ UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+DMA_HandleTypeDef hdma_lpuart1_rx;
+DMA_HandleTypeDef hdma_lpuart1_tx;
+DMA_HandleTypeDef hdma_uart4_rx;
+DMA_HandleTypeDef hdma_uart4_tx;
+DMA_HandleTypeDef hdma_uart5_rx;
+DMA_HandleTypeDef hdma_uart5_tx;
+DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart1_tx;
+DMA_HandleTypeDef hdma_usart2_rx;
+DMA_HandleTypeDef hdma_usart2_tx;
+DMA_HandleTypeDef hdma_usart3_rx;
+DMA_HandleTypeDef hdma_usart3_tx;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t lpuart1_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint8_t uart1_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint8_t uart2_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint8_t uart3_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint8_t uart4_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint8_t uart5_out_buf[UART_BUF_LEN + UART_PAK_LEN];
-uint32_t lpuart1_read, uart1_read, uart2_read, uart3_read, uart4_read, uart5_read;
-uint32_t total_read;
-char json[JSON_BUF_LEN];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_UART4_Init(void);
 static void MX_UART5_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_PCD_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void check_uart(UART_HandleTypeDef *huart);
 static void cdc_task(void);
@@ -116,48 +124,41 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_LPUART1_UART_Init();
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_USB_PCD_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
- // init device stack on configured roothub port
+  // Init device stack on configured roothub port
   tusb_rhport_init_t dev_init = {
     .role = TUSB_ROLE_DEVICE,
     .speed = TUSB_SPEED_AUTO
   };
   tusb_init(BOARD_TUD_RHPORT, &dev_init);
 
-  // Start UART receive interrupts
-  HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart1, uart1_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  // HAL_UARTEx_ReceiveToIdle_IT(&huart2, uart2_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart3, uart3_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart5, uart5_out_buf + UART_BUF_LEN, UART_PAK_LEN);
-
+  // Init UART structs and begin DMA receive
+  init_uart(&uarts[0], &hlpuart1, (uint8_t*) LPUART1_TOPIC);
+  init_uart(&uarts[1], &huart1, (uint8_t*) UART1_TOPIC);
+  init_uart(&uarts[2], &huart2, (uint8_t*) UART2_TOPIC);
+  init_uart(&uarts[3], &huart3, (uint8_t*) UART3_TOPIC);
+  init_uart(&uarts[4], &huart4, (uint8_t*) UART4_TOPIC);
+  init_uart(&uarts[5], &huart5, (uint8_t*) UART5_TOPIC);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // int tick = HAL_GetTick();
-    // printf("%d\n", tick);
-    if (HAL_GetTick()%1000==0){
-        HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
-    }
-    tud_task(); // tinyusb device task
-    cdc_task();
+    // Process UART RX
+    process_uart();
 
-    check_uart(&hlpuart1);
-    check_uart(&huart1);
-    // check_uart(&huart2);
-    check_uart(&huart3);
-    check_uart(&huart4);
-    check_uart(&huart5);
+    // TinyUSB
+    tud_task();
+    cdc_task();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -326,7 +327,7 @@ static void MX_UART5_Init(void)
   huart5.Init.StopBits = UART_STOPBITS_1;
   huart5.Init.Parity = UART_PARITY_NONE;
   huart5.Init.Mode = UART_MODE_TX_RX;
-  huart5.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+  huart5.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart5.Init.OverSampling = UART_OVERSAMPLING_16;
   huart5.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart5.Init.ClockPrescaler = UART_PRESCALER_DIV1;
@@ -398,6 +399,54 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -483,6 +532,57 @@ static void MX_USB_PCD_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMAMUX1_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  /* DMA1_Channel2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+  /* DMA1_Channel4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+  /* DMA1_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+  /* DMA2_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel1_IRQn);
+  /* DMA2_Channel2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel2_IRQn);
+  /* DMA2_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel3_IRQn);
+  /* DMA2_Channel4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel4_IRQn);
+  /* DMA1_Channel8_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel8_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel8_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -497,8 +597,8 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -560,113 +660,10 @@ void tud_cdc_line_state_cb(uint8_t instance, bool dtr, bool rts) {
   }
 }
 
-static UART_HandleTypeDef *get_huart(const char *topic) {
-  if (strcmp(topic, LPUART1_TOPIC) == 0) {
-    return &hlpuart1;
-  } else if (strcmp(topic, UART1_TOPIC) == 0) {
-    return &huart1;
-  // } else if (strcmp(topic, UART2_TOPIC) == 0) {
-  //   return &huart2;
-  }else if (strcmp(topic, UART3_TOPIC) == 0) {
-    return &huart3;
-  }else if (strcmp(topic, UART4_TOPIC) == 0) {
-    return &huart4;
-  }else if (strcmp(topic, UART5_TOPIC) == 0) {
-    return &huart5;
-  }
-
-  return NULL;
-}
-
-static char *get_topic(const UART_HandleTypeDef *huart) {
-  if (huart == &hlpuart1) {
-    return LPUART1_TOPIC;
-  } else if (huart == &huart1) {
-    return UART1_TOPIC;
-  // } else if (huart == &huart2) {
-  //   return UART2_TOPIC;
-  }else if (huart == &huart3) {
-    return UART3_TOPIC;
-  }else if (huart == &huart4) {
-    return UART4_TOPIC;
-  }else if (huart == &huart5) {
-    return UART5_TOPIC;
-  }
-
-  return NULL;
-}
-
-static uint8_t *get_buffer(const UART_HandleTypeDef *huart) {
-  if (huart == &hlpuart1) {
-    return lpuart1_out_buf;
-  } else if (huart == &huart1) {
-    return uart1_out_buf;
-  // } else if (huart == &huart2) {
-  //   return uart2_out_buf;
-  }else if (huart == &huart3) {
-    return uart3_out_buf;
-  }else if (huart == &huart4) {
-    return uart4_out_buf;
-  }else if (huart == &huart5) {
-    return uart5_out_buf;
-  }
-
-  return NULL;
-}
-
-static uint32_t *get_read_count(const UART_HandleTypeDef *huart) {
-  if (huart == &hlpuart1) {
-    return &lpuart1_read;
-  } else if (huart == &huart1) {
-    return &uart1_read;
-  // } else if (huart == &huart2) {
-  //   return &uart2_read;
-  }else if (huart == &huart3) {
-    return &uart3_read;
-  }else if (huart == &huart4) {
-    return &uart4_read;
-  }else if (huart == &huart5) {
-    return &uart5_read;
-  }
-
-  return NULL;
-}
-
-void check_uart(UART_HandleTypeDef *huart) {
-  uint32_t* read_ptr = get_read_count(huart);
-  uint8_t* buffer = get_buffer(huart);
-
-  if (*read_ptr == 0) return;
-  char* newline_pos = strchr((const char *)buffer, '\n');
-  if (newline_pos == NULL) return;
-
-  *newline_pos = '\0';
-  // send_msg(get_topic(huart), buffer);
-
-  // TODO: Process multiple messages per call if multiple newlines are present
-  uint32_t leftover = *read_ptr - (newline_pos - (char *)buffer + 1);
-  memcpy(buffer, newline_pos + 1, leftover);
-  *read_ptr -= (newline_pos - (char *)buffer + 1);
-  buffer[*read_ptr] = '\0';
-}
-
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size) {
-  uint32_t* read_ptr = get_read_count(huart);
-
-  if (*read_ptr + size >= UART_BUF_LEN) *read_ptr = 0;
-  
-  uint8_t* buffer = get_buffer(huart);
-
-  memcpy(buffer + *read_ptr, buffer + UART_BUF_LEN, size);
-  *read_ptr += size;
-  buffer[*read_ptr] = '\0';
-
-  HAL_UARTEx_ReceiveToIdle_IT(huart, buffer + UART_BUF_LEN, UART_PAK_LEN);
-}
-
 static void cdc_task(void) {
   // We assume itf 0
   if (tud_cdc_n_available(0)) {
+    /*
     // Read available data with a larger buffer to handle bigger JSON 
     uint32_t count = tud_cdc_n_read(0, json + total_read, JSON_BUF_LEN - total_read);
     total_read += count;
@@ -698,6 +695,7 @@ static void cdc_task(void) {
       HAL_UART_Transmit(huart, msg,  msg_len, 500);
       HAL_UART_Transmit(huart, (uint8_t*) "\n",  1, 500);
     }
+    */
   }
 }
 /* USER CODE END 4 */
