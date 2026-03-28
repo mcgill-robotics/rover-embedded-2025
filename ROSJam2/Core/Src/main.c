@@ -24,6 +24,7 @@
 #include "class/cdc/cdc_device.h"
 #include "device/usbd.h"
 #include "rosjam.h"
+#include "json_serde/serialization.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,6 +66,8 @@ RosjamEndpoint endpoint3;
 RosjamEndpoint endpoint4;
 RosjamEndpoint endpoint5;
 RosjamEndpoint endpoint6;
+
+Buffer test;
 /* USER CODE END 0 */
 
 /**
@@ -99,7 +102,7 @@ int main(void)
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
   setup();
-  add_interface(&endpoint0, "diag");
+  add_interface(&endpoint0, "diag0");
   add_interface(&endpoint1, "uart0");
   add_interface(&endpoint2, "uart1");
   add_interface(&endpoint3, "uart2");
@@ -117,19 +120,21 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // if (tud_cdc_n_ready(0)){
     //   tud_cdc_n_write_str(0, "Hello World! diag: This is a longer message\n");
+    //   // serialize(&test ,"test", "Hello World! diag: This is a longer message\n");
+    //   serialize_simple("test", "Hello World! diag: This is a longer message\n");
     // }
     
     if (HAL_GetTick()%1000==0){
         HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
     }
 
-    send_msg(&endpoint0, "Hello World! diag: This is a longer message");
-    send_msg(&endpoint1, "Hello World! uart0: This is a longer message");
-    send_msg(&endpoint2, "Hello World! uart1:This is a longer message");
-    send_msg(&endpoint3, "Hello World! uart2:This is a longer message");
-    send_msg(&endpoint4, "Hello World! uart3:This is a longer message");
-    send_msg(&endpoint5, "Hello World! uart4:This is a longer message");
-    send_msg(&endpoint6, "Hello World! uart5:This is a longer message");
+    // send_msg(&endpoint0, "Hello World! diag1: This is a longer message");
+    // send_msg(&endpoint1, "Hello World! uart0: This is a longer message");
+    // send_msg(&endpoint2, "Hello World! uart1: This is a longer message");
+    // send_msg(&endpoint3, "Hello World! uart2: This is a longer message");
+    // send_msg(&endpoint4, "Hello World! uart3: This is a longer message");
+    // send_msg(&endpoint5, "Hello World! uart4: This is a longer message");
+    // send_msg(&endpoint6, "Hello World! uart5: This is a longer message");
     
     process();
     // tud_task();
