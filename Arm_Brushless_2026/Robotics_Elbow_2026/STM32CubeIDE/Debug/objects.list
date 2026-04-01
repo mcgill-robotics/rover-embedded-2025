@@ -1,6 +1,8 @@
 "./Application/Startup/startup_stm32g431cbux.o"
 "./Application/User/CAN_processing_v2.o"
 "./Application/User/aspep.o"
+"./Application/User/can_telemetry.o"
+"./Application/User/esc_sensors.o"
 "./Application/User/hf_registers.o"
 "./Application/User/main.o"
 "./Application/User/mc_api.o"

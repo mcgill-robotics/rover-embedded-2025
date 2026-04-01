@@ -26,6 +26,8 @@
 #include "speed_pos_fdbk.h"
 #include "mc_config_common.h"
 #include <math.h>
+#include "can_telemetry.h"
+#include "esc_sensors.h"
 
 /* USER CODE END Includes */
 
@@ -73,7 +75,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 
 // Set the ESC ID
-int ESC_ID = 1; /* Set to this ESC's ID (0-15) */
+uint8_t ESC_ID = 1;
+uint8_t MOTOR_TYPE = 0;
 
 // Add the CANFD required variables
 static volatile uint8_t can_rx_flag = 0;
@@ -221,6 +224,9 @@ int main(void) {
 			CAN_Parse_MSG(&can_rx_header, can_rx_data);
 		}
 
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
+		HAL_Delay(200);
+//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -655,7 +661,8 @@ static void MX_FDCAN1_Init(void) {
 	hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
 	hfdcan1.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
 	hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
-	hfdcan1.Init.AutoRetransmission = ENABLE;
+//	hfdcan1.Init.AutoRetransmission = ENABLE;
+	hfdcan1.Init.AutoRetransmission = DISABLE;
 	hfdcan1.Init.TransmitPause = ENABLE;
 	hfdcan1.Init.ProtocolException = DISABLE;
 	hfdcan1.Init.NominalPrescaler = 20;
@@ -1070,6 +1077,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM6) {
+		ESC_Sensors_Update();       /* 1. refresh sensor cache        */
+		Telemetry_Tick_1ms();       /* 2. broadcast scheduled signals */
+		/* In your TIM6 ISR, after Telemetry_Tick_1ms() */
+
 		if (can_rx_flag) {
 			can_rx_flag = 0;
 			can_rx_ready = 1;
@@ -1126,6 +1137,8 @@ void Error_Handler(void) {
 	}
 	/* USER CODE END Error_Handler_Debug */
 }
+
+
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number

@@ -1,5 +1,5 @@
-Application/User/CAN_processing_v2.o: \
- ../Application/User/CAN_processing_v2.c ../../Inc/CAN_processing_v2.h \
+Application/User/esc_sensors.o: ../Application/User/esc_sensors.c \
+ ../../Inc/esc_sensors.h ../../Inc/main.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../../Inc/stm32g4xx_hal_conf.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -40,7 +40,6 @@ Application/User/CAN_processing_v2.o: \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
- ../../Inc/can_common.h ../../Inc/esc_sensors.h ../../Inc/main.h \
  ../../Inc/motorcontrol.h ../../Inc/mc_config.h \
  ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
@@ -88,8 +87,10 @@ Application/User/CAN_processing_v2.o: \
  ../../Inc/parameters_conversion.h ../../Inc/mc_math.h \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
- ../../Inc/mc_api.h ../../Inc/mc_api.h ../../Inc/mc_interface.h
-../../Inc/CAN_processing_v2.h:
+ ../../Inc/mc_api.h ../../Inc/mc_api.h ../../Inc/mc_interface.h \
+ ../../Inc/mc_config_common.h
+../../Inc/esc_sensors.h:
+../../Inc/main.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h:
@@ -130,9 +131,6 @@ Application/User/CAN_processing_v2.o: \
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h:
-../../Inc/can_common.h:
-../../Inc/esc_sensors.h:
-../../Inc/main.h:
 ../../Inc/motorcontrol.h:
 ../../Inc/mc_config.h:
 ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h:
@@ -191,3 +189,4 @@ Application/User/CAN_processing_v2.o: \
 ../../Inc/mc_api.h:
 ../../Inc/mc_api.h:
 ../../Inc/mc_interface.h:
+../../Inc/mc_config_common.h:
