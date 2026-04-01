@@ -84,14 +84,14 @@ class ReadSpec(IntEnum):
     Mirrors the ReadSpec enum in CAN_processing_v2.h.
     Values 0–7 (3 bits).
     """
-    CALIBRATION    = 0
-    POSITION       = 1
-    VOLTAGE        = 2
-    CURRENT        = 3
-    CURRENT_STATE  = 4
-    TEMPERATURE    = 5
-    PING           = 6
-    CONTROL_MODE   = 7
+    SPEED         = 0   # was CALIBRATION
+    POSITION      = 1
+    VOLTAGE       = 2
+    CURRENT       = 3
+    TEMPERATURE   = 4   # was CURRENT_STATE
+    CURRENT_STATE = 5   # was TEMPERATURE
+    PING          = 6
+    CONTROL_MODE  = 7
 
 
 class MotorID(IntEnum):
