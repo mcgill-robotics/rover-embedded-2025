@@ -1,5 +1,5 @@
 """
-test_read_all.py — Read all implemented fields from an ESC over CAN FD
+test_read_all.py,  Read all implemented fields from an ESC over CAN FD
 
 Sends each ReadSpec command one at a time, waits for the ESC response,
 and prints the decoded float value.
@@ -35,7 +35,7 @@ READ_FIELDS = [
     (ReadSpec.CURRENT,       "Current (A)",      None),
     (ReadSpec.CURRENT_STATE, "Motor State",       None),
     (ReadSpec.CONTROL_MODE,  "Control Mode",      None),
-    (ReadSpec.CALIBRATION,   "Calibration",       None),
+    # (ReadSpec.CALIBRATION,   "Calibration",       None),
 ]
 
 

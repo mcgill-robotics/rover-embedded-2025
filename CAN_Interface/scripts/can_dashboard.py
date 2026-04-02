@@ -33,7 +33,7 @@ import time
 import threading
 from pathlib import Path
 
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 
 app = Flask(__name__)
 
@@ -42,6 +42,10 @@ app = Flask(__name__)
 
 DB_PATH = "can_log.db"
 POLL_INTERVAL = 0.20  # seconds between SSE pushes
+CAN_PORT = None       # serial port for CANable (None = dry-run)
+
+# Commander instance — created in main(), used by /api/cmd endpoints
+_commander = None
 
 
 # Signal metadata — matches your firmware telemetry table
@@ -191,6 +195,160 @@ def api_stream():
     return Response(generate(), mimetype="text/event-stream",
                     headers={"Cache-Control": "no-cache",
                              "X-Accel-Buffering": "no"})
+
+
+
+# Command API endpoints — send CAN frames to ESC(s)
+
+
+@app.route("/api/cmd/position", methods=["POST"])
+def api_cmd_position():
+    """Send a position setpoint (degrees) to an ESC.
+
+    JSON body: { "device_id": 1, "degrees": 45.0, "motor_type": "DRIVE" }
+
+    The firmware receives the float payload and routes it through:
+        Handle_Run_Command → RUN_POSITION → degreesToRad(information)
+        → positionSetpoint = result, controlMode = MODE_POSITION
+    """
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    deg = float(data.get("degrees", 0.0))
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+
+    arb_id = _commander.set_position(dev, deg, motor_type=mt)
+    return jsonify({
+        "ok": True,
+        "arb_id": f"0x{arb_id:03X}",
+        "command": "POSITION",
+        "device_id": dev,
+        "value": deg,
+        "unit": "deg",
+    })
+
+
+@app.route("/api/cmd/velocity", methods=["POST"])
+def api_cmd_velocity():
+    """Send a velocity setpoint (rad/s) to an ESC.
+
+    JSON body: { "device_id": 1, "rad_per_sec": 0.5, "motor_type": "DRIVE" }
+
+    The firmware receives the float payload and routes it through:
+        Handle_Run_Command → RUN_SPEED → velCtrlSetDemand(velCtrl, information)
+    """
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    vel = float(data.get("rad_per_sec", 0.0))
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+
+    arb_id = _commander.set_velocity(dev, vel, motor_type=mt)
+    return jsonify({
+        "ok": True,
+        "arb_id": f"0x{arb_id:03X}",
+        "command": "SPEED",
+        "device_id": dev,
+        "value": vel,
+        "unit": "rad/s",
+    })
+
+
+@app.route("/api/cmd/stop", methods=["POST"])
+def api_cmd_stop():
+    """Send a STOP command to an ESC.
+
+    JSON body: { "device_id": 1 }
+    """
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+
+    arb_id = _commander.stop(dev, motor_type=mt)
+    return jsonify({
+        "ok": True,
+        "arb_id": f"0x{arb_id:03X}",
+        "command": "STOP",
+        "device_id": dev,
+    })
+
+
+@app.route("/api/cmd/ping", methods=["POST"])
+def api_cmd_ping():
+    """Send a PING read request to an ESC.
+
+    JSON body: { "device_id": 1 }
+    """
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+
+    arb_id = _commander.ping(dev, motor_type=mt)
+    return jsonify({
+        "ok": True,
+        "arb_id": f"0x{arb_id:03X}",
+        "command": "PING",
+        "device_id": dev,
+    })
+
+
+@app.route("/api/cmd/read", methods=["POST"])
+def api_cmd_read():
+    """Send a generic read request to an ESC.
+
+    JSON body: { "device_id": 1, "spec": "TEMPERATURE" }
+    """
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+
+    from esc_can.protocol import ReadSpec
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    spec_name = data.get("spec", "PING").upper()
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+
+    try:
+        spec = ReadSpec[spec_name]
+    except KeyError:
+        return jsonify({"error": f"Unknown ReadSpec: {spec_name}"}), 400
+
+    arb_id = _commander.read(dev, spec, motor_type=mt)
+    return jsonify({
+        "ok": True,
+        "arb_id": f"0x{arb_id:03X}",
+        "command": f"READ_{spec_name}",
+        "device_id": dev,
+    })
+
+
+@app.route("/api/cmd/status")
+def api_cmd_status():
+    """Return commander status (connected, tx count, port)."""
+    if _commander is None:
+        return jsonify({"connected": False, "tx_count": 0, "port": None})
+    return jsonify({
+        "connected": _commander.bus_connected,
+        "tx_count": _commander.tx_count,
+        "port": CAN_PORT,
+    })
+
+
+def _parse_motor_type(value) -> int:
+    """Parse motor type from string or int."""
+    from esc_can.protocol import MotorType
+    if isinstance(value, str):
+        return MotorType.STEERING if value.upper() == "STEERING" else MotorType.DRIVE
+    return int(value)
 
 
 
@@ -558,6 +716,221 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .empty-state h2 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
   .empty-state p { font-size: 14px; max-width: 400px; margin: 0 auto; line-height: 1.6; }
 
+  /* --- Command Panel --- */
+  .cmd-panel {
+    margin-top: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .cmd-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .cmd-panel-header:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .cmd-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .cmd-panel-title .icon {
+    font-size: 16px;
+  }
+
+  .cmd-bus-status {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .cmd-bus-status.connected {
+    background: rgba(63,185,80,0.12);
+    color: var(--accent-green);
+    border: 1px solid rgba(63,185,80,0.25);
+  }
+
+  .cmd-bus-status.disconnected {
+    background: rgba(210,153,34,0.12);
+    color: var(--accent-orange);
+    border: 1px solid rgba(210,153,34,0.25);
+  }
+
+  .cmd-chevron {
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    font-size: 12px;
+  }
+
+  .cmd-panel.open .cmd-chevron {
+    transform: rotate(180deg);
+  }
+
+  .cmd-panel-body {
+    display: none;
+    padding: 18px;
+  }
+
+  .cmd-panel.open .cmd-panel-body {
+    display: block;
+  }
+
+  .cmd-section {
+    margin-bottom: 20px;
+  }
+
+  .cmd-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .cmd-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .cmd-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .cmd-row label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-width: 70px;
+  }
+
+  .cmd-input {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    width: 110px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .cmd-input:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .cmd-input.narrow {
+    width: 70px;
+  }
+
+  .cmd-select {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .cmd-btn {
+    background: var(--glow-blue);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .cmd-btn:hover {
+    background: rgba(88,166,255,0.15);
+    border-color: rgba(88,166,255,0.5);
+  }
+
+  .cmd-btn:active {
+    transform: scale(0.97);
+  }
+
+  .cmd-btn.danger {
+    background: rgba(248,81,73,0.08);
+    border-color: rgba(248,81,73,0.3);
+    color: var(--accent-red);
+  }
+
+  .cmd-btn.danger:hover {
+    background: rgba(248,81,73,0.15);
+    border-color: rgba(248,81,73,0.5);
+  }
+
+  .cmd-btn.success {
+    background: rgba(63,185,80,0.08);
+    border-color: rgba(63,185,80,0.3);
+    color: var(--accent-green);
+  }
+
+  .cmd-btn.success:hover {
+    background: rgba(63,185,80,0.15);
+    border-color: rgba(63,185,80,0.5);
+  }
+
+  .cmd-feedback {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    min-height: 16px;
+    transition: color 0.2s;
+  }
+
+  .cmd-feedback.ok {
+    color: var(--accent-green);
+  }
+
+  .cmd-feedback.err {
+    color: var(--accent-red);
+  }
+
+  .cmd-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  .cmd-quick-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   /* --- Responsive --- */
   @media (max-width: 640px) {
     .topbar { flex-direction: column; gap: 10px; align-items: flex-start; }
@@ -586,6 +959,68 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </div>
 
 <div class="main" id="mainContent">
+
+  <!-- Command Panel -->
+  <div class="cmd-panel open" id="cmdPanel">
+    <div class="cmd-panel-header" onclick="document.getElementById('cmdPanel').classList.toggle('open')">
+      <div class="cmd-panel-title">
+        <span class="icon">&#x1F3AE;</span> Command Panel
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="cmd-bus-status disconnected" id="cmdBusStatus">NO BUS</span>
+        <span class="cmd-chevron">&#x25BC;</span>
+      </div>
+    </div>
+    <div class="cmd-panel-body">
+      <div class="cmd-section">
+        <div class="cmd-section-label">Target</div>
+        <div class="cmd-row">
+          <label>Device ID</label>
+          <input class="cmd-input narrow" type="number" id="cmdDevId" value="1" min="0" max="15">
+          <label>Motor</label>
+          <select class="cmd-select" id="cmdMotorType">
+            <option value="DRIVE">Drive</option>
+            <option value="STEERING">Steering</option>
+          </select>
+        </div>
+      </div>
+      <hr class="cmd-divider">
+      <div class="cmd-section">
+        <div class="cmd-section-label">Position Control (S-Curve Planner)</div>
+        <div class="cmd-row">
+          <label>Degrees</label>
+          <input class="cmd-input" type="number" id="cmdPosDeg" value="45.0" step="1">
+          <button class="cmd-btn" onclick="cmdSendPosition()">Send Position</button>
+        </div>
+        <div class="cmd-feedback" id="cmdPosFb"></div>
+      </div>
+      <div class="cmd-section">
+        <div class="cmd-section-label">Velocity Control (Jerk-Limited Filter)</div>
+        <div class="cmd-row">
+          <label>rad/s</label>
+          <input class="cmd-input" type="number" id="cmdVelRad" value="0.5" step="0.1">
+          <button class="cmd-btn" onclick="cmdSendVelocity()">Send Velocity</button>
+          <button class="cmd-btn" onclick="document.getElementById('cmdVelRad').value='0';cmdSendVelocity()">Zero Vel</button>
+        </div>
+        <div class="cmd-feedback" id="cmdVelFb"></div>
+      </div>
+      <hr class="cmd-divider">
+      <div class="cmd-section">
+        <div class="cmd-section-label">Quick Actions</div>
+        <div class="cmd-quick-btns">
+          <button class="cmd-btn danger" onclick="cmdSendStop()">&#x26D4; STOP</button>
+          <button class="cmd-btn success" onclick="cmdSendPing()">&#x1F4E1; Ping</button>
+          <button class="cmd-btn" onclick="cmdSendRead('POSITION')">Read Pos</button>
+          <button class="cmd-btn" onclick="cmdSendRead('SPEED')">Read Speed</button>
+          <button class="cmd-btn" onclick="cmdSendRead('VOLTAGE')">Read Vbus</button>
+          <button class="cmd-btn" onclick="cmdSendRead('TEMPERATURE')">Read Temp</button>
+          <button class="cmd-btn" onclick="cmdSendRead('CONTROL_MODE')">Read Mode</button>
+        </div>
+        <div class="cmd-feedback" id="cmdQuickFb"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="empty-state" id="emptyState">
     <div class="icon">&#x1F50C;</div>
     <h2>Waiting for CAN data…</h2>
@@ -853,6 +1288,86 @@ function connectSSE() {
 }
 
 // ---------------------------------------------------------------------------
+// Command Panel — send CAN frames to ESC(s)
+// ---------------------------------------------------------------------------
+function cmdGetParams() {
+  return {
+    device_id: parseInt(document.getElementById('cmdDevId').value) || 1,
+    motor_type: document.getElementById('cmdMotorType').value,
+  };
+}
+
+function cmdFeedback(elId, msg, ok) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'cmd-feedback ' + (ok ? 'ok' : 'err');
+  setTimeout(() => { el.textContent = ''; el.className = 'cmd-feedback'; }, 4000);
+}
+
+async function cmdPost(url, body, fbId) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const parts = [data.arb_id, data.command];
+      if (data.value !== undefined) parts.push(data.value + (data.unit ? ' ' + data.unit : ''));
+      cmdFeedback(fbId, '\u2713 Sent ' + parts.join(' \u2192 '), true);
+    } else {
+      cmdFeedback(fbId, '\u2717 ' + (data.error || 'Unknown error'), false);
+    }
+  } catch (e) {
+    cmdFeedback(fbId, '\u2717 ' + e.message, false);
+  }
+}
+
+function cmdSendPosition() {
+  const p = cmdGetParams();
+  const deg = parseFloat(document.getElementById('cmdPosDeg').value) || 0;
+  cmdPost('/api/cmd/position', { ...p, degrees: deg }, 'cmdPosFb');
+}
+
+function cmdSendVelocity() {
+  const p = cmdGetParams();
+  const vel = parseFloat(document.getElementById('cmdVelRad').value) || 0;
+  cmdPost('/api/cmd/velocity', { ...p, rad_per_sec: vel }, 'cmdVelFb');
+}
+
+function cmdSendStop() {
+  cmdPost('/api/cmd/stop', cmdGetParams(), 'cmdQuickFb');
+}
+
+function cmdSendPing() {
+  cmdPost('/api/cmd/ping', cmdGetParams(), 'cmdQuickFb');
+}
+
+function cmdSendRead(spec) {
+  const p = cmdGetParams();
+  cmdPost('/api/cmd/read', { ...p, spec: spec }, 'cmdQuickFb');
+}
+
+async function cmdPollStatus() {
+  try {
+    const res = await fetch('/api/cmd/status');
+    const s = await res.json();
+    const badge = document.getElementById('cmdBusStatus');
+    if (badge) {
+      if (s.connected) {
+        badge.textContent = s.port || 'CONNECTED';
+        badge.className = 'cmd-bus-status connected';
+      } else {
+        badge.textContent = 'DRY RUN';
+        badge.className = 'cmd-bus-status disconnected';
+      }
+    }
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
 // Stats polling & uptime
 // ---------------------------------------------------------------------------
 async function pollStats() {
@@ -879,10 +1394,12 @@ async function init() {
   } catch {}
 
   await pollStats();
+  cmdPollStatus();
   connectSSE();
 
-  // Refresh stats every 5s
+  // Refresh stats and commander status periodically
   setInterval(pollStats, 5000);
+  setInterval(cmdPollStatus, 5000);
 }
 
 init();
@@ -895,7 +1412,7 @@ init();
 
 # Entry point
 def main():
-    global DB_PATH, POLL_INTERVAL
+    global DB_PATH, POLL_INTERVAL, CAN_PORT, _commander
 
     parser = argparse.ArgumentParser(description="Live CAN FD telemetry dashboard")
     parser.add_argument("--db", default="can_log.db",
@@ -906,10 +1423,30 @@ def main():
                         help="Bind address (default: 127.0.0.1)")
     parser.add_argument("--poll", type=float, default=0.20,
                         help="SSE poll interval in seconds (default: 0.20)")
+    parser.add_argument("--can-port", default=None,
+                        help="Serial port for CANable adapter (e.g. COM4, /dev/ttyACM0). "
+                             "Omit for dry-run mode (commands built but not sent on bus).")
+    parser.add_argument("--can-interface", default="slcan",
+                        help="python-can interface type (default: slcan)")
     args = parser.parse_args()
 
     DB_PATH = args.db
     POLL_INTERVAL = args.poll
+    CAN_PORT = args.can_port
+
+    # Initialize commander for sending CAN commands
+    try:
+        from esc_can.commander import CANCommander, open_commander
+        if CAN_PORT:
+            _commander = open_commander(port=CAN_PORT, interface=args.can_interface)
+            print(f"  CAN TX   : {CAN_PORT} ({args.can_interface})")
+        else:
+            _commander = CANCommander(bus=None)
+            print(f"  CAN TX   : dry-run (no --can-port specified)")
+    except ImportError:
+        from esc_can.commander import CANCommander
+        _commander = CANCommander(bus=None)
+        print(f"  CAN TX   : dry-run (python-can not installed)")
 
     if not Path(DB_PATH).exists():
         print(f"WARNING: Database '{DB_PATH}' does not exist yet.")

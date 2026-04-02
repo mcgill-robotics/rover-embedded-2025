@@ -121,10 +121,8 @@ INSERT INTO raw_frames (
 """
 
 
-# 
-# Pending frame tuple (what sits in the write buffer)
-# 
 
+# Pending frame tuple (what sits in the write buffer)
 @dataclass(slots=True)
 class _PendingFrame:
     """Internal staging record before DB insert."""
@@ -145,10 +143,8 @@ class _PendingFrame:
     decoded_float: Optional[float]
 
 
-# 
-# Main logger class
-# 
 
+# Main logger class
 class CANDataLogger:
     """High-throughput SQLite logger for CAN FD frames.
 
@@ -182,7 +178,7 @@ class CANDataLogger:
         self._batch_size = batch_size
         self._flush_interval_s = flush_interval_s
 
-        # --- Database setup ---
+        #  Database setup 
         self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA synchronous=NORMAL")
@@ -197,30 +193,27 @@ class CANDataLogger:
         self._conn.commit()
         self._session_id: int = cur.lastrowid  # type: ignore[assignment]
 
-        # --- Timing reference ---
+        #  Timing reference 
         self._t0 = time.perf_counter()
 
-        # --- Write buffer ---
+        #  Write buffer 
         self._buf: list[tuple] = []
         self._lock = threading.Lock()
         self._total_logged: int = 0
         self._total_flushed: int = 0
 
-        # --- Stats ---
+        #  Stats 
         self._flush_count: int = 0
         self._flush_time_total: float = 0.0
 
-        # --- Auto-flush timer ---
+        #  Auto-flush timer 
         self._auto_flush = auto_flush
         self._closed = False
         self._timer: Optional[threading.Timer] = None
         if auto_flush:
             self._schedule_timer()
 
-    # 
     # Public API — logging
-    # 
-
     def log_frame(
         self,
         msg,                  # can.Message (duck-typed to avoid hard dep)
@@ -320,10 +313,8 @@ class CANDataLogger:
         m.bitrate_switch = brs      # type: ignore[attr-defined]
         self.log_frame(m, is_rx=is_rx, timestamp=timestamp)
 
-    # 
+    
     # Public API — flush / close
-    # 
-
     def flush(self) -> int:
         """Write all buffered frames to SQLite.  Returns count written."""
         with self._lock:
@@ -356,10 +347,8 @@ class CANDataLogger:
         self.flush()
         self._conn.close()
 
-    # 
+    
     # Public API — queries
-    # 
-
     def query_telemetry(
         self,
         device_id: int,
@@ -500,10 +489,8 @@ class CANDataLogger:
             "signal_count": row[4],
         }
 
-    # 
+    
     # Properties
-    # 
-
     @property
     def session_id(self) -> int:
         return self._session_id
@@ -543,20 +530,15 @@ class CANDataLogger:
             "session_id": self._session_id,
         }
 
-    # 
     # Context manager
-    # 
-
     def __enter__(self):
         return self
 
     def __exit__(self, *exc):
         self.close()
 
-    # 
+    
     # Internals
-    # 
-
     def _schedule_timer(self) -> None:
         if self._closed:
             return
@@ -568,7 +550,6 @@ class CANDataLogger:
         if not self._closed:
             self.flush()
             self._schedule_timer()
-
 
 def _resolve_spec_name(action: Action, spec: int) -> str:
     """Convert the 3-bit spec field to a human-readable name."""
