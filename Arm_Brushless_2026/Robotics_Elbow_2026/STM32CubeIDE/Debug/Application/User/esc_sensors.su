@@ -1,2 +1,2 @@
-../Application/User/esc_sensors.c:63:6:ESC_Sensors_Update	16	static
-../Application/User/esc_sensors.c:84:23:ESC_Sensors_Get	0	static
+../Application/User/esc_sensors.c:42:6:ESC_Sensors_Update	16	static
+../Application/User/esc_sensors.c:63:23:ESC_Sensors_Get	0	static

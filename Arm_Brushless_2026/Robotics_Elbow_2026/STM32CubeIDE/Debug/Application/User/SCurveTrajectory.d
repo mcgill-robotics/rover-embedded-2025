@@ -1,6 +1,6 @@
-Application/User/stm32g4xx_it.o: \
- C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/stm32g4xx_it.c \
- ../../Inc/main.h ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
+Application/User/SCurveTrajectory.o: \
+ ../Application/User/SCurveTrajectory.c ../../Inc/main.h \
+ ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../../Inc/stm32g4xx_hal_conf.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_def.h \
@@ -88,7 +88,7 @@ Application/User/stm32g4xx_it.o: \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
  ../../Inc/mc_api.h ../../Inc/velocity_ctrl.h \
- ../../Inc/SCurveTrajectory.h ../../Inc/stm32g4xx_it.h
+ ../../Inc/SCurveTrajectory.h ../../Inc/SCurveTrajectory.h
 ../../Inc/main.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
@@ -188,4 +188,4 @@ Application/User/stm32g4xx_it.o: \
 ../../Inc/mc_api.h:
 ../../Inc/velocity_ctrl.h:
 ../../Inc/SCurveTrajectory.h:
-../../Inc/stm32g4xx_it.h:
+../../Inc/SCurveTrajectory.h:

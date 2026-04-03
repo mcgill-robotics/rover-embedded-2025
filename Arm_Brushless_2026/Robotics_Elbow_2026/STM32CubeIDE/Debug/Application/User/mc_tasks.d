@@ -87,8 +87,9 @@ Application/User/mc_tasks.o: \
  ../../Inc/parameters_conversion.h ../../Inc/mc_math.h \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
- ../../Inc/mc_api.h ../../Inc/mc_math.h ../../Inc/motorcontrol.h \
- ../../Inc/mc_interface.h \
+ ../../Inc/mc_api.h ../../Inc/velocity_ctrl.h \
+ ../../Inc/SCurveTrajectory.h ../../Inc/mc_math.h \
+ ../../Inc/motorcontrol.h ../../Inc/mc_interface.h \
  ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/digital_output.h \
  ../../Inc/pwm_common.h ../../Inc/mc_tasks.h ../../Inc/mc_parameters.h \
  ../../Inc/parameters_conversion.h ../../Inc/mcp_config.h \
@@ -195,6 +196,8 @@ Application/User/mc_tasks.o: \
 ../../Inc/power_stage_parameters.h:
 ../../Inc/pmsm_motor_parameters.h:
 ../../Inc/mc_api.h:
+../../Inc/velocity_ctrl.h:
+../../Inc/SCurveTrajectory.h:
 ../../Inc/mc_math.h:
 ../../Inc/motorcontrol.h:
 ../../Inc/mc_interface.h:

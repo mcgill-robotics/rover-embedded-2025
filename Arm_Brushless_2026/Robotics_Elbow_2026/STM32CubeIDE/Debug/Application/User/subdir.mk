@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Application/User/CAN_processing_v2.c \
+../Application/User/SCurveTrajectory.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/aspep.c \
 ../Application/User/can_telemetry.c \
 ../Application/User/esc_sensors.c \
@@ -24,6 +25,7 @@ C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robot
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/mcp.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/mcp_config.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/motorcontrol.c \
+../Application/User/planner.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/pwm_common.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/pwm_curr_fdbk.c \
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/regular_conversion_manager.c \
@@ -35,10 +37,12 @@ C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robot
 C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c \
 ../Application/User/syscalls.c \
 ../Application/User/sysmem.c \
-C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/usart_aspep_driver.c 
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/usart_aspep_driver.c \
+../Application/User/velocity_ctrl.c 
 
 OBJS += \
 ./Application/User/CAN_processing_v2.o \
+./Application/User/SCurveTrajectory.o \
 ./Application/User/aspep.o \
 ./Application/User/can_telemetry.o \
 ./Application/User/esc_sensors.o \
@@ -57,6 +61,7 @@ OBJS += \
 ./Application/User/mcp.o \
 ./Application/User/mcp_config.o \
 ./Application/User/motorcontrol.o \
+./Application/User/planner.o \
 ./Application/User/pwm_common.o \
 ./Application/User/pwm_curr_fdbk.o \
 ./Application/User/regular_conversion_manager.o \
@@ -68,10 +73,12 @@ OBJS += \
 ./Application/User/sync_registers.o \
 ./Application/User/syscalls.o \
 ./Application/User/sysmem.o \
-./Application/User/usart_aspep_driver.o 
+./Application/User/usart_aspep_driver.o \
+./Application/User/velocity_ctrl.o 
 
 C_DEPS += \
 ./Application/User/CAN_processing_v2.d \
+./Application/User/SCurveTrajectory.d \
 ./Application/User/aspep.d \
 ./Application/User/can_telemetry.d \
 ./Application/User/esc_sensors.d \
@@ -90,6 +97,7 @@ C_DEPS += \
 ./Application/User/mcp.d \
 ./Application/User/mcp_config.d \
 ./Application/User/motorcontrol.d \
+./Application/User/planner.d \
 ./Application/User/pwm_common.d \
 ./Application/User/pwm_curr_fdbk.d \
 ./Application/User/regular_conversion_manager.d \
@@ -101,7 +109,8 @@ C_DEPS += \
 ./Application/User/sync_registers.d \
 ./Application/User/syscalls.d \
 ./Application/User/sysmem.d \
-./Application/User/usart_aspep_driver.d 
+./Application/User/usart_aspep_driver.d \
+./Application/User/velocity_ctrl.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -163,7 +172,7 @@ Application/User/usart_aspep_driver.o: C:/Users/james/Documents/2.Robotics/rover
 clean: clean-Application-2f-User
 
 clean-Application-2f-User:
-	-$(RM) ./Application/User/CAN_processing_v2.cyclo ./Application/User/CAN_processing_v2.d ./Application/User/CAN_processing_v2.o ./Application/User/CAN_processing_v2.su ./Application/User/aspep.cyclo ./Application/User/aspep.d ./Application/User/aspep.o ./Application/User/aspep.su ./Application/User/can_telemetry.cyclo ./Application/User/can_telemetry.d ./Application/User/can_telemetry.o ./Application/User/can_telemetry.su ./Application/User/esc_sensors.cyclo ./Application/User/esc_sensors.d ./Application/User/esc_sensors.o ./Application/User/esc_sensors.su ./Application/User/hf_registers.cyclo ./Application/User/hf_registers.d ./Application/User/hf_registers.o ./Application/User/hf_registers.su ./Application/User/main.cyclo ./Application/User/main.d ./Application/User/main.o ./Application/User/main.su ./Application/User/mc_api.cyclo ./Application/User/mc_api.d ./Application/User/mc_api.o ./Application/User/mc_api.su ./Application/User/mc_app_hooks.cyclo ./Application/User/mc_app_hooks.d ./Application/User/mc_app_hooks.o ./Application/User/mc_app_hooks.su ./Application/User/mc_config.cyclo ./Application/User/mc_config.d ./Application/User/mc_config.o ./Application/User/mc_config.su ./Application/User/mc_config_common.cyclo ./Application/User/mc_config_common.d ./Application/User/mc_config_common.o ./Application/User/mc_config_common.su ./Application/User/mc_configuration_registers.cyclo ./Application/User/mc_configuration_registers.d ./Application/User/mc_configuration_registers.o ./Application/User/mc_configuration_registers.su ./Application/User/mc_interface.cyclo ./Application/User/mc_interface.d ./Application/User/mc_interface.o ./Application/User/mc_interface.su ./Application/User/mc_math.cyclo ./Application/User/mc_math.d ./Application/User/mc_math.o ./Application/User/mc_math.su ./Application/User/mc_parameters.cyclo ./Application/User/mc_parameters.d ./Application/User/mc_parameters.o ./Application/User/mc_parameters.su ./Application/User/mc_tasks.cyclo ./Application/User/mc_tasks.d ./Application/User/mc_tasks.o ./Application/User/mc_tasks.su ./Application/User/mc_tasks_foc.cyclo ./Application/User/mc_tasks_foc.d ./Application/User/mc_tasks_foc.o ./Application/User/mc_tasks_foc.su ./Application/User/mcp.cyclo ./Application/User/mcp.d ./Application/User/mcp.o ./Application/User/mcp.su ./Application/User/mcp_config.cyclo ./Application/User/mcp_config.d ./Application/User/mcp_config.o ./Application/User/mcp_config.su ./Application/User/motorcontrol.cyclo ./Application/User/motorcontrol.d ./Application/User/motorcontrol.o ./Application/User/motorcontrol.su ./Application/User/pwm_common.cyclo ./Application/User/pwm_common.d ./Application/User/pwm_common.o ./Application/User/pwm_common.su ./Application/User/pwm_curr_fdbk.cyclo ./Application/User/pwm_curr_fdbk.d ./Application/User/pwm_curr_fdbk.o ./Application/User/pwm_curr_fdbk.su ./Application/User/regular_conversion_manager.cyclo ./Application/User/regular_conversion_manager.d ./Application/User/regular_conversion_manager.o ./Application/User/regular_conversion_manager.su ./Application/User/speed_torq_ctrl.cyclo ./Application/User/speed_torq_ctrl.d ./Application/User/speed_torq_ctrl.o ./Application/User/speed_torq_ctrl.su ./Application/User/stm32_mc_common_it.cyclo ./Application/User/stm32_mc_common_it.d ./Application/User/stm32_mc_common_it.o ./Application/User/stm32_mc_common_it.su ./Application/User/stm32g4xx_hal_msp.cyclo ./Application/User/stm32g4xx_hal_msp.d ./Application/User/stm32g4xx_hal_msp.o ./Application/User/stm32g4xx_hal_msp.su ./Application/User/stm32g4xx_it.cyclo ./Application/User/stm32g4xx_it.d ./Application/User/stm32g4xx_it.o ./Application/User/stm32g4xx_it.su ./Application/User/stm32g4xx_mc_it.cyclo ./Application/User/stm32g4xx_mc_it.d ./Application/User/stm32g4xx_mc_it.o ./Application/User/stm32g4xx_mc_it.su ./Application/User/sync_registers.cyclo ./Application/User/sync_registers.d ./Application/User/sync_registers.o ./Application/User/sync_registers.su ./Application/User/syscalls.cyclo ./Application/User/syscalls.d ./Application/User/syscalls.o ./Application/User/syscalls.su ./Application/User/sysmem.cyclo ./Application/User/sysmem.d ./Application/User/sysmem.o ./Application/User/sysmem.su ./Application/User/usart_aspep_driver.cyclo ./Application/User/usart_aspep_driver.d ./Application/User/usart_aspep_driver.o ./Application/User/usart_aspep_driver.su
+	-$(RM) ./Application/User/CAN_processing_v2.cyclo ./Application/User/CAN_processing_v2.d ./Application/User/CAN_processing_v2.o ./Application/User/CAN_processing_v2.su ./Application/User/SCurveTrajectory.cyclo ./Application/User/SCurveTrajectory.d ./Application/User/SCurveTrajectory.o ./Application/User/SCurveTrajectory.su ./Application/User/aspep.cyclo ./Application/User/aspep.d ./Application/User/aspep.o ./Application/User/aspep.su ./Application/User/can_telemetry.cyclo ./Application/User/can_telemetry.d ./Application/User/can_telemetry.o ./Application/User/can_telemetry.su ./Application/User/esc_sensors.cyclo ./Application/User/esc_sensors.d ./Application/User/esc_sensors.o ./Application/User/esc_sensors.su ./Application/User/hf_registers.cyclo ./Application/User/hf_registers.d ./Application/User/hf_registers.o ./Application/User/hf_registers.su ./Application/User/main.cyclo ./Application/User/main.d ./Application/User/main.o ./Application/User/main.su ./Application/User/mc_api.cyclo ./Application/User/mc_api.d ./Application/User/mc_api.o ./Application/User/mc_api.su ./Application/User/mc_app_hooks.cyclo ./Application/User/mc_app_hooks.d ./Application/User/mc_app_hooks.o ./Application/User/mc_app_hooks.su ./Application/User/mc_config.cyclo ./Application/User/mc_config.d ./Application/User/mc_config.o ./Application/User/mc_config.su ./Application/User/mc_config_common.cyclo ./Application/User/mc_config_common.d ./Application/User/mc_config_common.o ./Application/User/mc_config_common.su ./Application/User/mc_configuration_registers.cyclo ./Application/User/mc_configuration_registers.d ./Application/User/mc_configuration_registers.o ./Application/User/mc_configuration_registers.su ./Application/User/mc_interface.cyclo ./Application/User/mc_interface.d ./Application/User/mc_interface.o ./Application/User/mc_interface.su ./Application/User/mc_math.cyclo ./Application/User/mc_math.d ./Application/User/mc_math.o ./Application/User/mc_math.su ./Application/User/mc_parameters.cyclo ./Application/User/mc_parameters.d ./Application/User/mc_parameters.o ./Application/User/mc_parameters.su ./Application/User/mc_tasks.cyclo ./Application/User/mc_tasks.d ./Application/User/mc_tasks.o ./Application/User/mc_tasks.su ./Application/User/mc_tasks_foc.cyclo ./Application/User/mc_tasks_foc.d ./Application/User/mc_tasks_foc.o ./Application/User/mc_tasks_foc.su ./Application/User/mcp.cyclo ./Application/User/mcp.d ./Application/User/mcp.o ./Application/User/mcp.su ./Application/User/mcp_config.cyclo ./Application/User/mcp_config.d ./Application/User/mcp_config.o ./Application/User/mcp_config.su ./Application/User/motorcontrol.cyclo ./Application/User/motorcontrol.d ./Application/User/motorcontrol.o ./Application/User/motorcontrol.su ./Application/User/planner.cyclo ./Application/User/planner.d ./Application/User/planner.o ./Application/User/planner.su ./Application/User/pwm_common.cyclo ./Application/User/pwm_common.d ./Application/User/pwm_common.o ./Application/User/pwm_common.su ./Application/User/pwm_curr_fdbk.cyclo ./Application/User/pwm_curr_fdbk.d ./Application/User/pwm_curr_fdbk.o ./Application/User/pwm_curr_fdbk.su ./Application/User/regular_conversion_manager.cyclo ./Application/User/regular_conversion_manager.d ./Application/User/regular_conversion_manager.o ./Application/User/regular_conversion_manager.su ./Application/User/speed_torq_ctrl.cyclo ./Application/User/speed_torq_ctrl.d ./Application/User/speed_torq_ctrl.o ./Application/User/speed_torq_ctrl.su ./Application/User/stm32_mc_common_it.cyclo ./Application/User/stm32_mc_common_it.d ./Application/User/stm32_mc_common_it.o ./Application/User/stm32_mc_common_it.su ./Application/User/stm32g4xx_hal_msp.cyclo ./Application/User/stm32g4xx_hal_msp.d ./Application/User/stm32g4xx_hal_msp.o ./Application/User/stm32g4xx_hal_msp.su ./Application/User/stm32g4xx_it.cyclo ./Application/User/stm32g4xx_it.d ./Application/User/stm32g4xx_it.o ./Application/User/stm32g4xx_it.su ./Application/User/stm32g4xx_mc_it.cyclo ./Application/User/stm32g4xx_mc_it.d ./Application/User/stm32g4xx_mc_it.o ./Application/User/stm32g4xx_mc_it.su ./Application/User/sync_registers.cyclo ./Application/User/sync_registers.d ./Application/User/sync_registers.o ./Application/User/sync_registers.su ./Application/User/syscalls.cyclo ./Application/User/syscalls.d ./Application/User/syscalls.o ./Application/User/syscalls.su ./Application/User/sysmem.cyclo ./Application/User/sysmem.d ./Application/User/sysmem.o ./Application/User/sysmem.su ./Application/User/usart_aspep_driver.cyclo ./Application/User/usart_aspep_driver.d ./Application/User/usart_aspep_driver.o ./Application/User/usart_aspep_driver.su ./Application/User/velocity_ctrl.cyclo ./Application/User/velocity_ctrl.d ./Application/User/velocity_ctrl.o ./Application/User/velocity_ctrl.su
 
 .PHONY: clean-Application-2f-User
 

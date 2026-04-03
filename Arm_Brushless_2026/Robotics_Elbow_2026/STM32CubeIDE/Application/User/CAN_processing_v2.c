@@ -28,6 +28,11 @@
 #include "mc_api.h"
 #include "mc_interface.h"
 
+#include "planner.h"
+#include "SCurveTrajectory.h"
+#include "velocity_ctrl.h"
+
+
 #ifdef USE_UART_DEBUG
   #include "uart_debugging.h"
 #else
@@ -38,6 +43,10 @@
 extern FDCAN_HandleTypeDef hfdcan1;
 extern uint8_t ESC_ID;
 extern uint8_t MOTOR_TYPE;
+
+// Variables declared over can
+volatile float positionSetpoint;    // Set by CAN_processing.c
+volatile bool  newSetpointDetected; // Set by CAN_processing.c
 
 /*  Main CAN message parser  */
 
@@ -112,26 +121,40 @@ void Process_Multiple_ESC_Command(ParsedCANID *CANMessageID, uint8_t *rxData)
 void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
 {
     (void)rxData;
+	float information = SingleExtractFloatFromCAN(rxData); // infor for now always comes as 4 bytes
 
-    uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",
-                     (int)id->runSpec, (int)info);
+    uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",(int)id->runSpec, (int)info);
 
     switch (id->runSpec) {
     case RUN_STOP:
         uart_debug_print("  -> STOP\r\n");
         break;
+
     case RUN_ACKNOWLEDGE_FAULTS:
         uart_debug_print("  -> ACK FAULTS\r\n");
         break;
+
     case RUN_SPEED:
+        if (controlMode != MODE_VELOCITY) {
+            velCtrlStart(velCtrl, (VelocityFilter *)motorTracker);
+            controlMode = MODE_VELOCITY;
+        }
+        velCtrlSetDemand(velCtrl, information);  // value in rad/s
         uart_debug_print("  -> SPEED: %d RPM\r\n", (int)info);
         break;
+
     case RUN_POSITION:
+		/* Switch to position mode and plan a move */
+		positionSetpoint = degreesToRad(information);
+		newSetpointDetected = true;
+		controlMode = MODE_POSITION;
         uart_debug_print("  -> POSITION: %d deg\r\n", (int)info);
         break;
+
     case RUN_CALIBRATION:
         uart_debug_print("  -> CALIBRATION\r\n");
         break;
+
     default:
         uart_debug_print("  -> UNKNOWN runSpec\r\n");
         break;

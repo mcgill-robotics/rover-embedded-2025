@@ -32,17 +32,23 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "velocity_ctrl.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef enum {
+    MODE_NEED_CALIBRATION,
+	MODE_IDLE,
+    MODE_POSITION,
+    MODE_VELOCITY
+} ControlMode_t;
 
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+extern VelCtrlHandle *velCtrl;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

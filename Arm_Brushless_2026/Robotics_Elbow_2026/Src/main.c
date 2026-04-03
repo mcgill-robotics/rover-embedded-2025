@@ -28,6 +28,9 @@
 #include <math.h>
 #include "can_telemetry.h"
 #include "esc_sensors.h"
+#include "planner.h"
+#include "SCurveTrajectory.h"
+#include "velocity_ctrl.h"
 
 /* USER CODE END Includes */
 
@@ -83,6 +86,20 @@ static volatile uint8_t can_rx_flag = 0;
 static FDCAN_RxHeaderTypeDef can_rx_header;
 static uint8_t can_rx_data[64]; /* 64 bytes max for CAN FD */
 volatile uint8_t can_rx_ready = 0; // Flag that main while loop polls
+
+/* Control mode — written by CAN_processing_v2.c, read by TIM6 ISR.
+   MUST be file-scope (not local to main) so the extern declarations
+   in CAN_processing_v2.h and the ISR can resolve. */
+volatile ControlMode_t controlMode = MODE_IDLE;
+
+/* Velocity controller handle — static buffer + global pointer.
+   The pointer is extern'd in CAN_processing_v2.h and main.h. */
+static VelCtrlHandle velCtrl_buffer;
+VelCtrlHandle *velCtrl = &velCtrl_buffer;
+
+/* motor information */
+float gearRatio = 100.0f; // 1:100 Interpreted as 100 rotations of input shaft = 1 rotation of output
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,10 +124,9 @@ static void MX_TIM6_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 // Function from can_processing.c
-void CAN_Parse_MSG(FDCAN_RxHeaderTypeDef *header, uint8_t *data);
+
 /* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -161,6 +177,22 @@ int main(void) {
 	MX_FDCAN1_Init();
 	MX_TIM6_Init();
 
+
+
+	// Initialize motor control things
+
+	/* Initialize trajectory planner*/
+	plannerInit();
+
+	/* Initialize velocity controller (static alloc) */
+	velCtrlInitStatic(&velCtrl_buffer, 0.0f);  // your refactored init
+
+	/* Optionally set position limits for the joint */
+//	velCtrlSetPositionLimits(velCtrl, degreesToRad(-90.0f), degreesToRad(90.0f));
+
+    /* Start in idle, CAN commands will switch to POSITION or VELOCITY */
+    controlMode = MODE_IDLE;
+
 	/* Initialize interrupts */
 	MX_NVIC_Init();
 	/* USER CODE BEGIN 2 */
@@ -176,7 +208,7 @@ int main(void) {
 	HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6, 0);
 	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 
-	/* 1. Configure accept-all filter for standard IDs into FIFO0 */
+	/* Configure accept-all filter for standard IDs into FIFO0 */
 	FDCAN_FilterTypeDef filter;
 	filter.IdType = FDCAN_STANDARD_ID;
 	filter.FilterIndex = 0;
@@ -204,13 +236,8 @@ int main(void) {
 		Error_Handler();
 	}
 
-	// Now the callback settings
-	/**
-	 * @brief  FDCAN RX FIFO0 callback — fires on every new CAN message.
-	 *         Reads the message into a buffer and sets the flag.
-	 */
 
-	// Turn on
+
 //  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 
 	/* USER CODE END 2 */
@@ -218,15 +245,23 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
+
+		// If received a CAN command, service it
 		if (can_rx_ready) {
 			can_rx_ready = 0;
 			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 			CAN_Parse_MSG(&can_rx_header, can_rx_data);
 		}
 
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
-		HAL_Delay(200);
-//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
+        /* Foreground planner work */
+        /* Handles deferred replans: new setpoints, wandering, too-fast.
+           in the main loop (not the ISR) because
+           buildNewCurve / calculateNewRamp do floating-point math
+           that would make the ISR too long. */
+        if (controlMode == MODE_POSITION) {
+            Planner_MainStep((bool *)&newSetpointDetected, positionSetpoint);
+        }
+
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -1077,7 +1112,21 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM6) {
-		ESC_Sensors_Update();       /* 1. refresh sensor cache        */
+
+	    /* Trajectory step produces the position setpoint for this tick */
+	    if (controlMode == MODE_POSITION) {
+	        PosCtrl_ISRStep();
+	    } else if (controlMode == MODE_VELOCITY) {
+	        velCtrl_ISRStep(velCtrl, (VelocityFilter *)motorTracker);
+	    }
+
+	    /*. PID position loop drives the motor to track the setpoint */
+	    float_t positionSetpointForPID = outputShaftToInput((float) (motorTracker->theta));
+//	     feed this to  FOC/PID loop
+
+		/* Refresh sensor cache        */
+		ESC_Sensors_Update();
+
 		Telemetry_Tick_1ms();       /* 2. broadcast scheduled signals */
 		/* In your TIM6 ISR, after Telemetry_Tick_1ms() */
 
@@ -1090,9 +1139,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 /**
  * @brief  Read the motor shaft mechanical angle directly from the encoder,
- *         returned in radians.
+ *         returned in radians. Do note this function does convert he input shaft
+ *         directly to output shaft, so the algorithms computing trajectory work, otherwise
+ *         they will be off
  *
- * Uses SPD_GetMecAngle() on the encoder's SpeednPosFdbk base handle — the
+ * Uses SPD_GetMecAngle() on the encoder's SpeednPosFdbk base handle, the
  * same value the FOC speed/torque controller and MCI_ExecPositionCommand use.
  *
  * SPD_GetMecAngle() returns a 32-bit value in s16degree units, where one full
@@ -1104,11 +1155,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
  *
  * @retval float  Mechanical angle in radians
  */
+#define SIM_MODE
 float Read_Encoder_Position_Rad(void)
 {
+#ifdef SIM_MODE
+    /* No encoder — return the commanded position from whichever
+       controller is active. The tracker already holds this. */
+    return ((VelocityFilter *)motorTracker)->theta;
+#else
     int32_t mec_angle_s16 = SPD_GetMecAngle(&ENCODER_M1._Super);
-    float position_rad = (float)mec_angle_s16 / (float)RADTOS16;
-    return position_rad;
+    return inputShaftToOutput((float)mec_angle_s16 / (float)RADTOS16);
+#endif
 }
 
 float degreesToRad(float positionDegrees){
@@ -1118,6 +1175,17 @@ float degreesToRad(float positionDegrees){
 float radToDegrees(float positionRad){
 	return (positionRad*180/M_PI);
 
+}
+
+// Converts input shaft to output shaft, based on gear ratio
+float inputShaftToOutput(float positionRad, float ratio){
+	return positionRad / ratio;
+}
+
+// Converts input shaft to output shaft, based on gear ratio, used to convert a setpoint in rad
+// from degrees to actual motor setpoint
+float outputShaftToInput(float positionRad, float ratio){
+	return positionRad * ratio;
 }
 
 
