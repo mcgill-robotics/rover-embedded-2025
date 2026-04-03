@@ -113,10 +113,7 @@ class MotorID(IntEnum):
     ELBOW     = 10
 
 
-# ---------------------------------------------------------------------------
 # Parsed CAN ID
-# ---------------------------------------------------------------------------
-
 @dataclass
 class ParsedCANID:
     """Decoded fields from an 11-bit CAN arbitration ID."""
@@ -175,10 +172,7 @@ class ParsedCANID:
         )
 
 
-# ---------------------------------------------------------------------------
 # ID encode / decode
-# ---------------------------------------------------------------------------
-
 def encode_can_id(
     sender: Sender | int = Sender.MASTER,
     action: Action | int = Action.RUN,
@@ -223,9 +217,7 @@ def decode_can_id(arb_id: int) -> ParsedCANID:
     )
 
 
-# ---------------------------------------------------------------------------
-# Payload builders — data that goes into the CAN frame's data bytes
-# ---------------------------------------------------------------------------
+# Payload builders data that goes into the CAN frame's data bytes
 
 def pack_single_float(value: float) -> bytes:
     """Pack a 32-bit float into 8 bytes (4 data + 4 zero padding).

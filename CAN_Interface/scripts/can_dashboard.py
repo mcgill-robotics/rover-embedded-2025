@@ -33,7 +33,7 @@ import time
 import threading
 from pathlib import Path
 
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, request
 
 app = Flask(__name__)
 
@@ -42,9 +42,9 @@ app = Flask(__name__)
 
 DB_PATH = "can_log.db"
 POLL_INTERVAL = 0.20  # seconds between SSE pushes
-CAN_PORT = None       # serial port for CANable (None = dry-run)
 
-# Commander instance — created in main(), used by /api/cmd endpoints
+# Commander instance — created in main(), sends commands via TCP
+# to the CmdServer running inside can_logger.py
 _commander = None
 
 
@@ -198,153 +198,109 @@ def api_stream():
 
 
 
-# Command API endpoints — send CAN frames to ESC(s)
 
+
+# ---------------------------------------------------------------------------
+# Command API — relay TX requests to the logger's CmdServer via TCP
+# ---------------------------------------------------------------------------
 
 @app.route("/api/cmd/position", methods=["POST"])
 def api_cmd_position():
-    """Send a position setpoint (degrees) to an ESC.
-
-    JSON body: { "device_id": 1, "degrees": 45.0, "motor_type": "DRIVE" }
-
-    The firmware receives the float payload and routes it through:
-        Handle_Run_Command → RUN_POSITION → degreesToRad(information)
-        → positionSetpoint = result, controlMode = MODE_POSITION
-    """
+    """Send a position setpoint (degrees) to an ESC."""
     if _commander is None:
         return jsonify({"error": "Commander not initialised"}), 503
-
     data = request.get_json(force=True)
     dev = int(data.get("device_id", 1))
     deg = float(data.get("degrees", 0.0))
     mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
-
-    arb_id = _commander.set_position(dev, deg, motor_type=mt)
-    return jsonify({
-        "ok": True,
-        "arb_id": f"0x{arb_id:03X}",
-        "command": "POSITION",
-        "device_id": dev,
-        "value": deg,
-        "unit": "deg",
-    })
-
+    try:
+        arb_id = _commander.set_position(dev, deg, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": "POSITION", "device_id": dev,
+                        "value": deg, "unit": "deg"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 @app.route("/api/cmd/velocity", methods=["POST"])
 def api_cmd_velocity():
-    """Send a velocity setpoint (rad/s) to an ESC.
-
-    JSON body: { "device_id": 1, "rad_per_sec": 0.5, "motor_type": "DRIVE" }
-
-    The firmware receives the float payload and routes it through:
-        Handle_Run_Command → RUN_SPEED → velCtrlSetDemand(velCtrl, information)
-    """
+    """Send a velocity setpoint (rad/s) to an ESC."""
     if _commander is None:
         return jsonify({"error": "Commander not initialised"}), 503
-
     data = request.get_json(force=True)
     dev = int(data.get("device_id", 1))
     vel = float(data.get("rad_per_sec", 0.0))
     mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
-
-    arb_id = _commander.set_velocity(dev, vel, motor_type=mt)
-    return jsonify({
-        "ok": True,
-        "arb_id": f"0x{arb_id:03X}",
-        "command": "SPEED",
-        "device_id": dev,
-        "value": vel,
-        "unit": "rad/s",
-    })
-
+    try:
+        arb_id = _commander.set_velocity(dev, vel, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": "SPEED", "device_id": dev,
+                        "value": vel, "unit": "rad/s"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 @app.route("/api/cmd/stop", methods=["POST"])
 def api_cmd_stop():
-    """Send a STOP command to an ESC.
-
-    JSON body: { "device_id": 1 }
-    """
+    """Send a STOP command to an ESC."""
     if _commander is None:
         return jsonify({"error": "Commander not initialised"}), 503
-
     data = request.get_json(force=True)
     dev = int(data.get("device_id", 1))
     mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
-
-    arb_id = _commander.stop(dev, motor_type=mt)
-    return jsonify({
-        "ok": True,
-        "arb_id": f"0x{arb_id:03X}",
-        "command": "STOP",
-        "device_id": dev,
-    })
-
+    try:
+        arb_id = _commander.stop(dev, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": "STOP", "device_id": dev})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 @app.route("/api/cmd/ping", methods=["POST"])
 def api_cmd_ping():
-    """Send a PING read request to an ESC.
-
-    JSON body: { "device_id": 1 }
-    """
+    """Send a PING read request to an ESC."""
     if _commander is None:
         return jsonify({"error": "Commander not initialised"}), 503
-
     data = request.get_json(force=True)
     dev = int(data.get("device_id", 1))
     mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
-
-    arb_id = _commander.ping(dev, motor_type=mt)
-    return jsonify({
-        "ok": True,
-        "arb_id": f"0x{arb_id:03X}",
-        "command": "PING",
-        "device_id": dev,
-    })
-
+    try:
+        arb_id = _commander.ping(dev, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": "PING", "device_id": dev})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 @app.route("/api/cmd/read", methods=["POST"])
 def api_cmd_read():
-    """Send a generic read request to an ESC.
-
-    JSON body: { "device_id": 1, "spec": "TEMPERATURE" }
-    """
+    """Send a generic read request to an ESC."""
     if _commander is None:
         return jsonify({"error": "Commander not initialised"}), 503
-
     from esc_can.protocol import ReadSpec
     data = request.get_json(force=True)
     dev = int(data.get("device_id", 1))
     spec_name = data.get("spec", "PING").upper()
     mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
-
     try:
         spec = ReadSpec[spec_name]
     except KeyError:
-        return jsonify({"error": f"Unknown ReadSpec: {spec_name}"}), 400
-
-    arb_id = _commander.read(dev, spec, motor_type=mt)
-    return jsonify({
-        "ok": True,
-        "arb_id": f"0x{arb_id:03X}",
-        "command": f"READ_{spec_name}",
-        "device_id": dev,
-    })
-
+        return jsonify({"ok": False, "error": f"Unknown ReadSpec: {spec_name}"}), 400
+    try:
+        arb_id = _commander.read(dev, spec, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": f"READ_{spec_name}", "device_id": dev})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 @app.route("/api/cmd/status")
 def api_cmd_status():
-    """Return commander status (connected, tx count, port)."""
+    """Return commander status (connected to logger, tx count)."""
     if _commander is None:
-        return jsonify({"connected": False, "tx_count": 0, "port": None})
+        return jsonify({"connected": False, "tx_count": 0})
     return jsonify({
         "connected": _commander.bus_connected,
         "tx_count": _commander.tx_count,
-        "port": CAN_PORT,
+        "cmd_port": _commander.cmd_port,
     })
 
-
 def _parse_motor_type(value) -> int:
-    """Parse motor type from string or int."""
     from esc_can.protocol import MotorType
     if isinstance(value, str):
         return MotorType.STEERING if value.upper() == "STEERING" else MotorType.DRIVE
@@ -931,6 +887,41 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     flex-wrap: wrap;
   }
 
+  /* --- Command Panel --- */
+  .cmd-panel { margin-top: 0; margin-bottom: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .cmd-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; transition: background 0.15s; }
+  .cmd-panel-header:hover { background: var(--bg-card-hover); }
+  .cmd-panel-title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .cmd-panel-title .icon { font-size: 16px; }
+  .cmd-bus-status { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .cmd-bus-status.connected { background: rgba(63,185,80,0.12); color: var(--accent-green); border: 1px solid rgba(63,185,80,0.25); }
+  .cmd-bus-status.disconnected { background: rgba(210,153,34,0.12); color: var(--accent-orange); border: 1px solid rgba(210,153,34,0.25); }
+  .cmd-chevron { color: var(--text-dim); transition: transform 0.2s; font-size: 12px; }
+  .cmd-panel.open .cmd-chevron { transform: rotate(180deg); }
+  .cmd-panel-body { display: none; padding: 18px; }
+  .cmd-panel.open .cmd-panel-body { display: block; }
+  .cmd-section { margin-bottom: 20px; }
+  .cmd-section:last-child { margin-bottom: 0; }
+  .cmd-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 10px; }
+  .cmd-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .cmd-row label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); min-width: 70px; }
+  .cmd-input { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-family: var(--mono); font-size: 13px; color: var(--text-primary); width: 110px; outline: none; transition: border-color 0.15s; }
+  .cmd-input:focus { border-color: var(--accent-blue); }
+  .cmd-input.narrow { width: 70px; }
+  .cmd-select { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-family: var(--mono); font-size: 12px; color: var(--text-primary); outline: none; cursor: pointer; }
+  .cmd-btn { background: var(--glow-blue); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; padding: 7px 16px; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent-blue); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .cmd-btn:hover { background: rgba(88,166,255,0.15); border-color: rgba(88,166,255,0.5); }
+  .cmd-btn:active { transform: scale(0.97); }
+  .cmd-btn.danger { background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.3); color: var(--accent-red); }
+  .cmd-btn.danger:hover { background: rgba(248,81,73,0.15); border-color: rgba(248,81,73,0.5); }
+  .cmd-btn.success { background: rgba(63,185,80,0.08); border-color: rgba(63,185,80,0.3); color: var(--accent-green); }
+  .cmd-btn.success:hover { background: rgba(63,185,80,0.15); border-color: rgba(63,185,80,0.5); }
+  .cmd-feedback { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 6px; min-height: 16px; transition: color 0.2s; }
+  .cmd-feedback.ok { color: var(--accent-green); }
+  .cmd-feedback.err { color: var(--accent-red); }
+  .cmd-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .cmd-quick-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
   /* --- Responsive --- */
   @media (max-width: 640px) {
     .topbar { flex-direction: column; gap: 10px; align-items: flex-start; }
@@ -1412,7 +1403,7 @@ init();
 
 # Entry point
 def main():
-    global DB_PATH, POLL_INTERVAL, CAN_PORT, _commander
+    global DB_PATH, POLL_INTERVAL, _commander
 
     parser = argparse.ArgumentParser(description="Live CAN FD telemetry dashboard")
     parser.add_argument("--db", default="can_log.db",
@@ -1423,30 +1414,18 @@ def main():
                         help="Bind address (default: 127.0.0.1)")
     parser.add_argument("--poll", type=float, default=0.20,
                         help="SSE poll interval in seconds (default: 0.20)")
-    parser.add_argument("--can-port", default=None,
-                        help="Serial port for CANable adapter (e.g. COM4, /dev/ttyACM0). "
-                             "Omit for dry-run mode (commands built but not sent on bus).")
-    parser.add_argument("--can-interface", default="slcan",
-                        help="python-can interface type (default: slcan)")
+    parser.add_argument("--cmd-port", type=int, default=5555,
+                        help="TCP port of logger's CmdServer (default: 5555). "
+                             "Commands are sent to can_logger.py via this port.")
     args = parser.parse_args()
 
     DB_PATH = args.db
     POLL_INTERVAL = args.poll
-    CAN_PORT = args.can_port
 
-    # Initialize commander for sending CAN commands
-    try:
-        from esc_can.commander import CANCommander, open_commander
-        if CAN_PORT:
-            _commander = open_commander(port=CAN_PORT, interface=args.can_interface)
-            print(f"  CAN TX   : {CAN_PORT} ({args.can_interface})")
-        else:
-            _commander = CANCommander(bus=None)
-            print(f"  CAN TX   : dry-run (no --can-port specified)")
-    except ImportError:
-        from esc_can.commander import CANCommander
-        _commander = CANCommander(bus=None)
-        print(f"  CAN TX   : dry-run (python-can not installed)")
+    # Commander sends commands via TCP to the logger's CmdServer.
+    # The logger process owns the CAN bus — this process never opens it.
+    from esc_can.commander import CANCommander
+    _commander = CANCommander(cmd_port=args.cmd_port)
 
     if not Path(DB_PATH).exists():
         print(f"WARNING: Database '{DB_PATH}' does not exist yet.")
@@ -1454,9 +1433,10 @@ def main():
         print()
 
     print(f"CAN FD Dashboard")
-    print(f"  Database : {DB_PATH}")
-    print(f"  URL      : http://{args.host}:{args.port}")
-    print(f"  SSE poll : {POLL_INTERVAL}s")
+    print(f"  Database  : {DB_PATH}")
+    print(f"  URL       : http://{args.host}:{args.port}")
+    print(f"  SSE poll  : {POLL_INTERVAL}s")
+    print(f"  Cmd relay : localhost:{args.cmd_port} (via can_logger.py)")
     print()
 
     app.run(host=args.host, port=args.port, debug=False, threaded=True)
@@ -1465,8 +1445,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-# # Terminal 1 — capture from bus
+# Terminal 1 — capture from bus + command server
 # python scripts/can_logger.py --port COM4 --db can_log.db
-
-# # Terminal 2 — serve dashboard
+#
+# Terminal 2 — serve dashboard (reads DB, sends commands via TCP)
 # python scripts/can_dashboard.py --db can_log.db
