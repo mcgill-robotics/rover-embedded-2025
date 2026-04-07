@@ -125,8 +125,15 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
 
     uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",(int)id->runSpec, (int)info);
 
+    // Temporary calibration auto
+    if (MC_GetSTMStateMotor1() == IDLE){
+    	MC_StartMotor1();
+    	return;
+    }
+
     switch (id->runSpec) {
     case RUN_STOP:
+    	MC_StopMotor1();
         uart_debug_print("  -> STOP\r\n");
         break;
 
@@ -144,6 +151,7 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
         break;
 
     case RUN_POSITION:
+
 		/* Switch to position mode and plan a move */
 		positionSetpoint = degreesToRad(information);
 		newSetpointDetected = true;

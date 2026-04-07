@@ -47,7 +47,7 @@ int plannerInit(void){
     /* Zero-init and configure plan buffer 1 */
     memset(&plan_buffer_1, 0, sizeof(PosCtrlHandle));
     plan_buffer_1.a_max = A_MAX;
-    plan_buffer_1.v_max = 0.5f;
+    plan_buffer_1.v_max = 0.3f;
     plan_buffer_1.j_max = J_MAX;
     plan_buffer_1.dir   = 0;
     plan_buffer_1.theta = 0.0f;

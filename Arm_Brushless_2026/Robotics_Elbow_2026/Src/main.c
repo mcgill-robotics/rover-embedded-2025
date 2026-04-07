@@ -78,7 +78,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 
 // Set the ESC ID
-uint8_t ESC_ID = 1;
+uint8_t ESC_ID = 2;
 uint8_t MOTOR_TYPE = 0;
 
 // Add the CANFD required variables
@@ -1120,8 +1120,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	        velCtrl_ISRStep(velCtrl, (VelocityFilter *)motorTracker);
 	    }
 
-	    /*. PID position loop drives the motor to track the setpoint */
-	    float_t positionSetpointForPID = outputShaftToInput((float) (motorTracker->theta));
+//	    /*. PID position loop drives the motor to track the setpoint */
+//	    if (MC_GetSTMStateMotor1() == RUN){
+//			float_t positionSetpointForPID = outputShaftToInput((float) (motorTracker->theta), gearRatio);
+//			MC_ProgramPositionCommandMotor1(positionSetpointForPID, 0);
+//	    }
+
+	    if (MC_GetSTMStateMotor1() == RUN){
+	        float_t positionSetpointForPID;
+
+	        if (controlMode == MODE_POSITION) {
+	            PosCtrlHandle *plan = (PosCtrlHandle *)paths_planned[active_plan];
+	            positionSetpointForPID = outputShaftToInput(plan->theta, gearRatio);
+	        } else { // MODE_VELOCITY
+	            positionSetpointForPID = outputShaftToInput(((VelocityFilter *)motorTracker)->theta, gearRatio);
+	        }
+
+	        MC_ProgramPositionCommandMotor1(positionSetpointForPID, 0);
+	    }
+
 //	     feed this to  FOC/PID loop
 
 		/* Refresh sensor cache        */
@@ -1155,6 +1172,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
  *
  * @retval float  Mechanical angle in radians
  */
+
 #define SIM_MODE
 float Read_Encoder_Position_Rad(void)
 {
@@ -1164,7 +1182,7 @@ float Read_Encoder_Position_Rad(void)
     return ((VelocityFilter *)motorTracker)->theta;
 #else
     int32_t mec_angle_s16 = SPD_GetMecAngle(&ENCODER_M1._Super);
-    return inputShaftToOutput((float)mec_angle_s16 / (float)RADTOS16);
+    return inputShaftToOutput(((float)mec_angle_s16 / (float)RADTOS16), gearRatio);
 #endif
 }
 

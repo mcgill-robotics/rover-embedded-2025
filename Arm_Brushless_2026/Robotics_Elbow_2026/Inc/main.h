@@ -65,6 +65,8 @@ void Error_Handler(void);
 float radToDegrees(float positionRad);
 float degreesToRad(float positionDegrees);
 float Read_Encoder_Position_Rad(void);
+float outputShaftToInput(float positionRad, float ratio);
+float inputShaftToOutput(float positionRad, float ratio);
 
 /* USER CODE END EFP */
 
