@@ -1,0 +1,10 @@
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:276:6:SystemClock_Config	88	static,ignoring_inline_asm
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:138:5:main	168	static,ignoring_inline_asm
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1100:6:HAL_FDCAN_RxFifo0Callback	8	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1113:6:HAL_TIM_PeriodElapsedCallback	8	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1177:7:Read_Encoder_Position_Rad	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1189:7:degreesToRad	8	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1193:7:radToDegrees	8	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1199:7:inputShaftToOutput	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1205:7:outputShaftToInput	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Test_2026/Src/main.c:1218:6:Error_Handler	0	static,ignoring_inline_asm

@@ -1,0 +1,9 @@
+../Application/User/SCurveTrajectory.c:17:16:STrajectoryInit	16	static
+../Application/User/SCurveTrajectory.c:48:17:velocityFilterInit	8	static
+../Application/User/SCurveTrajectory.c:79:6:updateVelocityFilter	16	static
+../Application/User/SCurveTrajectory.c:122:9:selectJerk	0	static
+../Application/User/SCurveTrajectory.c:141:9:getCurrentPosition	0	static
+../Application/User/SCurveTrajectory.c:145:9:getAngularVelocity	0	static
+../Application/User/SCurveTrajectory.c:149:9:getAngularAccel	0	static
+../Application/User/SCurveTrajectory.c:153:9:getJerk	0	static
+../Application/User/SCurveTrajectory.c:163:6:setMaxVelocity	0	static
