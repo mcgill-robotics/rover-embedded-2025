@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
+enable_language(C CXX ASM)
 
 set(ROSJAM_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/rosjam.c
   ${CMAKE_CURRENT_SOURCE_DIR}/usb_descriptors.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/buffers.c
   ${CMAKE_CURRENT_SOURCE_DIR}/json_serde/serialization.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/json_serde/deserialization.cc
 
@@ -12,7 +14,7 @@ set(ROSJAM_SRC
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libs/tinyusb/src "${CMAKE_CURRENT_BINARY_DIR}/tinyusb_build")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libs/ArduinoJson "${CMAKE_CURRENT_BINARY_DIR}/ArduinoJson_build")
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../cobs/cobs-c/src "${CMAKE_CURRENT_BINARY_DIR}/cobs_build")
 add_library(rosjam2 STATIC 
   ${ROSJAM_SRC}
 )
@@ -26,5 +28,6 @@ target_include_directories(rosjam2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(rosjam2
     stm32cubemx
     ArduinoJson
+    cobs-c
     # Add user defined libraries
 )

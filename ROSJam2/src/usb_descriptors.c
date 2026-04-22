@@ -23,6 +23,9 @@
  *
  */
 
+#include "default_rosjam_config.h"
+
+#ifndef USE_CUSTOM_DESCRIPTOR
 
 #include "tusb.h"
 #include "stm32g474xx.h"
@@ -34,7 +37,7 @@
  *   [MSB]         HID | MSC | CDC          [LSB]
  */
 #define PID_MAP(itf, n)  ((CFG_TUD_##itf) ? (1 << (n)) : 0)
-#define USB_PID           (0x4000 | PID_MAP(CDC, 0) | PID_MAP(MSC, 1) | PID_MAP(HID, 2) | \
+#define USB_PID           (USB_BASE_PID | PID_MAP(CDC, 0) | PID_MAP(MSC, 1) | PID_MAP(HID, 2) | \
                            PID_MAP(MIDI, 3) | PID_MAP(VENDOR, 4) )
 
 #define USB_VID   0xCafe
@@ -212,8 +215,8 @@ enum {
 // array of pointer to string descriptors
 static char const *string_desc_arr[] = {
   (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
-  "McGill Robotics Rover",                     // 1: Manufacturer
-  "UART Hub v1",              // 2: Product
+  USB_MANUFACTURER_STR,                     // 1: Manufacturer
+  USB_PRODUCT_STR,              // 2: Product
   NULL,                          // 3: Serials will use unique ID if possible
   "TinyUSB CDC",                 // 4: CDC Interface
 };
@@ -298,3 +301,5 @@ uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
   _desc_str[0] = (uint16_t) ((TUSB_DESC_STRING << 8) | (2 * chr_count + 2));
   return _desc_str;
 }
+
+#endif

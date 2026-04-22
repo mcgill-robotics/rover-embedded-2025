@@ -2,17 +2,21 @@
 #include "ArduinoJson/Document/JsonDocument.hpp"
 #include "ArduinoJson/Json/JsonDeserializer.hpp"
 #include "ArduinoJson/Json/JsonSerializer.hpp"
-#include "rosjam.h"
+#include "ArduinoJson/MsgPack/MsgPackDeserializer.hpp"
+#include "buffers.h"
 #include "deserialization.h"
 
+
 extern "C" {
+
+
 	DeserializationResult deserialize(ActiveEndpoints* endpoints, char *json) {
-		JsonDocument doc;
+    	JsonDocument doc;
 		DeserializationResult result = {
 			.endpoint = NULL,
 			.message = NULL
 		};
-		deserializeJson(doc, json);
+		deserializeMsgPack(doc, json);
 		// Match endpoint
 		const char *topic = doc["topic"];
 		RosjamEndpoint* endpoint = NULL;
