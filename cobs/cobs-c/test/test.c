@@ -8,7 +8,7 @@ uint8_t decode_buffer[10000];
 
 int main(){
 	char* test1 = "ab123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890bcdefghaasdfasfaf";
-	char* test2 = "abcdefghaasdfasfaf";
+	// char* test1 = "abcdefghaasdfasfaf";
 	uint8_t* write_head = encode_buffer;
 	printf("Og len: %d\n", strlen(test1));
 	for (int i=0;i<5;i++){
@@ -16,7 +16,12 @@ int main(){
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;
+		// printf("a is %hhx\n", 'a');
+		// for (int i=0; i<len; i++){
+		// 	printf("%hhx, %c\n", encode_buffer[i], encode_buffer[i]);
+		// }
 	}
+	
 	// int len = encode(test1, strlen(test1), encode_buffer, 1000, 'a');
 	int remaining = 10000;
 	int remaining_decode = 10000;

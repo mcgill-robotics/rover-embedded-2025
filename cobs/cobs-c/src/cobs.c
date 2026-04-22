@@ -1,49 +1,62 @@
 #include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+
+#define MAX_CHUNK_SIZE 255
+
 /**
  * Returns the bytes written to the output buffer
  * -1 if not enough bytes are available in output_length
  * 
  */
 int encode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim){
-	uint8_t* output_write_pos = output;
-	int bytes_written = 0;
+	uint8_t* output_initial = output;
+	uint8_t* output_end = output+output_length;
+	uint8_t* input_end = input+input_length;
+	int chunk_size = 0;
 	int non_stuffed_count = 0;
-	if (bytes_written+2>=output_length){
+	if (2>=output_length){
 		return -1;
 	}
-	*output_write_pos = delim;
-	uint8_t* last_replaced = output_write_pos+1;
-	output_write_pos+=2; // reserve place for header and write initial delim
-	bytes_written = 2;
-	for (int i=0;i<input_length;i++){
-		if (bytes_written>=output_length){
+	*output = delim;
+	uint8_t* last_replaced = output+1;
+	output+=2; // reserve place for header and write initial delim
+	for (;input<input_end;input++){
+		uint8_t current_byte = *input;
+		if (output+chunk_size+1 >= output_end){
 			return -1;
 		}
-		if (non_stuffed_count == 254){
-			*last_replaced = non_stuffed_count+1;
-			non_stuffed_count = 0;
-			last_replaced = output_write_pos;
-			output_write_pos++;
-			bytes_written++;
+		if (chunk_size+1 == MAX_CHUNK_SIZE){
+			printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
+			memcpy(output, input-chunk_size, chunk_size);
+			output+=chunk_size;
+			*last_replaced = chunk_size+1;
+			last_replaced = output;
+			output++; //make space for next stuffed byte
+			chunk_size = 0;
 		}
-		if (input[i]==delim){
-			*last_replaced = non_stuffed_count+1;
-			non_stuffed_count = 0;
-			last_replaced = output_write_pos;
+		if (current_byte == delim) {
+			printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
+			memcpy(output, input-chunk_size, chunk_size);
+			output+=chunk_size;
+			*last_replaced = chunk_size+1;
+			last_replaced = output;
+			output++; //make space for next stuffed byte
+			chunk_size = 0;
 		} else {
-			*output_write_pos=input[i];
-			non_stuffed_count++;
+			chunk_size++;
 		}
-		output_write_pos++;
-		bytes_written++;
 	}
-	if (bytes_written>=output_length){
+	if (output+chunk_size+1 >= output_end){
 		return -1;
 	}
-	*last_replaced = non_stuffed_count+1;
-	*output_write_pos = delim;
-	bytes_written++;
-	return bytes_written;
+	printf("%c, %d, %p, %c\n", *input, chunk_size, input-chunk_size, *(input-chunk_size));
+	memcpy(output, input-chunk_size, chunk_size);
+	output+=chunk_size;
+	*output = delim;
+	output++;
+
+	return output-output_initial;
 }
 
 /**
