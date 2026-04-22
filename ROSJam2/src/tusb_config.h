@@ -30,7 +30,7 @@
  extern "C" {
 #endif
 
-#include "rosjam.h"
+#include "default_rosjam_config.h"
 
 //--------------------------------------------------------------------+
 // Board Specific Configuration

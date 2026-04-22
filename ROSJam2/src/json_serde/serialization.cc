@@ -2,28 +2,78 @@
 #include "ArduinoJson.h"
 #include "ArduinoJson/Document/JsonDocument.hpp"
 #include "ArduinoJson/Json/JsonSerializer.hpp"
+#include "ArduinoJson/Memory/Allocator.hpp"
 #include "class/cdc/cdc_device.h"
-#include "rosjam.h"
+#include "buffers.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <stdint.h>
 
+// class StaticAllocator:public ArduinoJson::Allocator {
+//     char* buffer;
+//     int offset;
+//     public:
+//         StaticAllocator(char* buffer_to_use){
+//             buffer = buffer_to_use;
+//             offset = 0;
+//         }
+
+//         void* allocate(size_t size) override {
+//             char* to_allocate = buffer+offset;
+//             offset+=size;
+//             return to_allocate;
+//     }
+
+//     void deallocate(void* pointer) override {
+//             ;
+//     }
+
+//     void* reallocate(void* ptr, size_t new_size) override {
+//         offset+=new_size;
+//         return ptr;
+//     }
+// };
+
 extern "C" {
     
 size_t serialize(Buffer* buffer, const char *topic, uint8_t *msg) {
+    // char buildBuffer[2048];
+    // char* head = "{\"topic\":\"";
+    // memcpy(buildBuffer, head, strlen(head)+1);
+    // strcat(buildBuffer, topic);
+    // strcat(buildBuffer, "\",\"message\":\"");
+    // strcat(buildBuffer, (char*) msg);
+    // strcat(buildBuffer, "\"}");
+    // size_t len = strlen(buildBuffer);
+    // // update buffer size with json size
+    // uint8_t* write_head = get_write_space(buffer, len+1); // +1 and newline
+    // if (write_head != NULL){
+    //     // int size = serializeJson(doc, (void*) write_head, json_size)+2;
+    //     memcpy(write_head, buildBuffer, len);
+    //     *(write_head+len) = '\n';
+    //     // *(write_head+json_size+1) = '\0';
+    //     return len+1;
+    // } else {
+    //     return 0;
+    // }
+    // return 0;
+
+    // with arduino json
+    // StaticAllocator alloc(buildBuffer);
+    // JsonDocument doc(&alloc);
     JsonDocument doc;
     doc["topic"] = topic;
     doc["message"] = msg;
-    int json_size = measureJson(doc);
+    int json_size = measureMsgPack(doc);
     if (json_size == 0){
         return 0;
     }
     // update buffer size with json size
     uint8_t* write_head = get_write_space(buffer, json_size+1); // +1 and newline
     if (write_head != NULL){
-        int size = serializeJson(doc, (void*) write_head, json_size)+2;
+        int size = serializeMsgPack(doc, (void*) write_head, json_size)+1;
         *(write_head+json_size) = '\n';
         // *(write_head+json_size+1) = '\0';
         return size;

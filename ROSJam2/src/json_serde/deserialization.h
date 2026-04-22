@@ -1,6 +1,7 @@
 #ifndef DESERIALIZATION_H
 #define DESERIALIZATION_H
 
+#include "rosjam_internal.h"
 #include "rosjam.h"
 
 #ifdef __cplusplus
