@@ -23,8 +23,8 @@ int main(){
 	printf("Og len: %d\n", strlen(test1));
 	for (int i=0;i<5;i++){
 		int slen = strlen(test1);
-		printf("estimate: %d \n", estimate_encoded_size(slen));
-		int len = encode(test1, slen, write_head, estimate_encoded_size(slen), 'a');
+		printf("estimate: %d \n", cobs_estimate_encoded_size(slen));
+		int len = cobs_encode(test1, slen, write_head, estimate_encoded_size(slen), 'a');
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;
@@ -45,7 +45,7 @@ int main(){
 		int written;
 		
 		printf("frame %d: %p, %p\n", read, write_head, read_head);
-		int len2 = decode(read_head, remaining, write_head, remaining_decode-1, 'a', &written);
+		int len2 = cobs_decode(read_head, remaining, write_head, remaining_decode-1, 'a', &written);
 		printf("Read: %d\n", len2);
 		if (len2 == -3 || len2 == -2){
 			break;
