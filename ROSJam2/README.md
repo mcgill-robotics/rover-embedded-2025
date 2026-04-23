@@ -1,0 +1,1 @@
+To get the mpack library clone the git repo and run the tools/amalgamate.sh script

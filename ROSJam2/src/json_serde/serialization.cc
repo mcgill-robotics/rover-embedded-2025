@@ -38,7 +38,7 @@
 
 extern "C" {
     
-size_t serialize(Buffer* buffer, const char *topic, uint8_t *msg) {
+size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *msg) {
     // char buildBuffer[2048];
     // char* head = "{\"topic\":\"";
     // memcpy(buildBuffer, head, strlen(head)+1);
@@ -70,11 +70,9 @@ size_t serialize(Buffer* buffer, const char *topic, uint8_t *msg) {
     if (json_size == 0){
         return 0;
     }
-    // update buffer size with json size
-    uint8_t* write_head = get_write_space(buffer, json_size+1); // +1 and newline
-    if (write_head != NULL){
-        int size = serializeMsgPack(doc, (void*) write_head, json_size)+1;
-        *(write_head+json_size) = '\n';
+    if (buf_len >= json_size){
+        int size = serializeMsgPack(doc, (void*) temp_buf, json_size)+1;
+        *(temp_buf+json_size) = '\n';
         // *(write_head+json_size+1) = '\0';
         return size;
     } else {
