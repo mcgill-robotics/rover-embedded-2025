@@ -1,4 +1,4 @@
-// #include "rosjam_config.h"
+#include "rosjam_config.h"
 
 #ifndef USB_CDC_ITF
 #define USB_CDC_ITF 0
