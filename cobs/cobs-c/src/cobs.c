@@ -21,8 +21,7 @@ int encode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 	uint8_t* output_end = output+output_length;
 	uint8_t* input_end = input+input_length;
 	int chunk_size = 0;
-	int non_stuffed_count = 0;
-	if (2>=output_length){
+	if (2>output_length){
 		return -1;
 	}
 	*output = delim;
@@ -30,11 +29,11 @@ int encode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 	output+=2; // reserve place for header and write initial delim
 	for (;input<input_end;input++){
 		uint8_t current_byte = *input;
-		if (output+chunk_size+1 >= output_end){
+		if (output+chunk_size+1 > output_end){
 			return -1;
 		}
 		if (chunk_size+1 == MAX_CHUNK_SIZE){
-			printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
+			// printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
 			memcpy(output, input-chunk_size, chunk_size);
 			output+=chunk_size;
 			*last_replaced = chunk_size+1;
@@ -43,7 +42,7 @@ int encode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 			chunk_size = 0;
 		}
 		if (current_byte == delim) {
-			printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
+			// printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
 			memcpy(output, input-chunk_size, chunk_size);
 			output+=chunk_size;
 			*last_replaced = chunk_size+1;
@@ -54,10 +53,10 @@ int encode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 			chunk_size++;
 		}
 	}
-	if (output+chunk_size+1 >= output_end){
+	if (output+chunk_size+1 > output_end){
 		return -1;
 	}
-	printf("%c, %d, %p, %c\n", *input, chunk_size, input-chunk_size, *(input-chunk_size));
+	// printf("%c, %d, %p, %c\n", *input, chunk_size, input-chunk_size, *(input-chunk_size));
 	memcpy(output, input-chunk_size, chunk_size);
 	output+=chunk_size;
 	*last_replaced = chunk_size+1;
@@ -84,11 +83,11 @@ int decode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 	int delim_count = 0;
 	int count = 0;
 	// printf("Start out: %p\n", output);
-	while (input<input_end){
+	while (input<=input_end){
 		count+=1;
 		uint8_t current_byte = *input;
 		if (current_byte == delim){
-			printf("cnt: %d %d\n", count, input-input_initial);
+			// printf("cnt: %d %d\n", count, input-input_initial);
 			delim_count++;
 			input++;
 			chunk_size = MAX_CHUNK_SIZE-1;
@@ -109,13 +108,13 @@ int decode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 		
 
 		// printf("p %d, %d, %p, %c\n", current_byte, chunk_size, input, *(input));
-		printf("Chunk size: %d %d %p %p\n", chunk_size, delim_count, input, input_end);
+		// printf("Chunk size: %d %d %p %p\n", chunk_size, delim_count, input, input_end);
 		if (chunk_size == MAX_CHUNK_SIZE-1){
 			chunk_size = (*input)-1;
 			
-			printf("header\n");
+			// printf("header\n");
 		} else {
-			if (output+1>=output_end){
+			if (output+1>output_end){
 				return -1;
 			}
 			chunk_size = (*input)-1;
@@ -124,7 +123,7 @@ int decode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 			output++;
 			// printf("stuffed %p %d %d %d\n", output, *input, *(input-1), *(input+1));
 		}
-		if (output+chunk_size>=output_end){
+		if (output+chunk_size>output_end){
 			return -1;
 		}		
 		
@@ -154,7 +153,7 @@ int decode(uint8_t* input, int input_length, uint8_t* output, int output_length,
 	} else if (delim_count == 1){
 		return -3;
 	}
-	printf("delim: %d \n", delim_count);
+	// printf("delim: %d \n", delim_count);
 	*written = output-output_initial;
 	return input-input_initial;
 }

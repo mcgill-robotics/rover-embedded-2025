@@ -5,8 +5,18 @@
 uint8_t encode_buffer[10000];
 uint8_t decode_buffer[10000];
 
+int float_to_string(float number, int precision, char* buf, int buf_len){
+    int len = snprintf(NULL, 0, "%.*f", precision, number);
+	if (len +1 > buf_len){
+		return -1;
+	}
+    snprintf(buf, len + 1, "%.*f", number);
+}
 
 int main(){
+	char buf[1000];
+	float_to_string(12.33454565, 2, buf, 1000);
+	printf("%s\n", buf);
 	char* test1 = "ab123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890bcdefghaasdfasfaf";
 	// char* test1 = "abcdefghaasdfasfaf";
 	uint8_t* write_head = encode_buffer;
@@ -14,7 +24,7 @@ int main(){
 	for (int i=0;i<5;i++){
 		int slen = strlen(test1);
 		printf("estimate: %d \n", estimate_encoded_size(slen));
-		int len = encode(test1, slen, write_head, 1000, 'a');
+		int len = encode(test1, slen, write_head, estimate_encoded_size(slen), 'a');
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;

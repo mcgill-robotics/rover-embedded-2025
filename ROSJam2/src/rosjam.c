@@ -1,3 +1,4 @@
+#include "cobs.h"
 #include "default_rosjam_config.h"
 #include "rosjam.h"
 #include "rosjam_internal.h"
@@ -10,11 +11,74 @@
 #include "tusb.h"
 #include "stdio.h"
 #include <stdint.h>
+#include <stdlib.h>
 // #include "cobs.h"
 
 ActiveEndpoints currentEndpoints;
 
 int drop_dangling = 0;
+
+double string_to_float(char* string){
+	return atof(string);
+}
+
+int float_to_string(double number, int precision, char* buf, int buf_len){
+    int len = snprintf(NULL, 0, "%.*lf", precision, number);
+	if (len +1 > buf_len){
+		return -1;
+	}
+    snprintf(buf, len + 1, "%.*lf", precision, number);
+	return len+1;
+}
+
+int int_to_string(int number, char* buf, int buf_len){
+    int len = snprintf(NULL, 0, "%d", number);
+	if (len +1 > buf_len){
+		return -1;
+	}
+    snprintf(buf, len + 1, "%d", number);
+	return len+1;
+}
+
+void setup_simple(){
+	tusb_rhport_init_t dev_init = {
+    	.role = TUSB_ROLE_DEVICE,
+    	.speed = TUSB_SPEED_AUTO
+  	};
+  	tusb_init(BOARD_TUD_RHPORT, &dev_init);
+}
+
+void print_to_usb(char* message){
+	send_msg_raw(message,strlen(message));
+}
+
+void send_msg_raw(char *message, int message_len){
+	if (tud_cdc_n_ready(USB_CDC_ITF)){
+		tud_cdc_n_write(USB_CDC_ITF, message, message_len);
+		tud_cdc_n_write_flush(USB_CDC_ITF);
+	}
+}
+
+int has_data(){
+	if (tud_cdc_n_ready(USB_CDC_ITF)){
+		int available = tud_cdc_n_available(USB_CDC_ITF);
+		return available > 0;
+	}
+	return 0;
+}
+
+char read_char(){
+	if (has_data()){
+		return tud_cdc_n_read_char(USB_CDC_ITF);
+	}
+	return -1;
+}
+
+
+void process_simple(){
+	tud_cdc_n_write_flush(USB_CDC_ITF); //make sure small messages get immediately sent
+	tud_task();
+}
 
 void setup(){
 	currentEndpoints.global_rx_buffer.capacity = ENDPOINT_BUF_LEN*ENDPOINT_COUNT;
@@ -35,9 +99,9 @@ int add_interface(RosjamEndpoint* endpoint, const char* topic){
 	if (currentEndpoints.size<ENDPOINT_COUNT){
 		// initialize endpoint fields
 		//tx buffer
-		(endpoint->rx_buf).capacity = ENDPOINT_BUF_LEN;
-		(endpoint->rx_buf).size = 0;
-		(endpoint->rx_buf).read_offset = 0;
+		// (endpoint->rx_buf).capacity = ENDPOINT_BUF_LEN;
+		// (endpoint->rx_buf).size = 0;
+		// (endpoint->rx_buf).read_offset = 0;
 		//rx buffer
 		(endpoint->tx_buf).capacity = ENDPOINT_BUF_LEN;
 		(endpoint->tx_buf).size = 0;
@@ -53,15 +117,24 @@ int add_interface(RosjamEndpoint* endpoint, const char* topic){
 	return 0;
 }
 
+
 /**
 
 Call this to prepare a message to be sent on an endpoint
 
 */
 void send_msg(RosjamEndpoint* endpoint, char* message){
+	uint8_t temp_buf[2048];
 	Buffer* buffer = &(endpoint -> tx_buf);
 	printf("Serialization start\n");
-	serialize(buffer, endpoint->topic, (uint8_t*) message); // serialize into tx buffer directly
+	int json_size = serialize(temp_buf, 512, endpoint->topic, (uint8_t*) message); // serialize into tx buffer directly
+	int cobs_size = estimate_encoded_size(json_size);
+	uint8_t* write_head = get_write_space(buffer, cobs_size);
+	printf("Sizes: %d, %d\n", json_size, cobs_size);
+	if (write_head != NULL){
+		int enc_status = encode(temp_buf, json_size, write_head, cobs_size, 0);
+		printf("Wrote: %d\n", enc_status);
+	}
 }
 
 /**
@@ -219,37 +292,49 @@ void check_rx(){
 
 		// find json packet boundary
 		do {
-			uint8_t* read_head = buffer->buf+buffer->read_offset;
-			int in_buffer = buffer->size-buffer->read_offset;
-			printf("read_head: %p\n", read_head);
-			// find newline
-			int newline_pos = 0;
-			for (int i=0;i<in_buffer;i++){
-				if (read_head[i]=='\n'){
-					newline_pos = i;
-					break;
-				}
-			}
+			// uint8_t* read_head = buffer->buf+buffer->read_offset;
+			// int in_buffer = buffer->size-buffer->read_offset;
+			// printf("read_head: %p\n", read_head);
+			// // find newline
+			// int newline_pos = 0;
+			// for (int i=0;i<in_buffer;i++){
+			// 	if (read_head[i]=='\n'){
+			// 		newline_pos = i;
+			// 		break;
+			// 	}
+			// }
 			// char* newline_pos = strchr((char*)read_head, '\n');
-
-			if (newline_pos != 0) {
-				if (drop_dangling){
-					printf("Dropping\n");
-					drop_dangling = 0;
-					mark_read_global(buffer, newline_pos+1);
-					// parse rest on next invocation
-					continue;
-				}
-				read_head[newline_pos] = '\0'; //terminate string for deserialize
+			uint8_t cobs_decode_buf[2048];
+			int written_bytes;
+			int in_buffer = buffer->size-buffer->read_offset;
+			int read_bytes = decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes);
+			if (read_bytes == -2){
+				// printf("Dropping\n");
+				// drop_dangling = 0;
+				mark_read_global(buffer, in_buffer);
+				// skip 
+				return;
+			}
+			if (read_bytes > 0) {
+			// if (newline_pos != 0) {
+				// if (drop_dangling){
+				// 	printf("Dropping\n");
+				// 	drop_dangling = 0;
+				// 	mark_read_global(buffer, newline_pos+1);
+				// 	// parse rest on next invocation
+				// 	continue;
+				// }
+				// read_head[newline_pos] = '\0'; //terminate string for deserialize
 				// decode cobs
-				
-				DeserializationResult result = deserialize(&currentEndpoints, (char*) read_head);
-				if (result.endpoint != NULL){
+				uint8_t msg_pack_decode_buf[2048];
+				RosjamEndpoint* endpoint = deserialize(&currentEndpoints, (char*) cobs_decode_buf, (char*)msg_pack_decode_buf, 2048);
+				if (endpoint != NULL){
 					// call callback for user to process
-					receivedFromUSB(result.endpoint, result.message);
+					receivedFromUSB(endpoint, (char*)msg_pack_decode_buf);
 				}
-				mark_read_global(buffer, newline_pos+1);
-				printf("Marked %d as read\n", newline_pos+1);
+				mark_read_global(buffer, read_bytes);
+				// mark_read_global(buffer, newline_pos+1);
+				// printf("Marked %d as read\n", newline_pos+1);
 			} else {
 				if (buffer->size == buffer->capacity){
 					printf("Full\n");

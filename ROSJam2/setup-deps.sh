@@ -1,0 +1,1 @@
+cp mpack_cmake.txt libs/mpack/CMakeLists.txt

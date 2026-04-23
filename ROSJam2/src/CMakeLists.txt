@@ -14,6 +14,7 @@ set(ROSJAM_SRC
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libs/tinyusb/src "${CMAKE_CURRENT_BINARY_DIR}/tinyusb_build")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libs/ArduinoJson "${CMAKE_CURRENT_BINARY_DIR}/ArduinoJson_build")
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libs/mpack "${CMAKE_CURRENT_BINARY_DIR}/mpack_build")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../cobs/cobs-c/src "${CMAKE_CURRENT_BINARY_DIR}/cobs_build")
 add_library(rosjam2 STATIC 
   ${ROSJAM_SRC}
@@ -29,5 +30,6 @@ target_link_libraries(rosjam2
     stm32cubemx
     ArduinoJson
     cobs-c
+    # mpack
     # Add user defined libraries
 )

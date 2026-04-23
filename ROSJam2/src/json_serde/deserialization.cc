@@ -4,13 +4,15 @@
 #include "ArduinoJson/Json/JsonSerializer.hpp"
 #include "ArduinoJson/MsgPack/MsgPackDeserializer.hpp"
 #include "buffers.h"
+#include "rosjam.h"
+#include <cstddef>
 #include "deserialization.h"
 
 
 extern "C" {
 
 
-	DeserializationResult deserialize(ActiveEndpoints* endpoints, char *json) {
+	RosjamEndpoint* deserialize(ActiveEndpoints* endpoints, char *json, char* message_buf, int msg_buf_len) {
     	JsonDocument doc;
 		DeserializationResult result = {
 			.endpoint = NULL,
@@ -28,18 +30,21 @@ extern "C" {
 			}
 		}
 		if (endpoint == NULL){
-			return result;
+			return endpoint;
 		}
 		// Copy message into buffer
 		const char *msg = doc["message"];
 		int message_len = strlen(msg)+1;
-		uint8_t* write_head = get_write_space(&(endpoint->rx_buf), message_len);
-
-		if (write_head != NULL){
-			memcpy(write_head, msg, message_len);
-			result.message = (char*) write_head;
-			result.endpoint = endpoint;
+		if (message_len > msg_buf_len){
+			return NULL;
 		}
-		return result;
+		// uint8_t* write_head = get_write_space(&(endpoint->rx_buf), message_len);
+
+		// if (write_head != NULL){
+		memcpy(message_buf, msg, message_len);
+			// result.message = (char*) write_head;
+			// result.endpoint = endpoint;
+		// }
+		return endpoint;
 	}
 }

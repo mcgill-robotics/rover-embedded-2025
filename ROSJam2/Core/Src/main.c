@@ -26,6 +26,8 @@
 #include "rosjam.h"
 #include "json_serde/serialization.h"
 #include "stdio.h"
+#include "cobs.h"
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,28 +116,35 @@ int main(void)
   MX_USART3_UART_Init();
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
-  setup();
-  add_interface(&endpoint0, "diag0");
-  add_interface(&endpoint1, "uart0");
-  add_interface(&endpoint2, "uart1");
-  add_interface(&endpoint3, "uart2");
-  add_interface(&endpoint4, "uart3");
-  add_interface(&endpoint5, "uart4");
-  add_interface(&endpoint6, "uart5");
+  setup_simple();
+  // setup();
+  // add_interface(&endpoint0, "diag0");
+  // add_interface(&endpoint1, "uart0");
+  // add_interface(&endpoint2, "uart1");
+  // add_interface(&endpoint3, "uart2");
+  // add_interface(&endpoint4, "uart3");
+  // add_interface(&endpoint5, "uart4");
+  // add_interface(&endpoint6, "uart5");
   // HAL_UART_Receive_IT(&huart3, rx_buff, 1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int commaIndex = 0;
+  int index = 0;
+  char buf[1000];
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     // if (tud_cdc_n_ready(0)){
-    //   tud_cdc_n_write_str(0, "Hello World! diag: This is a longer message\n");
-    //   // serialize(&test ,"test", "Hello World! diag: This is a longer message\n");
-    //   serialize_simple("test", "Hello World! diag: This is a longer message\n");
+    //   char* str = "Hello World! diag: This is a longer message\n";
+    //   int written = encode( (uint8_t*)str, strlen(str), (uint8_t*)data, 1000, 0);
+    //   tud_cdc_n_write(0, data, written);
+    //   tud_cdc_n_write_flush(0);
+      // serialize(&test ,"test", "Hello World! diag: This is a longer message\n");
+      // serialize_simple("test", "Hello World! diag: This is a longer message\n");
     // }
     
     if (HAL_GetTick()%1000==0){
@@ -150,6 +159,51 @@ int main(void)
     // } else {
     //   __NOP();
     // }
+    //look into this for converting float to string https://stackoverflow.com/questions/41394063/how-to-simply-convert-a-float-to-a-string-in-order-to-write-it-to-a-text-file-in
+    // int sat = 5;
+    // double latitude = 12.1234345345345345345;
+    // double longitude = 1.23456234245345345;
+    // char convert_buf[100];
+    // int_to_string(sat, convert_buf, 100);
+    // print_to_usb(convert_buf);
+    // print_to_usb(",");
+    // float_to_string(latitude, 8, convert_buf, 100);
+    // print_to_usb(convert_buf);
+    // print_to_usb(",");
+    // float_to_string(longitude, 8, convert_buf, 100);
+    // print_to_usb(convert_buf);
+    // print_to_usb("\n");
+
+    if (has_data()) {
+      char incomingChar = read_char();
+      if (incomingChar == ',') {
+        commaIndex = index;
+      }
+      if (incomingChar == '\n') {
+        if (commaIndex > 0 ) {
+          buf[commaIndex] = '\0';
+          char* panStr = buf;
+          char* tiltStr = buf+commaIndex+1;
+          buf[index] = '\0';
+          double panFloat = string_to_float(panStr);
+          double tiltFloat = string_to_float(tiltStr);
+          char buf2[100];
+          float_to_string(panFloat, 8, buf2, 100);
+          print_to_usb(buf2);
+          print_to_usb(" sep ");
+          float_to_string(tiltFloat, 8, buf2, 100);
+          print_to_usb(buf2);
+          print_to_usb("\n");
+        }
+        index = 0;
+        commaIndex = 0;
+      } 
+      else {
+        buf[index] = incomingChar; // Append to buffer
+        index++;
+      }
+    }
+
     // send_msg(&endpoint0, "Hello World! diag1: This is a longer message");
     // send_msg(&endpoint1, "Hello World! uart0: This is a longer message");
     // send_msg(&endpoint2, "Hello World! uart1: This is a longer message");
@@ -158,7 +212,7 @@ int main(void)
     // send_msg(&endpoint5, "Hello World! uart4: This is a longer message");
     // send_msg(&endpoint6, "Hello World! uart5: This is a longer message");
     
-    process();
+    process_simple();
     // tud_task();
   }
   /* USER CODE END 3 */
