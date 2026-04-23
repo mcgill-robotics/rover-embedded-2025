@@ -12,7 +12,9 @@ int main(){
 	uint8_t* write_head = encode_buffer;
 	printf("Og len: %d\n", strlen(test1));
 	for (int i=0;i<5;i++){
-		int len = encode(test1, strlen(test1), write_head, 1000, 'a');
+		int slen = strlen(test1);
+		printf("estimate: %d \n", estimate_encoded_size(slen));
+		int len = encode(test1, slen, write_head, 1000, 'a');
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;
