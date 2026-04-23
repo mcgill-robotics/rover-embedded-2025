@@ -128,11 +128,11 @@ void send_msg(RosjamEndpoint* endpoint, char* message){
 	Buffer* buffer = &(endpoint -> tx_buf);
 	printf("Serialization start\n");
 	int json_size = serialize(temp_buf, 512, endpoint->topic, (uint8_t*) message); // serialize into tx buffer directly
-	int cobs_size = estimate_encoded_size(json_size);
+	int cobs_size = cobs_estimate_encoded_size(json_size);
 	uint8_t* write_head = get_write_space(buffer, cobs_size);
 	printf("Sizes: %d, %d\n", json_size, cobs_size);
 	if (write_head != NULL){
-		int enc_status = encode(temp_buf, json_size, write_head, cobs_size, 0);
+		int enc_status = cobs_encode(temp_buf, json_size, write_head, cobs_size, 0);
 		printf("Wrote: %d\n", enc_status);
 	}
 }
@@ -307,7 +307,7 @@ void check_rx(){
 			uint8_t cobs_decode_buf[2048];
 			int written_bytes;
 			int in_buffer = buffer->size-buffer->read_offset;
-			int read_bytes = decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes);
+			int read_bytes = cobs_decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes);
 			if (read_bytes == -2){
 				// printf("Dropping\n");
 				// drop_dangling = 0;

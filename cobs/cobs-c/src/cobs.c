@@ -7,7 +7,7 @@
 /**
  * Returns the worse case encoded size
  */
-int estimate_encoded_size(int buf_size){
+int cobs_estimate_encoded_size(int buf_size){
 	return 2+(buf_size/(MAX_CHUNK_SIZE-1)+1)+buf_size;// 2 delimiter(front + back) + chunk overhead (rounded up) + data size
 }
 
@@ -16,7 +16,7 @@ int estimate_encoded_size(int buf_size){
  * -1 if not enough bytes are available in output_length
  * 
  */
-int encode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim){
+int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim){
 	uint8_t* output_initial = output;
 	uint8_t* output_end = output+output_length;
 	uint8_t* input_end = input+input_length;
@@ -74,7 +74,7 @@ int encode(uint8_t* input, int input_length, uint8_t* output, int output_length,
  * -3 if message could not be found in input buffer (not enough bytes)
  * -2 not enough data and could not find first delim (all data to throw)
  */
-int decode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim, int* written){
+int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim, int* written){
 	uint8_t* output_initial = output;
 	uint8_t* input_initial = input;
 	uint8_t* output_end = output+output_length;
