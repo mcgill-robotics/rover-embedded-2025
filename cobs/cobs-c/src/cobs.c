@@ -5,6 +5,13 @@
 #define MAX_CHUNK_SIZE 255
 
 /**
+ * Returns the worse case encoded size
+ */
+int estimate_encoded_size(int buf_size){
+	return 2+(buf_size/(MAX_CHUNK_SIZE-1)+1)+buf_size;// 2 delimiter(front + back) + chunk overhead (rounded up) + data size
+}
+
+/**
  * Returns the bytes written to the output buffer
  * -1 if not enough bytes are available in output_length
  * 
