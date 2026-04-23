@@ -28,24 +28,31 @@ int main(){
 	write_head = decode_buffer;
 	uint8_t* read_head = encode_buffer;
 	int read = 0;
+	printf("all: %s\n", encode_buffer);
 	while (remaining>0){
 		int written;
+		
 		printf("frame %d: %p, %p\n", read, write_head, read_head);
 		int len2 = decode(read_head, remaining, write_head, remaining_decode-1, 'a', &written);
+		printf("Read: %d\n", len2);
 		if (len2 == -3 || len2 == -2){
 			break;
 		}
-		decode_buffer[written] = '\0';
-		printf("Read: %d\n", len2);
+		write_head[written] = '\0';
+		printf("%.*s\n", len2, encode_buffer);
 		printf("Wrote: %d\n", written);	
-		printf("Result: %d\n", strcmp(test1, decode_buffer));
-		printf("%s\n", decode_buffer);
+		printf("Result: %d\n", strcmp(test1, write_head));
+		printf("start: %p\n", write_head);
+		printf("%s\n", write_head);
 		remaining-=len2;
 		remaining_decode-=written;
 		write_head+=written;
 		read_head+=len2;
 		read++;
-
+		printf("n:%s\n", read_head);
+		if (read == 6){
+			break;
+		}
 	}
 	printf("Found %d frames\n", read);
 	
