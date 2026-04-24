@@ -52,6 +52,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 Robotics_Arm_Brushed_firmware.list \
 
+OBJCOPY_HEX += \
+Robotics_Arm_Brushed_firmware.hex \
+
+OBJCOPY_BIN += \
+Robotics_Arm_Brushed_firmware.bin \
+
 
 # All Target
 all: main-build
@@ -75,12 +81,22 @@ Robotics_Arm_Brushed_firmware.list: $(EXECUTABLES) makefile objects.list $(OPTIO
 	@echo 'Finished building: $@'
 	@echo ' '
 
+Robotics_Arm_Brushed_firmware.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "Robotics_Arm_Brushed_firmware.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+Robotics_Arm_Brushed_firmware.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Robotics_Arm_Brushed_firmware.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) Robotics_Arm_Brushed_firmware.elf Robotics_Arm_Brushed_firmware.list Robotics_Arm_Brushed_firmware.map default.size.stdout
+	-$(RM) Robotics_Arm_Brushed_firmware.bin Robotics_Arm_Brushed_firmware.elf Robotics_Arm_Brushed_firmware.hex Robotics_Arm_Brushed_firmware.list Robotics_Arm_Brushed_firmware.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

@@ -269,10 +269,15 @@ int main(void)
 
   while (1)
   {
+	  //HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+	  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+	  //HAL_Delay(500); // wait 1000 ms (1 second)
+
 	  // Process Message if available
 	  if (CAN_flag){
 
 		CAN_flag = 0;
+		//HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
 		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 
 		//if (steering_state != CALIBRATION){
@@ -280,7 +285,7 @@ int main(void)
 		//}
 		// led pin to check msg processing working
 
-		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+		HAL_Delay(1000);
 	  }
 
 
@@ -519,18 +524,18 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
   hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan2.Init.AutoRetransmission = DISABLE;
-  hfdcan2.Init.TransmitPause = DISABLE;
+  hfdcan2.Init.AutoRetransmission = ENABLE;
+  hfdcan2.Init.TransmitPause = ENABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
-  hfdcan2.Init.NominalPrescaler = 1;
-  hfdcan2.Init.NominalSyncJumpWidth = 1;
-  hfdcan2.Init.NominalTimeSeg1 = 2;
-  hfdcan2.Init.NominalTimeSeg2 = 1;
-  hfdcan2.Init.DataPrescaler = 1;
-  hfdcan2.Init.DataSyncJumpWidth = 1;
-  hfdcan2.Init.DataTimeSeg1 = 1;
+  hfdcan2.Init.NominalPrescaler = 2;
+  hfdcan2.Init.NominalSyncJumpWidth = 3;
+  hfdcan2.Init.NominalTimeSeg1 = 13;
+  hfdcan2.Init.NominalTimeSeg2 = 2;
+  hfdcan2.Init.DataPrescaler = 5;
+  hfdcan2.Init.DataSyncJumpWidth = 3;
+  hfdcan2.Init.DataTimeSeg1 = 13;
   hfdcan2.Init.DataTimeSeg2 = 1;
-  hfdcan2.Init.StdFiltersNbr = 0;
+  hfdcan2.Init.StdFiltersNbr = 1;
   hfdcan2.Init.ExtFiltersNbr = 0;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
