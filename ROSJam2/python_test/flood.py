@@ -11,7 +11,7 @@ uarts = ["diag0", "uart0", "uart1", "uart2", "uart3", "uart4", "uart5"]
 values = [0, 0, 0, 0, 0, 0]
 
 try:
-    interface = serial.Serial("/dev/ttyACM1", 115200000)
+    interface = serial.Serial("/dev/ttyACM2", 115200000)
 except serial.SerialException as e:
     print(f"Error opening serial port: {e}")
     exit(1)
@@ -29,15 +29,23 @@ try:
                 continue
 
             
-            data = msgpack.dumps(f"Hello from {uarts[current_uart]} {counter}")
-            data = msgpack.dumps({"topic":uarts[current_uart], "data":data})
+            data = msgpack.dumps(f"Hello uart0 {counter}")#{uarts[current_uart]}")
+            print(f"data pre encode {len(data)}")
+            print([int(byte) for byte in data])
+            # print(len(data))
+            data = msgpack.dumps({"topic":"uart0", "data":data})
             data = bytearray(data)
-            data.append("\b".encode('ascii')[0])
+            # print(len(data))
+            data.append("\n".encode('ascii')[0])
+            print(f"pre encode {len(data)}")
+            print([int(byte) for byte in data])
             data = cobs.encode(bytes(data), 0)
-            # print(data)
+            # print("after" +str(len(data)))
             interface.write(data)
             interface.flush()
             # print(f"writing to {uarts[current_uart]}")
+            print("post encode")
+            print([int(byte) for byte in data])
             current_uart = (current_uart+1)%len(uarts)
             counter+=1
         else:

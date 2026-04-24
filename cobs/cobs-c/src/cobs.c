@@ -29,10 +29,11 @@ int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_le
 	output+=1;//2; // reserve place for header and write initial delim
 	for (;input<input_end;input++){
 		uint8_t current_byte = *input;
-		if (output+chunk_size+1 > output_end){
-			return -1;
-		}
+		
 		if (chunk_size+1 == MAX_CHUNK_SIZE){
+			if (output+chunk_size+1 > output_end){
+				return -1;
+			}
 			// printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
 			memcpy(output, input-chunk_size, chunk_size);
 			output+=chunk_size;
@@ -42,6 +43,9 @@ int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_le
 			chunk_size = 0;
 		}
 		if (current_byte == delim) {
+			if (output+chunk_size+1 > output_end){
+				return -1;
+			}
 			// printf("%c, %d, %p, %c\n", current_byte, chunk_size, input-chunk_size, *(input-chunk_size));
 			memcpy(output, input-chunk_size, chunk_size);
 			output+=chunk_size;

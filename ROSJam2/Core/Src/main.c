@@ -204,13 +204,13 @@ int main(void)
     //   }
     // }
 
-    // send_msg(&endpoint0, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint1, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint2, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint3, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint4, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint5, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
-    // send_msg(&endpoint6, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint0, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World!");
+    // send_msg(&endpoint1, "Hello World! uart0: This is a longer message  uart0: This is a longer message Hello World!");
+    // send_msg(&endpoint2, "Hello World! uart1: This is a longer message  uart1: This is a longer message Hello World!");
+    // send_msg(&endpoint3, "Hello World! uart2: This is a longer message  uart2: This is a longer message Hello World!");
+    // send_msg(&endpoint4, "Hello World! uart3: This is a longer message  uart3: This is a longer message Hello World!");
+    // send_msg(&endpoint5, "Hello World! uart4: This is a longer message  uart4: This is a longer message Hello World!");
+    // send_msg(&endpoint6, "Hello World! uart5: This is a longer message  uart5: This is a longer message Hello World!");
     
     process();
     // tud_task();

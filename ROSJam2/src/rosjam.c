@@ -131,7 +131,6 @@ void send_msg(RosjamEndpoint* endpoint, char* message){
 	mpack_writer_init(&writer, (char*) temp_buf, 2048);
 	mpack_write_cstr(&writer, message);
 	int written = mpack_writer_buffer_used(&writer);
-	int prelen = strlen(message);
     if (mpack_writer_destroy(&writer) != mpack_ok) {
         fprintf(stderr, "An error occurred encoding the data!\n");
         return;
@@ -148,14 +147,14 @@ void send_data(RosjamEndpoint* endpoint, uint8_t* data, int data_len){
 	currentEndpoints.hasPending = 1;
 	uint8_t temp_buf[512];
 	Buffer* buffer = &(endpoint -> tx_buf);
-	printf("Serialization start\n");
+	// printf("Serialization start\n");
 	int json_size = serialize(temp_buf, 512, endpoint->topic, (uint8_t*) data, data_len); // serialize into tx buffer directly
 	int cobs_size = cobs_estimate_encoded_size(json_size);
 	uint8_t* write_head = get_write_space(buffer, cobs_size);
-	printf("Sizes: %d, %d\n", json_size, cobs_size);
+	// printf("Sizes: %d, %d\n", json_size, cobs_size);
 	if (write_head != NULL){
 		int enc_status = cobs_encode(temp_buf, json_size, write_head, cobs_size, 0);
-		printf("Wrote: %d\n", enc_status);
+		// printf("Wrote: %d\n", enc_status);
 	}
 }
 
@@ -231,7 +230,7 @@ void send_next_messages(){
 
 	while (empty_count<currentEndpoints.size){
 		if (msg_bytes_actual == 0){
-			printf("Empty send %d, %d\n", currentEndpoints.nextTxEndpoint, empty_count);
+			// printf("Empty send %d, %d\n", currentEndpoints.nextTxEndpoint, empty_count);
 			empty_count++;
 
 		} else {
@@ -259,7 +258,7 @@ void send_next_messages(){
 			tud_cdc_n_write(USB_CDC_ITF, start, str_size);
 			can_send-=str_size;
 			mark_read(buf, msg_bytes_actual);			
-			printf("Sent one message");
+			// printf("Sent one message\n");
 		}
 
 		// move on to next interface
@@ -295,7 +294,6 @@ void send_next_messages(){
 }
 
 __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message_len){
-	printf("Received: topic: %s, msg: %s\n", endpoint->topic, message);
 	char message_string[512];
 	mpack_reader_t reader;
 	mpack_reader_init_data(&reader, message, message_len);
@@ -304,8 +302,9 @@ __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message
 		fprintf(stderr, "An error occurred decoding the data!\n");
 		return;
 	}
-	// send_msg(endpoint, message_string);
-	printf("Echo message\n");
+	printf("Received new msg: topic: %s, msg: %s\n", endpoint->topic, message_string);
+	send_msg(endpoint, message_string);
+	// printf("Echo message\n");
 }
 
 
@@ -316,43 +315,49 @@ void check_rx(){
 			// printf("Not available\n");
 			return;
 		}
-		printf("Checking rx\n");
+		// printf("Checking rx\n");
 		//determine how many bytes to read in this operation
 		int to_read = available;
 		RosjamRxBuffer* buffer = &currentEndpoints.global_rx_buffer;
+		// if (available < ENDPOINT_BUF_LEN/2){
+		// 	return;
+		// }
 		if (available > buffer->capacity){
 			to_read = buffer -> capacity;
 		}
-		printf("To read: %d\n", to_read);
+		// printf("To read: %d\n", to_read);
 		// read data into rx buffer
 		uint8_t* write_head = get_write_space_global(buffer, to_read);
-		printf("Writehead: %p", write_head);
+		// printf("Writehead: %p\n", write_head);
 		if (write_head != NULL){
 			
 			int read = tud_cdc_n_read(USB_CDC_ITF, write_head, to_read);
-			printf("Reading %d\n", read);
+			// printf("Reading %d\n", read);
 		}
-		int in_buffer = buffer->size-buffer->read_offset;
-		mark_read_global(buffer, in_buffer);
-		return;
+		// int in_buffer = buffer->size-buffer->read_offset;
+		// mark_read_global(buffer, in_buffer);
+		// return;
 		
 		//{"topic":"uart0","message":"hello"}
 		uint8_t cobs_decode_buf[2048];
 		// find json packet boundary
 		do {
 			int written_bytes;
-			int in_buffer = buffer->size-buffer->read_offset;
+			int in_buffer = buffer->size;
 			int read_bytes = cobs_decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes);
 			if (read_bytes == -2){
 				// not enough data so throw all away
+				printf("skipping\n");
 				mark_read_global(buffer, in_buffer);
 				// skip 
 				return;
 			} else if (read_bytes == -1){
+				printf("too big\n");
 				// message too big for output buffer
 				mark_read_global(buffer, 2048); // 2048 is size of cobs_decode_buf because it was filled
 				continue;
 			}
+			// printf("Read bytes cobs: %d\n", read_bytes);
 			if (read_bytes > 0) {
 				// decode cobs
 				uint8_t msg_pack_decode_buf[2048];
@@ -371,11 +376,11 @@ void check_rx(){
 					buffer->read_offset = 0;
 					return;
 				} else {
-					printf("No new line\n");
+					// printf("No new line\n");
 					break;
 				}
 			}
-		} while (buffer->read_offset<buffer->size);
+		} while (buffer->size>0);
 	}
 }
 

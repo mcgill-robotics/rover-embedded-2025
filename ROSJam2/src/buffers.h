@@ -24,6 +24,7 @@ typedef struct RosjamRxBuffer {
 } RosjamRxBuffer;
 
 
+
 uint8_t* get_write_space(Buffer* buf, uint32_t size);
 uint32_t get_size_with_pad(uint32_t size);
 int get_first_message(Buffer* buf, int* str_size, uint8_t** start);
