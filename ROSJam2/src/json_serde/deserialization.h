@@ -13,7 +13,7 @@ typedef struct DeserializationResult {
 	char* message;
 } DeserializationResult;
 
-RosjamEndpoint* deserialize(ActiveEndpoints* endpoints, char *json, char* message_buf, int msg_buf_len);
+RosjamEndpoint* deserialize(ActiveEndpoints* endpoints, char *json, int json_buf_len, char* message_buf, int msg_buf_len, int* read_message_len);
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *msg);
+size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *data, int data_len);
 void serialize_simple(const char *topic, uint8_t *msg);
 // void send_msg(const char *topic, uint8_t *msg);
 #ifdef __cplusplus

@@ -1,8 +1,8 @@
 def encode(input_buf:bytes, delim:int):
 	output = bytearray()
 	non_stuffed_count = 0
-	last_replaced = 1
-	output.append(delim)
+	last_replaced = 0#1
+	# output.append(delim)
 	output.append(0)
 	for byte in input_buf:
 		if non_stuffed_count == 254:
@@ -63,15 +63,16 @@ def decode(input_buf:bytearray, delim:int):
 		return output, -2
 	elif delim_count == 1:
 		return output, -1
-	del input_buf[:read+1]
-	return output, read+1
+
+	del input_buf[:read]
+	return output, read
 	
 
 if __name__ == "__main__":
 	input_buf = "ab123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890bcdefghaasdfasfaf"
 	delim = 'a'.encode('ascii')[0]
 	print(input_buf)
-	enc_buf = bytearray()
+	enc_buf = bytearray(b"a")
 	frames = 0
 	for i in range(5):
 		enc = encode(input_buf.encode(), delim)

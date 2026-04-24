@@ -12,8 +12,10 @@ extern "C" {
 typedef struct ActiveEndpoints {
 	int size;
 	int nextTxEndpoint;
+	int first_message;
 	RosjamEndpoint* endpoints[ENDPOINT_COUNT];
 	RosjamRxBuffer global_rx_buffer;
+	int hasPending;
 } ActiveEndpoints;
 
 #ifdef __cplusplus

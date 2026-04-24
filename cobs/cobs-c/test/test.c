@@ -20,11 +20,13 @@ int main(){
 	char* test1 = "ab123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890bcdefghaasdfasfaf";
 	// char* test1 = "abcdefghaasdfasfaf";
 	uint8_t* write_head = encode_buffer;
+	*write_head = 'a';
+	write_head++;
 	printf("Og len: %d\n", strlen(test1));
 	for (int i=0;i<5;i++){
 		int slen = strlen(test1);
 		printf("estimate: %d \n", cobs_estimate_encoded_size(slen));
-		int len = cobs_encode(test1, slen, write_head, estimate_encoded_size(slen), 'a');
+		int len = cobs_encode(test1, slen, write_head, cobs_estimate_encoded_size(slen), 'a');
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;

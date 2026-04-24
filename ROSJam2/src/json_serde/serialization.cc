@@ -5,11 +5,13 @@
 #include "ArduinoJson/Memory/Allocator.hpp"
 #include "class/cdc/cdc_device.h"
 #include "buffers.h"
+#include "mpack.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <stdint.h>
+#include <sys/_intsup.h>
 
 // class StaticAllocator:public ArduinoJson::Allocator {
 //     char* buffer;
@@ -38,7 +40,7 @@
 
 extern "C" {
     
-size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *msg) {
+size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *data, int data_len) {
     // char buildBuffer[2048];
     // char* head = "{\"topic\":\"";
     // memcpy(buildBuffer, head, strlen(head)+1);
@@ -63,21 +65,43 @@ size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *msg
     // with arduino json
     // StaticAllocator alloc(buildBuffer);
     // JsonDocument doc(&alloc);
-    JsonDocument doc;
-    doc["topic"] = topic;
-    doc["message"] = msg;
-    int json_size = measureMsgPack(doc);
-    if (json_size == 0){
+
+    // old
+    // JsonDocument doc;
+    // doc["topic"] = topic;
+    // doc["message"] = msg;
+    // int json_size = measureMsgPack(doc);
+    // if (json_size == 0){
+    //     return 0;
+    // }
+    // if (buf_len >= json_size){
+    //     int size = serializeMsgPack(doc, (void*) temp_buf, json_size)+1;
+    //     *(temp_buf+json_size) = '\n';
+    //     // *(write_head+json_size+1) = '\0';
+    //     return size;
+    // } else {
+    //     return 0;
+    // }
+
+    mpack_writer_t writer;
+    mpack_writer_init(&writer, (char*) temp_buf, buf_len);
+    mpack_start_map(&writer, 2);
+    mpack_write_cstr(&writer, "topic");
+    mpack_write_cstr(&writer, topic);
+    mpack_write_cstr(&writer, "data");
+    mpack_write_bin(&writer, (char*) data, data_len);
+    mpack_finish_map(&writer);
+    int written = mpack_writer_buffer_used(&writer);
+    if (mpack_writer_destroy(&writer) != mpack_ok) {
+        fprintf(stderr, "An error occurred encoding the data!\n");
         return 0;
     }
-    if (buf_len >= json_size){
-        int size = serializeMsgPack(doc, (void*) temp_buf, json_size)+1;
-        *(temp_buf+json_size) = '\n';
-        // *(write_head+json_size+1) = '\0';
-        return size;
+    if (written>buf_len){
+        return 0;
     } else {
-        return 0;
+        *(temp_buf+written) = '\n';
     }
+    return written+1;
 }
 
 }

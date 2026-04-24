@@ -34,7 +34,7 @@ typedef struct RosjamEndpoint {
 } RosjamEndpoint;
 
 int add_interface(RosjamEndpoint* endpoint, const char* topic);
-
+void send_data(RosjamEndpoint* endpoint, uint8_t* data, int data_len);
 void send_msg(RosjamEndpoint* endpoint, char* message);
 
 /**
@@ -43,7 +43,7 @@ void send_msg(RosjamEndpoint* endpoint, char* message);
 	The message is stored in the rx buffer of endpoint
 
 */
-void receivedFromUSB(RosjamEndpoint* endpoint, char* message);
+void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message_len);
 
 void setup();
 

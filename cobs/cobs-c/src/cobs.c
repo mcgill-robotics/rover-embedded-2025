@@ -8,7 +8,7 @@
  * Returns the worse case encoded size
  */
 int cobs_estimate_encoded_size(int buf_size){
-	return 2+(buf_size/(MAX_CHUNK_SIZE-1)+1)+buf_size;// 2 delimiter(front + back) + chunk overhead (rounded up) + data size
+	return 1+(buf_size/(MAX_CHUNK_SIZE-1)+1)+buf_size;// 1 delimiter(back) + chunk overhead (rounded up) + data size
 }
 
 /**
@@ -21,12 +21,12 @@ int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_le
 	uint8_t* output_end = output+output_length;
 	uint8_t* input_end = input+input_length;
 	int chunk_size = 0;
-	if (2>output_length){
+	if (1>output_length){
 		return -1;
 	}
-	*output = delim;
-	uint8_t* last_replaced = output+1;
-	output+=2; // reserve place for header and write initial delim
+	// *output = delim;
+	uint8_t* last_replaced = output;//+1;
+	output+=1;//2; // reserve place for header and write initial delim
 	for (;input<input_end;input++){
 		uint8_t current_byte = *input;
 		if (output+chunk_size+1 > output_end){
@@ -83,7 +83,7 @@ int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_le
 	int delim_count = 0;
 	int count = 0;
 	// printf("Start out: %p\n", output);
-	while (input<=input_end){
+	while (input<input_end){
 		count+=1;
 		uint8_t current_byte = *input;
 		if (current_byte == delim){
@@ -155,5 +155,5 @@ int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_le
 	}
 	// printf("delim: %d \n", delim_count);
 	*written = output-output_initial;
-	return input-input_initial;
+	return input-input_initial-1; // do not count second delim
 }

@@ -116,15 +116,15 @@ int main(void)
   MX_USART3_UART_Init();
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
-  setup_simple();
-  // setup();
-  // add_interface(&endpoint0, "diag0");
-  // add_interface(&endpoint1, "uart0");
-  // add_interface(&endpoint2, "uart1");
-  // add_interface(&endpoint3, "uart2");
-  // add_interface(&endpoint4, "uart3");
-  // add_interface(&endpoint5, "uart4");
-  // add_interface(&endpoint6, "uart5");
+  // setup_simple();
+  setup();
+  add_interface(&endpoint0, "diag0");
+  add_interface(&endpoint1, "uart0");
+  add_interface(&endpoint2, "uart1");
+  add_interface(&endpoint3, "uart2");
+  add_interface(&endpoint4, "uart3");
+  add_interface(&endpoint5, "uart4");
+  add_interface(&endpoint6, "uart5");
   // HAL_UART_Receive_IT(&huart3, rx_buff, 1000);
   /* USER CODE END 2 */
 
@@ -174,45 +174,45 @@ int main(void)
     // print_to_usb(convert_buf);
     // print_to_usb("\n");
 
-    if (has_data()) {
-      char incomingChar = read_char();
-      if (incomingChar == ',') {
-        commaIndex = index;
-      }
-      if (incomingChar == '\n') {
-        if (commaIndex > 0 ) {
-          buf[commaIndex] = '\0';
-          char* panStr = buf;
-          char* tiltStr = buf+commaIndex+1;
-          buf[index] = '\0';
-          double panFloat = string_to_float(panStr);
-          double tiltFloat = string_to_float(tiltStr);
-          char buf2[100];
-          float_to_string(panFloat, 8, buf2, 100);
-          print_to_usb(buf2);
-          print_to_usb(" sep ");
-          float_to_string(tiltFloat, 8, buf2, 100);
-          print_to_usb(buf2);
-          print_to_usb("\n");
-        }
-        index = 0;
-        commaIndex = 0;
-      } 
-      else {
-        buf[index] = incomingChar; // Append to buffer
-        index++;
-      }
-    }
+    // if (has_data()) {
+    //   char incomingChar = read_char();
+    //   if (incomingChar == ',') {
+    //     commaIndex = index;
+    //   }
+    //   if (incomingChar == '\n') {
+    //     if (commaIndex > 0 ) {
+    //       buf[commaIndex] = '\0';
+    //       char* panStr = buf;
+    //       char* tiltStr = buf+commaIndex+1;
+    //       buf[index] = '\0';
+    //       double panFloat = string_to_float(panStr);
+    //       double tiltFloat = string_to_float(tiltStr);
+    //       char buf2[100];
+    //       float_to_string(panFloat, 8, buf2, 100);
+    //       print_to_usb(buf2);
+    //       print_to_usb(" sep ");
+    //       float_to_string(tiltFloat, 8, buf2, 100);
+    //       print_to_usb(buf2);
+    //       print_to_usb("\n");
+    //     }
+    //     index = 0;
+    //     commaIndex = 0;
+    //   } 
+    //   else {
+    //     buf[index] = incomingChar; // Append to buffer
+    //     index++;
+    //   }
+    // }
 
-    // send_msg(&endpoint0, "Hello World! diag1: This is a longer message");
-    // send_msg(&endpoint1, "Hello World! uart0: This is a longer message");
-    // send_msg(&endpoint2, "Hello World! uart1: This is a longer message");
-    // send_msg(&endpoint3, "Hello World! uart2: This is a longer message");
-    // send_msg(&endpoint4, "Hello World! uart3: This is a longer message");
-    // send_msg(&endpoint5, "Hello World! uart4: This is a longer message");
-    // send_msg(&endpoint6, "Hello World! uart5: This is a longer message");
+    // send_msg(&endpoint0, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint1, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint2, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint3, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint4, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint5, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
+    // send_msg(&endpoint6, "Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message Hello World! diag1: This is a longer message  diag1: This is a longer message");
     
-    process_simple();
+    process();
     // tud_task();
   }
   /* USER CODE END 3 */
