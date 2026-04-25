@@ -19,7 +19,7 @@ endif()
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs/tinyusb/src/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs/mpack/tools/amalgamate.sh")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs/mpack_git/tools/amalgamate.sh")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 

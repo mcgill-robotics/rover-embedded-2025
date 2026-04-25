@@ -1,6 +1,6 @@
 [submodule "ROSJam2/libs/tinyusb"]
 	path = ROSJam2/libs/tinyusb
 	url = https://github.com/hathach/tinyusb
-[submodule "ROSJam2/libs/mpack"]
-	path = ROSJam2/libs/mpack
+[submodule "ROSJam2/libs/mpack_git"]
+	path = ROSJam2/libs/mpack_git
 	url = https://github.com/ludocode/mpack
