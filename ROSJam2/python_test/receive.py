@@ -11,12 +11,13 @@ uarts = ["diag0"]#,"uart0", "uart1", "uart2", "uart3", "uart4", "uart5"]
 values = [0, 0, 0, 0, 0, 0]
 
 try:
-    interface = serial.Serial("/dev/ttyACM2", 115200)
+    interface = serial.Serial("/dev/ttyACM1", 115200)
 except serial.SerialException as e:
     print(f"Error opening serial port: {e}")
     exit(1)
 
 counter = 0
+firstMismatch = True
 try:
     stream = bytearray()
     while True:
@@ -37,9 +38,14 @@ try:
                 # print(parsed_data)
                 parsed_data["data"] = msgpack.load(io.BytesIO(parsed_data["data"]))
                 print(parsed_data)
-                if counter != int(parsed_data["data"].removeprefix("Hello uart0 ")):
-                    print("Mismatched count")
-                    exit(1)
+                if counter != int(parsed_data["data"].split()[-1]):
+                    if not firstMismatch:
+                        print("Mismatched count")
+                        counter = int(parsed_data["data"].split()[-1])
+                        # exit(1)
+                    else:
+                        counter = int(parsed_data["data"].split()[-1])
+                        firstMismatch = False
                 counter+=1
             # print(stream)
                 

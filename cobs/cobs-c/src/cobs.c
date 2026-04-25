@@ -85,10 +85,10 @@ int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_le
 	uint8_t* input_end = input+input_length;
 	int chunk_size = 0;
 	int delim_count = 0;
-	int count = 0;
+	
 	// printf("Start out: %p\n", output);
 	while (input<input_end){
-		count+=1;
+		
 		uint8_t current_byte = *input;
 		if (current_byte == delim){
 			// printf("cnt: %d %d\n", count, input-input_initial);

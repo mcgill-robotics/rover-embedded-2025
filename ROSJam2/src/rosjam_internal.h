@@ -16,6 +16,7 @@ typedef struct ActiveEndpoints {
 	RosjamEndpoint* endpoints[ENDPOINT_COUNT];
 	RosjamRxBuffer global_rx_buffer;
 	int hasPending;
+	RosjamEndpoint* diag;
 } ActiveEndpoints;
 
 #ifdef __cplusplus

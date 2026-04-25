@@ -20,7 +20,7 @@ typedef struct RosjamRxBuffer {
 	int capacity;
 	int size;
 	int read_offset;
-	uint8_t buf[ENDPOINT_BUF_LEN*ENDPOINT_COUNT];
+	uint8_t buf[ENDPOINT_BUF_LEN];
 } RosjamRxBuffer;
 
 

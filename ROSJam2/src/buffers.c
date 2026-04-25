@@ -1,7 +1,9 @@
 #include "buffers.h"
 #include "stdio.h"
 #include "stddef.h"
+#include <stdlib.h>
 #include <string.h>
+
 
 uint32_t get_size_with_pad(uint32_t size){
 	// ensure alignment
@@ -10,9 +12,8 @@ uint32_t get_size_with_pad(uint32_t size){
 }
 
 int get_first_message(Buffer* buf, int* str_size, uint8_t** start){
-	if (buf->read_offset < buf->size){
-		int offset = buf ->read_offset;
-		uint8_t* message_start = buf->buf+offset;
+	if (buf->size>0){
+		uint8_t* message_start = buf->buf+buf ->read_offset;
 		*str_size = ((uint32_t*) message_start)[0];
 		*start = message_start+4;
 		int size_with_padding = get_size_with_pad(*str_size);
@@ -23,7 +24,7 @@ int get_first_message(Buffer* buf, int* str_size, uint8_t** start){
 }
 
 void mark_read(Buffer* buf, int read){
-	(buf ->read_offset)+=read;
+	(buf->read_offset)+=read;
 	(buf->size)-=read;
 }
 
@@ -45,7 +46,6 @@ uint8_t* get_write_space(Buffer* buf, uint32_t size){
 	int tail_space = buf->capacity - (buf ->read_offset+buf->size);
 	if (available < to_reserve){
 		// drop everything currently in buffer
-		printf("Dropping data\n");
 		buf-> read_offset = 0;
 		buf -> size = to_reserve;
 		write_position = buf -> buf;
@@ -83,7 +83,6 @@ uint8_t* get_write_space_global(RosjamRxBuffer* buf, int size){
 	int tail_space = buf->capacity - (buf ->read_offset+buf->size);
 	if (available < to_reserve){
 		// drop everything currently in buffer
-		printf("Dropping data\n");
 		buf-> read_offset = 0;
 		buf -> size = to_reserve;
 		write_position = buf -> buf;

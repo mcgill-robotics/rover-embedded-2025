@@ -5,7 +5,7 @@
 #endif
 
 #ifndef USB_CDC_FIFO_SIZE
-#define USB_CDC_FIFO_SIZE 4096
+#define USB_CDC_FIFO_SIZE 2048
 #endif
 
 #ifndef USB_CDC_EP_BUF_SIZE
