@@ -172,6 +172,7 @@ int send_next_messages(){
 	if (!currentEndpoints.hasPending){
 		return 0;
 	}
+	// tud_cdc_n_write_clear(USB_CDC_ITF);
 	int can_send = tud_cdc_n_write_available(USB_CDC_ITF);
 	if (currentEndpoints.first_message && can_send>1){
 		char buf[1];
@@ -201,7 +202,7 @@ int send_next_messages(){
 
 		} else {
 			empty_count = 0;
-
+			
 			if (str_size>CFG_TUD_CDC_TX_BUFSIZE){
 				tud_cdc_n_write_flush(USB_CDC_ITF); // flush buffer
 				int bytes_sent = 0;
@@ -218,9 +219,11 @@ int send_next_messages(){
 				break;
 			} else if (str_size>can_send){
 				// Message larger than available (wait till flushed and space becomes available)
-				
 				tud_cdc_n_write_clear(USB_CDC_ITF);
 				break;
+			}
+			if (currentEndpoints.endpoints[next_endpoint_idx]==currentEndpoints.diag){
+					led_state=!led_state;
 			}
 			total_sent+=str_size;
 			// send as many complete messages as possible
@@ -252,6 +255,9 @@ __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message
 		fprintf(stderr, "An error occurred decoding the data!\n");
 		return;
 	}
+	// if (endpoint == currentEndpoints.diag){
+	// 	led_state = !led_state;
+	// }
 	send_msg(currentEndpoints.diag, message_string);
 }
 

@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+extern int led_state;
+
 double string_to_float(char* string);
 
 int float_to_string(double number, int precision, char* buf, int buf_len);

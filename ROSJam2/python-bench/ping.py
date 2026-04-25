@@ -32,7 +32,7 @@ try:
             current_time = time.perf_counter()
             data = msgpack.dumps(f"{current_time}")#{uarts[current_uart]}")
             
-            data = msgpack.dumps({"topic":"uart0", "data":data})
+            data = msgpack.dumps({"topic":"diag0", "data":data})
             data = bytearray(data)
             
             data.append("\n".encode('ascii')[0])
@@ -53,12 +53,18 @@ try:
                 if read > 0:
                     end_time = time.perf_counter()
                     parsed_data = msgpack.load(io.BytesIO(data[:-1])) # strip newline
-                    parsed_data["data"] = msgpack.load(io.BytesIO(parsed_data["data"]))
-                    start_time = float(parsed_data["data"])
-                    rtt = end_time-start_time
-                    print(f"rtt: {rtt}s")
-                    times.append(rtt)
-                    send = True
+                    # print(parsed_data["topic"])
+                    if parsed_data["topic"] == "diag0":
+                        parsed_data["data"] = msgpack.load(io.BytesIO(parsed_data["data"]))
+                        try:
+                            start_time = float(parsed_data["data"])
+                            rtt = end_time-start_time
+                            print(f"rtt: {rtt}s")
+                            times.append(rtt)
+                        except ValueError:
+                            pass
+                        
+                        send = True
                 
 
 except KeyboardInterrupt:

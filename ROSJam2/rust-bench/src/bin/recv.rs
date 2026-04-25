@@ -1,10 +1,12 @@
-use std::{collections::VecDeque, io::Cursor, time::Duration};
+use std::{collections::VecDeque, io::Cursor, sync::mpsc::{self, Receiver, Sender}, thread, time::{Duration, Instant}};
 
 use rmpv::Value;
 use serde::Serialize;
 use serialport::{SerialPort, SerialPortBuilder};
 
 use cobs_rs::cobs::{decode, encode, estimate_size};
+
+
 
 fn main() {
     let port = serialport::new("/dev/ttyACM1", 115200)
@@ -15,13 +17,15 @@ fn main() {
 		let mut data:VecDeque<u8> = VecDeque::new();
 		let mut first_frame = true;
 		let mut counter = 0;
+		let mut mismatched_count = 0;
         while true {
             if let Ok(read) = interface.read(&mut buffer){
 				for element in &buffer[..read] {
 					data.push_back(*element);
 				}
-				if let Ok((decoded, read)) = decode(data.make_contiguous(), 0){
+				if let Ok((mut decoded, read)) = decode(data.make_contiguous(), 0){
 					data.drain(0..read);
+					decoded.remove(decoded.len()-1);
 					let mut stream = Cursor::new(decoded);
 					if let Value::Map(map) = rmpv::decode::read_value(&mut stream).unwrap(){
 						let mut topic_str:String = String::new();
@@ -40,14 +44,19 @@ fn main() {
 										} else {
 											if counter+1 != num {
 												println!("mismatched");
+												mismatched_count +=1;
 											} 
 										}
 										counter = num;
+										// println!("Topic: {}", topic_str);
+										// println!("Data: {}", rust_str_data_string);
+										// println!("Counter: {}", num);
+									} else {
+										print!("\x1B[2J");
+										print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 										println!("Topic: {}", topic_str);
 										println!("Data: {}", rust_str_data_string);
-										println!("Counter: {}", num);
-									} else {
-										
+										println!("Mismatches: {}", mismatched_count);
 									}
 								}
 								

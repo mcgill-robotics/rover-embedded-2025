@@ -21,7 +21,7 @@ fn main() {
                     initial = false;
                 }
             }
-            let strData = String::from("Hello uart0 12345678901234567890123456789 ");
+            let strData = String::from("Hello diag0 12345678901234567890123456789 ");
             let finalStrData = strData+&counter.to_string();
             let data = rmp_serde::to_vec(&finalStrData).unwrap();
             

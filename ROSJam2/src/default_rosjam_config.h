@@ -13,7 +13,7 @@
 #endif
 
 #ifndef ENDPOINT_COUNT 
-#define ENDPOINT_COUNT 1
+#define ENDPOINT_COUNT 7
 #endif
 
 #ifndef ENDPOINT_BUF_LEN

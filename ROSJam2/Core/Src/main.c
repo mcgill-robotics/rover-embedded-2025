@@ -50,6 +50,7 @@ PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
 uint8_t rx_buff[1000];
+int led_state = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,8 +137,11 @@ int main(void)
       // serialize_simple("test", "Hello World! diag: This is a longer message\n");
     // }
     
-    if (HAL_GetTick()%1000==0){
-        HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
+    if (led_state==1){
+        HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 1);
+        // HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
+    } else {
+        HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
     }
     // if(HAL_UART_Receive(&huart4, rx_buff, 1000, 1000)==HAL_OK) //if transfer is successful
     // { 
@@ -192,25 +196,25 @@ int main(void)
     //     index++;
     //   }
     // }
-    // for (int i = 0; i<2; i++){
-    //   char base[100];
-    //   char* str = "Hello jetson this is some longer data this is some longer data this is some longer data ";
-    //   memcpy(base, str, strlen(str)+1);
-    //   char convert_buf[100];
-    //   int_to_string(counter, convert_buf, 100);
-    //   strcat(base, convert_buf);
-    //   RosjamEndpoint* endpoint;
-    //   switch (counter%6) {
-    //     case 0: endpoint = &endpoint1; break;
-    //     case 1: endpoint = &endpoint2; break;
-    //     case 2: endpoint = &endpoint3; break;
-    //     case 3: endpoint = &endpoint4; break;
-    //     case 4: endpoint = &endpoint5; break;
-    //     case 5: endpoint = &endpoint6; break;
-    //   }
-    //   send_msg(endpoint, base) ;
-    //   counter+=1;
-    // }
+    for (int i = 0; i<2; i++){
+      char base[100];
+      char* str = "Hello jetson this is some longer data this is some longer data this is some longer data ";
+      memcpy(base, str, strlen(str)+1);
+      char convert_buf[100];
+      int_to_string(counter, convert_buf, 100);
+      strcat(base, convert_buf);
+      RosjamEndpoint* endpoint;
+      switch (counter%6) {
+        case 0: endpoint = &endpoint1; break;
+        case 1: endpoint = &endpoint2; break;
+        case 2: endpoint = &endpoint3; break;
+        case 3: endpoint = &endpoint4; break;
+        case 4: endpoint = &endpoint5; break;
+        case 5: endpoint = &endpoint6; break;
+      }
+      send_msg(endpoint, base) ;
+      counter+=1;
+    }
     
     // for (int i =0; i<1 ;i++){
     //   send_msg(&endpoint1, "Hello World! uart0: This is a longer message  uart0: This is a longer message Hello World! Hello World! uart0: This is a longer message  uart0: This is a longer message Hello World!");
