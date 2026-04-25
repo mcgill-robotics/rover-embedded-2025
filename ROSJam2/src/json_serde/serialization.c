@@ -1,17 +1,7 @@
 #include "serialization.h"
-#include "ArduinoJson.h"
-#include "ArduinoJson/Document/JsonDocument.hpp"
-#include "ArduinoJson/Json/JsonSerializer.hpp"
-#include "ArduinoJson/Memory/Allocator.hpp"
 #include "class/cdc/cdc_device.h"
 #include "buffers.h"
 #include "mpack.h"
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <stdint.h>
-#include <sys/_intsup.h>
 
 // class StaticAllocator:public ArduinoJson::Allocator {
 //     char* buffer;
@@ -38,7 +28,7 @@
 //     }
 // };
 
-extern "C" {
+// extern "C" {
     
 size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *data, int data_len) {
     // char buildBuffer[2048];
@@ -104,4 +94,4 @@ size_t serialize(uint8_t* temp_buf, int buf_len, const char *topic, uint8_t *dat
     return written+1;
 }
 
-}
+// }

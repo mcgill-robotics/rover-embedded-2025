@@ -1,6 +1,3 @@
-[submodule "ROSJam2/libs/ArduinoJson"]
-	path = ROSJam2/libs/ArduinoJson
-	url = https://github.com/bblanchon/ArduinoJson
 [submodule "ROSJam2/libs/tinyusb"]
 	path = ROSJam2/libs/tinyusb
 	url = https://github.com/hathach/tinyusb

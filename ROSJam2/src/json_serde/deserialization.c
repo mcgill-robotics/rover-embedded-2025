@@ -1,17 +1,11 @@
-#include "ArduinoJson.h"
-#include "ArduinoJson/Document/JsonDocument.hpp"
-#include "ArduinoJson/Json/JsonDeserializer.hpp"
-#include "ArduinoJson/Json/JsonSerializer.hpp"
-#include "ArduinoJson/MsgPack/MsgPackDeserializer.hpp"
+
 #include "buffers.h"
 #include "mpack.h"
 #include "rosjam.h"
-#include <cstddef>
-#include <cstdint>
 #include "deserialization.h"
 
 
-extern "C" {
+// extern "C" {
 	enum key_names       {
 		KEY_TOPIC, 
 		KEY_DATA,
@@ -100,4 +94,4 @@ extern "C" {
 		// // }
 		// return endpoint;
 	}
-}
+// }
