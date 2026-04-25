@@ -240,7 +240,7 @@ void ControlSingleMotor(Motor * motor, float angle){
 }
 
 
-
+/*
 void sendCANResponse(ParsedCANID *CANMessageID, float information){
 
 	/*
@@ -248,7 +248,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 	 that was sent to the esc, except the MSB is now 1, indicating that it is the esc which is sending data back to the master. In turn, this also
 	 makes sure that no other escs begin processing the message that the current one is trying to send.
 
-	 */
+	 *  /
 
 	FDCAN_TxHeaderTypeDef TxHeader;
     uint16_t txID = 0;
@@ -292,6 +292,51 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information){
 		Error_Handler();
 	}
 }
+
+*/
+
+
+void sendCANResponse(ParsedCANID *CANMessageID, float information)
+{
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[64] = {0};
+
+    uint8_t spec = (CANMessageID->commandType == ACTION_READ)
+                   ? (uint8_t)(CANMessageID->readSpec)
+                   : (uint8_t)(CANMessageID->runSpec);
+
+    uint16_t txID = 0x1;
+
+//    CAN_BuildID(
+//        SLAVE,                                      /* Sender    */
+//        (uint8_t)CANMessageID->commandType,         /* Action    */
+//        (uint8_t)CANMessageID->motorConfig,         /* Config    */
+//        (uint8_t)CANMessageID->motorType,           /* MotorType */
+//        spec,                                       /* Spec      */
+//        (uint8_t)CANMessageID->motorID              /* DeviceID  */
+//    );
+//
+
+    memcpy(txData, &information, sizeof(float));
+
+    txHeader.Identifier          = txID;
+    txHeader.IdType              = FDCAN_CLASSIC_CAN; // Using NOT FD here:
+    txHeader.TxFrameType         = FDCAN_DATA_FRAME;
+    txHeader.DataLength          = FDCAN_DLC_BYTES_8;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch       = FDCAN_BRS_OFF;  // Using NOT FD here:
+    txHeader.FDFormat            = FDCAN_FD_CAN;
+    txHeader.TxEventFifoControl  = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker       = 0;
+
+    //uart_debug_print("CAN FD Response Sent!\r\n");
+
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &txHeader, txData) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+
 
 // Extracts a float from a CAN data buffer that is expected to be in little-Endian
 float SingleExtractFloatFromCAN(uint8_t *data) {

@@ -8,6 +8,6 @@
 ../Core/Src/CAN_processing.c:142:6:Process_Single_Motor_Command	32	static
 ../Core/Src/CAN_processing.c:205:6:Process_Multiple_Motor_Command	24	static
 ../Core/Src/CAN_processing.c:238:6:ControlSingleMotor	16	static
-../Core/Src/CAN_processing.c:244:6:sendCANResponse	64	static
-../Core/Src/CAN_processing.c:297:7:SingleExtractFloatFromCAN	24	static
-../Core/Src/CAN_processing.c:312:9:extract_multiple_speeds	16	static
+../Core/Src/CAN_processing.c:299:6:sendCANResponse	120	static
+../Core/Src/CAN_processing.c:342:7:SingleExtractFloatFromCAN	24	static
+../Core/Src/CAN_processing.c:357:9:extract_multiple_speeds	16	static

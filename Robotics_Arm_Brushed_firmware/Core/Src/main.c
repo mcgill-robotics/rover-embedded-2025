@@ -231,24 +231,35 @@ int main(void)
 
 
     // CAN initialization
-    FDCAN_FilterTypeDef canfilterconfig;
+  // Configure accept-all filter for standard IDs into FIFO0 /
+      FDCAN_FilterTypeDef filter;
+      //filter.IdType = FDCAN_STANDARD_ID;
+      filter.IdType = FDCAN_CLASSIC_CAN;
+      filter.FilterIndex = 0;
+      filter.FilterType = FDCAN_FILTER_MASK;
+      filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+      filter.FilterID1 = 0x000; // ID pattern: don't care /
+      filter.FilterID2 = 0x000; // Mask: 0 = all bits ignored = accept all /
+      if (HAL_FDCAN_ConfigFilter(&hfdcan2, &filter) != HAL_OK) {
+          Error_Handler();
+      }
 
-      canfilterconfig.IdType = FDCAN_STANDARD_ID;
-      canfilterconfig.FilterIndex = 0;
-      canfilterconfig.FilterID1 = 0x0000; // ID
-      canfilterconfig.FilterID2 = 0x0000; // ID filtered on this value; effectively allows all
-      canfilterconfig.FilterType = FDCAN_FILTER_MASK;
-      canfilterconfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+      if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
+          Error_Handler();
+      }
 
-    HAL_FDCAN_ConfigFilter(&hfdcan2, &canfilterconfig); // apply to CANFD
+      // Activate RX FIFO0 new message notification //
+      if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
+              0) != HAL_OK) {
+          Error_Handler();
+      }
 
-    HAL_FDCAN_Start(&hfdcan2); // start the filter
 
 
-    if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-    {
-      Error_Handler();
-    }
+
+      if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
+          Error_Handler();
+      }
 
 
   /* USER CODE END 2 */
@@ -273,19 +284,34 @@ int main(void)
 	  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	  //HAL_Delay(500); // wait 1000 ms (1 second)
 
+	  ParsedCANID header;
+
+	  header.messageSender = 1;
+	  header.motorType = 0;
+	  header.motorConfig = 0;
+	  header.commandType = 1;
+	  header.readSpec = 1;
+	  header.runSpec = 1;
+	  header.motorID = 0;
+
+	  float message = 69.0f;
+
+	  sendCANResponse(&header, message);
+	  HAL_Delay(1000);
+
 	  // Process Message if available
 	  if (CAN_flag){
 
 		CAN_flag = 0;
 		//HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-		HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+		//HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 
 		//if (steering_state != CALIBRATION){
 		CAN_Parse_MSG(&RxHeader, RxData);
 		//}
 		// led pin to check msg processing working
 
-		HAL_Delay(1000);
+		//HAL_Delay(1000);
 	  }
 
 
@@ -522,7 +548,7 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE END FDCAN2_Init 1 */
   hfdcan2.Instance = FDCAN2;
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
+  hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
   hfdcan2.Init.AutoRetransmission = ENABLE;
   hfdcan2.Init.TransmitPause = ENABLE;
@@ -1173,6 +1199,7 @@ void HAL_FDCAN_RxFifo0Callback (FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs
 	    }
 
 	    //upon successful interrupt, the CAN flag is set high for main loop to catch
+	    HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	    CAN_flag = 1;
 
 	  }
