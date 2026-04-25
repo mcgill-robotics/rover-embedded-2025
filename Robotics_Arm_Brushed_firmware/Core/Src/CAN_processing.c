@@ -332,6 +332,7 @@ void sendCANResponse(ParsedCANID *CANMessageID, float information)
     //uart_debug_print("CAN FD Response Sent!\r\n");
 
     if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &txHeader, txData) != HAL_OK) {
+    	HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
         Error_Handler();
     }
 }
