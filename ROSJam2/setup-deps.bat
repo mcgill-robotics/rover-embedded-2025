@@ -1,6 +1,13 @@
+REM this is to manually setup the depencies if you arent using cmake
+REM when using cmake the cmake files should install everything for you
+@echo off
+echo "Cloning submodules"
 git submodule update --init --recursive
+echo "Creating mpack amalgamation directory"
 mkdir libs\mpack\
-copy mpack_cmake.txt libs\mpack\CMakeLists.txt
-echo "skipping amalgamation of mpack library on windows (download the amalgamation package manually from here https://github.com/ludocode/mpack/releases and place its contents in libs/mpack/)"
-echo "There should at least be a libs/mpack/src/mpack.c and libs/mpack/src/mpack.h for the library to work"
-echo "Do not delete the CMakeLists.txt that was placed (if you did rerun this after copying the amalgamation package)"
+echo "Copying CMakeLists.txt for mpack"
+copy src\mpack_cmake.txt libs\mpack\CMakeLists.txt
+echo "Manually downloading amalgamation package from github as tar.gz because this is on windows"
+curl.exe -L -o libs\mpack\mpack.tar.gz --url https://github.com/ludocode/mpack/releases/download/v1.1.1/mpack-amalgamation-1.1.1.tar.gz
+tar -xzf libs\mpack\mpack.tar.gz -C libs/mpack --strip-components=1
+DEL libs\mpack\mpack.tar.gz
