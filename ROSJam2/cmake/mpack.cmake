@@ -1,3 +1,4 @@
+# CMakeLists.txt for the mpack library (will automatically get copied by the rosjam CMakeLists.txt)
 cmake_minimum_required(VERSION 3.20)
 enable_language(C ASM)
 
