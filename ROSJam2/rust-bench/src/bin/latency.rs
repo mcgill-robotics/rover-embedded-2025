@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, io::Cursor, time::{Duration, Instant, SystemTime}};
+use std::{collections::VecDeque, io::Cursor, thread::sleep, time::{Duration, Instant, SystemTime}};
 
 use rmpv::Value;
 use serde::Serialize;
@@ -15,7 +15,7 @@ fn main() {
 		let mut data:VecDeque<u8> = VecDeque::new();
 		let mut counter = 0;
 		let mut send = true;
-		let mut times:Vec<f64> = Vec::new();
+		let mut times:VecDeque<f64> = VecDeque::new();
 		let mut initial = true;
         while true {
 			if initial {
@@ -25,9 +25,8 @@ fn main() {
                 }
             }
 			let start = Instant::now();
-			let sys_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_millis();
-            let str_data = String::from("Hello uart0 12345678901234567890123456789 ");
-            let final_str_data = str_data+&counter.to_string();
+			let sys_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos();
+            let final_str_data = sys_time.to_string();
             let send_data = rmp_serde::to_vec(&final_str_data).unwrap();
             let map_value = Value::Map(vec![(Value::String("topic".into()),Value::String("uart0".into())), ((Value::String("data".into()), Value::Binary(send_data)))]);
             let mut msg_pack_packet = Vec::new();
@@ -36,11 +35,7 @@ fn main() {
             let cobs_encoded_frame = encode(msg_pack_packet, 0);
             
             match interface.write_all(&cobs_encoded_frame){
-                Ok(()) => {
-                    
-                    println!("Sent packet {}", counter);
-                    
-                    
+                Ok(()) => {                    
                     counter+=1;
                     
                 },
@@ -64,25 +59,34 @@ fn main() {
 							if let Value::String(topic) = &map[0].1 {
 								topic_str = topic.clone().into_str().expect("no topic");
 							}
-							if let Value::Binary(decoded_data) = &map[1].1 {
-								let mut data_stream = Cursor::new(decoded_data);
-								if let Value::String(data_string) = rmpv::decode::read_value(&mut data_stream).unwrap(){
-									// let rust_str_data_string = data_string.into_str().expect("No string");
-									// let num:u128 = rust_str_data_string.parse().unwrap();
-									if topic_str == "diag0"{
-										let elapsed = start.elapsed().as_nanos();
+							if topic_str == "diag0"{
+								let elapsed = start.elapsed().as_nanos();
+								if let Value::Binary(decoded_data) = &map[1].1 {
+									let mut data_stream = Cursor::new(decoded_data);
+									if let Value::String(data_string) = rmpv::decode::read_value(&mut data_stream).unwrap(){
+										let current_sys_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos();
+										let rust_str_data_string = data_string.into_str().expect("No string");
+										let num:u128 = rust_str_data_string.parse().unwrap();
+										print!("\x1B[2J");
+										print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+										println!("ROSJam latency:");
 										println!("rtt: {}ns", elapsed);
+										println!("rtt (systime sent on packet): {}ns", current_sys_time-num);
 										if !times.is_empty() {
 											let total:f64 = times.iter().sum();
 											let count = times.len() as f64;
 											let avg_rtt = total/count;
-											println!("Avg rtt: {}ns", avg_rtt);
+											println!("Avg rtt (200 samples): {}ns", avg_rtt);
 										}
-										times.push(elapsed as f64);
+										times.push_back(elapsed as f64);
+										if times.len() > 200 {
+											times.pop_front();
+										}
 										send = true;
-									} 									
+										sleep(Duration::from_millis(100));
+									}
 								}
-							}
+							} 		
 						}
 					}
 				}
