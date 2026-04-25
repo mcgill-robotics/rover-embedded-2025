@@ -324,14 +324,9 @@ void check_rx(){
 				}
 				mark_read_global(buffer, read_bytes);
 			} else {
-				if (buffer->size == buffer->capacity){
-					//buffer full and message cannot fit
-					buffer->size = 0; // clear buffer
-					buffer->read_offset = 0;
-					return;
-				} else {
-					break;
-				}
+				
+				break;
+				
 			}
 		} while (buffer->size>0);
 	}
