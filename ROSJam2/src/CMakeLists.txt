@@ -16,13 +16,19 @@ if(GIT_FOUND)
     endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs/tinyusb/src/CMakeLists.txt")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/tinyusb/src/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libs/mpack_git/tools/amalgamate.sh")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/mpack_git/tools/amalgamate.sh")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
-
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/mpack_git/tools/amalgamate.sh")
+    execute_process(COMMAND "${PROJECT_SOURCE_DIR}/libs/mpack_git/tools/amalgamate.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/libs/mpack_git")
+    file(REMOVE_RECURSE "${PROJECT_SOURCE_DIR}/libs/mpack")
+    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../libs/mpack_git/.build/amalgamation" DESTINATION "${PROJECT_SOURCE_DIR}/libs/")
+    file(RENAME "${PROJECT_SOURCE_DIR}/libs/amalgamation" "${PROJECT_SOURCE_DIR}/libs/mpack")
+    file(COPY_FILE "${CMAKE_CURRENT_SOURCE_DIR}/mpack_cmake.txt" "${CMAKE_CURRENT_SOURCE_DIR}/../libs/mpack/CMakeLists.txt")
+endif()
 set(ROSJAM_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/rosjam.c
   ${CMAKE_CURRENT_SOURCE_DIR}/usb_descriptors.c
