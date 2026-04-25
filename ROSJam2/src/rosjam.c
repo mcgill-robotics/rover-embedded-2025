@@ -240,29 +240,6 @@ int send_next_messages(){
 	}
 	added-=counter;
 	currentEndpoints.hasPending = 0;
-	// if (sent_count == 0){
-	// 	// if message too big for one transfer try immediately sending it
-	// 	if (bytes_to_send>CFG_TUD_CDC_TX_BUFSIZE){
-	// 		tud_cdc_n_write_flush(USB_CDC_ITF); // flush buffer
-	// 		int bytes_sent = 0;
-	// 		while (bytes_to_send>0){
-	// 			int sent = tud_cdc_n_write(USB_CDC_ITF, buf->buf+buf->read_offset+bytes_sent, bytes_to_send);
-	// 			tud_cdc_n_write_flush(USB_CDC_ITF);
-	// 			bytes_sent += sent;
-	// 			bytes_to_send-=bytes_sent;
-	// 		}
-	// 		mark_read(buf, bytes_sent);
-	// 	} else {
-	// 		// Message larger than available (wait till flushed and space becomes available)
-	// 		return;
-	// 	}
-	// } else {
-	// 	// send as many complete messages as possible
-	// 	tud_cdc_n_write(USB_CDC_ITF, buf->buf, bytes_to_send);
-	// 	mark_read(buf, bytes_to_send);
-	// }
-	// // message sent so we can move to next available interface
-	// currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
 	return total_sent;
 }
 
@@ -324,9 +301,7 @@ void check_rx(){
 				}
 				mark_read_global(buffer, read_bytes);
 			} else {
-				
-				break;
-				
+				break;				
 			}
 		} while (buffer->size>0);
 	}

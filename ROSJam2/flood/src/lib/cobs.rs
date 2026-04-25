@@ -115,7 +115,7 @@ pub fn decode(input_buf:&[u8], delim:u8) -> Result<(Vec<u8>, usize), Box<dyn Err
 	}
 	if delim_count == 0 {
 		return Err(Box::new(DecodeError::NoDelimiterfound));
-	} else if delim_count == 0 {
+	} else if delim_count == 1 {
 		return Err(Box::new(DecodeError::NotEnoughBytes));
 	}
 	return Ok((output, input_index-1));
