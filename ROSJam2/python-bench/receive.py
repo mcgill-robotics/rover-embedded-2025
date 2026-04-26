@@ -22,7 +22,7 @@ try:
     stream = bytearray()
     while True:
         if interface.readable():
-            read_bytes:bytes = interface.read()
+            read_bytes:bytes = interface.read(max(1, min(1024, interface.in_waiting)))
             # print(read_bytes)
             if read_bytes:
                 stream.extend(read_bytes)

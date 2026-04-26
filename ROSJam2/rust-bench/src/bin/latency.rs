@@ -95,7 +95,6 @@ fn main() {
 										print!("\x1B[2J");
 										print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 										println!("ROSJam latency:");
-										println!("{}", init_time.elapsed().as_nanos());
 										println!("Decode time: {}", decode_start.elapsed().as_nanos());
 										println!("rtt: {}ns", elapsed);
 										println!("rtt (systime sent on packet): {}ns", current_sys_time-num);

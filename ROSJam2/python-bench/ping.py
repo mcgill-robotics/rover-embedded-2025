@@ -46,7 +46,7 @@ try:
 
         while not send:
             if interface.readable() and not send:
-                read_bytes:bytes = interface.read()
+                read_bytes:bytes = interface.read(max(1, min(1024, interface.in_waiting)))
                 if read_bytes:
                     stream.extend(read_bytes)
                 data, read = cobs.decode(stream, 0)
