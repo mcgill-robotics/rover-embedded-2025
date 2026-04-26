@@ -22,7 +22,9 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32g4xx_hal.h"
 #include "tusb.h"
+#include "led_blink.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -186,6 +188,9 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
+  if (HAL_GetTick()%1000 == 0){
+    needs_blink = 1;
+  }
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 

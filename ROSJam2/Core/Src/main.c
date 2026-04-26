@@ -21,12 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "class/cdc/cdc_device.h"
-#include "device/usbd.h"
 #include "rosjam.h"
-#include "json_serde/serialization.h"
 #include "stdio.h"
-#include "cobs.h"
 #include "stm32g4xx_hal_def.h"
 #include <stdint.h>
 #include <string.h>
@@ -80,6 +76,8 @@ uint8_t uart3buf[ENDPOINT_BUF_LEN];
 uint8_t uart4buf[ENDPOINT_BUF_LEN];
 uint8_t uart5buf[ENDPOINT_BUF_LEN];
 uint8_t diag0buf[ENDPOINT_BUF_LEN];
+
+int needs_blink = 0;
 /* USER CODE END 0 */
 
 /**
@@ -133,7 +131,7 @@ int main(void)
   register_interface(&endpoint6);
   
   set_diag_endpoint(&endpoint0);
-  
+
   // HAL_UART_Receive_IT(&huart3, rx_buff, 1000);
   /* USER CODE END 2 */
 
@@ -154,12 +152,15 @@ int main(void)
       // serialize_simple("test", "Hello World! diag: This is a longer message\n");
     // }
     
-    if (led_state==1){
-        HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 1);
-        // HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
-    } else {
-        HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
-    }
+    if (needs_blink){
+        // HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 1);
+        
+        HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
+        needs_blink = 0;
+    } 
+    // else {
+    //     HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 0);
+    // }
     // if(HAL_UART_Receive(&huart4, rx_buff, 1000, 1000)==HAL_OK) //if transfer is successful
     // { 
     //   printf("Received: %s\n", rx_buff);
