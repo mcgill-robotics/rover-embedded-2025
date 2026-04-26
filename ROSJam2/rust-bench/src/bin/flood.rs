@@ -25,7 +25,7 @@ fn main() {
             let finalStrData = strData+&counter.to_string();
             let data = rmp_serde::to_vec(&finalStrData).unwrap();
             
-            let map_value = Value::Map(vec![(Value::String("topic".into()),Value::String("uart0".into())), ((Value::String("data".into()), Value::Binary(data)))]);
+            let map_value = Value::Map(vec![(Value::String("topic".into()),Value::String("diag0".into())), ((Value::String("data".into()), Value::Binary(data)))]);
             let mut msg_pack_packet = Vec::new();
             rmpv::encode::write_value(&mut msg_pack_packet, &map_value);
             msg_pack_packet.push(b'\n');

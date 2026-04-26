@@ -26,7 +26,7 @@ fn main() {
 		// thread::spawn(move ||{
 		// 	receiver(interface2);
 		// });
-        let mut buffer = [0u8;10000];
+        let mut buffer = [0u8;1024];
 		let mut data:VecDeque<u8> = VecDeque::new();
 		let mut send = true;
 		let mut times:VecDeque<f64> = VecDeque::new();
@@ -87,9 +87,10 @@ fn main() {
 										let elapsed = start.elapsed().as_nanos();
 										let current_sys_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos();
 										let rust_str_data_string = data_string.into_str().expect("No string");
+										println!("{}", rust_str_data_string);
 										let num:u128 = match rust_str_data_string.parse() {
 											Ok(n) => n,
-											Err(_) => continue
+											Err(_) => panic!("bad number")
 										};
 										print!("\x1B[2J");
 										print!("{esc}[2J{esc}[1;1H", esc = 27 as char);

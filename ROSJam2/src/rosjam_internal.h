@@ -14,7 +14,7 @@ typedef struct ActiveEndpoints {
 	int nextTxEndpoint;
 	int first_message;
 	RosjamEndpoint* endpoints[ENDPOINT_COUNT];
-	RosjamRxBuffer global_rx_buffer;
+	Buffer global_rx_buffer;
 	int hasPending;
 	RosjamEndpoint* diag;
 } ActiveEndpoints;

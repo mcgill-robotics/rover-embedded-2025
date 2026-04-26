@@ -28,12 +28,8 @@ void mark_read(Buffer* buf, int read){
 	(buf->size)-=read;
 }
 
-void mark_read_global(RosjamRxBuffer* buf, int read){
-	(buf ->read_offset)+=read;
-	(buf->size)-=read;
-}
 
-uint8_t* get_write_space(Buffer* buf, uint32_t size){
+uint8_t* get_tagged_write_space(Buffer* buf, uint32_t size){
 	uint32_t metadata_size = 4; //+4 for metadata about string size
 	uint32_t size_with_padding = get_size_with_pad(size);
 	uint32_t to_reserve = size_with_padding+metadata_size;
@@ -72,7 +68,7 @@ uint8_t* get_write_space(Buffer* buf, uint32_t size){
 }
 
 
-uint8_t* get_write_space_global(RosjamRxBuffer* buf, int size){
+uint8_t* get_write_space(Buffer* buf, int size){
 	uint32_t to_reserve = size;
 	
 	if (size > buf->capacity){

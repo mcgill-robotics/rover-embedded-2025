@@ -27,6 +27,7 @@
 #include "json_serde/serialization.h"
 #include "stdio.h"
 #include "cobs.h"
+#include "stm32g4xx_hal_def.h"
 #include <stdint.h>
 #include <string.h>
 /* USER CODE END Includes */
@@ -71,7 +72,14 @@ RosjamEndpoint endpoint4;
 RosjamEndpoint endpoint5;
 RosjamEndpoint endpoint6;
 
-Buffer test;
+
+uint8_t uart0buf[ENDPOINT_BUF_LEN];
+uint8_t uart1buf[ENDPOINT_BUF_LEN];
+uint8_t uart2buf[ENDPOINT_BUF_LEN];
+uint8_t uart3buf[ENDPOINT_BUF_LEN];
+uint8_t uart4buf[ENDPOINT_BUF_LEN];
+uint8_t uart5buf[ENDPOINT_BUF_LEN];
+uint8_t diag0buf[ENDPOINT_BUF_LEN];
 /* USER CODE END 0 */
 
 /**
@@ -106,22 +114,31 @@ int main(void)
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
   // setup_simple();
-  setup(&endpoint0);
-  add_interface(&endpoint0, "diag0");
-  add_interface(&endpoint1, "uart0");
-  add_interface(&endpoint2, "uart1");
-  add_interface(&endpoint3, "uart2");
-  add_interface(&endpoint4, "uart3");
-  add_interface(&endpoint5, "uart4");
-  add_interface(&endpoint6, "uart5");
+  
+  init_interface(&endpoint0, "diag0", diag0buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint1, "uart0", uart0buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint2, "uart1", uart1buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint3, "uart2", uart2buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint4, "uart3", uart3buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint5, "uart4", uart4buf, ENDPOINT_BUF_LEN);
+  init_interface(&endpoint6, "uart5", uart5buf, ENDPOINT_BUF_LEN);
+  // must call init before registering interfaces
+  init_rosjam_usb();
+  register_interface(&endpoint0);
+  register_interface(&endpoint1);
+  register_interface(&endpoint2);
+  register_interface(&endpoint3);
+  register_interface(&endpoint4);
+  register_interface(&endpoint5);
+  register_interface(&endpoint6);
+  
+  set_diag_endpoint(&endpoint0);
+  
   // HAL_UART_Receive_IT(&huart3, rx_buff, 1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int commaIndex = 0;
-  int index = 0;
-  char buf[1000];
   int counter = 0;
   while (1)
   {
@@ -197,13 +214,7 @@ int main(void)
     //   }
     // }
     for (int i = 0; i<2; i++){
-      char base[100];
-      char* str = "Hello jetson this is some longer data this is some longer data this is some longer data ";
-      memcpy(base, str, strlen(str)+1);
-      char convert_buf[100];
-      int_to_string(counter, convert_buf, 100);
-      strcat(base, convert_buf);
-      RosjamEndpoint* endpoint;
+      RosjamEndpoint* endpoint = NULL;
       switch (counter%6) {
         case 0: endpoint = &endpoint1; break;
         case 1: endpoint = &endpoint2; break;
@@ -212,7 +223,21 @@ int main(void)
         case 4: endpoint = &endpoint5; break;
         case 5: endpoint = &endpoint6; break;
       }
+      char base[100];
+      char* str = "Hello jetson this is some longer data this is some longer data this is some longer data ";
+      char* str2 = "from ";
+      int strlen2 = strlen(str2);
+      memcpy(base, str2, strlen2);
+      char* topic = endpoint->topic;
+      int topic_len = strlen(topic);
+      memcpy(base+strlen2, topic, topic_len);
+      *(base+strlen2+topic_len) = ' ';
+      memcpy(base+strlen2+topic_len+1, str, strlen(str)+1);
+      char convert_buf[100];
+      int_to_string(counter, convert_buf, 100);
+      strcat(base, convert_buf);
       send_msg(endpoint, base) ;
+      
       counter+=1;
     }
     

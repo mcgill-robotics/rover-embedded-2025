@@ -35,7 +35,9 @@ typedef struct RosjamEndpoint {
 	// Buffer rx_buf;
 } RosjamEndpoint;
 
-int add_interface(RosjamEndpoint* endpoint, const char* topic);
+void init_interface(RosjamEndpoint* endpoint, const char* topic, uint8_t* buffer, int buffer_size);
+int register_interface(RosjamEndpoint* endpoint);
+void set_diag_endpoint(RosjamEndpoint* diag);
 void send_data(RosjamEndpoint* endpoint, uint8_t* data, int data_len);
 void send_msg(RosjamEndpoint* endpoint, char* message);
 
@@ -47,7 +49,7 @@ void send_msg(RosjamEndpoint* endpoint, char* message);
 */
 void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message_len);
 
-void setup();
+void init_rosjam_usb();
 
 void process();
 

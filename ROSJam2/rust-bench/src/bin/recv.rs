@@ -13,12 +13,20 @@ fn main() {
         .timeout(Duration::from_secs(0))
         .exclusive(false);
     if let Ok(mut interface) = port.open(){
-        let mut buffer = [0u8;10000];
+        let mut buffer = [0u8;1024];
 		let mut data:VecDeque<u8> = VecDeque::new();
 		let mut first_frame = true;
+		let mut first_frame_diag = true;
 		let mut counter = 0;
+		let mut diag_counter =0;
 		let mut mismatched_count = 0;
+		let mut diag_mismatched_count = 0;
         while true {
+			// let toRead = interface.bytes_to_read().unwrap();
+			// if toRead != 0 {
+			// 	println!("Available: {}", toRead);
+			// }
+			
             if let Ok(read) = interface.read(&mut buffer){
 				for element in &buffer[..read] {
 					data.push_back(*element);
@@ -52,11 +60,21 @@ fn main() {
 										// println!("Data: {}", rust_str_data_string);
 										// println!("Counter: {}", num);
 									} else {
+										if first_frame_diag {
+											first_frame_diag = false
+										} else {
+											if diag_counter+1 != num {
+												println!("mismatched");
+												diag_mismatched_count +=1;
+											} 
+										}
+										diag_counter = num;
 										print!("\x1B[2J");
 										print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 										println!("Topic: {}", topic_str);
 										println!("Data: {}", rust_str_data_string);
 										println!("Mismatches: {}", mismatched_count);
+										println!("Diag0 Mismatches: {}", diag_mismatched_count);
 									}
 								}
 								

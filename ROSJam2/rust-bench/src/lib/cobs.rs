@@ -104,12 +104,13 @@ pub fn decode(input_buf:&[u8], delim:u8) -> Result<(Vec<u8>, usize), Box<dyn Err
 			output.push(delim);
 		}
 
-		
 		let current_output_index = output.len();
 		output.reserve(chunk_size.into());
 		let chunk_size_usize:usize = chunk_size.into();
-		output.resize(current_output_index+chunk_size_usize, 0);
-		output[current_output_index..current_output_index+chunk_size_usize].copy_from_slice(&input_buf[input_index..input_index+chunk_size_usize]);
+		if input_index+chunk_size_usize <= input_buf.len(){
+			output.resize(current_output_index+chunk_size_usize, 0);
+			output[current_output_index..current_output_index+chunk_size_usize].copy_from_slice(&input_buf[input_index..input_index+chunk_size_usize]);
+		}
 		input_index+=chunk_size_usize;
 		
 	}

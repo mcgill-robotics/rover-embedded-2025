@@ -7,11 +7,13 @@
 #include "device/usbd.h"
 #include "json_serde/deserialization.h"
 #include "json_serde/serialization.h"
+#include "stm32g4xx_hal_def.h"
 #include "tusb_config.h"
 #include "tusb.h"
 #include "stdio.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "mpack.h"
 // #include "cobs.h"
 
@@ -84,8 +86,10 @@ void process_simple(){
 
 uint8_t temp_data_buf[ENDPOINT_BUF_LEN];
 uint8_t temp_frame_buf[ENDPOINT_BUF_LEN];
+uint8_t global_rx_buf[ENDPOINT_BUF_LEN];
 
-void setup(RosjamEndpoint* diag){
+void init_rosjam_usb(){
+	currentEndpoints.global_rx_buffer.buf = global_rx_buf;
 	currentEndpoints.global_rx_buffer.capacity = ENDPOINT_BUF_LEN;
 	currentEndpoints.global_rx_buffer.read_offset = 0;
 	currentEndpoints.global_rx_buffer.size = 0;
@@ -93,7 +97,7 @@ void setup(RosjamEndpoint* diag){
 	currentEndpoints.size = 0;
 	currentEndpoints.first_message = 1;
 	currentEndpoints.hasPending = 0;
-	currentEndpoints.diag = diag;
+	currentEndpoints.diag = NULL;
 	tusb_rhport_init_t dev_init = {
     	.role = TUSB_ROLE_DEVICE,
     	.speed = TUSB_SPEED_AUTO
@@ -101,21 +105,26 @@ void setup(RosjamEndpoint* diag){
   	tusb_init(BOARD_TUD_RHPORT, &dev_init);
 }
 
+/**
+	Set diag channel for loopback use
+*/
+void set_diag_endpoint(RosjamEndpoint* diag){
+	currentEndpoints.diag = diag;
+}
 
-int add_interface(RosjamEndpoint* endpoint, const char* topic){
+void init_interface(RosjamEndpoint* endpoint, const char* topic, uint8_t* buffer, int buffer_size){
+	endpoint->topic = topic;
+	(endpoint->tx_buf).capacity = buffer_size;
+	(endpoint->tx_buf).size = 0;
+	(endpoint->tx_buf).read_offset = 0;
+	(endpoint->tx_buf).buf = buffer;
+}
+
+/**
+	Registers the interface for use. Returns 1 on success, 0 on failure if not enough endpoints were declared at compile time
+*/
+int register_interface(RosjamEndpoint* endpoint){
 	if (currentEndpoints.size<ENDPOINT_COUNT){
-		// initialize endpoint fields
-		//tx buffer
-		// (endpoint->rx_buf).capacity = ENDPOINT_BUF_LEN;
-		// (endpoint->rx_buf).size = 0;
-		// (endpoint->rx_buf).read_offset = 0;
-		//rx buffer
-		(endpoint->tx_buf).capacity = ENDPOINT_BUF_LEN;
-		(endpoint->tx_buf).size = 0;
-		(endpoint->tx_buf).read_offset = 0;
-
-		endpoint->topic = topic;
-
 		// Add to array
 		currentEndpoints.endpoints[currentEndpoints.size] = endpoint;
 		currentEndpoints.size++;
@@ -142,7 +151,6 @@ void send_msg(RosjamEndpoint* endpoint, char* message){
 	send_data(endpoint, (uint8_t*) temp_data_buf, written);
 }
 
-int added = 0;
 /**
 
 Call this to prepare a message to be sent on an endpoint
@@ -150,12 +158,12 @@ Call this to prepare a message to be sent on an endpoint
 */
 void send_data(RosjamEndpoint* endpoint, uint8_t* data, int data_len){
 	currentEndpoints.hasPending = 1;
-	Buffer* buffer = &(endpoint -> tx_buf);
+	Buffer* buffer = &(endpoint->tx_buf);
 	int json_size = serialize(temp_frame_buf, ENDPOINT_BUF_LEN, endpoint->topic, (uint8_t*) data, data_len);
 	int cobs_size = cobs_estimate_encoded_size(json_size);
-	uint8_t* write_head = get_write_space(buffer, cobs_size);
+	uint8_t* write_head = get_tagged_write_space(buffer, cobs_size);
 	if (write_head != NULL){
-		int enc_status = cobs_encode(temp_frame_buf, json_size, write_head, cobs_size, 0);
+		cobs_encode(temp_frame_buf, json_size, write_head, cobs_size, 0);
 	}
 }
 
@@ -192,7 +200,7 @@ int send_next_messages(){
 	// Find next non empty endpoint in round robin fashion
 	int first_endpoint_to_try = currentEndpoints.nextTxEndpoint;
 	int next_endpoint_idx = first_endpoint_to_try;
-	Buffer* buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
+	Buffer* buf = &(currentEndpoints.endpoints[next_endpoint_idx] -> tx_buf);
 	int total_sent = 0;
 	int msg_bytes_actual = get_first_message(buf, &str_size, &start);
 	int counter = 0;
@@ -208,7 +216,7 @@ int send_next_messages(){
 				int bytes_sent = 0;
 				int bytes_to_send = str_size;
 				while (bytes_to_send>0){
-					int sent = tud_cdc_n_write(USB_CDC_ITF, start, bytes_to_send);
+					int sent = tud_cdc_n_write(USB_CDC_ITF, start+bytes_sent, bytes_to_send);
 					tud_cdc_n_write_flush(USB_CDC_ITF);
 					bytes_sent += sent;
 					bytes_to_send-=bytes_sent;
@@ -216,7 +224,7 @@ int send_next_messages(){
 				mark_read(buf, msg_bytes_actual);
 				currentEndpoints.nextTxEndpoint = (next_endpoint_idx+1)%currentEndpoints.size;
 				counter+=1;
-				break;
+				return total_sent;
 			} else if (str_size>can_send){
 				// Message larger than available (wait till flushed and space becomes available)
 				tud_cdc_n_write_clear(USB_CDC_ITF);
@@ -239,26 +247,28 @@ int send_next_messages(){
 		next_endpoint_idx = currentEndpoints.nextTxEndpoint;
 		buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
 		msg_bytes_actual = get_first_message(buf, &str_size, &start);
-		// tud_task();
 	}
-	added-=counter;
 	currentEndpoints.hasPending = 0;
 	return total_sent;
 }
 
 __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message_len){
-	char message_string[512];
-	mpack_reader_t reader;
-	mpack_reader_init_data(&reader, message, message_len);
-	mpack_expect_cstr(&reader, message_string, 512);
-	if (mpack_reader_destroy(&reader) != mpack_ok) {
-		fprintf(stderr, "An error occurred decoding the data!\n");
-		return;
+	if (currentEndpoints.diag != NULL){
+		char message_string[512];
+		mpack_reader_t reader;
+		mpack_reader_init_data(&reader, message, message_len);
+		mpack_expect_cstr(&reader, message_string, 512);
+		if (mpack_reader_destroy(&reader) != mpack_ok) {
+			fprintf(stderr, "An error occurred decoding the data!\n");
+			return;
+		}
+		// if (endpoint == currentEndpoints.diag){
+		// 	led_state = !led_state;
+		// }
+		// if (strcmp(endpoint->topic, "diag0")==0){
+			send_msg(currentEndpoints.diag, message_string);
+		// }
 	}
-	// if (endpoint == currentEndpoints.diag){
-	// 	led_state = !led_state;
-	// }
-	send_msg(currentEndpoints.diag, message_string);
 }
 
 
@@ -272,43 +282,43 @@ void check_rx(){
 		
 		//determine how many bytes to read in this operation
 		int to_read = available;
-		RosjamRxBuffer* buffer = &currentEndpoints.global_rx_buffer;
+		Buffer* buffer = &currentEndpoints.global_rx_buffer;
 		if (available > buffer->capacity){
 			to_read = buffer -> capacity;
 		}
 		// read data into rx buffer
-		uint8_t* write_head = get_write_space_global(buffer, to_read);
+		uint8_t* write_head = get_write_space(buffer, to_read);
 		if (write_head != NULL){
 			
-			int read = tud_cdc_n_read(USB_CDC_ITF, write_head, to_read);
+			tud_cdc_n_read(USB_CDC_ITF, write_head, to_read);
 		}
 		do {
 			int written_bytes;
 			int in_buffer = buffer->size;
+			memset(temp_frame_buf, 0, ENDPOINT_BUF_LEN); // investigate why this is needed
 			int read_bytes = cobs_decode(buffer->buf+buffer->read_offset, in_buffer, temp_frame_buf, ENDPOINT_BUF_LEN, 0, &written_bytes);
 			if (read_bytes == -2){
 				// not enough data so throw all away
-				mark_read_global(buffer, in_buffer);
+				mark_read(buffer, in_buffer);
 				// skip 
 				return;
 			} else if (read_bytes == -1){
 				// message too big for output buffer
-				mark_read_global(buffer, ENDPOINT_BUF_LEN); // 2048 is size of cobs_decode_buf because it was filled
+				mark_read(buffer, ENDPOINT_BUF_LEN); // 2048 is size of cobs_decode_buf because it was filled
 				continue;
+			} else if (read_bytes == -3) {
+				break;
 			}
 
-			if (read_bytes > 0) {
-				// decode cobs
-				int data_size;
-				RosjamEndpoint* endpoint = deserialize(&currentEndpoints, (char*) temp_frame_buf,  written_bytes-1, (char*)temp_data_buf, ENDPOINT_BUF_LEN, &data_size);
-				if (endpoint != NULL){
-					// call callback for user to process
-					receivedFromUSB(endpoint, (char*)temp_data_buf, data_size);
-				}
-				mark_read_global(buffer, read_bytes);
-			} else {
-				break;				
+			
+			int data_size;
+			RosjamEndpoint* endpoint = deserialize(&currentEndpoints, (char*) temp_frame_buf,  written_bytes-1, (char*)temp_data_buf, ENDPOINT_BUF_LEN, &data_size);
+			if (endpoint != NULL){
+				// call callback for user to process
+				receivedFromUSB(endpoint, (char*)temp_data_buf, data_size);
 			}
+			mark_read(buffer, read_bytes);
+			
 		} while (buffer->size>0);
 	}
 }
