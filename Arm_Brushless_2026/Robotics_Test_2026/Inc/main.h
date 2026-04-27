@@ -38,12 +38,12 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 typedef enum {
-    MODE_NEED_CALIBRATION,
-	MODE_IDLE,
+    MODE_IDLE,
+    MODE_CALIBRATING,
     MODE_POSITION,
     MODE_VELOCITY
 } ControlMode_t;
-
+extern volatile ControlMode_t controlMode;  /* defined in main.c */
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -114,17 +114,23 @@ float inputShaftToOutput(float positionRad, float ratio);
 #define Start_Stop_Pin GPIO_PIN_10
 #define Start_Stop_GPIO_Port GPIOC
 #define Start_Stop_EXTI_IRQn EXTI15_10_IRQn
-#define UART_TX_Pin GPIO_PIN_3
-#define UART_TX_GPIO_Port GPIOB
-#define UART_RX_Pin GPIO_PIN_4
-#define UART_RX_GPIO_Port GPIOB
+#define LIMIT_SW_LOWER_Pin GPIO_PIN_3
+#define LIMIT_SW_UPPER_Pin GPIO_PIN_4
+#define LIMIT_SW_UPPER_GPIO_Port GPIOB
+#define LIMIT_SW_UPPER_EXTI_IRQn EXTI3_IRQn
 #define M1_ENCODER_A_Pin GPIO_PIN_6
 #define M1_ENCODER_A_GPIO_Port GPIOB
 #define M1_ENCODER_B_Pin GPIO_PIN_7
 #define M1_ENCODER_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+#define JOINT_MIN_DEG   (0.0f)
+#define JOINT_MAX_DEG   (45.0f)
 
+/* Pre-computed radian equivalents — use these everywhere in C code.
+   Avoids calling degreesToRad() (which needs math.h) in header context. */
+#define JOINT_MIN_RAD   (JOINT_MIN_DEG * (3.14159265f / 180.0f))
+#define JOINT_MAX_RAD   (JOINT_MAX_DEG * (3.14159265f / 180.0f))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

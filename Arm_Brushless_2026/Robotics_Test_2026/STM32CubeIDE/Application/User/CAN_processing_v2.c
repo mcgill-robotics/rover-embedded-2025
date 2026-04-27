@@ -31,6 +31,7 @@
 #include "planner.h"
 #include "SCurveTrajectory.h"
 #include "velocity_ctrl.h"
+#include "calibration.h"
 
 
 #ifdef USE_UART_DEBUG
@@ -118,22 +119,56 @@ void Process_Multiple_ESC_Command(ParsedCANID *CANMessageID, uint8_t *rxData)
 
 /* Run command handler*/
 
+/* Joint limits come from main.h (JOINT_MIN_RAD / JOINT_MAX_RAD).
+   Do NOT redefine them here — main.h is the single source of truth. */
+
 void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
 {
+    /* Use the `info` value computed by the caller — Single dispatch
+       passes SingleExtractFloatFromCAN(rxData), Multiple dispatch
+       passes extract_multiple_positions_arm(rxData).  Re-extracting
+       here would silently break multi-motor commands by replacing
+       the half-float-decoded value with a misaligned 4-byte read of
+       the first slot in the broadcast payload. */
     (void)rxData;
-	float information = SingleExtractFloatFromCAN(rxData); // infor for now always comes as 4 bytes
+    float information = info;
 
-    uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",(int)id->runSpec, (int)info);
+    uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",
+                     (int)id->runSpec, (int)information);
 
-    // Temporary calibration auto
-    if (MC_GetSTMStateMotor1() == IDLE){
-    	MC_StartMotor1();
-    	return;
+    /* Gate 1: Calibration command is ALWAYS allowed — it's how you start. */
+    /* Every other run command is blocked until calibration is complete.   */
+    if (id->runSpec == RUN_CALIBRATION) {
+        uart_debug_print("  -> CALIBRATION\r\n");
+
+        /* Re-run is always allowed.  Reset internal state so a second
+           RUN_CALIBRATION restarts the seek instead of being silently
+           dropped.  The original "ignore if done" gate also caused
+           dead-on-arrival behaviour after a no-reset reflash, since
+           BSS retained cal_state = CAL_COMPLETE from the prior session. */
+        Calibration_Init();
+        controlMode = MODE_CALIBRATING;
+        return;
     }
 
+    /* Gate 2: Block all other commands until calibration has completed.   */
+    if (!Calibration_IsDone()) {
+        uart_debug_print("  -> Not calibrated yet, command rejected\r\n");
+        return;
+    }
+
+    /* Gate 3: Start FOC if needed (motor stopped but calibrated).         */
+    if (MC_GetSTMStateMotor1() == IDLE) {
+        MC_StartMotor1();
+        return;
+    }
+
+    /* Normal command dispatch                                             */
     switch (id->runSpec) {
+
     case RUN_STOP:
-    	MC_StopMotor1();
+        MC_StopMotor1();
+        controlMode = MODE_IDLE;
         uart_debug_print("  -> STOP\r\n");
         break;
 
@@ -141,27 +176,44 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
         uart_debug_print("  -> ACK FAULTS\r\n");
         break;
 
-    case RUN_SPEED:
-        if (controlMode != MODE_VELOCITY) {
-            velCtrlStart(velCtrl, (VelocityFilter *)motorTracker);
-            controlMode = MODE_VELOCITY;
+    case RUN_SPEED: {
+        /* Clamp velocity demand: the fastest the joint can physically
+           travel is bounded by the total joint range.  Use JOINT_MAX_RAD
+           from main.h — the same value that velCtrl's position limits use. */
+        float demand = information;
+        float v_max  = JOINT_MAX_RAD - JOINT_MIN_RAD;  /* rad/s ceiling */
+        if (demand >  v_max) demand =  v_max;
+        if (demand < -v_max) demand = -v_max;
+
+        /* Always call velCtrlStart so the velocity controller cleanly
+           inherits the current tracker state (theta, omega, accel) on
+           every velocity command. */
+        velCtrlStart(velCtrl, (VelocityFilter *)motorTracker);
+        controlMode = MODE_VELOCITY;
+
+        velCtrlSetDemand(velCtrl, demand);
+        uart_debug_print("  -> SPEED: %d rad/s\r\n", (int)demand);
+        break;
+    }
+
+    case RUN_POSITION: {
+        /* Setpoint arrives in degrees, convert and clamp to joint limits */
+        float setpoint_rad = degreesToRad(information);
+
+        if (setpoint_rad < JOINT_MIN_RAD) {
+            uart_debug_print("  -> POSITION clamped to min\r\n");
+            setpoint_rad = JOINT_MIN_RAD;
+        } else if (setpoint_rad > JOINT_MAX_RAD) {
+            uart_debug_print("  -> POSITION clamped to max\r\n");
+            setpoint_rad = JOINT_MAX_RAD;
         }
-        velCtrlSetDemand(velCtrl, information);  // value in rad/s
-        uart_debug_print("  -> SPEED: %d RPM\r\n", (int)info);
-        break;
 
-    case RUN_POSITION:
-
-		/* Switch to position mode and plan a move */
-		positionSetpoint = degreesToRad(information);
-		newSetpointDetected = true;
-		controlMode = MODE_POSITION;
-        uart_debug_print("  -> POSITION: %d deg\r\n", (int)info);
+        positionSetpoint    = setpoint_rad;
+        newSetpointDetected = true;
+        controlMode         = MODE_POSITION;
+        uart_debug_print("  -> POSITION: %d deg\r\n", (int)information);
         break;
-
-    case RUN_CALIBRATION:
-        uart_debug_print("  -> CALIBRATION\r\n");
-        break;
+    }
 
     default:
         uart_debug_print("  -> UNKNOWN runSpec\r\n");
