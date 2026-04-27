@@ -253,6 +253,21 @@ def api_cmd_stop():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 502
 
+@app.route("/api/cmd/calibrate", methods=["POST"])
+def api_cmd_calibrate():
+    """Send a RUN_CALIBRATION command to an ESC."""
+    if _commander is None:
+        return jsonify({"error": "Commander not initialised"}), 503
+    data = request.get_json(force=True)
+    dev = int(data.get("device_id", 1))
+    mt = _parse_motor_type(data.get("motor_type", "DRIVE"))
+    try:
+        arb_id = _commander.calibrate(dev, motor_type=mt)
+        return jsonify({"ok": True, "arb_id": f"0x{arb_id:03X}",
+                        "command": "CALIBRATION", "device_id": dev})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
+
 @app.route("/api/cmd/ping", methods=["POST"])
 def api_cmd_ping():
     """Send a PING read request to an ESC."""
@@ -887,8 +902,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     flex-wrap: wrap;
   }
 
+  /* --- Command Panels Grid --- */
+  .cmd-panels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
   /* --- Command Panel --- */
-  .cmd-panel { margin-top: 0; margin-bottom: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .cmd-panel { margin-top: 0; margin-bottom: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .cmd-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; transition: background 0.15s; }
   .cmd-panel-header:hover { background: var(--bg-card-hover); }
   .cmd-panel-title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
@@ -922,12 +945,34 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .cmd-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
   .cmd-quick-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
+  /* --- 3D Arm Viewer --- */
+  .arm-viewer-panel { margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .arm-viewer-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; transition:background 0.15s; }
+  .arm-viewer-header:hover { background:var(--bg-card-hover); }
+  .arm-viewer-title { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--text-primary); }
+  .arm-viewer-body { display:none; position:relative; }
+  .arm-viewer-panel.open .arm-viewer-body { display:block; }
+  #armCanvas { width:100%; height:450px; display:block; outline:none; }
+  .arm-joint-readout { position:absolute; top:12px; left:12px; background:rgba(10,14,20,0.85); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-family:var(--mono); font-size:11px; color:var(--text-secondary); pointer-events:none; line-height:1.8; backdrop-filter:blur(8px); }
+  .arm-joint-readout .joint-val { color:var(--accent-cyan); font-weight:600; }
+  .arm-viewer-hint { position:absolute; bottom:10px; right:14px; font-family:var(--mono); font-size:10px; color:var(--text-dim); pointer-events:none; }
+  .arm-test-sliders { border-top:1px solid var(--border); padding:12px 18px; }
+  .arm-test-sliders summary { font-size:12px; font-weight:600; color:var(--text-dim); cursor:pointer; user-select:none; }
+  .arm-slider-row { display:flex; align-items:center; gap:10px; margin:6px 0; }
+  .arm-slider-row label { font-family:var(--mono); font-size:11px; color:var(--text-secondary); min-width:130px; }
+  .arm-slider-row input[type=range] { width:200px; accent-color:var(--accent-orange); }
+  .arm-slider-row .arm-slider-val { font-family:var(--mono); font-size:11px; color:var(--text-secondary); min-width:45px; }
+
   /* --- Responsive --- */
+  @media (max-width: 1200px) {
+    .cmd-panels-grid { grid-template-columns: 1fr 1fr; }
+  }
   @media (max-width: 640px) {
     .topbar { flex-direction: column; gap: 10px; align-items: flex-start; }
     .signals-grid { grid-template-columns: 1fr 1fr; }
     .card-value { font-size: 22px; }
     .main { padding: 16px; }
+    .cmd-panels-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -951,73 +996,465 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
 <div class="main" id="mainContent">
 
-  <!-- Command Panel -->
-  <div class="cmd-panel open" id="cmdPanel">
-    <div class="cmd-panel-header" onclick="document.getElementById('cmdPanel').classList.toggle('open')">
-      <div class="cmd-panel-title">
-        <span class="icon">&#x1F3AE;</span> Command Panel
+  <!-- 3D Arm Viewer -->
+  <div class="arm-viewer-panel open" id="armViewerPanel">
+    <div class="arm-viewer-header" onclick="document.getElementById('armViewerPanel').classList.toggle('open')">
+      <div class="arm-viewer-title"><span class="icon">&#x1F9BE;</span> Arm Visualiser</div>
+      <span class="cmd-chevron">&#x25BC;</span>
+    </div>
+    <div class="arm-viewer-body" id="armViewerBody">
+      <canvas id="armCanvas"></canvas>
+      <div class="arm-joint-readout">
+        Waist: <span class="joint-val" id="jWaist">0.00</span>&deg;<br>
+        Shoulder: <span class="joint-val" id="jShoulder">0.00</span>&deg;<br>
+        Elbow: <span class="joint-val" id="jElbow">0.00</span>&deg;
       </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span class="cmd-bus-status disconnected" id="cmdBusStatus">NO BUS</span>
-        <span class="cmd-chevron">&#x25BC;</span>
+      <div class="arm-viewer-hint">Drag to orbit &middot; Scroll to zoom</div>
+    </div>
+    <div class="arm-test-sliders">
+      <details>
+        <summary>&#x1F527; Test Joint Angles</summary>
+        <div style="padding-top:8px;">
+          <div class="arm-slider-row">
+            <label>Waist (deg)</label>
+            <input type="range" min="-180" max="180" step="1" value="0" oninput="armSetJoint(8,this.value);this.nextElementSibling.textContent=this.value+'&deg;'">
+            <span class="arm-slider-val">0&deg;</span>
+          </div>
+          <div class="arm-slider-row">
+            <label>Shoulder (deg)</label>
+            <input type="range" min="-90" max="90" step="1" value="0" oninput="armSetJoint(9,this.value);this.nextElementSibling.textContent=this.value+'&deg;'">
+            <span class="arm-slider-val">0&deg;</span>
+          </div>
+          <div class="arm-slider-row">
+            <label>Elbow (deg)</label>
+            <input type="range" min="-135" max="135" step="1" value="0" oninput="armSetJoint(10,this.value);this.nextElementSibling.textContent=this.value+'&deg;'">
+            <span class="arm-slider-val">0&deg;</span>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Command Panels — one per motor -->
+  <div class="cmd-panels-grid">
+    <div class="cmd-panel open" id="cmdPanel1">
+      <div class="cmd-panel-header" onclick="document.getElementById('cmdPanel1').classList.toggle('open')">
+        <div class="cmd-panel-title">
+          <span class="icon">&#x1F3AE;</span> Command Panel 1
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="cmd-bus-status disconnected" id="cmdBusStatus">NO BUS</span>
+          <span class="cmd-chevron">&#x25BC;</span>
+        </div>
+      </div>
+      <div class="cmd-panel-body">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Target</div>
+          <div class="cmd-row">
+            <label>Device ID</label>
+            <input class="cmd-input narrow" type="number" id="cmdDevId1" value="1" min="0" max="15">
+            <label>Motor</label>
+            <select class="cmd-select" id="cmdMotorType1">
+              <option value="DRIVE">Drive</option>
+              <option value="STEERING">Steering</option>
+            </select>
+          </div>
+        </div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Position Control (S-Curve Planner)</div>
+          <div class="cmd-row">
+            <label>Degrees</label>
+            <input class="cmd-input" type="number" id="cmdPosDeg1" value="45.0" step="1">
+            <button class="cmd-btn" onclick="cmdSendPosition(1)">Send Position</button>
+          </div>
+          <div class="cmd-feedback" id="cmdPosFb1"></div>
+        </div>
+        <div class="cmd-section">
+          <div class="cmd-section-label">Velocity Control (Jerk-Limited Filter)</div>
+          <div class="cmd-row">
+            <label>rad/s</label>
+            <input class="cmd-input" type="number" id="cmdVelRad1" value="0.5" step="0.1">
+            <button class="cmd-btn" onclick="cmdSendVelocity(1)">Send Velocity</button>
+            <button class="cmd-btn" onclick="document.getElementById('cmdVelRad1').value='0';cmdSendVelocity(1)">Zero Vel</button>
+          </div>
+          <div class="cmd-feedback" id="cmdVelFb1"></div>
+        </div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Quick Actions</div>
+          <div class="cmd-quick-btns">
+            <button class="cmd-btn danger" onclick="cmdSendStop(1)">&#x26D4; STOP</button>
+            <button class="cmd-btn" style="background:rgba(188,140,255,0.08);border-color:rgba(188,140,255,0.3);color:var(--accent-purple);" onclick="cmdSendCalibrate(1)">&#x21BA; Calibrate</button>
+            <button class="cmd-btn success" onclick="cmdSendPing(1)">&#x1F4E1; Ping</button>
+            <button class="cmd-btn" onclick="cmdSendRead('POSITION',1)">Read Pos</button>
+            <button class="cmd-btn" onclick="cmdSendRead('SPEED',1)">Read Speed</button>
+            <button class="cmd-btn" onclick="cmdSendRead('VOLTAGE',1)">Read Vbus</button>
+            <button class="cmd-btn" onclick="cmdSendRead('TEMPERATURE',1)">Read Temp</button>
+            <button class="cmd-btn" onclick="cmdSendRead('CONTROL_MODE',1)">Read Mode</button>
+          </div>
+          <div class="cmd-feedback" id="cmdQuickFb1"></div>
+        </div>
       </div>
     </div>
-    <div class="cmd-panel-body">
-      <div class="cmd-section">
-        <div class="cmd-section-label">Target</div>
-        <div class="cmd-row">
-          <label>Device ID</label>
-          <input class="cmd-input narrow" type="number" id="cmdDevId" value="1" min="0" max="15">
-          <label>Motor</label>
-          <select class="cmd-select" id="cmdMotorType">
-            <option value="DRIVE">Drive</option>
-            <option value="STEERING">Steering</option>
-          </select>
+
+    <div class="cmd-panel open" id="cmdPanel2">
+      <div class="cmd-panel-header" onclick="document.getElementById('cmdPanel2').classList.toggle('open')">
+        <div class="cmd-panel-title">
+          <span class="icon">&#x1F3AE;</span> Command Panel 2
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="cmd-chevron">&#x25BC;</span>
         </div>
       </div>
-      <hr class="cmd-divider">
-      <div class="cmd-section">
-        <div class="cmd-section-label">Position Control (S-Curve Planner)</div>
-        <div class="cmd-row">
-          <label>Degrees</label>
-          <input class="cmd-input" type="number" id="cmdPosDeg" value="45.0" step="1">
-          <button class="cmd-btn" onclick="cmdSendPosition()">Send Position</button>
+      <div class="cmd-panel-body">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Target</div>
+          <div class="cmd-row">
+            <label>Device ID</label>
+            <input class="cmd-input narrow" type="number" id="cmdDevId2" value="2" min="0" max="15">
+            <label>Motor</label>
+            <select class="cmd-select" id="cmdMotorType2">
+              <option value="DRIVE">Drive</option>
+              <option value="STEERING">Steering</option>
+            </select>
+          </div>
         </div>
-        <div class="cmd-feedback" id="cmdPosFb"></div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Position Control (S-Curve Planner)</div>
+          <div class="cmd-row">
+            <label>Degrees</label>
+            <input class="cmd-input" type="number" id="cmdPosDeg2" value="45.0" step="1">
+            <button class="cmd-btn" onclick="cmdSendPosition(2)">Send Position</button>
+          </div>
+          <div class="cmd-feedback" id="cmdPosFb2"></div>
+        </div>
+        <div class="cmd-section">
+          <div class="cmd-section-label">Velocity Control (Jerk-Limited Filter)</div>
+          <div class="cmd-row">
+            <label>rad/s</label>
+            <input class="cmd-input" type="number" id="cmdVelRad2" value="0.5" step="0.1">
+            <button class="cmd-btn" onclick="cmdSendVelocity(2)">Send Velocity</button>
+            <button class="cmd-btn" onclick="document.getElementById('cmdVelRad2').value='0';cmdSendVelocity(2)">Zero Vel</button>
+          </div>
+          <div class="cmd-feedback" id="cmdVelFb2"></div>
+        </div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Quick Actions</div>
+          <div class="cmd-quick-btns">
+            <button class="cmd-btn danger" onclick="cmdSendStop(2)">&#x26D4; STOP</button>
+            <button class="cmd-btn" style="background:rgba(188,140,255,0.08);border-color:rgba(188,140,255,0.3);color:var(--accent-purple);" onclick="cmdSendCalibrate(2)">&#x21BA; Calibrate</button>
+            <button class="cmd-btn success" onclick="cmdSendPing(2)">&#x1F4E1; Ping</button>
+            <button class="cmd-btn" onclick="cmdSendRead('POSITION',2)">Read Pos</button>
+            <button class="cmd-btn" onclick="cmdSendRead('SPEED',2)">Read Speed</button>
+            <button class="cmd-btn" onclick="cmdSendRead('VOLTAGE',2)">Read Vbus</button>
+            <button class="cmd-btn" onclick="cmdSendRead('TEMPERATURE',2)">Read Temp</button>
+            <button class="cmd-btn" onclick="cmdSendRead('CONTROL_MODE',2)">Read Mode</button>
+          </div>
+          <div class="cmd-feedback" id="cmdQuickFb2"></div>
+        </div>
       </div>
-      <div class="cmd-section">
-        <div class="cmd-section-label">Velocity Control (Jerk-Limited Filter)</div>
-        <div class="cmd-row">
-          <label>rad/s</label>
-          <input class="cmd-input" type="number" id="cmdVelRad" value="0.5" step="0.1">
-          <button class="cmd-btn" onclick="cmdSendVelocity()">Send Velocity</button>
-          <button class="cmd-btn" onclick="document.getElementById('cmdVelRad').value='0';cmdSendVelocity()">Zero Vel</button>
+    </div>
+
+    <div class="cmd-panel open" id="cmdPanel3">
+      <div class="cmd-panel-header" onclick="document.getElementById('cmdPanel3').classList.toggle('open')">
+        <div class="cmd-panel-title">
+          <span class="icon">&#x1F3AE;</span> Command Panel 3
         </div>
-        <div class="cmd-feedback" id="cmdVelFb"></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="cmd-chevron">&#x25BC;</span>
+        </div>
       </div>
-      <hr class="cmd-divider">
-      <div class="cmd-section">
-        <div class="cmd-section-label">Quick Actions</div>
-        <div class="cmd-quick-btns">
-          <button class="cmd-btn danger" onclick="cmdSendStop()">&#x26D4; STOP</button>
-          <button class="cmd-btn success" onclick="cmdSendPing()">&#x1F4E1; Ping</button>
-          <button class="cmd-btn" onclick="cmdSendRead('POSITION')">Read Pos</button>
-          <button class="cmd-btn" onclick="cmdSendRead('SPEED')">Read Speed</button>
-          <button class="cmd-btn" onclick="cmdSendRead('VOLTAGE')">Read Vbus</button>
-          <button class="cmd-btn" onclick="cmdSendRead('TEMPERATURE')">Read Temp</button>
-          <button class="cmd-btn" onclick="cmdSendRead('CONTROL_MODE')">Read Mode</button>
+      <div class="cmd-panel-body">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Target</div>
+          <div class="cmd-row">
+            <label>Device ID</label>
+            <input class="cmd-input narrow" type="number" id="cmdDevId3" value="3" min="0" max="15">
+            <label>Motor</label>
+            <select class="cmd-select" id="cmdMotorType3">
+              <option value="DRIVE">Drive</option>
+              <option value="STEERING">Steering</option>
+            </select>
+          </div>
         </div>
-        <div class="cmd-feedback" id="cmdQuickFb"></div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Position Control (S-Curve Planner)</div>
+          <div class="cmd-row">
+            <label>Degrees</label>
+            <input class="cmd-input" type="number" id="cmdPosDeg3" value="45.0" step="1">
+            <button class="cmd-btn" onclick="cmdSendPosition(3)">Send Position</button>
+          </div>
+          <div class="cmd-feedback" id="cmdPosFb3"></div>
+        </div>
+        <div class="cmd-section">
+          <div class="cmd-section-label">Velocity Control (Jerk-Limited Filter)</div>
+          <div class="cmd-row">
+            <label>rad/s</label>
+            <input class="cmd-input" type="number" id="cmdVelRad3" value="0.5" step="0.1">
+            <button class="cmd-btn" onclick="cmdSendVelocity(3)">Send Velocity</button>
+            <button class="cmd-btn" onclick="document.getElementById('cmdVelRad3').value='0';cmdSendVelocity(3)">Zero Vel</button>
+          </div>
+          <div class="cmd-feedback" id="cmdVelFb3"></div>
+        </div>
+        <hr class="cmd-divider">
+        <div class="cmd-section">
+          <div class="cmd-section-label">Quick Actions</div>
+          <div class="cmd-quick-btns">
+            <button class="cmd-btn danger" onclick="cmdSendStop(3)">&#x26D4; STOP</button>
+            <button class="cmd-btn" style="background:rgba(188,140,255,0.08);border-color:rgba(188,140,255,0.3);color:var(--accent-purple);" onclick="cmdSendCalibrate(3)">&#x21BA; Calibrate</button>
+            <button class="cmd-btn success" onclick="cmdSendPing(3)">&#x1F4E1; Ping</button>
+            <button class="cmd-btn" onclick="cmdSendRead('POSITION',3)">Read Pos</button>
+            <button class="cmd-btn" onclick="cmdSendRead('SPEED',3)">Read Speed</button>
+            <button class="cmd-btn" onclick="cmdSendRead('VOLTAGE',3)">Read Vbus</button>
+            <button class="cmd-btn" onclick="cmdSendRead('TEMPERATURE',3)">Read Temp</button>
+            <button class="cmd-btn" onclick="cmdSendRead('CONTROL_MODE',3)">Read Mode</button>
+          </div>
+          <div class="cmd-feedback" id="cmdQuickFb3"></div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- ESC sections get inserted here dynamically -->
+  <div id="escContainer"></div>
 
   <div class="empty-state" id="emptyState">
     <div class="icon">&#x1F50C;</div>
     <h2>Waiting for CAN data…</h2>
     <p>Make sure <code>can_logger.py</code> is running and writing to the same database file. Data will appear here automatically.</p>
   </div>
+
+  <!-- Recent Frames log — always at the bottom -->
+  <div class="log-section" id="log-section" style="display:none;">
+    <div class="log-header">Recent Frames <span class="count" id="logCount"></span></div>
+    <div class="log-wrap">
+      <table class="log-table">
+        <thead><tr>
+          <th>Time</th><th>Arb ID</th><th>Sender</th><th>Action</th>
+          <th>Signal</th><th>Dev</th><th>Value</th>
+        </tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// 3D Arm Viewer — procedural, no file loading
+// ---------------------------------------------------------------------------
+(function() {
+  const canvas = document.getElementById('armCanvas');
+  if (!canvas) return;
+
+  const ESC_WAIST = 8, ESC_SHOULDER = 9, ESC_ELBOW = 10;
+
+  // Dimensions (meters)
+  const BASE_H = 0.08, BASE_R = 0.10;
+  const TURRET_H = 0.06, TURRET_R = 0.065;
+  const BICEP_LEN = 0.42, BICEP_W = 0.04;
+  const FOREARM_LEN = 0.35, FOREARM_W = 0.03;
+  const EE_LEN = 0.10, JOINT_R = 0.035;
+
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x0a0e14);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 2, 0.01, 50);
+  camera.position.set(0.65, 0.5, 0.65);
+
+  const orbit = new THREE.OrbitControls(camera, canvas);
+  orbit.enableDamping = true;
+  orbit.dampingFactor = 0.08;
+  orbit.target.set(0, 0.28, 0);
+  orbit.update();
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  var keyL = new THREE.DirectionalLight(0xffffff, 1.2);
+  keyL.position.set(1.5, 2.5, 2);
+  keyL.castShadow = true;
+  keyL.shadow.mapSize.set(1024, 1024);
+  scene.add(keyL);
+  var rimL = new THREE.DirectionalLight(0x58a6ff, 0.3);
+  rimL.position.set(-2, 1, -1);
+  scene.add(rimL);
+
+  // Ground
+  var gnd = new THREE.Mesh(
+    new THREE.PlaneGeometry(2, 2),
+    new THREE.MeshStandardMaterial({ color: 0x0d1117, roughness: 0.9 })
+  );
+  gnd.rotation.x = -Math.PI / 2;
+  gnd.receiveShadow = true;
+  scene.add(gnd);
+  scene.add(new THREE.GridHelper(2, 30, 0x1e2a3a, 0x141c26));
+
+  // Materials
+  function M(c, metal, rough) {
+    return new THREE.MeshStandardMaterial({ color: c, metalness: metal || 0.4, roughness: rough || 0.5 });
+  }
+  var matBase   = M(0x1e2a3a, 0.6, 0.3);
+  var matTurret = M(0x2a3a4f, 0.5, 0.4);
+  var matJoint  = M(0x58a6ff, 0.7, 0.2);
+  var matBicep  = M(0x8899aa, 0.4, 0.5);
+  var matFore   = M(0x778899, 0.4, 0.5);
+  var matEE     = M(0x3fb950, 0.6, 0.3);
+  var matJaw    = M(0x4a5568, 0.3, 0.6);
+  var matHole   = M(0x0a0e14, 0.0, 1.0);
+
+  // Helper: truss link
+  function makeLink(len, w, d, material) {
+    var g = new THREE.Group();
+    var beam = new THREE.Mesh(new THREE.BoxGeometry(w, len, d), material);
+    beam.position.y = len / 2;
+    beam.castShadow = true;
+    g.add(beam);
+    // Side plates
+    [-1, 1].forEach(function(s) {
+      var plate = new THREE.Mesh(new THREE.BoxGeometry(0.005, len * 0.85, d * 2.5), material);
+      plate.position.set(s * w * 0.6, len / 2, 0);
+      plate.castShadow = true;
+      g.add(plate);
+    });
+    // Lightening holes
+    var n = Math.max(1, Math.floor(len / 0.08));
+    for (var i = 0; i < n; i++) {
+      var hole = new THREE.Mesh(new THREE.BoxGeometry(w * 0.5, 0.02, d + 0.002), matHole);
+      hole.position.y = len * (i + 1) / (n + 1);
+      g.add(hole);
+    }
+    return g;
+  }
+
+  // === BASE ===
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(BASE_R, BASE_R * 1.15, BASE_H, 24), matBase);
+  base.position.y = BASE_H / 2;
+  base.castShadow = true;
+  scene.add(base);
+
+  // Feet
+  for (var i = 0; i < 4; i++) {
+    var foot = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.01, 0.06), matBase);
+    var a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    foot.position.set(Math.cos(a) * BASE_R * 1.1, 0.005, Math.sin(a) * BASE_R * 1.1);
+    foot.rotation.y = a;
+    scene.add(foot);
+  }
+
+  // === WAIST PIVOT (Y rot) ===
+  var waistPivot = new THREE.Group();
+  waistPivot.position.y = BASE_H;
+  scene.add(waistPivot);
+
+  // Turret
+  var turret = new THREE.Mesh(new THREE.CylinderGeometry(TURRET_R, TURRET_R, TURRET_H, 16), matTurret);
+  turret.position.y = TURRET_H / 2;
+  turret.castShadow = true;
+  waistPivot.add(turret);
+
+  // Shoulder ball
+  var sBall = new THREE.Mesh(new THREE.SphereGeometry(JOINT_R, 16, 12), matJoint);
+  sBall.position.y = TURRET_H;
+  sBall.castShadow = true;
+  waistPivot.add(sBall);
+
+  // === SHOULDER PIVOT (Z rot) ===
+  var shoulderPivot = new THREE.Group();
+  shoulderPivot.position.y = TURRET_H;
+  waistPivot.add(shoulderPivot);
+
+  // Bicep
+  shoulderPivot.add(makeLink(BICEP_LEN, BICEP_W, BICEP_W * 0.6, matBicep));
+
+  // Elbow ball
+  var eBall = new THREE.Mesh(new THREE.SphereGeometry(JOINT_R * 0.85, 16, 12), matJoint);
+  eBall.position.y = BICEP_LEN;
+  eBall.castShadow = true;
+  shoulderPivot.add(eBall);
+
+  // === ELBOW PIVOT (Z rot) ===
+  var elbowPivot = new THREE.Group();
+  elbowPivot.position.y = BICEP_LEN;
+  shoulderPivot.add(elbowPivot);
+
+  // Forearm
+  elbowPivot.add(makeLink(FOREARM_LEN, FOREARM_W, FOREARM_W * 0.6, matFore));
+
+  // === END EFFECTOR ===
+  var eeG = new THREE.Group();
+  eeG.position.y = FOREARM_LEN;
+  elbowPivot.add(eeG);
+
+  var wrist = new THREE.Mesh(new THREE.CylinderGeometry(JOINT_R * 0.6, JOINT_R * 0.7, 0.025, 12), matEE);
+  wrist.position.y = 0.012;
+  wrist.castShadow = true;
+  eeG.add(wrist);
+
+  [-1, 1].forEach(function(s) {
+    var jaw = new THREE.Mesh(new THREE.BoxGeometry(0.015, EE_LEN, 0.02), matJaw);
+    jaw.position.set(s * 0.025, EE_LEN / 2 + 0.02, 0);
+    jaw.castShadow = true;
+    eeG.add(jaw);
+    var tip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.015, 0.025), matEE);
+    tip.position.set(s * 0.025, EE_LEN + 0.02, 0);
+    tip.castShadow = true;
+    eeG.add(tip);
+  });
+
+  // === Joint update function (global) ===
+  window.armSetJoint = function(devId, degrees) {
+    var rad = parseFloat(degrees) * Math.PI / 180;
+    if (devId === ESC_WAIST)    waistPivot.rotation.y = rad;
+    if (devId === ESC_SHOULDER) shoulderPivot.rotation.z = rad;
+    if (devId === ESC_ELBOW)    elbowPivot.rotation.z = rad;
+
+    var jW = document.getElementById('jWaist');
+    var jS = document.getElementById('jShoulder');
+    var jE = document.getElementById('jElbow');
+    if (devId === ESC_WAIST && jW)    jW.textContent = parseFloat(degrees).toFixed(2);
+    if (devId === ESC_SHOULDER && jS) jS.textContent = parseFloat(degrees).toFixed(2);
+    if (devId === ESC_ELBOW && jE)    jE.textContent = parseFloat(degrees).toFixed(2);
+  };
+
+  // === Resize ===
+  function resize() {
+    var body = document.getElementById('armViewerBody');
+    if (!body || body.style.display === 'none') return;
+    var w = body.clientWidth;
+    var h = 450;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+
+  var panel = document.getElementById('armViewerPanel');
+  new MutationObserver(function() {
+    if (panel.classList.contains('open')) setTimeout(resize, 50);
+  }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+  // === Animate ===
+  function loop() {
+    requestAnimationFrame(loop);
+    orbit.update();
+    resize();
+    renderer.render(scene, camera);
+  }
+  loop();
+  setTimeout(resize, 50);
+})();
+</script>
 
 <script>
 // ---------------------------------------------------------------------------
@@ -1056,7 +1493,11 @@ function ensureESCSection(devId) {
   const empty = document.getElementById('emptyState');
   if (empty) empty.remove();
 
-  const main = document.getElementById('mainContent');
+  // Show the log section (hidden until first data)
+  const logSec = document.getElementById('log-section');
+  if (logSec) logSec.style.display = '';
+
+  const container = document.getElementById('escContainer');
 
   const section = document.createElement('div');
   section.className = 'esc-section';
@@ -1068,7 +1509,7 @@ function ensureESCSection(devId) {
     </div>
     <div class="signals-grid" id="grid-${devId}"></div>
   `;
-  main.appendChild(section);
+  container.appendChild(section);
 
   // Create signal cards
   const grid = document.getElementById(`grid-${devId}`);
@@ -1092,26 +1533,6 @@ function ensureESCSection(devId) {
     `;
     grid.appendChild(card);
     sparkData[`${devId}_${sig}`] = [];
-  }
-
-  // Add frame log section once
-  if (!document.getElementById('log-section')) {
-    const logSection = document.createElement('div');
-    logSection.className = 'log-section';
-    logSection.id = 'log-section';
-    logSection.innerHTML = `
-      <div class="log-header">Recent Frames <span class="count" id="logCount"></span></div>
-      <div class="log-wrap">
-        <table class="log-table">
-          <thead><tr>
-            <th>Time</th><th>Arb ID</th><th>Sender</th><th>Action</th>
-            <th>Signal</th><th>Dev</th><th>Value</th>
-          </tr></thead>
-          <tbody id="logBody"></tbody>
-        </table>
-      </div>
-    `;
-    main.appendChild(logSection);
   }
 }
 
@@ -1263,6 +1684,7 @@ function connectSSE() {
         updateCard(devId, sig, info.value, info.t);
         addLogEntry(devId, sig, info.value, info.t);
         totalFrames++;
+        if (sig === 'POSITION') armSetJoint(parseInt(devId), info.value);
       }
     }
 
@@ -1281,10 +1703,10 @@ function connectSSE() {
 // ---------------------------------------------------------------------------
 // Command Panel — send CAN frames to ESC(s)
 // ---------------------------------------------------------------------------
-function cmdGetParams() {
+function cmdGetParams(panelIdx) {
   return {
-    device_id: parseInt(document.getElementById('cmdDevId').value) || 1,
-    motor_type: document.getElementById('cmdMotorType').value,
+    device_id: parseInt(document.getElementById('cmdDevId' + panelIdx).value) || 1,
+    motor_type: document.getElementById('cmdMotorType' + panelIdx).value,
   };
 }
 
@@ -1316,29 +1738,34 @@ async function cmdPost(url, body, fbId) {
   }
 }
 
-function cmdSendPosition() {
-  const p = cmdGetParams();
-  const deg = parseFloat(document.getElementById('cmdPosDeg').value) || 0;
-  cmdPost('/api/cmd/position', { ...p, degrees: deg }, 'cmdPosFb');
+function cmdSendPosition(panelIdx) {
+  const p = cmdGetParams(panelIdx);
+  const deg = parseFloat(document.getElementById('cmdPosDeg' + panelIdx).value) || 0;
+  cmdPost('/api/cmd/position', { ...p, degrees: deg }, 'cmdPosFb' + panelIdx);
 }
 
-function cmdSendVelocity() {
-  const p = cmdGetParams();
-  const vel = parseFloat(document.getElementById('cmdVelRad').value) || 0;
-  cmdPost('/api/cmd/velocity', { ...p, rad_per_sec: vel }, 'cmdVelFb');
+function cmdSendVelocity(panelIdx) {
+  const p = cmdGetParams(panelIdx);
+  const vel = parseFloat(document.getElementById('cmdVelRad' + panelIdx).value) || 0;
+  cmdPost('/api/cmd/velocity', { ...p, rad_per_sec: vel }, 'cmdVelFb' + panelIdx);
 }
 
-function cmdSendStop() {
-  cmdPost('/api/cmd/stop', cmdGetParams(), 'cmdQuickFb');
+function cmdSendStop(panelIdx) {
+  cmdPost('/api/cmd/stop', cmdGetParams(panelIdx), 'cmdQuickFb' + panelIdx);
 }
 
-function cmdSendPing() {
-  cmdPost('/api/cmd/ping', cmdGetParams(), 'cmdQuickFb');
+function cmdSendCalibrate(panelIdx) {
+  if (!confirm('Start calibration? The arm will move toward its lower limit switch.')) return;
+  cmdPost('/api/cmd/calibrate', cmdGetParams(panelIdx), 'cmdQuickFb' + panelIdx);
 }
 
-function cmdSendRead(spec) {
-  const p = cmdGetParams();
-  cmdPost('/api/cmd/read', { ...p, spec: spec }, 'cmdQuickFb');
+function cmdSendPing(panelIdx) {
+  cmdPost('/api/cmd/ping', cmdGetParams(panelIdx), 'cmdQuickFb' + panelIdx);
+}
+
+function cmdSendRead(spec, panelIdx) {
+  const p = cmdGetParams(panelIdx);
+  cmdPost('/api/cmd/read', { ...p, spec: spec }, 'cmdQuickFb' + panelIdx);
 }
 
 async function cmdPollStatus() {
@@ -1380,6 +1807,7 @@ async function init() {
     for (const [devId, signals] of Object.entries(data)) {
       for (const [sig, info] of Object.entries(signals)) {
         updateCard(devId, sig, info.value, info.timestamp_s);
+        if (sig === 'POSITION') armSetJoint(parseInt(devId), info.value);
       }
     }
   } catch {}
