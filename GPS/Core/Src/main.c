@@ -57,7 +57,7 @@ UART_HandleTypeDef huart4;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t uart4buf[1];
+uint8_t uart4buf[100];
 uint8_t lpuart1buf[512];
 uint8_t buf[512];
 int data_ready = 0;
@@ -116,7 +116,7 @@ int main(void)
   gps_init();
   setup_simple();
   
-  HAL_UART_Receive_IT(&huart4, uart4buf, 1);
+  HAL_UART_Receive_IT(&huart4, uart4buf, 100);
   // HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
   /* USER CODE END 2 */
 
@@ -142,18 +142,22 @@ int main(void)
     // print_to_usb("looping\n");
     if (data_ready){
     HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-      char msg[6];
-      msg[0] = 'r';
-      msg[1] = 'x';
-      msg[2] = ':';
-      msg[3] = *uart4buf;
-      msg[4] = '\n';
-      msg[5] = '\0';
-      print_to_usb(msg);
-      // if (gps_process((char*)buf, 0, *uart4buf)) {
-      //   print_to_usb((char*) buf);
+      // for (int i=0;i<2048;i++){
+      //   char msg[2];
+      //   // msg[0] = 'r';
+      //   // msg[1] = 'x';
+      //   // msg[2] = ':';
+      //   msg[0] = *uart4buf;
+      //   // msg[4] = '\n';
+      //   msg[1] = '\0';
+      send_msg_raw(uart4buf, 100);
       // }
-      HAL_UART_Receive_IT(&huart4, uart4buf, 1);
+      for (int i=0;i<100;i++){
+        if (gps_process((char*)buf, 0, uart4buf[i])) {
+          print_to_usb((char*) buf);
+        }
+      }
+      HAL_UART_Receive_IT(&huart4, uart4buf, 100);
       data_ready = 0;
     }
     
@@ -292,7 +296,7 @@ static void MX_UART4_Init(void)
 
   /* USER CODE END UART4_Init 1 */
   huart4.Instance = UART4;
-  huart4.Init.BaudRate = 115200;
+  huart4.Init.BaudRate = 9600;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
