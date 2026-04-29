@@ -23,10 +23,13 @@
 /* USER CODE BEGIN Includes */
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal_def.h"
+#include "stm32g4xx_hal_gpio.h"
 #include "stm32g4xx_hal_uart.h"
 #include "stm32g4xx_hal_uart_ex.h"
 #include "tinygps.h"
+#include "rosjam.h"
 #include <complex.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -54,8 +57,10 @@ UART_HandleTypeDef huart4;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t uart4buf;
+uint8_t uart4buf[1];
 uint8_t lpuart1buf[512];
+uint8_t buf[512];
+int data_ready = 0;
 
 /* USER CODE END PV */
 
@@ -109,22 +114,48 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   gps_init();
+  setup_simple();
   
-  HAL_UARTEx_Receive_IT(&huart4, &uart4buf, 1);
-  HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
+  HAL_UART_Receive_IT(&huart4, uart4buf, 1);
+  // HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    /*
-    if (HAL_UART_Receive(&huart3, &c, 1, HAL_MAX_DELAY) == HAL_OK) {
-      if (gps_process(buf, 0, c)) {
-        HAL_UART_Transmit(&hlpuart1, (uint8_t *)buf, 512, 100);
-      }
+    
+    // uint8_t c;
+    // if (HAL_UART_Receive(&huart4, uart4buf, 1, 10) == HAL_OK) {
+    //   HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+    // }
+      // char c_buf[3];
+      // c_buf[0] = *uart4buf;
+      // c_buf[1] = '\n';
+      // c_buf[2] = '\0';
+      // print_to_usb(c_buf);
+      // if (gps_process((char*)buf, 0, c)) {
+      //   print_to_usb((char*) buf);
+      //   // HAL_UART_Transmit(&hlpuart1, (uint8_t *)buf, 512, 100);
+      // }
+    // }
+    // memset(buf, 0, 512);
+    // print_to_usb("looping\n");
+    if (data_ready){
+    HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+      char msg[6];
+      msg[0] = 'r';
+      msg[1] = 'x';
+      msg[2] = ':';
+      msg[3] = *uart4buf;
+      msg[4] = '\n';
+      msg[5] = '\0';
+      print_to_usb(msg);
+      // if (gps_process((char*)buf, 0, *uart4buf)) {
+      //   print_to_usb((char*) buf);
+      // }
+      HAL_UART_Receive_IT(&huart4, uart4buf, 1);
+      data_ready = 0;
     }
-    memset(buf, 0, 512);
-    */
     
 
     /*
@@ -145,7 +176,7 @@ int main(void)
     }
     memset(buf, 0, 512);
     */
-
+    process_simple();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -361,14 +392,15 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if (huart->Instance == UART4) {
-    HAL_UART_Transmit(&hlpuart1, "data\n", strlen("data\n"), 100);
-    HAL_UARTEx_Receive_IT(&huart4, &uart4buf, 1);
-  } else if (huart->Instance == LPUART1) {
-    HAL_UART_Transmit(&hlpuart1, "COMMAND\n", strlen("COMMAND\n"), 100);
-    HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
-  }
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  if (huart == &huart4) {
+    // HAL_UART_Transmit(&hlpuart1, "data\n", strlen("data\n"), 100);
+    data_ready = 1;
+  } 
+  // else if (huart->Instance == LPUART1) {
+  //   HAL_UART_Transmit(&hlpuart1, "COMMAND\n", strlen("COMMAND\n"), 100);
+  //   HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
+  // }
 
 }
 /* USER CODE END 4 */

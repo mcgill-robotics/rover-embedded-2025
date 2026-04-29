@@ -22,6 +22,7 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "tusb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -206,7 +207,8 @@ void SysTick_Handler(void)
 void USB_HP_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_HP_IRQn 0 */
-
+  tud_int_handler(0);
+  return;
   /* USER CODE END USB_HP_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
   /* USER CODE BEGIN USB_HP_IRQn 1 */
@@ -220,7 +222,8 @@ void USB_HP_IRQHandler(void)
 void USB_LP_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_IRQn 0 */
-
+  tud_int_handler(0);
+  return;
   /* USER CODE END USB_LP_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
   /* USER CODE BEGIN USB_LP_IRQn 1 */
@@ -257,5 +260,7 @@ void LPUART1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void USBWakeUp_IRQHandler(void) {
+  tud_int_handler(0);
+}
 /* USER CODE END 1 */
