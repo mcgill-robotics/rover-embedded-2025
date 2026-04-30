@@ -5,75 +5,67 @@
 #include <stdint.h>
 
 typedef enum {
-    CAL_NOT_STARTED,
+    CAL_NOT_STARTED = 0,
     CAL_SEEKING_LOWER,
     CAL_STOPPING,
+    CAL_BACKING_OFF,
     CAL_COMPLETE
 } CalibrationState;
 
+/* ... existing prototypes ... */
+
+bool Calibration_BackOffTwoDegrees(void);
+
 typedef enum {
-    LIMIT_NONE,
-    LIMIT_LOWER,    /* PB3 */
-    LIMIT_UPPER     /* PB4 */
+    LIMIT_NONE = 0,
+    LIMIT_LOWER,
+    LIMIT_UPPER
 } LimitSwitch;
 
-/** Call once at startup after GPIO init. */
-void  Calibration_Init(void);
+/* Lifecycle */
+void  Calibration_Init(void);          /* boot only — zeroes position_offset */
+void  Calibration_Restart(void);       /* re-cal — preserves position_offset */
 
-/** Call from main loop when controlMode == MODE_CALIBRATING. */
-void  Calibration_MainStep(void);
+/* EXTI hooks */
+void  Calibration_LimitHit(LimitSwitch sw);                  /* during cal */
+void  Calibration_LimitEdge(LimitSwitch sw, bool rising);    /* always */
 
-/** Call from 1 kHz TIM6 ISR when controlMode == MODE_CALIBRATING —
- *  runs velCtrl filter and settle counter. */
-void  Calibration_ISRStep(void);
+/* Foreground + ISR ticks */
+void  Calibration_MainStep(void);      /* call from while(1) when MODE_CALIBRATING */
+void  Calibration_ISRStep(void);       /* call from TIM6 when MODE_CALIBRATING */
+void  Calibration_Tick_1ms(void);      /* call from TIM6 every tick, all modes */
 
-/** Call from 1 kHz TIM6 ISR every tick (regardless of mode) —
- *  decrements the runtime-snap lockout timer.  Separate from
- *  Calibration_ISRStep because it must keep ticking after CAL_COMPLETE
- *  and after MODE_IDLE so the lockout actually expires. */
-void  Calibration_Tick_1ms(void);
-
-/** Call from EXTI ISR — records which switch fired. */
-void  Calibration_LimitHit(LimitSwitch sw);
-
-/** Returns true once calibration is complete. */
+/* Queries */
 bool  Calibration_IsDone(void);
-
-/**
- * Returns the position offset (radians) between raw encoder frame and
- * the calibrated frame.
- *
- *   raw_setpoint = calibrated_setpoint + Calibration_GetOffset()
- *
- * Applied in the TIM6 ISR before MC_ProgramPositionCommandMotor1().
- * This is the correct approach — do not attempt to reset wMecAngle via
- * ENC_SetMecAngle() while the FOC loop is live; it causes a burst spin.
- */
 float Calibration_GetOffset(void);
 
-/**
- * Runtime re-snap: call from EXTI during normal operation when a limit
- * switch fires.  Recomputes offset and snaps tracker + velCtrl in place,
- * also syncs both plan buffers and the SDK target so the next command
- * does not produce a step.
- *
- * Internally gated by:
- *   1. A post-calibration lockout window (suppresses bounce-induced
- *      events that arrive after CAL_COMPLETE has flipped the mode out
- *      of MODE_CALIBRATING).
- *   2. A re-read of the GPIO pin to confirm the switch is genuinely
- *      open (suppresses single-cycle bounce glitches).
- *
- * If either gate fails, the call returns without modifying state.
- */
-void  Calibration_RuntimeSnap(LimitSwitch sw);
+/* Active joint limits in the (possibly rezeroed) calibrated frame.
 
-/* Diagnostic counters — useful for confirming bounce activity on the
-   limit switches via telemetry / debugger watch.
-   Calibration_runtime_snap_attempts increments on every call.
-   Calibration_runtime_snap_applied  increments only when the snap
-   actually modified state. */
+   Before first calibration, these mirror the compile-time defaults
+   JOINT_MIN_RAD / JOINT_MAX_RAD from main.h.
+
+   After first calibration, the post-backoff rest position becomes
+   calibrated 0, so:
+     active_lower_limit == 0
+     active_upper_limit == JOINT_MAX_RAD - JOINT_MIN_RAD - CAL_BACKOFF_OFFSET
+
+   After a runtime lower-switch hit, the rezero re-anchors everything
+   so active_lower_limit stays at 0 and active_upper_limit shrinks.
+   After a runtime upper-switch hit, only active_upper_limit tightens
+   to the new park position; active_lower_limit and the offset are
+   unchanged.
+
+   CAN_processing_v2.c uses these to clamp incoming RUN_POSITION and
+   RUN_SPEED commands.  IMPORTANT: any caller of these getters must
+   include this header — without a prototype, the implicit int return
+   will scramble the float bit pattern and produce garbage limits. */
+float Calibration_GetActiveLowerLimit(void);
+float Calibration_GetActiveUpperLimit(void);
+
+/* Diagnostics (optional — handy for debugging) */
 extern volatile uint32_t Calibration_runtime_snap_attempts;
+extern volatile uint32_t Calibration_runtime_snap_armed;
 extern volatile uint32_t Calibration_runtime_snap_applied;
+extern volatile uint32_t Calibration_runtime_snap_timeouts;
 
 #endif /* CALIBRATION_H */

@@ -81,25 +81,25 @@ extern TIM_HandleTypeDef htim6;
 void EXTI3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI3_IRQn 0 */
-  if (controlMode == MODE_CALIBRATING)
-      Calibration_LimitHit(LIMIT_LOWER);
-  else
-      Calibration_RuntimeSnap(LIMIT_LOWER);
-  /* USER CODE END EXTI3_IRQn 0 */
 
-  HAL_GPIO_EXTI_IRQHandler(LIMIT_SW_LOWER_Pin);  /* clears flag, calls HAL callback */
+  /* USER CODE END EXTI3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(LIMIT_SW_LOWER_Pin);
+  /* USER CODE BEGIN EXTI3_IRQn 1 */
+
+  /* USER CODE END EXTI3_IRQn 1 */
 }
 
+/**
+  * @brief This function handles EXTI line4 interrupt.
+  */
 void EXTI4_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_IRQn 0 */
-  if (controlMode == MODE_CALIBRATING)
-      Calibration_LimitHit(LIMIT_UPPER);
-  else
-      Calibration_RuntimeSnap(LIMIT_UPPER);
   /* USER CODE END EXTI4_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(LIMIT_SW_UPPER_Pin);
+  /* USER CODE BEGIN EXTI4_IRQn 1 */
 
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
+  /* USER CODE END EXTI4_IRQn 1 */
 }
 
 /**

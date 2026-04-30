@@ -115,9 +115,11 @@ float inputShaftToOutput(float positionRad, float ratio);
 #define Start_Stop_GPIO_Port GPIOC
 #define Start_Stop_EXTI_IRQn EXTI15_10_IRQn
 #define LIMIT_SW_LOWER_Pin GPIO_PIN_3
+#define LIMIT_SW_LOWER_GPIO_Port GPIOB
+#define LIMIT_SW_LOWER_EXTI_IRQn EXTI3_IRQn
 #define LIMIT_SW_UPPER_Pin GPIO_PIN_4
 #define LIMIT_SW_UPPER_GPIO_Port GPIOB
-#define LIMIT_SW_UPPER_EXTI_IRQn EXTI3_IRQn
+#define LIMIT_SW_UPPER_EXTI_IRQn EXTI4_IRQn
 #define M1_ENCODER_A_Pin GPIO_PIN_6
 #define M1_ENCODER_A_GPIO_Port GPIOB
 #define M1_ENCODER_B_Pin GPIO_PIN_7

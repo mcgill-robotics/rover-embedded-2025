@@ -347,7 +347,6 @@ static void MX_NVIC_Init(void)
   /* EXTI15_10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
 }
 
 /**
@@ -1076,17 +1075,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Start_Stop_GPIO_Port, &GPIO_InitStruct);
 
-  /* PB3 — Lower limit switch */
-  GPIO_InitStruct.Pin = LIMIT_SW_LOWER_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : LIMIT_SW_LOWER_Pin LIMIT_SW_UPPER_Pin */
+  GPIO_InitStruct.Pin = LIMIT_SW_LOWER_Pin|LIMIT_SW_UPPER_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* PB4 — Upper limit switch */
-  GPIO_InitStruct.Pin = LIMIT_SW_UPPER_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -1103,65 +1104,89 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 	}
 }
 
+static GPIO_PinState read_pin_synced(GPIO_TypeDef *port, uint16_t pin)
+{
+    GPIO_PinState a = HAL_GPIO_ReadPin(port, pin);
+    __NOP(); __NOP(); __NOP(); __NOP();
+    GPIO_PinState b = HAL_GPIO_ReadPin(port, pin);
+    return (a == b) ? a : HAL_GPIO_ReadPin(port, pin);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == LIMIT_SW_LOWER_Pin) {
+        bool rising = (read_pin_synced(GPIOB, LIMIT_SW_LOWER_Pin)
+                       == GPIO_PIN_SET);
+        Calibration_LimitEdge(LIMIT_LOWER, rising);
+    }
+    else if (GPIO_Pin == LIMIT_SW_UPPER_Pin) {
+        bool rising = (read_pin_synced(LIMIT_SW_UPPER_GPIO_Port,
+                                       LIMIT_SW_UPPER_Pin)
+                       == GPIO_PIN_SET);
+        Calibration_LimitEdge(LIMIT_UPPER, rising);
+    }
+}
 
 /**
  * @brief  TIM6 period elapsed callback — fires at 1 kHz.
  *         Checks the CAN flag and dispatches processing.
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM6) {
+    if (htim->Instance == TIM6) {
 
-	    /* Trajectory step produces the position setpoint for this tick */
-	    if (controlMode == MODE_POSITION) {
-	        PosCtrl_ISRStep();
-	    } else if (controlMode == MODE_VELOCITY) {
-	        velCtrl_ISRStep(velCtrl, (VelocityFilter *)motorTracker);
-	    } else if (controlMode == MODE_CALIBRATING) {
-            Calibration_ISRStep();   /* <-- new */
+        /* Trajectory step produces the position setpoint for this tick. */
+        if (controlMode == MODE_POSITION) {
+            PosCtrl_ISRStep();
+        } else if (controlMode == MODE_VELOCITY) {
+            velCtrl_ISRStep(velCtrl, (VelocityFilter *)motorTracker);
+        } else if (controlMode == MODE_CALIBRATING) {
+            Calibration_ISRStep();
+        }
+        /* MODE_IDLE: no kinematic update — tracker->theta holds last value */
+
+        Calibration_Tick_1ms();
+
+        /* Push current calibrated-frame position to the SDK every tick,
+           regardless of mode.  In MODE_IDLE, tracker->theta typically
+           doesn't change tick-to-tick, so the SDK target stays put.
+           But when commit_snap (or any other code path) updates
+           tracker->theta during MODE_IDLE, this propagates the change
+           to the SDK so the rotor actually moves.  Without this, the
+           runtime limit-switch back-off does nothing — the SDK never
+           sees the new target. */
+        if (MC_GetSTMStateMotor1() == RUN) {
+            float calibrated_setpoint;
+
+            if (controlMode == MODE_POSITION) {
+                PosCtrlHandle *plan =
+                    (PosCtrlHandle *)paths_planned[active_plan];
+                calibrated_setpoint = plan->theta;
+            } else {
+                /* MODE_VELOCITY, MODE_CALIBRATING, MODE_IDLE — all use
+                   tracker->theta as the canonical calibrated-frame
+                   position. */
+                calibrated_setpoint =
+                    ((VelocityFilter *)motorTracker)->theta;
+            }
+
+            float raw_setpoint = calibrated_setpoint
+                               + Calibration_GetOffset();
+            float pid_setpoint = outputShaftToInput(raw_setpoint, gearRatio);
+            MC_ProgramPositionCommandMotor1(pid_setpoint, 0);
         }
 
-	    Calibration_Tick_1ms();
-	    // position Loop
-	    if (MC_GetSTMStateMotor1() == RUN) {
+        /* Refresh sensor cache */
+        ESC_Sensors_Update();
 
-	        float calibrated_setpoint;
-	        bool send_command = true; // Used for commands not to be sent while idle, but motor is calibrated
+        /* Broadcast scheduled signals */
+        Telemetry_Tick_1ms();
 
-	        if (controlMode == MODE_POSITION) {
-	            PosCtrlHandle *plan = (PosCtrlHandle *)paths_planned[active_plan];
-	            calibrated_setpoint = plan->theta;
-
-	        } else if (controlMode == MODE_VELOCITY ||
-	                   controlMode == MODE_CALIBRATING) {
-	            calibrated_setpoint = ((VelocityFilter *)motorTracker)->theta; // ← fixed
-
-	        } else {
-	            send_command = false; // idle — don't touch the SDK setpoint
-	        }
-
-	        if (send_command) {
-	            float raw_setpoint = calibrated_setpoint + Calibration_GetOffset();
-	            float pid_setpoint = outputShaftToInput(raw_setpoint, gearRatio);
-	            MC_ProgramPositionCommandMotor1(pid_setpoint, 0);
-	        }
-	    }
-
-
-//	     feed this to  FOC/PID loop
-
-		/* Refresh sensor cache        */
-		ESC_Sensors_Update();
-
-	    /*broadcast scheduled signals */
-		Telemetry_Tick_1ms();
-
-
-		// service CAN flag if message is received
-		if (can_rx_flag) {
-			can_rx_flag = 0;
-			can_rx_ready = 1;
-		}
-	}
+        /* Service CAN flag if message is received */
+        if (can_rx_flag) {
+            can_rx_flag = 0;
+            can_rx_ready = 1;
+        }
+    }
 }
 
 /**

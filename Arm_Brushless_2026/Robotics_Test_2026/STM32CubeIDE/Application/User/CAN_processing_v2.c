@@ -141,12 +141,12 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
     if (id->runSpec == RUN_CALIBRATION) {
         uart_debug_print("  -> CALIBRATION\r\n");
 
-        /* Re-run is always allowed.  Reset internal state so a second
-           RUN_CALIBRATION restarts the seek instead of being silently
-           dropped.  The original "ignore if done" gate also caused
-           dead-on-arrival behaviour after a no-reset reflash, since
-           BSS retained cal_state = CAL_COMPLETE from the prior session. */
-        Calibration_Init();
+        /* Use Restart, not Init.  Init zeroes position_offset, which the
+           TIM6 ISR applies every tick — that step gets multiplied by
+           gearRatio at the SDK input and lurches the motor.  Restart
+           preserves the live offset until the new switch hit installs
+           a fresh one atomically. */
+        Calibration_Restart();
         controlMode = MODE_CALIBRATING;
         return;
     }
@@ -178,10 +178,13 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
 
     case RUN_SPEED: {
         /* Clamp velocity demand: the fastest the joint can physically
-           travel is bounded by the total joint range.  Use JOINT_MAX_RAD
-           from main.h — the same value that velCtrl's position limits use. */
+           travel is bounded by the total joint range.  Use the active
+           range (Calibration_GetActiveUpperLimit - GetActiveLowerLimit)
+           rather than JOINT_MAX_RAD - JOINT_MIN_RAD so the ceiling
+           tracks any runtime tightening of the upper limit. */
         float demand = information;
-        float v_max  = JOINT_MAX_RAD - JOINT_MIN_RAD;  /* rad/s ceiling */
+        float v_max  = Calibration_GetActiveUpperLimit()
+                     - Calibration_GetActiveLowerLimit();  /* rad/s */
         if (demand >  v_max) demand =  v_max;
         if (demand < -v_max) demand = -v_max;
 
@@ -197,15 +200,21 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
     }
 
     case RUN_POSITION: {
-        /* Setpoint arrives in degrees, convert and clamp to joint limits */
+        /* Setpoint arrives in degrees, convert and clamp to the *active*
+           joint limits — these reflect the runtime-discovered range
+           (rezeroed at calibration, retightened on upper-switch hits)
+           and may differ from the JOINT_MIN_RAD / JOINT_MAX_RAD compile-
+           time defaults. */
         float setpoint_rad = degreesToRad(information);
+        float lo = Calibration_GetActiveLowerLimit();
+        float hi = Calibration_GetActiveUpperLimit();
 
-        if (setpoint_rad < JOINT_MIN_RAD) {
-            uart_debug_print("  -> POSITION clamped to min\r\n");
-            setpoint_rad = JOINT_MIN_RAD;
-        } else if (setpoint_rad > JOINT_MAX_RAD) {
-            uart_debug_print("  -> POSITION clamped to max\r\n");
-            setpoint_rad = JOINT_MAX_RAD;
+        if (setpoint_rad < lo) {
+            uart_debug_print("  -> POSITION clamped to active lower\r\n");
+            setpoint_rad = lo;
+        } else if (setpoint_rad > hi) {
+            uart_debug_print("  -> POSITION clamped to active upper\r\n");
+            setpoint_rad = hi;
         }
 
         positionSetpoint    = setpoint_rad;
