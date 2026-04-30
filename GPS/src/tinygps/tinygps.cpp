@@ -674,7 +674,15 @@ bool gps_process(char *buf, int g, char c) {
   }
   
   // Sending only basic gps data - similar to what was sent from old pantilt
-  sprintf(buf, "%d,%f,%f\n", ret_data.satellites, ret_data.lng, ret_data.lat);
+  // Cut off number of digits (5 for number of satellites and 8 for coordinates)
+  char satellites[6];
+  char longitude[9];
+  char latitude[9];
+  snprintf(satellites, 6, "%d", ret_data.satellites);
+  snprintf(longitude, 9, "%f", ret_data.lng);
+  snprintf(latitude, 9, "%f", ret_data.lat);
+  snprintf(buf, sizeof(buf), "%s, %s, %s", satellites, longitude, latitude);
+  //sprintf(buf, "%d,%f,%f\n", ret_data.satellites, ret_data.lng, ret_data.lat);
 
   // Send complete gps data
   /*
