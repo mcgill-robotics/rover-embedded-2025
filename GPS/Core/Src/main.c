@@ -181,7 +181,7 @@ int main(void)
           // print_to_usb("\n");
           printf("long: %lf\n", data.lng);
           print_to_usb(longitude);
-          print_to_usb("\n");
+          print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
         }
       }
       data_ready = 0;
