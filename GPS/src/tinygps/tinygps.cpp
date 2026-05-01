@@ -485,17 +485,6 @@ struct Time {
    uint8_t centisecond;
 };
 
-struct combined_gps_data {
-  double lat;
-  double lng;
-  double course;
-  double kmph;
-  double alt;
-  int satellites;
-  int valid_gps_count;
-  double bearing;
-};
-
 struct single_gps_data {
   double lat;
   double lng;
@@ -621,7 +610,7 @@ static bool gps_prefilter(struct single_gps_data data) {
 }
 
 static void gps_combine(struct single_gps_data &g1, struct single_gps_data &g2,
-                 struct combined_gps_data *output) {
+                 combined_gps_data_t *output) {
     // Just averaging for now
     // Filtering should be set up in here
     output->lat = (g1.lat + g2.lat) / 2.0;
@@ -635,7 +624,7 @@ static void gps_combine(struct single_gps_data &g1, struct single_gps_data &g2,
 }
 
 // 0 = gps1, 1 = gps2
-bool gps_process(char *buf, int g, char c) {
+bool gps_process(combined_gps_data_t* data, int g, char c) {
   static struct single_gps_data gps_data[2] = {0};
   static bool gps_valid[2] = {true, true};
 
@@ -653,15 +642,15 @@ bool gps_process(char *buf, int g, char c) {
   if (!gps_valid[g])
     return false;
 
-  struct combined_gps_data ret_data = {0};
+  // struct combined_gps_data ret_data = {0};
 
   // If there is no gps selector and both data valid
   if (gps_selector < 0 && gps_valid[0] && gps_valid[1]) {
-      gps_combine(gps_data[0], gps_data[1], &ret_data);
+      gps_combine(gps_data[0], gps_data[1], data);
       // Otherwise if only gps g is valid or selector points to g
       // We don't consider the other option since in this case the new data comes from g
   } else if (gps_selector == g || (gps_valid[g] && !gps_valid[!g])) {
-    ret_data = {
+    *data = {
         .lat = gps_data[g].lat,
         .lng = gps_data[g].lng,
         .course = gps_data[g].course,
@@ -675,13 +664,13 @@ bool gps_process(char *buf, int g, char c) {
   
   // Sending only basic gps data - similar to what was sent from old pantilt
   // Cut off number of digits (5 for number of satellites and 8 for coordinates)
-  char satellites[6];
-  char longitude[9];
-  char latitude[9];
-  snprintf(satellites, 6, "%d", ret_data.satellites);
-  snprintf(longitude, 9, "%f", ret_data.lng);
-  snprintf(latitude, 9, "%f", ret_data.lat);
-  snprintf(buf, sizeof(buf), "%s, %s, %s", satellites, longitude, latitude);
+  // char satellites[6];
+  // char longitude[9];
+  // char latitude[9];
+  // snprintf(satellites, 6, "%d", ret_data.satellites);
+  // snprintf(longitude, 9, "%f", ret_data.lng);
+  // snprintf(latitude, 9, "%f", ret_data.lat);
+  // snprintf(buf, sizeof(buf), "%s, %s, %s", satellites, longitude, latitude);
   //sprintf(buf, "%d,%f,%f\n", ret_data.satellites, ret_data.lng, ret_data.lat);
 
   // Send complete gps data
@@ -706,7 +695,7 @@ static void gps_set_filter_mode(int mode) {
     filter_mode = mode;
 }
 
-static void gps_set_selector(int g) {
+void gps_set_selector(int g) {
   if (g == 0)
     gps_selector = g;
   else if (g == 1)

@@ -7,12 +7,25 @@ extern "C" {
 
 #include <stdbool.h>
 
+typedef struct combined_gps_data_t {
+  double lat;
+  double lng;
+  double course;
+  double kmph;
+  double alt;
+  int satellites;
+  int valid_gps_count;
+  double bearing;
+} combined_gps_data_t;
+
 // Initializes the TinyGPS library and gps
 void gps_init();
 
+void gps_set_selector(int g);
+
 // process char c from gps g. If gps has processed a valid sentence, buf is filled and it returns true.
 // if not, false is return and buf is left as is. 
-bool gps_process(char *buf, int gps, char c);
+bool gps_process(combined_gps_data_t* data, int g, char c);
 
 // send a command to the gps in buf with size bufz. If command is valid and was process it returns true.
 // Possible commands:

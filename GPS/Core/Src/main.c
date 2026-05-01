@@ -58,8 +58,7 @@ PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
 uint8_t uart4buf[100];
-uint8_t lpuart1buf[512];
-uint8_t buf[512];
+uint8_t data_buffer[1024];
 int data_ready = 0;
 
 /* USER CODE END PV */
@@ -115,6 +114,7 @@ int main(void)
 
   gps_init();
   setup_simple();
+  gps_set_selector(0);
   
   HAL_UART_Receive_IT(&huart4, uart4buf, 100);
   // HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
@@ -126,7 +126,7 @@ int main(void)
     
     // uint8_t c;
     // if (HAL_UART_Receive(&huart4, uart4buf, 1, 10) == HAL_OK) {
-    //   HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+      // HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
     // }
       // char c_buf[3];
       // c_buf[0] = *uart4buf;
@@ -141,7 +141,6 @@ int main(void)
     // memset(buf, 0, 512);
     // print_to_usb("looping\n");
     if (data_ready){
-    HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
       // for (int i=0;i<2048;i++){
       //   char msg[2];
       //   // msg[0] = 'r';
@@ -150,14 +149,41 @@ int main(void)
       //   msg[0] = *uart4buf;
       //   // msg[4] = '\n';
       //   msg[1] = '\0';
-      send_msg_raw(uart4buf, 100);
+      // print_to_usb("data start\n");
+      // send_msg_raw(uart4buf, 100);
+      // print_to_usb("data end\n");
       // }
-      for (int i=0;i<100;i++){
-        if (gps_process((char*)buf, 0, uart4buf[i])) {
-          print_to_usb((char*) buf);
+      for (int i=0;i<data_ready;i++){
+        combined_gps_data_t data;
+        if (gps_process(&data, 0, uart4buf[i])) {
+          HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+          char satellites_buf_used[100];
+          char satellites[50];
+          char latitude[50];
+          char longitude[50];
+          int_to_string(data.satellites, satellites, 50);
+          
+          // print_to_usb(satellites_buf_used);
+          print_to_usb(satellites);
+          print_to_usb(",");
+          float_to_string(data.lat, 8, latitude, 50);
+          // int_to_string(used, satellites_buf_used, 100);
+          // print_to_usb("used lat: ");
+          // print_to_usb(satellites_buf_used);
+          // print_to_usb("\n");
+          printf("lat: %lf\n", data.lat);
+          print_to_usb(latitude);
+          print_to_usb(",");
+          float_to_string(data.lng, 8, longitude, 50);
+          // int_to_string(used, satellites_buf_used, 100);
+          // print_to_usb("used lat: ");
+          // print_to_usb(satellites_buf_used);
+          // print_to_usb("\n");
+          printf("long: %lf\n", data.lng);
+          print_to_usb(longitude);
+          print_to_usb("\n");
         }
       }
-      HAL_UART_Receive_IT(&huart4, uart4buf, 100);
       data_ready = 0;
     }
     
@@ -396,10 +422,29 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+int __io_putchar(int ch)
+{
+ // Write character to ITM ch.0
+ ITM_SendChar(ch);
+ return(ch);
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+  if (huart == &huart4){
+    uint32_t err =  HAL_UART_GetError(huart);
+    printf("uart 4 failed\n");
+  }
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == &huart4) {
     // HAL_UART_Transmit(&hlpuart1, "data\n", strlen("data\n"), 100);
-    data_ready = 1;
+    if (data_ready+100 > 1024){
+      data_ready = 0;
+    }
+    memcpy((data_buffer+data_ready), uart4buf, 100);
+    data_ready+=100;
+    HAL_UART_Receive_IT(&huart4, uart4buf, 100);
   } 
   // else if (huart->Instance == LPUART1) {
   //   HAL_UART_Transmit(&hlpuart1, "COMMAND\n", strlen("COMMAND\n"), 100);
