@@ -188,10 +188,16 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL); // pitch encoder
   	  //TIM_CHANNEL_ALL: Enable both channel needed for encoder
 
+
   //Setup Motor PWM
-  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
-  HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1); // roll PWM
-  HAL_TIMEx_PWMN_Start(&htim20, TIM_CHANNEL_1); // gripper PWM
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // roll PWM
+  HAL_TIM_PWM_Start(&htim20, TIM_CHANNEL_1);  // gripper PWM
+  // For Driver, running in PH/EN mode, PWM port (EN) always to 1
+  HAL_GPIO_WritePin(PWM_pitch_GPIO_Port, PWM_pitch_Pin, 1);   // EN/IN1 = 1
+  HAL_GPIO_WritePin(PWM_roll_GPIO_Port, PWM_roll_Pin, 1);   // EN/IN1 = 1
+  HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // EN/IN1 = 1
+
 
   // Initialize motor state
 
@@ -200,6 +206,7 @@ int main(void)
   /*
    * offset such that can go 180 right and 180 left without getting to 0 counts(- values)
    */
+
   gripper_motor.ENCODER_type->CNT = 41744; //gripper
   roll_motor.ENCODER_type->CNT = 41744; //roll
   pitch_motor.ENCODER_type->CNT = 41744; //pitch
@@ -233,8 +240,8 @@ int main(void)
     // CAN initialization
   // Configure accept-all filter for standard IDs into FIFO0 /
       FDCAN_FilterTypeDef filter;
-      //filter.IdType = FDCAN_STANDARD_ID;
-      filter.IdType = FDCAN_CLASSIC_CAN;
+      filter.IdType = FDCAN_STANDARD_ID;
+      //filter.IdType = FDCAN_CLASSIC_CAN;
       filter.FilterIndex = 0;
       filter.FilterType = FDCAN_FILTER_MASK;
       filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
@@ -280,24 +287,32 @@ int main(void)
 
   while (1)
   {
+	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
+	  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/2); // 50% Speed
+	  //TODO: Figure out why running 50% speed causes motor jittering
+
+	  //HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
+	  //^ moved on top
+	  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1); //  PH = 1 = go forward
+
+//	  HAL_Delay(10000);
+//
+//	  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/4);
+//
+//	  HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
+//	  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0); // IN2 = 0 = go backwards
+	  // TODO: Check on motor if this will actually go in opposite direction
+
+
+	  HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
+
+	  HAL_Delay(10000);
+
+
 	  //HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
 	  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	  //HAL_Delay(500); // wait 1000 ms (1 second)
 
-	  ParsedCANID header;
-
-	  header.messageSender = 1;
-	  header.motorType = 0;
-	  header.motorConfig = 0;
-	  header.commandType = 1;
-	  header.readSpec = 1;
-	  header.runSpec = 1;
-	  header.motorID = 0;
-
-	  float message = 69.0f;
-
-	  sendCANResponse(&header, message);
-	  HAL_Delay(1000);
 
 	  // Process Message if available
 	  if (CAN_flag){
@@ -548,7 +563,7 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE END FDCAN2_Init 1 */
   hfdcan2.Instance = FDCAN2;
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
+  hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
   hfdcan2.Init.AutoRetransmission = DISABLE;
   hfdcan2.Init.TransmitPause = ENABLE;
@@ -979,7 +994,7 @@ static void MX_TIM20_Init(void)
 
   /* USER CODE END TIM20_Init 1 */
   htim20.Instance = TIM20;
-  htim20.Init.Prescaler = 0;
+  htim20.Init.Prescaler = 71;
   htim20.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim20.Init.Period = 65535;
   htim20.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1199,7 +1214,7 @@ void HAL_FDCAN_RxFifo0Callback (FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs
 	    }
 
 	    //upon successful interrupt, the CAN flag is set high for main loop to catch
-	    HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+	    //HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
 	    CAN_flag = 1;
 
 	  }

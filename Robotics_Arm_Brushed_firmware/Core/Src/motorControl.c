@@ -63,6 +63,8 @@ void set_motor_speed_raw(Motor * motor, int n){
 		n = power_limit;
 	}
 	motor->PWM_type->CCR1 = n;
+	//__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/2); // 50% Speed
+	//TODO:  ^ check if doing the right thing
 }
 
 
