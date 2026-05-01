@@ -1,0 +1,4 @@
+../Core/Src/motor.c:14:6:stop_motor	1
+../Core/Src/motor.c:20:6:set_motor_speed_percent	1
+../Core/Src/motor.c:24:6:set_motor_speed_raw	2
+../Core/Src/motor.c:33:6:set_motor_direction	2
