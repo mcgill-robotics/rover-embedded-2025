@@ -24,6 +24,9 @@ extern TIM_HandleTypeDef htim2; // PWM_1
 int32_t min(int32_t a, int32_t b);
 int32_t max(int32_t a, int32_t b);
 
+void process_servo(void);
+void create_substring(char *buffer, char *destination, int start, int end);
+
 void init_servos(void);
 void write_servo(TIM_HandleTypeDef *htim, uint16_t angle);
 void set_pan(float angle);
