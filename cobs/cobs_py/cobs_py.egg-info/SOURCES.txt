@@ -1,0 +1,7 @@
+README.md
+cobs.py
+pyproject.toml
+cobs_py.egg-info/PKG-INFO
+cobs_py.egg-info/SOURCES.txt
+cobs_py.egg-info/dependency_links.txt
+cobs_py.egg-info/top_level.txt
