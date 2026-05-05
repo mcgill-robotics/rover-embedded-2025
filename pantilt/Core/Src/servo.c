@@ -86,15 +86,17 @@ void process_servo_uart(char *buffer, int length) {
     while(index < length) {
         char incoming = buffer[index];
 
-        if (incoming == '\n' && comma_index != -1) {
-            create_substring(buffer, pan_angle_string, 0, comma_index - 1);
-            create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
+        if (incoming == '\n') {
+            if (comma_index != -1) {
+                create_substring(buffer, pan_angle_string, 0, comma_index - 1);
+                create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
 
-            new_pan_angle = string_to_float(pan_angle_string);
-            new_tilt_angle = string_to_float(tilt_angle_string);
+                new_pan_angle = string_to_float(pan_angle_string);
+                new_tilt_angle = string_to_float(tilt_angle_string);
 
-            set_pan(new_pan_angle);
-            set_tilt(new_tilt_angle);
+                set_pan(new_pan_angle);
+                set_tilt(new_tilt_angle);
+            }
 
             return;
         } else {
