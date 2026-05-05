@@ -25,6 +25,7 @@ int32_t min(int32_t a, int32_t b);
 int32_t max(int32_t a, int32_t b);
 
 void process_servo(void);
+void process_servo_uart(char *buffer, int length);
 void create_substring(char *buffer, char *destination, int start, int end);
 
 void init_servos(void);

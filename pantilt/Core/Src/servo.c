@@ -74,6 +74,37 @@ void process_servo(void) {
     }
 }
 
+void process_servo_uart(char *buffer, int length) {
+    int comma_index = -1;
+    int index = 0;
+
+    char pan_angle_string[50];
+    char tilt_angle_string[50];
+    float new_pan_angle;
+    float new_tilt_angle;
+
+    while(index < length) {
+        char incoming = buffer[index];
+
+        if (incoming == '\n' && comma_index != -1) {
+            create_substring(buffer, pan_angle_string, 0, comma_index - 1);
+            create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
+
+            new_pan_angle = string_to_float(pan_angle_string);
+            new_tilt_angle = string_to_float(tilt_angle_string);
+
+            set_pan(new_pan_angle);
+            set_tilt(new_tilt_angle);
+
+            return;
+        } else {
+            if (incoming == ',') comma_index = index;
+            buffer[index] = incoming;
+            index++;
+        }
+    }
+}
+
 void write_servo(TIM_HandleTypeDef *htim, uint16_t angle) {
     uint16_t pulse = MIN_PERIOD + (angle * (MAX_PERIOD - MIN_PERIOD) / MAX_ANGLE);
     __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, pulse);
