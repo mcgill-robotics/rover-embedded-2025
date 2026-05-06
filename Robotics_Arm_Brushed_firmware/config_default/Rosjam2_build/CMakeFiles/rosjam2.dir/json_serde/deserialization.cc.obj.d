@@ -1,0 +1,312 @@
+Rosjam2_build/CMakeFiles/rosjam2.dir/json_serde/deserialization.cc.obj: \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/json_serde/deserialization.cc \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Configuration.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/JsonArray.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/ElementProxy.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantRefBase.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/Converter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Namespace.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/preprocessor.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/version.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/JsonVariantConst.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/include/stddef.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/include/stdint.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/stdint.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/machine/_default_types.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/features.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/_newlib_version.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/_intsup.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/_stdint.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/ResourceManager.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/Allocator.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/stdlib.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cstdlib \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\c++config.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\os_defines.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\cpu_defines.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/pstl/pstl_config.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/stdlib.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/machine/ieeefp.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/_ansi.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/newlib.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/config.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/reent.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/_ansi.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/cdefs.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/_types.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/machine/_types.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/lock.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/machine/stdlib.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/alloca.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/std_abs.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/MemoryPoolList.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/MemoryPool.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/assert.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/assert.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/integer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/utility.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/conditional.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/decay.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/enable_if.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/function_traits.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/integral_constant.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_array.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_base_of.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/remove_reference.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_class.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/declval.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_const.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_convertible.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_enum.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_floating_point.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_same.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/remove_cv.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_integral.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_pointer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_signed.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_unsigned.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/make_unsigned.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/type_identity.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/remove_const.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/void_t.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/string.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/_locale.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/strings.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/string.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/StringPool.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/StringNode.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/limits.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/StringAdapters.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/Adapters/RamString.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/attributes.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/StringAdapter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/Adapters/StringObject.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/StringTraits.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantData.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Misc/SerializedValue.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/convertNumber.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/FloatTraits.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/alias_cast.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/math.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/pgmspace_generic.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/JsonFloat.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/JsonString.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/ostream \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\requires_hosted.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/ios \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/iosfwd \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/stringfwd.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/memoryfwd.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/postypes.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cwchar \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/wchar.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/include/stdarg.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/exception \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/exception.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\exception_ptr.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\exception_defines.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\cxxabi_init_exception.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/typeinfo \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/hash_bytes.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/new \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/move.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/type_traits \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\nested_exception.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/char_traits.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/localefwd.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\c++locale.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/clocale \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/locale.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cctype \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/ctype.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/ios_base.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/ext/atomicity.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr-default.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\atomic_word.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\locale_classes.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/string \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/allocator.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\c++allocator.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\new_allocator.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/functexcept.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\cpp_type_traits.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\ostream_insert.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\cxxabi_forced.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_iterator_base_funcs.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\concept_check.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/debug/assertions.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_iterator_base_types.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_iterator.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/ext/type_traits.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/ptr_traits.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_function.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/backward/binders.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\ext\numeric_traits.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_algobase.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/stl_pair.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/utility.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/debug/debug.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\predefined_ops.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bit \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/refwrap.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/invoke.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\range_access.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/initializer_list \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\basic_string.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/ext/alloc_traits.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\alloc_traits.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\stl_construct.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/string_view \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\functional_hash.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\string_view.tcc \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\ext\string_conversions.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cstdio \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/stdio.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/stdio.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cerrno \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/errno.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/sys/errno.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/charconv.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\basic_string.tcc \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\memory_resource.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cstddef \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\uses_allocator.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\uses_allocator_args.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/tuple \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\locale_classes.tcc \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/system_error \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\error_constants.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/stdexcept \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/streambuf \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/streambuf.tcc \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/basic_ios.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\locale_facets.h \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/cwctype \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/wctype.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\ctype_base.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\streambuf_iterator.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\ctype_inline.h \
+ C:\ST\STM32CubeIDE_2.0.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712\tools\arm-none-eabi\include\c++\13.3.1\bits\locale_facets.tcc \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/basic_ios.tcc \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/ostream.tcc \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantContent.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/ArrayData.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Collection/CollectionData.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/JsonInteger.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/ObjectData.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/IsString.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantAttorney.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantTo.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantOperators.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/arithmeticCompare.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantTag.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/JsonArrayConst.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/JsonArrayIterator.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/JsonVariant.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/JsonObject.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/JsonObjectConst.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/JsonObjectIterator.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/JsonPair.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/MemberProxy.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Document/JsonDocument.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/ArrayImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantCompare.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/JsonVariantVisitor.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantDataVisitor.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Array/Utilities.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Collection/CollectionImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/Alignment.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/ResourceManagerImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Object/ObjectImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/ConverterImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/JsonSerializer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/TextFormatter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/EscapeSequence.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/FloatParts.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/CountingDecorator.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/measure.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/Writers/DummyWriter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/serialize.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/Writer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/Writers/StaticStringWriter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/Writers/StdStringWriter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/Writers/StdStreamWriter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/StringBuilder.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/JsonVariantCopier.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Variant/VariantRefBaseImpl.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/JsonDeserializer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/deserialize.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/DeserializationError.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/DeserializationOptions.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Filter.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/NestingLimit.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Reader.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Readers/IteratorReader.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Readers/RamReader.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Readers/VariantReader.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Deserialization/Readers/StdStreamReader.hpp \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/istream \
+ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/istream.tcc \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/Latch.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/Utf16.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/Utf8.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Numbers/parseNumber.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/ctype.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Json/PrettyJsonSerializer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/MsgPackBinary.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/MsgPackDeserializer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/StringBuffer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/endianness.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/ieee754.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/MsgPackExtension.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/MsgPack/MsgPackSerializer.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/compatibility.hpp \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/default_rosjam_config.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/rosjam_config.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/stm32g4xx_hal_conf.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_def.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g4xx.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g474xx.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Include/core_cm4.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Include/cmsis_version.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Include/cmsis_compiler.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Include/cmsis_gcc.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Include/mpu_armv7.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32G4xx/Include/system_stm32g4xx.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_gpio.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_gpio_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_dma.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_dma_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_cortex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_adc.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_adc.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_adc_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_exti.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_fdcan.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_flash.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_flash_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_flash_ramfunc.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_i2c.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_i2c_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pcd.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_usb.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pcd_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/json_serde/deserialization.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam_internal.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h

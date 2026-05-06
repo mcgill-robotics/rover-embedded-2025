@@ -1,0 +1,4 @@
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/pid.c:42:5:updatePIDImpl	24	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/pid.c:132:5:updatePID	40	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/pid.c:145:5:updatePIDOverrideGoal	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/pid.c:165:6:setPIDGoalA	48	static

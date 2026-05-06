@@ -19,10 +19,9 @@
 
 
 
-
+int currCounts = 0;
 int angleError = 0;
-int angleCorrection = 0;
-int oldAngleError = 0;
+float angleCorrection = 0;
 int currentGoal =0;
 int calibrationMode = 0; // if calibrating, lower the speed!
 // In Calibration.c, calibrationMode is set to one at the start
@@ -33,8 +32,11 @@ int calibrationMode = 0; // if calibrating, lower the speed!
 // I will mention this to whoever is controlling the steering.
 
 static volatile atomic_int gripperGoalAngle = ATOMIC_VAR_INIT (0);
-static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (0);
+static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (41744);
 static volatile atomic_int rollGoalAngle = ATOMIC_VAR_INIT (0);
+
+uint32_t last_blink2 = 0;
+
 
 // PID implementation
 int updatePIDImpl(Motor * motor, int goal) {
@@ -58,10 +60,24 @@ int updatePIDImpl(Motor * motor, int goal) {
 	 */
 
 
+	currCounts = motor->ENCODER_type->CNT;
+	currentGoal = goal; //goal correct frm testing encoder
 
-	currentGoal = goal;
 	//return 1 when goal reached
-	angleError = goal - get_counts(motor->Motor_Encoding_Struct);
+	//angleError = goal - get_counts(motor->Motor_Encoding_Struct);
+	angleError = goal - currCounts;
+	if (currCounts == 30000){
+		// Non-blocking LED blink
+		if (HAL_GetTick() - last_blink2 >= 1000) {
+			HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
+			last_blink2 = HAL_GetTick();
+		}
+	}
+
+//	if (currCounts >= 66512){
+//		motor->ENCODER_type->CNT = motor->ENCODER_type->CNT % 66512 + 33488;
+//	}
+
 	// Find optimal direction
 //	if (abs(angleError) > MAX_COUNTS/2) {
 //		if (angleError > 0) {
@@ -74,19 +90,21 @@ int updatePIDImpl(Motor * motor, int goal) {
 
 
 	// --> define kPw and kDw for each individual motor !
-    angleCorrection = motor->kPw * angleError + motor->kDw * (angleError - oldAngleError);
-    // Set direction based on allowed error
+    //angleCorrection = motor->kPw * angleError + motor->kDw * (angleError - motor->Motor_Encoding_Struct->oldAngleError);
+    angleCorrection = angleError/33024.0f * 4499;
+	// Set direction based on allowed error
 	if (angleCorrection < 0){
 		set_motor_direction(motor, 0);
 	} else{
 		set_motor_direction(motor, 1);
 	}
-	oldAngleError = angleError;
+	motor->Motor_Encoding_Struct->oldAngleError = angleError;
+
 	// Stop if within error
 	if (abs(angleError) <  ALLOWED_ERROR){
 		set_motor_speed_raw(motor, 0);
 
-		oldAngleError = 0; //reset error once goal reached
+		motor->Motor_Encoding_Struct->oldAngleError = 0; //reset error once goal reached
 		return 1;
 	}
 
@@ -97,14 +115,20 @@ int updatePIDImpl(Motor * motor, int goal) {
 //			return;
 //		}
 //	}
-	set_motor_speed_raw(motor, angleCorrection);
 
+	// Clamp to valid PWM range
+	int MAX_PWM = 4499;
+	if (angleCorrection > MAX_PWM)  angleCorrection = 4499/16;
+	if (angleCorrection < -MAX_PWM) angleCorrection = 4499/16;
 
+	set_motor_speed_raw(motor, abs(angleCorrection));
 
 	return 0;
 }
 
 // normal pid with goal from can
+
+
 int updatePID(Motor * motor){
 	if (motor->motorName == GRIPPER){
 		return updatePIDImpl(motor, atomic_load(&gripperGoalAngle));
@@ -124,21 +148,19 @@ int updatePIDOverrideGoal(Motor * motor, int override){
 
 
 // use PID to move away from limit switch a little bit after switch is triggered
-void leave_limit_switch(Motor * motor){
-	/*TODO FIX (is it even necessary??)
-	 *
-	if(updatePIDOverrideGoal(motor, angle_to_count(170))){
-
-		motor->steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
-		// prevent continuously moving to the limit
-		if(atomic_load(&goalAngle) > angle_to_count(170)){
-			stop_motor();
-		}
-	}
-	*/
-
-
-}
+//void leave_limit_switch(Motor * motor){
+//	if(updatePIDOverrideGoal(motor, angle_to_count(170))){
+//
+//		motor->steering_state = PID; // TEMPORARILY REMOVED FOR TESTING; ADD BACK
+//		// prevent continuously moving to the limit
+//		if(atomic_load(&goalAngle) > angle_to_count(170)){
+//			stop_motor();
+//		}
+//	}
+//
+//
+//
+//}
 
 void setPIDGoalA(Motor * motor, double angle) {
 	if (motor->motorName == GRIPPER){

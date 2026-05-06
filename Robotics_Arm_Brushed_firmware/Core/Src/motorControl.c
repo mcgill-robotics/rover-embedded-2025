@@ -62,18 +62,18 @@ void set_motor_speed_raw(Motor * motor, int n){
 	if (n > power_limit){
 		n = power_limit;
 	}
+	//ASSUMES PWM CHANNEL TO BE 1!!!
+	//CHANGE IF NOT THE CASE
 	motor->PWM_type->CCR1 = n;
-	//__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/2); // 50% Speed
-	//TODO:  ^ check if doing the right thing
 }
 
 
 void set_motor_direction(Motor * motor, int n){
 	if (n) {
-		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, 1);
 	}
 	else {
-		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(motor->DIR_port, motor->DIR_pin, 0);
 	}
 	direction = n;
 }

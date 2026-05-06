@@ -26,6 +26,7 @@
 #include "motorControl.h"
 #include "encoder.h"
 #include "pid.h" // use arguments to pass the specific motor used?
+#include "rosjam.h"
 
 /* USER CODE END Includes */
 
@@ -99,6 +100,64 @@ int LMSW2_flag_pitch_down = 0;
 int LMSW5_flag_roll = 0;
 int LMSW6_flag_gripper = 0;
 
+volatile uint8_t systick_10ms_flag = 0;
+
+
+int systick_counts = 0;
+int syscounter = 0;
+void SysTickFunction(void) {
+	/*
+	 * THIS IS CALLED EVERY 1ms
+	 */
+
+	for (int i = 0; i < NB_MOTORS; i++){
+
+		Motor * motor =  all_motors_list[i];
+
+		// !!!! debugging; remove when fixed encoder
+		if (motor->motorName != PITCH){
+			continue;
+		}
+
+		// poll limit switch after interrupt triggered
+		//if (is_debouncing(motor->Motor_Encoding_Struct)){
+			//if (try_calibrate_encoder()){
+				// reset to stop polling and set switch to non pressed state
+	//			set_debounce(motor, 0);
+	//			reset_debounce_buffer();
+				// align wheel if initial calibration
+//				if (motor->steering_state == CALIBRATION){
+//					setPIDGoalA(motor, 90);
+//				}
+//				motor->steering_state = LEAVE_LIMIT;
+			//}
+		//}
+
+		//normal systick loop execution
+		switch (motor->steering_state) {
+			case (PID):
+				updatePID(motor);// TODO FIX
+				break;
+			case(CALIBRATION):
+				set_calibration_motor_movement(motor);
+				break;
+			case(LEAVE_LIMIT):
+				//leave_limit_switch(); // TODO FIX
+				break;
+		}
+		//set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
+
+
+		//	if (is_debouncing()){
+	//		if(systick_counts++==100){
+	//			systick_counts=0;
+	//			set_debounce(0);
+	//		}
+	//	}
+
+	}
+
+}
 
 /* USER CODE END 0 */
 
@@ -110,6 +169,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+
+	setup_simple();
 
   /* USER CODE END 1 */
 
@@ -174,8 +235,8 @@ int main(void)
    * - kDw; //derivative gain (smoothing)
    */
   motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 50, 5);
-  motor_struct_init(&roll_motor, TIM8, TIM4, &pitch_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 50, 5);
-  motor_struct_init(&pitch_motor, TIM1, TIM5, &roll_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 50, 5);
+  motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 50, 5);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 50, 5);
 
 
   all_motors_list[0] = &gripper_motor;
@@ -185,8 +246,8 @@ int main(void)
   //set up Encoders
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL); // roll encoder
-  HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL); // pitch encoder
-  	  //TIM_CHANNEL_ALL: Enable both channel needed for encoder
+  if (HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL) != HAL_OK) HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin); // pitch encoder
+  //TIM_CHANNEL_ALL: Enable both channel needed for encoder
 
 
   //Setup Motor PWM
@@ -226,19 +287,13 @@ int main(void)
   set_counts(&roll_encoding, 41744);
 
 
-  setPIDGoalA(&gripper_motor, 90);
-  setPIDGoalA(&pitch_motor, 90);
-  setPIDGoalA(&roll_motor, 90);
+//  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
+//  CalibrateMotor(&roll_motor);
+//  CalibrateMotor(&pitch_motor);
 
 
-
-  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
-  CalibrateMotor(&roll_motor);
-  CalibrateMotor(&pitch_motor);
-
-
-    // CAN initialization
-  // Configure accept-all filter for standard IDs into FIFO0 /
+  	  // CAN initialization
+  	  // Configure accept-all filter for standard IDs into FIFO0 /
       FDCAN_FilterTypeDef filter;
       filter.IdType = FDCAN_STANDARD_ID;
       //filter.IdType = FDCAN_CLASSIC_CAN;
@@ -261,12 +316,10 @@ int main(void)
           Error_Handler();
       }
 
-
-
-
       if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
           Error_Handler();
       }
+
 
 
   /* USER CODE END 2 */
@@ -283,35 +336,67 @@ int main(void)
   int LMSW5_isDebouncing = 0;
   int LMSW6_isDebouncing = 0;
 
+  uint32_t last_blink = 0;
+
+  int count = 0;
+  //setPIDGoalA(&pitch_motor, 45);
+
+
 
 
   while (1)
   {
+	  process_simple();
+
+
+	    // Non-blocking LED blink
+	    if (HAL_GetTick() - last_blink >= 1000) {
+	        HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
+	        last_blink = HAL_GetTick();
+	    }
+
+
+	    print_to_usb("hello world");
+
+	    char readchar = read_char();
+	    if (readchar == 'c'){
+	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+	    }else if (readchar == 'o'){
+	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+	    }else if (readchar == 's'){
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+	    }
+
 	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
-	  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/2); // 50% Speed
-	  //TODO: Figure out why running 50% speed causes motor jittering
-
-	  //HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
-	  //^ moved on top
-	  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1); //  PH = 1 = go forward
-
-//	  HAL_Delay(10000);
+//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
 //
-//	  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 65535/4);
+//	  //HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
+//	  //^ moved on top
 //
-//	  HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
-//	  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0); // IN2 = 0 = go backwards
-	  // TODO: Check on motor if this will actually go in opposite direction
+//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0); //  PH = 1 = go forward
+//
+//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+//
+//	  HAL_Delay(3000);
+//
+//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//	  HAL_Delay(2000);
+//
+//	  //reverse direction
+//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+//
+//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+//
+//	  HAL_Delay(3000);
+//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+//
+//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//	  HAL_Delay(2000);
 
 
-	  HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
-
-	  HAL_Delay(10000);
-
-
-	  //HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-	  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
-	  //HAL_Delay(500); // wait 1000 ms (1 second)
+//	  if (TIM5->CNT >= 41750){
+//		  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+//	  }
 
 
 	  // Process Message if available
@@ -329,6 +414,12 @@ int main(void)
 		//HAL_Delay(1000);
 	  }
 
+
+//	  if (systick_10ms_flag) {
+//		  systick_10ms_flag = 0;
+//
+//		  SysTickFunction();
+//	  }
 
 	  if (LMSW1_flag_pitch_up){
 		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
@@ -659,7 +750,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 4499;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -778,7 +869,7 @@ static void MX_TIM3_Init(void)
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
@@ -786,7 +877,7 @@ static void MX_TIM3_Init(void)
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
+  sConfig.IC2Filter = 5;
   if (HAL_TIM_Encoder_Init(&htim3, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -827,7 +918,7 @@ static void MX_TIM4_Init(void)
   htim4.Init.Period = 65535;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
@@ -835,7 +926,7 @@ static void MX_TIM4_Init(void)
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
+  sConfig.IC2Filter = 5;
   if (HAL_TIM_Encoder_Init(&htim4, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -876,11 +967,11 @@ static void MX_TIM5_Init(void)
   htim5.Init.Period = 4294967295;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0;
+  sConfig.IC1Filter = 5;
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
@@ -923,7 +1014,7 @@ static void MX_TIM8_Init(void)
   htim8.Instance = TIM8;
   htim8.Init.Prescaler = 0;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim8.Init.Period = 65535;
+  htim8.Init.Period = 4499;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim8.Init.RepetitionCounter = 0;
   htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -994,9 +1085,9 @@ static void MX_TIM20_Init(void)
 
   /* USER CODE END TIM20_Init 1 */
   htim20.Instance = TIM20;
-  htim20.Init.Prescaler = 71;
+  htim20.Init.Prescaler = 0;
   htim20.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim20.Init.Period = 65535;
+  htim20.Init.Period = 4499;
   htim20.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim20.Init.RepetitionCounter = 0;
   htim20.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

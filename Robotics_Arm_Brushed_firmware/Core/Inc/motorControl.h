@@ -29,6 +29,7 @@ typedef struct {
 	int 			LMSW_RESET_COUNTS;
 	int				curr_counts;
 	int 			need_debounce;
+	int				oldAngleError;
 
 } Motor_Encoding_Struct;
 

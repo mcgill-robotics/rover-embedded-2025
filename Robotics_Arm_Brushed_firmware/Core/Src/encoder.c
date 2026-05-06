@@ -24,6 +24,7 @@ void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_ma
 	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
 	encoding->curr_counts = 0;
 	encoding->need_debounce = 0;
+	encoding->oldAngleError = 0;
 }
 
 
@@ -82,7 +83,7 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
 	//reset the maximum number of counts
 	//set the current number of counts to the MAX
 	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
-	set_counts(motor->Motor_Encoding_Struct, (uint16_t) TIM2->CNT);
+	set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
 	return 1;
 }
 
@@ -105,7 +106,7 @@ int lmsw_roll_recalibrate(Motor * motor){
 int lmsw_gripper_recalibrate(Motor * motor){
 	//reset calibration & set current number of counts to MAX
 	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
-	set_counts(motor->Motor_Encoding_Struct, (uint16_t) TIM2->CNT);
+	set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
 	return 1;
 }
 
