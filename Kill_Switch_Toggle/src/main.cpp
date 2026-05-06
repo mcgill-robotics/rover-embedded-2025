@@ -3,11 +3,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-const int killSwitchPin = 6; 
+const int SKSPin = 6; 
+const int MKSPin = 5; 
 
 void setup() {
-  pinMode(killSwitchPin, OUTPUT);
-  digitalWrite(killSwitchPin, LOW);  // Start OFF
+  pinMode(SKSPin, OUTPUT);
+  pinMode(MKSPin, OUTPUT);
+  digitalWrite(, LOW);  // Start OFF
   Serial.begin(9600);
   while (!Serial);  // Wait for serial connection (only needed on Teensy)
 }
@@ -17,11 +19,13 @@ void loop() {
     char cmd = Serial.read();
     switch (cmd) {
       case 'H':  // Turn ON
-        digitalWrite(killSwitchPin, HIGH);
+        digitalWrite(SKSPin, HIGH);
+        digitalWrite(MKSPin, HIGH);
         Serial.println("Kill switch ON");
         break;
       case 'L':  // Turn OFF
-        digitalWrite(killSwitchPin, LOW);
+        digitalWrite(SKSPin, LOW);
+        digitalWrite(MKSPin, LOW);
         Serial.println("Kill switch OFF");
         break;
       default:
