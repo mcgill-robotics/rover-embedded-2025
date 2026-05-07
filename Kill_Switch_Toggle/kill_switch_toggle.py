@@ -6,7 +6,7 @@ import serial
 import time
 import sys
 
-PORT = "COM6"  # Change this to the correct port
+PORT = "COM4"  # Change this to the correct port
 BAUDRATE = 9600
 
 # Argument check
