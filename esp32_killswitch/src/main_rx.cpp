@@ -71,16 +71,20 @@ void rx_setup()
   pinMode(TRANSISTOR_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
   pinMode(BUZZER, OUTPUT);
+  pinMode(COMMUNICATION_WITH_TEENSY_PIN, OUTPUT);
 
+  /* I2C code commented
   Wire.begin(RX_I2C_DATA_PIN, RX_I2C_CLOCK_PIN, 0x30); // Initialize I2C with specified SDA and SCL pins
   Wire.setClock(100000); // Set I2C clock speed to 100 kHz  
-
+  */
+  
   Serial.begin(115200);     // Start Serial communication for debugging
   ESP_BT.begin("ESP32_RX"); // Start Bluetooth with name ESP32_RX
   Serial.println("Bluetooth Switch is Ready to Pair");
 
   digitalWrite(LED_PIN, LOW);
   digitalWrite(TRANSISTOR_PIN, LOW);
+  digitalWrite(COMMUNICATION_WITH_TEENSY_PIN, LOW);
 
   lastReadTime = micros();
 }
@@ -116,15 +120,24 @@ void rx_loop()
         }
         digitalWrite(LED_PIN, LOW);
         digitalWrite(TRANSISTOR_PIN, HIGH);
+        digitalWrite(COMMUNICATION_WITH_TEENSY_PIN, HIGH); // Teensy should read that high when dead
+        
+        /* I2C code commented
         Wire.write("ON"); // Send "ON" command to the I2C device
         Wire.endTransmission(); // End I2C transmission
+        */
       }
       else if (msg == "OFF")
       {
         digitalWrite(LED_PIN, HIGH);
         digitalWrite(TRANSISTOR_PIN, LOW);
+        digitalWrite(COMMUNICATION_WITH_TEENSY_PIN, LOW);  // Teensy should read that high when dead
+        
+        /* I2C code commented
         Wire.write("OFF"); // Send "OFF" command to the I2C device
         Wire.endTransmission(); // End I2C transmission
+        */
+        
         rover_stopped = true; // toggle kill var to signal the fact that we have killed the rover
                               // rover is currently dead
         tone(BUZZER, 85);

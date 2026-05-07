@@ -13,3 +13,4 @@ const int TRANSISTOR_PIN = 14;
 const int BUZZER = 5;
 const int RX_I2C_DATA_PIN = 21;
 const int RX_I2C_CLOCK_PIN = 22;
+const int COMMUNICATION_WITH_TEENSY_PIN = 15;
