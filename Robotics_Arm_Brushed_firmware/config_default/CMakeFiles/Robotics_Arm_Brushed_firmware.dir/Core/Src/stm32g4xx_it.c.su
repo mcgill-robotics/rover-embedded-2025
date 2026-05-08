@@ -15,4 +15,4 @@ C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotic
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_it.c:281:6:EXTI15_10_IRQHandler	8	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_it.c:300:6:FDCAN2_IT0_IRQHandler	8	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_it.c:314:6:FDCAN2_IT1_IRQHandler	8	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_it.c:326:6:USBWakeUp_IRQHAndler	8	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_it.c:326:6:USBWakeUp_IRQHandler	8	static

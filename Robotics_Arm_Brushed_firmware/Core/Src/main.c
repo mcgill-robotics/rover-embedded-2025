@@ -170,8 +170,6 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-	setup_simple();
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -204,6 +202,7 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
+
 
 
 
@@ -342,6 +341,10 @@ int main(void)
   //setPIDGoalA(&pitch_motor, 45);
 
 
+  setup_simple(); // usb comm
+
+
+  HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   while (1)
@@ -349,22 +352,27 @@ int main(void)
 	  process_simple();
 
 
-	    // Non-blocking LED blink
-	    if (HAL_GetTick() - last_blink >= 1000) {
-	        HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
-	        last_blink = HAL_GetTick();
-	    }
+//	    // Non-blocking LED blink
+//	    if (HAL_GetTick() - last_blink >= 1000) {
+//	        HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
+//	        last_blink = HAL_GetTick();
+//	    }
 
 
-	    print_to_usb("hello world");
+
 
 	    char readchar = read_char();
 	    if (readchar == 'c'){
+	    	print_to_usb("close\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
 	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
 	    }else if (readchar == 'o'){
+	    	print_to_usb("open\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
 	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 	    }else if (readchar == 's'){
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+	    	print_to_usb("stop\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 	    }
 
 	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
@@ -399,120 +407,120 @@ int main(void)
 //	  }
 
 
-	  // Process Message if available
-	  if (CAN_flag){
-
-		CAN_flag = 0;
-		//HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-		//HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
-
-		//if (steering_state != CALIBRATION){
-		CAN_Parse_MSG(&RxHeader, RxData);
-		//}
-		// led pin to check msg processing working
-
-		//HAL_Delay(1000);
-	  }
-
-
-//	  if (systick_10ms_flag) {
-//		  systick_10ms_flag = 0;
+//	  // Process Message if available
+//	  if (CAN_flag){
 //
-//		  SysTickFunction();
+//		CAN_flag = 0;
+//		//HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+//		//HAL_GPIO_TogglePin(LED_comms_GPIO_Port , LED_comms_Pin);
+//
+//		//if (steering_state != CALIBRATION){
+//		CAN_Parse_MSG(&RxHeader, RxData);
+//		//}
+//		// led pin to check msg processing working
+//
+//		//HAL_Delay(1000);
 //	  }
-
-	  if (LMSW1_flag_pitch_up){
-		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
-			if (!switch_state){
-				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
-			}
-
-		  LMSW1_flag_pitch_up = 0;
-	  }
-
-	  if (LMSW1_isDebouncing){
-		 //check that at–– least 32 consecutive readings of switch = 1
-		 //ensures that the switch reading is stabilized
-		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
-			LMSW1_buffer = (LMSW1_buffer<<1) | current_switch_reading;
-
-		 //only once stable switch reading that perform switch actions
-		 if (LMSW1_buffer == 0xFFFFFFFF){
-			LMSW1_isDebouncing = 0;
-			LMSW1_buffer = 0;
-			lmsw_pitch_up_recalibrate(&pitch_motor); // actual action to do on switch
-		 }
-	  }
-
-
-
-	  if (LMSW2_flag_pitch_down){
-		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
-			if (!switch_state){
-				LMSW2_isDebouncing = 1;
-			}
-		  LMSW2_flag_pitch_down = 0;
-	  }
-
-	  if (LMSW2_isDebouncing){
-	  		 //check that at–– least 32 consecutive readings of switch = 1
-	  		 //ensures that the switch reading is stabilized
-	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
-	  			LMSW2_buffer = (LMSW2_buffer<<1) | current_switch_reading;
-
-	  		 //only once stable switch reading that perform switch actions
-	  		 if (LMSW2_buffer == 0xFFFFFFFF){
-	  			LMSW2_isDebouncing = 0;
-	  			LMSW2_buffer = 0;
-	  			lmsw_pitch_down_recalibrate(&pitch_motor); // actual action to do on switch
-	  		 }
-	  }
-
-
-
-	  if (LMSW5_flag_roll){
-		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
-			if (!switch_state){
-				LMSW5_isDebouncing = 1;
-			}
-		  LMSW5_flag_roll = 0;
-	  }
-	  if (LMSW5_isDebouncing){
-	  		 //check that at–– least 32 consecutive readings of switch = 1
-	  		 //ensures that the switch reading is stabilized
-	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
-	  			LMSW5_buffer = (LMSW5_buffer<<1) | current_switch_reading;
-
-	  		 //only once stable switch reading that perform switch actions
-	  		 if (LMSW5_buffer == 0xFFFFFFFF){
-	  			LMSW5_isDebouncing = 0;
-	  			LMSW5_buffer = 0;
-	  			lmsw_roll_recalibrate(&roll_motor); // actual action to do on switch
-	  		 }
-	  }
-
-
-	  if (LMSW6_flag_gripper){
-		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
-			if (!switch_state){
-				LMSW6_isDebouncing = 1;
-			}
-		  LMSW6_flag_gripper = 0;
-	  }
-
-	  if (LMSW6_isDebouncing){
-	  		 //check that at–– least 32 consecutive readings of switch = 1
-	  		 //ensures that the switch reading is stabilized
-	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
-	  			LMSW6_buffer = (LMSW6_buffer<<1) | current_switch_reading;
-
-	  		 //only once stable switch reading that perform switch actions
-	  		 if (LMSW6_buffer == 0xFFFFFFFF){
-	  			LMSW6_isDebouncing = 0;
-	  			LMSW6_buffer = 0;
-	  			lmsw_gripper_recalibrate(&gripper_motor); // actual action to do on switch
-	  		 }
-	  }
+//
+//
+////	  if (systick_10ms_flag) {
+////		  systick_10ms_flag = 0;
+////
+////		  SysTickFunction();
+////	  }
+//
+//	  if (LMSW1_flag_pitch_up){
+//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+//			if (!switch_state){
+//				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
+//			}
+//
+//		  LMSW1_flag_pitch_up = 0;
+//	  }
+//
+//	  if (LMSW1_isDebouncing){
+//		 //check that at–– least 32 consecutive readings of switch = 1
+//		 //ensures that the switch reading is stabilized
+//		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+//			LMSW1_buffer = (LMSW1_buffer<<1) | current_switch_reading;
+//
+//		 //only once stable switch reading that perform switch actions
+//		 if (LMSW1_buffer == 0xFFFFFFFF){
+//			LMSW1_isDebouncing = 0;
+//			LMSW1_buffer = 0;
+//			lmsw_pitch_up_recalibrate(&pitch_motor); // actual action to do on switch
+//		 }
+//	  }
+//
+//
+//
+//	  if (LMSW2_flag_pitch_down){
+//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+//			if (!switch_state){
+//				LMSW2_isDebouncing = 1;
+//			}
+//		  LMSW2_flag_pitch_down = 0;
+//	  }
+//
+//	  if (LMSW2_isDebouncing){
+//	  		 //check that at–– least 32 consecutive readings of switch = 1
+//	  		 //ensures that the switch reading is stabilized
+//	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+//	  			LMSW2_buffer = (LMSW2_buffer<<1) | current_switch_reading;
+//
+//	  		 //only once stable switch reading that perform switch actions
+//	  		 if (LMSW2_buffer == 0xFFFFFFFF){
+//	  			LMSW2_isDebouncing = 0;
+//	  			LMSW2_buffer = 0;
+//	  			lmsw_pitch_down_recalibrate(&pitch_motor); // actual action to do on switch
+//	  		 }
+//	  }
+//
+//
+//
+//	  if (LMSW5_flag_roll){
+//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
+//			if (!switch_state){
+//				LMSW5_isDebouncing = 1;
+//			}
+//		  LMSW5_flag_roll = 0;
+//	  }
+//	  if (LMSW5_isDebouncing){
+//	  		 //check that at–– least 32 consecutive readings of switch = 1
+//	  		 //ensures that the switch reading is stabilized
+//	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
+//	  			LMSW5_buffer = (LMSW5_buffer<<1) | current_switch_reading;
+//
+//	  		 //only once stable switch reading that perform switch actions
+//	  		 if (LMSW5_buffer == 0xFFFFFFFF){
+//	  			LMSW5_isDebouncing = 0;
+//	  			LMSW5_buffer = 0;
+//	  			lmsw_roll_recalibrate(&roll_motor); // actual action to do on switch
+//	  		 }
+//	  }
+//
+//
+//	  if (LMSW6_flag_gripper){
+//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
+//			if (!switch_state){
+//				LMSW6_isDebouncing = 1;
+//			}
+//		  LMSW6_flag_gripper = 0;
+//	  }
+//
+//	  if (LMSW6_isDebouncing){
+//	  		 //check that at–– least 32 consecutive readings of switch = 1
+//	  		 //ensures that the switch reading is stabilized
+//	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_6_GPIO_Port, Limit_switch_6_Pin);
+//	  			LMSW6_buffer = (LMSW6_buffer<<1) | current_switch_reading;
+//
+//	  		 //only once stable switch reading that perform switch actions
+//	  		 if (LMSW6_buffer == 0xFFFFFFFF){
+//	  			LMSW6_isDebouncing = 0;
+//	  			LMSW6_buffer = 0;
+//	  			lmsw_gripper_recalibrate(&gripper_motor); // actual action to do on switch
+//	  		 }
+//	  }
 
 
     /* USER CODE END WHILE */

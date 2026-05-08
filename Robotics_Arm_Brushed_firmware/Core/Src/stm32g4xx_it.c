@@ -323,7 +323,7 @@ void FDCAN2_IT1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-void USBWakeUp_IRQHAndler(void){
+void USBWakeUp_IRQHandler(void){
 	tud_int_handler(0);
 }
 /* USER CODE END 1 */

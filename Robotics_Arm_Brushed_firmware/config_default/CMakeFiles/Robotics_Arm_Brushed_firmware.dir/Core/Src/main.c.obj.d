@@ -71,7 +71,7 @@ CMakeFiles/Robotics_Arm_Brushed_firmware.dir/Core/Src/main.c.obj: \
  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/motorControl.h \
  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/encoder.h \
  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/pid.h \
- C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/rosjam.h \
- C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/default_rosjam_config.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h \
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/default_rosjam_config.h \
  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/rosjam_config.h \
- C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/cmake/stm32cubemx/../../Core/Inc/buffers.h
+ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h

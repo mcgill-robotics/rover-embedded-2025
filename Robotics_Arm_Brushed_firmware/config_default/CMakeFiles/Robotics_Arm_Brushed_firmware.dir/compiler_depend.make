@@ -353,15 +353,15 @@ CMakeFiles/Robotics_Arm_Brushed_firmware.dir/Core/Src/main.c.obj: C:/Users/wei-K
   C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/lib/gcc/arm-none-eabi/13.3.1/include/stdbool.h \
   C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/lib/gcc/arm-none-eabi/13.3.1/include/stddef.h \
   C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/lib/gcc/arm-none-eabi/13.3.1/include/stdint.h \
+  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h \
+  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/default_rosjam_config.h \
+  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/CAN_processing.h \
-  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/buffers.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/calibration.h \
-  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/default_rosjam_config.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/encoder.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/main.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/motorControl.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/pid.h \
-  C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/rosjam.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/rosjam_config.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/stm32g4xx_hal_conf.h \
   C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g474xx.h \
@@ -1848,19 +1848,13 @@ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externalt
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/calibration.h:
 
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/buffers.h:
+C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/postypes.h:
 
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_enum.hpp:
+C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/machine/time.h:
 
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/default_rosjam_config.h:
+C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h:
 
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/MemoryPool.hpp:
-
-C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/clocale:
-
-C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/memoryfwd.h:
-
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Inc/rosjam.h:
+C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h:
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:
 
@@ -1907,12 +1901,6 @@ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJ
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/machine/_endian.h:
 
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/machine/_time.h:
-
-C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/postypes.h:
-
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/buffers.h:
-
-C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/machine/time.h:
 
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/locale_classes.tcc:
 
@@ -1988,8 +1976,6 @@ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJ
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/json_serde/serialization.h:
 
-C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam.h:
-
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Serialization/CountingDecorator.hpp:
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/src/rosjam_internal.h:
@@ -2027,6 +2013,12 @@ C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externalt
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/ios_base.h:
 
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/localefwd.h:
+
+C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Memory/MemoryPool.hpp:
+
+C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/clocale:
+
+C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/memoryfwd.h:
 
 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/arm-none-eabi/include/c++/13.3.1/bits/nested_exception.h:
 
@@ -2233,6 +2225,8 @@ C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJ
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_const.hpp:
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_convertible.hpp:
+
+C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Polyfills/type_traits/is_enum.hpp:
 
 C:/Users/wei-K/OneDrive\ -\ McGill\ University/Robotics/rover-embedded-2025/ROSJam2/libs/ArduinoJson/src/ArduinoJson/Strings/Adapters/StringObject.hpp:
 
