@@ -11,7 +11,7 @@
 #define MIN_PERIOD 500  // 500 us period (0 degrees)
 #define MAX_PERIOD 2500 // 2.5 ms period (180 degrees)
 #define MIN_ANGLE  0
-#define MAX_ANGLE  180
+#define MAX_ANGLE  270
 
 #define PAN_GEAR_RATIO 2.0
 

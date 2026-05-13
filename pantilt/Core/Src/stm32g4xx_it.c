@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "device/usbd.h"
 #include "main.h"
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/

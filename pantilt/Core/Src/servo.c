@@ -36,10 +36,11 @@ void init_servos(void) {
     write_servo(TILT_SERVO, (uint16_t) tilt_angle);
 }
 
+int buffer_index = 0;
+int comma_index = -1;
+
 void process_servo(void) {
     char buffer[100];
-    int comma_index = -1;
-    int index = 0;
 
     char pan_angle_string[50];
     char tilt_angle_string[50];
@@ -50,13 +51,13 @@ void process_servo(void) {
         char incoming = read_char();
 
         // Check in case of overflow
-        if (index >= 100) {
+        if (buffer_index >= 100) {
             comma_index = -1;
-            index = 0;
+            buffer_index = 0;
         } else if (incoming == '\n') {
             if (comma_index != -1) {
                 create_substring(buffer, pan_angle_string, 0, comma_index - 1);
-                create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
+                create_substring(buffer, tilt_angle_string, comma_index + 1, buffer_index - 1);
 
                 new_pan_angle = string_to_float(pan_angle_string);
                 new_tilt_angle = string_to_float(tilt_angle_string);
@@ -65,11 +66,11 @@ void process_servo(void) {
                 set_tilt(new_tilt_angle);
             }
             comma_index = -1;
-            index = 0;
+            buffer_index = 0;
         } else {
-            if (incoming == ',') comma_index = index;
-            buffer[index] = incoming;
-            index++;
+            if (incoming == ',') comma_index = buffer_index;
+            buffer[buffer_index] = incoming;
+            buffer_index++;
         }
     }
 }
