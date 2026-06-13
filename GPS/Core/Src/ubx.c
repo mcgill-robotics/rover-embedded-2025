@@ -1,185 +1,108 @@
-// ubx.c — Minimal u-blox UBX protocol parser. See ubx.h for the API.
-
 #include "ubx.h"
 #include <string.h>
 
-void ubx_parser_init(ubx_parser_t *p)
-{
-    memset(p, 0, sizeof(*p));
-    p->state = UBX_STATE_SYNC1;
-}
+#ifndef UBX_MAX_PAYLOAD
+#define UBX_MAX_PAYLOAD 128
+#endif
 
-static inline void ck_update(ubx_parser_t *p, uint8_t byte)
-{
-    // 8-bit Fletcher over class, id, length, payload
-    p->ck_a = (uint8_t)(p->ck_a + byte);
+#define UBX_SYNC1     0xB5
+#define UBX_SYNC2     0x62
+#define UBX_CLASS_NAV 0x01
+#define UBX_NAV_PVT   0x07
+
+typedef enum {
+    S_SYNC1 = 0, S_SYNC2, S_CLASS, S_ID, S_LEN1, S_LEN2, S_PAYLOAD, S_CK_A, S_CK_B,
+} ubx_state_t;
+
+typedef struct {
+    ubx_state_t state;
+    uint8_t  msg_class, msg_id;
+    uint16_t length, count;
+    bool     oversized;
+    uint8_t  ck_a, ck_b;
+    uint8_t  payload[UBX_MAX_PAYLOAD];
+} ubx_parser_t;
+
+static void parser_init(ubx_parser_t *p) { memset(p, 0, sizeof(*p)); }
+
+static inline void ck_update(ubx_parser_t *p, uint8_t b) {
+    p->ck_a = (uint8_t)(p->ck_a + b);
     p->ck_b = (uint8_t)(p->ck_b + p->ck_a);
 }
 
-bool ubx_parser_feed(ubx_parser_t *p, uint8_t byte)
-{
+static bool parser_feed(ubx_parser_t *p, uint8_t b) {
     switch (p->state) {
-
-    case UBX_STATE_SYNC1:
-        if (byte == UBX_SYNC1)
-            p->state = UBX_STATE_SYNC2;
+    case S_SYNC1:
+        if (b == UBX_SYNC1) p->state = S_SYNC2;
         break;
-
-    case UBX_STATE_SYNC2:
-        if (byte == UBX_SYNC2) {
-            p->ck_a = 0;
-            p->ck_b = 0;
-            p->state = UBX_STATE_CLASS;
-        } else if (byte != UBX_SYNC1) {
-            // 0xB5 0xB5 0x62 ... - stay armed on a repeated 0xB5
-            p->state = UBX_STATE_SYNC1;
-        }
+    case S_SYNC2:
+        if      (b == UBX_SYNC2) { p->ck_a = 0; p->ck_b = 0; p->state = S_CLASS; }
+        else if (b != UBX_SYNC1)  p->state = S_SYNC1;
         break;
-
-    case UBX_STATE_CLASS:
-        p->msg_class = byte;
-        ck_update(p, byte);
-        p->state = UBX_STATE_ID;
+    case S_CLASS:
+        p->msg_class = b; ck_update(p, b); p->state = S_ID;
         break;
-
-    case UBX_STATE_ID:
-        p->msg_id = byte;
-        ck_update(p, byte);
-        p->state = UBX_STATE_LEN1;
+    case S_ID:
+        p->msg_id = b; ck_update(p, b); p->state = S_LEN1;
         break;
-
-    case UBX_STATE_LEN1:
-        p->length = byte;
-        ck_update(p, byte);
-        p->state = UBX_STATE_LEN2;
+    case S_LEN1:
+        p->length = b; ck_update(p, b); p->state = S_LEN2;
         break;
-
-    case UBX_STATE_LEN2:
-        p->length |= (uint16_t)byte << 8;
-        ck_update(p, byte);
+    case S_LEN2:
+        p->length |= (uint16_t)b << 8; ck_update(p, b);
         p->count = 0;
         p->oversized = (p->length > UBX_MAX_PAYLOAD);
-        if (p->oversized)
-            p->frames_oversize++;
-        p->state = (p->length == 0) ? UBX_STATE_CK_A : UBX_STATE_PAYLOAD;
+        p->state = (p->length == 0) ? S_CK_A : S_PAYLOAD;
         break;
-
-    case UBX_STATE_PAYLOAD:
-        ck_update(p, byte);
-        if (!p->oversized)
-            p->payload[p->count] = byte;
-        if (++p->count >= p->length)
-            p->state = UBX_STATE_CK_A;
+    case S_PAYLOAD:
+        ck_update(p, b);
+        if (!p->oversized) p->payload[p->count] = b;
+        if (++p->count >= p->length) p->state = S_CK_A;
         break;
-
-    case UBX_STATE_CK_A:
-        if (byte == p->ck_a) {
-            p->state = UBX_STATE_CK_B;
-        } else {
-            p->frames_crc_err++;
-            p->state = UBX_STATE_SYNC1;
-        }
+    case S_CK_A:
+        if (b == p->ck_a) p->state = S_CK_B;
+        else              p->state = S_SYNC1;
         break;
-
-    case UBX_STATE_CK_B:
-        p->state = UBX_STATE_SYNC1;
-        if (byte == p->ck_b) {
-            if (!p->oversized) {
-                p->frames_ok++;
-                return true;
-            }
-        } else {
-            p->frames_crc_err++;
-        }
+    case S_CK_B:
+        p->state = S_SYNC1;
+        if (b == p->ck_b && !p->oversized) return true;
         break;
     }
-
     return false;
 }
 
-void ubx_parser_feed_buf(ubx_parser_t *p, const uint8_t *buf, size_t len,
-                         ubx_frame_cb_t cb, void *user)
-{
-    for (size_t i = 0; i < len; i++) {
-        if (ubx_parser_feed(p, buf[i]) && cb)
-            cb(p, user);
-    }
+static UART_HandleTypeDef *s_huart;
+static uint8_t             s_rxbuf[256];
+static ubx_parser_t        s_parser;
+static volatile uint8_t    s_frame_ready;
+static ubx_nav_pvt_t       s_pvt_snapshot;
+
+void gps_init(UART_HandleTypeDef *huart) {
+    s_huart = huart;
+    parser_init(&s_parser);
+    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
 }
 
-bool ubx_decode_nav_pvt(const ubx_parser_t *p, ubx_nav_pvt_t *out)
-{
-    if (p->msg_class != UBX_CLASS_NAV || p->msg_id != UBX_NAV_PVT ||
-        p->length != UBX_NAV_PVT_LEN)
-        return false;
-    memcpy(out, p->payload, UBX_NAV_PVT_LEN);
+void gps_uart_rx_event(uint16_t size) {
+    for (uint16_t i = 0; i < size; i++) {
+        if (parser_feed(&s_parser, s_rxbuf[i])
+                && s_parser.msg_class == UBX_CLASS_NAV
+                && s_parser.msg_id    == UBX_NAV_PVT
+                && s_parser.length    == sizeof(ubx_nav_pvt_t)) {
+            memcpy(&s_pvt_snapshot, s_parser.payload, sizeof(ubx_nav_pvt_t));
+            s_frame_ready = 1;
+        }
+    }
+    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
+}
+
+void gps_uart_error(void) {
+    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
+}
+
+bool gps_process(ubx_nav_pvt_t *out) {
+    if (!s_frame_ready) return false;
+    s_frame_ready = 0;
+    *out = s_pvt_snapshot;
     return true;
-}
-
-size_t ubx_build_frame(uint8_t msg_class, uint8_t msg_id,
-                       const uint8_t *payload, uint16_t payload_len,
-                       uint8_t *out, size_t out_size)
-{
-    const size_t total = 8u + payload_len;
-    if (out_size < total)
-        return 0;
-
-    out[0] = UBX_SYNC1;
-    out[1] = UBX_SYNC2;
-    out[2] = msg_class;
-    out[3] = msg_id;
-    out[4] = (uint8_t)(payload_len & 0xFF);
-    out[5] = (uint8_t)(payload_len >> 8);
-    if (payload_len)
-        memcpy(&out[6], payload, payload_len);
-
-    uint8_t ck_a = 0, ck_b = 0;
-    for (size_t i = 2; i < 6u + payload_len; i++) {
-        ck_a = (uint8_t)(ck_a + out[i]);
-        ck_b = (uint8_t)(ck_b + ck_a);
-    }
-    out[6 + payload_len] = ck_a;
-    out[7 + payload_len] = ck_b;
-
-    return total;
-}
-
-// M10 configuration keys (u-blox M10 interface description, SPG 5.00)
-#define KEY_CFG_UART1OUTPROT_NMEA         0x10740002u  // L  (bool)
-#define KEY_CFG_MSGOUT_UBX_NAV_PVT_UART1  0x20910007u  // U1
-#define KEY_CFG_RATE_MEAS                 0x30210001u  // U2, ms
-
-static size_t put_key(uint8_t *dst, uint32_t key)
-{
-    dst[0] = (uint8_t)(key);
-    dst[1] = (uint8_t)(key >> 8);
-    dst[2] = (uint8_t)(key >> 16);
-    dst[3] = (uint8_t)(key >> 24);
-    return 4;
-}
-
-size_t ubx_build_init_valset(uint16_t meas_rate_ms,
-                             uint8_t *out, size_t out_size)
-{
-    uint8_t payload[4 + (4 + 1) + (4 + 1) + (4 + 2)];
-    size_t n = 0;
-
-    payload[n++] = 0x00; // version 0
-    payload[n++] = 0x01; // layers: RAM only
-    payload[n++] = 0x00;
-    payload[n++] = 0x00;
-
-    n += put_key(&payload[n], KEY_CFG_UART1OUTPROT_NMEA);
-    payload[n++] = 0x00; // NMEA off
-
-    n += put_key(&payload[n], KEY_CFG_MSGOUT_UBX_NAV_PVT_UART1);
-    payload[n++] = 0x01; // one NAV-PVT per epoch
-
-    if (meas_rate_ms != 0) {
-        n += put_key(&payload[n], KEY_CFG_RATE_MEAS);
-        payload[n++] = (uint8_t)(meas_rate_ms & 0xFF);
-        payload[n++] = (uint8_t)(meas_rate_ms >> 8);
-    }
-
-    return ubx_build_frame(UBX_CLASS_CFG, UBX_CFG_VALSET,
-                           payload, (uint16_t)n, out, out_size);
 }

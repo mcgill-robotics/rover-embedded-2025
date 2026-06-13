@@ -21,19 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "class/cdc/cdc_device.h"
-#include "stm32g474xx.h"
-#include "stm32g4xx_hal_def.h"
-#include "stm32g4xx_hal_gpio.h"
-#include "stm32g4xx_hal_uart.h"
-#include "stm32g4xx_hal_uart_ex.h"
 #include "ubx.h"
 #include "rosjam.h"
-#include "tusb_config.h"
+#include "rosjam_config.h"
 #include "tusb.h"
-#include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -60,12 +52,6 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-static uint8_t uart4buf[256];
-// static uint8_t uart3buf[100];
-static volatile uint8_t gps_frame_ready = 0;
-static ubx_nav_pvt_t gps_pvt_snapshot;
-// static int pantilt_to_send = 0;
-static ubx_parser_t ubx_parser;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -120,29 +106,36 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   printf("LPUART1 is working\n");
-  ubx_parser_init(&ubx_parser);
+  gps_init(&huart4);
   setup_simple();
-  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    if (gps_frame_ready) {
-      gps_frame_ready = 0;
-      ubx_nav_pvt_t pvt = gps_pvt_snapshot;
+    ubx_nav_pvt_t pvt;
+    if (gps_process(&pvt)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-      printf("sat: %d\n", pvt.numSV);
-      printf("lat: %lf\n", ubx_pvt_lat_deg(&pvt));
-      printf("lon: %lf\n", ubx_pvt_lon_deg(&pvt));
-    }
 
-    /*
-    if (tud_cdc_n_ready(USB_CDC_ITF) && pantilt_to_send <= 0) {
-      pantilt_to_send = tud_cdc_n_read(USB_CDC_ITF, uart3buf, 100);
-      HAL_UART_Transmit_IT(&huart3, uart3buf, pantilt_to_send);
+      double lat = ubx_pvt_lat_deg(&pvt);
+      double lon = ubx_pvt_lon_deg(&pvt);
+
+      char satellites[50];
+      char latitude[50];
+      char longitude[50];
+      int_to_string(pvt.numSV, satellites, 50);
+      float_to_string((float)lat, 8, latitude, 50);
+      float_to_string((float)lon, 8, longitude, 50);
+
+      print_to_usb(satellites);
+      print_to_usb(",");
+      print_to_usb(latitude);
+      print_to_usb(",");
+      print_to_usb(longitude);
+      print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
+
+      printf("%s, %s, %s\n", satellites, latitude, longitude);
     }
-    */
 
     process_simple();
     /* USER CODE END WHILE */
@@ -415,29 +408,12 @@ int __io_putchar(int ch)
   return ch;
 }
 
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
-  if (huart == &huart4){
-    uint32_t err = HAL_UART_GetError(huart);
-    printf("UART4 error: %ld\n", err);
-    HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
-  }
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+  if (huart == &huart4) gps_uart_error();
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if (huart == &huart4) {
-    for (uint16_t i = 0; i < Size; i++) {
-      if (ubx_parser_feed(&ubx_parser, uart4buf[i])) {
-        if (ubx_decode_nav_pvt(&ubx_parser, &gps_pvt_snapshot)) {
-          gps_frame_ready = 1;
-        }
-      }
-    }
-    HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
-  }
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  // pantilt_to_send = 0;
+  if (huart == &huart4) gps_uart_rx_event(Size);
 }
 /* USER CODE END 4 */
 
