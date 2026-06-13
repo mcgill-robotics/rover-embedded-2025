@@ -53,17 +53,18 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-static uint8_t uart4buf[100];
-static uint8_t uart3buf[100];
-static uint8_t data_buffer[1024];
-static volatile int data_ready = 0;
-static int pantilt_to_send = 0;
+static uint8_t uart4buf[256];
+// static uint8_t uart3buf[100];
+static volatile uint8_t gps_frame_ready = 0;
+static ubx_nav_pvt_t gps_pvt_snapshot;
+// static int pantilt_to_send = 0;
 static ubx_parser_t ubx_parser;
 /* USER CODE END PV */
 
@@ -73,6 +74,7 @@ static void MX_GPIO_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_UART4_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -114,49 +116,33 @@ int main(void)
   MX_USB_PCD_Init();
   MX_UART4_Init();
   MX_USART3_UART_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  printf("LPUART1 is working\n");
   ubx_parser_init(&ubx_parser);
   setup_simple();
-  HAL_UART_Receive_IT(&huart4, uart4buf, 100);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    if (data_ready) {
-      int count = data_ready;
-      data_ready = 0;
-      for (int i = 0; i < count; i++) {
-        ubx_nav_pvt_t pvt;
-        if (ubx_parser_feed(&ubx_parser, data_buffer[i])) {
-          if (ubx_decode_nav_pvt(&ubx_parser, &pvt)) {
-            HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-
-            char satellites[20];
-            char latitude[50];
-            char longitude[50];
-            int_to_string(pvt.numSV, satellites, sizeof(satellites));
-            float_to_string(ubx_pvt_lat_deg(&pvt), 8, latitude, sizeof(latitude));
-            float_to_string(ubx_pvt_lon_deg(&pvt), 8, longitude, sizeof(longitude));
-
-            printf("lat: %lf\n", ubx_pvt_lat_deg(&pvt));
-            printf("lon: %lf\n", ubx_pvt_lon_deg(&pvt));
-            print_to_usb(satellites);
-            print_to_usb(",");
-            print_to_usb(latitude);
-            print_to_usb(",");
-            print_to_usb(longitude);
-            print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
-          }
-        }
-      }
+    if (gps_frame_ready) {
+      gps_frame_ready = 0;
+      ubx_nav_pvt_t pvt = gps_pvt_snapshot;
+      HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+      printf("sat: %d\n", pvt.numSV);
+      printf("lat: %lf\n", ubx_pvt_lat_deg(&pvt));
+      printf("lon: %lf\n", ubx_pvt_lon_deg(&pvt));
     }
 
+    /*
     if (tud_cdc_n_ready(USB_CDC_ITF) && pantilt_to_send <= 0) {
       pantilt_to_send = tud_cdc_n_read(USB_CDC_ITF, uart3buf, 100);
       HAL_UART_Transmit_IT(&huart3, uart3buf, pantilt_to_send);
     }
+    */
 
     process_simple();
     /* USER CODE END WHILE */
@@ -182,10 +168,11 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
   RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
@@ -209,6 +196,53 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief LPUART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPUART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
+  hlpuart1.Instance = LPUART1;
+  hlpuart1.Init.BaudRate = 115200;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.StopBits = UART_STOPBITS_1;
+  hlpuart1.Init.Parity = UART_PARITY_NONE;
+  hlpuart1.Init.Mode = UART_MODE_TX_RX;
+  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPUART1_Init 2 */
+
+  /* USER CODE END LPUART1_Init 2 */
+
 }
 
 /**
@@ -353,7 +387,6 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -377,31 +410,34 @@ static void MX_GPIO_Init(void)
 
 int __io_putchar(int ch)
 {
- // Write character to ITM ch.0
- ITM_SendChar(ch);
- return(ch);
+  uint8_t c = (uint8_t)ch;
+  HAL_UART_Transmit(&hlpuart1, &c, 1, HAL_MAX_DELAY);
+  return ch;
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
   if (huart == &huart4){
-    uint32_t err =  HAL_UART_GetError(huart);
-    printf("UART 4 failed: %ld\n", err);
+    uint32_t err = HAL_UART_GetError(huart);
+    printf("UART4 error: %ld\n", err);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
   }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart == &huart4) {
-    if (data_ready + 100 > 1024){
-      data_ready = 0;
+    for (uint16_t i = 0; i < Size; i++) {
+      if (ubx_parser_feed(&ubx_parser, uart4buf[i])) {
+        if (ubx_decode_nav_pvt(&ubx_parser, &gps_pvt_snapshot)) {
+          gps_frame_ready = 1;
+        }
+      }
     }
-    memcpy((data_buffer + data_ready), uart4buf, 100);
-    data_ready += 100;
-    HAL_UART_Receive_IT(&huart4, uart4buf, 100);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4buf, sizeof(uart4buf));
   }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  pantilt_to_send = 0;
+  // pantilt_to_send = 0;
 }
 /* USER CODE END 4 */
 
