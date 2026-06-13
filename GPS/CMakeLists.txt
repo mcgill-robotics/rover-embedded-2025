@@ -68,6 +68,3 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     rosjam2
     # Add user defined libraries
 )
-
-add_subdirectory(src/tinygps)
-tiny_gps_add(${CMAKE_PROJECT_NAME})
