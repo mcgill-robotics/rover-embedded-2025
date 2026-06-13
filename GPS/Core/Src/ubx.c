@@ -1,27 +1,10 @@
 #include "ubx.h"
 #include <string.h>
 
-#ifndef UBX_MAX_PAYLOAD
-#define UBX_MAX_PAYLOAD 128
-#endif
-
 #define UBX_SYNC1     0xB5
 #define UBX_SYNC2     0x62
 #define UBX_CLASS_NAV 0x01
 #define UBX_NAV_PVT   0x07
-
-typedef enum {
-    S_SYNC1 = 0, S_SYNC2, S_CLASS, S_ID, S_LEN1, S_LEN2, S_PAYLOAD, S_CK_A, S_CK_B,
-} ubx_state_t;
-
-typedef struct {
-    ubx_state_t state;
-    uint8_t  msg_class, msg_id;
-    uint16_t length, count;
-    bool     oversized;
-    uint8_t  ck_a, ck_b;
-    uint8_t  payload[UBX_MAX_PAYLOAD];
-} ubx_parser_t;
 
 static void parser_init(ubx_parser_t *p) { memset(p, 0, sizeof(*p)); }
 
@@ -71,38 +54,35 @@ static bool parser_feed(ubx_parser_t *p, uint8_t b) {
     return false;
 }
 
-static UART_HandleTypeDef *s_huart;
-static uint8_t             s_rxbuf[256];
-static ubx_parser_t        s_parser;
-static volatile uint8_t    s_frame_ready;
-static ubx_nav_pvt_t       s_pvt_snapshot;
+// ── GPS integration ──────────────────────────────────────────────────────────
 
-void gps_init(UART_HandleTypeDef *huart) {
-    s_huart = huart;
-    parser_init(&s_parser);
-    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
+void gps_init(gps_t *gps, UART_HandleTypeDef *huart) {
+    gps->huart = huart;
+    gps->frame_ready = 0;
+    parser_init(&gps->parser);
+    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
 }
 
-void gps_uart_rx_event(uint16_t size) {
+void gps_uart_rx_event(gps_t *gps, uint16_t size) {
     for (uint16_t i = 0; i < size; i++) {
-        if (parser_feed(&s_parser, s_rxbuf[i])
-                && s_parser.msg_class == UBX_CLASS_NAV
-                && s_parser.msg_id    == UBX_NAV_PVT
-                && s_parser.length    == sizeof(ubx_nav_pvt_t)) {
-            memcpy(&s_pvt_snapshot, s_parser.payload, sizeof(ubx_nav_pvt_t));
-            s_frame_ready = 1;
+        if (parser_feed(&gps->parser, gps->rxbuf[i])
+                && gps->parser.msg_class == UBX_CLASS_NAV
+                && gps->parser.msg_id    == UBX_NAV_PVT
+                && gps->parser.length    == sizeof(ubx_nav_pvt_t)) {
+            memcpy(&gps->pvt_snapshot, gps->parser.payload, sizeof(ubx_nav_pvt_t));
+            gps->frame_ready = 1;
         }
     }
-    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
+    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
 }
 
-void gps_uart_error(void) {
-    HAL_UARTEx_ReceiveToIdle_IT(s_huart, s_rxbuf, sizeof(s_rxbuf));
+void gps_uart_error(gps_t *gps) {
+    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
 }
 
-bool gps_process(ubx_nav_pvt_t *out) {
-    if (!s_frame_ready) return false;
-    s_frame_ready = 0;
-    *out = s_pvt_snapshot;
+bool gps_process(gps_t *gps, ubx_nav_pvt_t *out) {
+    if (!gps->frame_ready) return false;
+    gps->frame_ready = 0;
+    *out = gps->pvt_snapshot;
     return true;
 }

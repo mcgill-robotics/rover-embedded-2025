@@ -1,5 +1,3 @@
-// ubx.h — u-blox UBX NAV-PVT parser + GPS integration for M10 (SPG 5.00).
-
 #ifndef UBX_H
 #define UBX_H
 
@@ -11,7 +9,8 @@
 extern "C" {
 #endif
 
-// UBX-NAV-PVT payload (0x01 0x07), 92 bytes, little-endian
+// ── NAV-PVT payload (0x01 0x07), 92 bytes, little-endian ───────────────────
+
 typedef struct __attribute__((packed)) {
     uint32_t iTOW;
     uint16_t year;
@@ -50,10 +49,6 @@ typedef struct __attribute__((packed)) {
 
 _Static_assert(sizeof(ubx_nav_pvt_t) == 92, "ubx_nav_pvt_t size mismatch");
 
-#define UBX_PVT_VALID_DATE           (1u << 0)
-#define UBX_PVT_VALID_TIME           (1u << 1)
-#define UBX_PVT_VALID_FULLY_RESOLVED (1u << 2)
-
 #define UBX_PVT_FLAGS_GNSS_FIX_OK   (1u << 0)
 #define UBX_PVT_FLAGS3_INVALID_LLH  (1u << 0)
 
@@ -67,10 +62,35 @@ static inline bool ubx_pvt_fix_valid(const ubx_nav_pvt_t *pvt)
 static inline double ubx_pvt_lat_deg(const ubx_nav_pvt_t *pvt) { return pvt->lat * 1e-7; }
 static inline double ubx_pvt_lon_deg(const ubx_nav_pvt_t *pvt) { return pvt->lon * 1e-7; }
 
-void gps_init(UART_HandleTypeDef *huart);
-void gps_uart_rx_event(uint16_t size);
-void gps_uart_error(void);
-bool gps_process(ubx_nav_pvt_t *out);
+// ── Parser internals (exposed so gps_t can embed them) ──────────────────────
+
+#define UBX_MAX_PAYLOAD 128
+
+typedef enum {
+    S_SYNC1 = 0, S_SYNC2, S_CLASS, S_ID, S_LEN1, S_LEN2, S_PAYLOAD, S_CK_A, S_CK_B,
+} ubx_state_t;
+
+typedef struct {
+    ubx_state_t state;
+    uint8_t  msg_class, msg_id;
+    uint16_t length, count;
+    bool     oversized;
+    uint8_t  ck_a, ck_b;
+    uint8_t  payload[UBX_MAX_PAYLOAD];
+} ubx_parser_t;
+
+typedef struct {
+    UART_HandleTypeDef *huart;
+    uint8_t             rxbuf[256];
+    ubx_parser_t        parser;
+    volatile uint8_t    frame_ready;
+    ubx_nav_pvt_t       pvt_snapshot;
+} gps_t;
+
+void gps_init(gps_t *gps, UART_HandleTypeDef *huart);
+void gps_uart_rx_event(gps_t *gps, uint16_t size);
+void gps_uart_error(gps_t *gps);
+bool gps_process(gps_t *gps, ubx_nav_pvt_t *out);
 
 #ifdef __cplusplus
 }

@@ -52,6 +52,8 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+static gps_t gps1;
+// static gps_t gps2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,8 +107,9 @@ int main(void)
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  printf("LPUART1 is working\n");
-  gps_init(&huart4);
+  gps_init(&gps1, &huart4);
+  // gps_init(&gps2, &huart3);
+
   setup_simple();
   /* USER CODE END 2 */
 
@@ -114,7 +117,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
     ubx_nav_pvt_t pvt;
-    if (gps_process(&pvt)) {
+    if (gps_process(&gps1, &pvt)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
 
       double lat = ubx_pvt_lat_deg(&pvt);
@@ -403,17 +406,19 @@ static void MX_GPIO_Init(void)
 
 int __io_putchar(int ch)
 {
-  uint8_t c = (uint8_t)ch;
-  HAL_UART_Transmit(&hlpuart1, &c, 1, HAL_MAX_DELAY);
+  HAL_UART_Transmit(&hlpuart1, (uint8_t *) &ch, 1, HAL_MAX_DELAY);
+  // ITM_SendChar(ch);
   return ch;
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
-  if (huart == &huart4) gps_uart_error();
+  if (huart == gps1.huart) gps_uart_error(&gps1);
+  // if (huart == gps2.huart) gps_uart_error(&gps2);
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if (huart == &huart4) gps_uart_rx_event(Size);
+  if (huart == gps1.huart) gps_uart_rx_event(&gps1, Size);
+  // if (huart == gps2.huart) gps_uart_rx_event(&gps2, Size);
 }
 /* USER CODE END 4 */
 
