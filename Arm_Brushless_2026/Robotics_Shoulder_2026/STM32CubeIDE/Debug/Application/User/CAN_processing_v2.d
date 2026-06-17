@@ -38,8 +38,6 @@ Application/User/CAN_processing_v2.o: \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
  ../../Inc/can_common.h ../../Inc/main.h ../../Inc/motorcontrol.h \
  ../../Inc/mc_config.h \
  ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h \
@@ -91,7 +89,8 @@ Application/User/CAN_processing_v2.o: \
  ../../Inc/mc_api.h ../../Inc/velocity_ctrl.h \
  ../../Inc/SCurveTrajectory.h ../../Inc/esc_sensors.h ../../Inc/main.h \
  ../../Inc/mc_api.h ../../Inc/mc_interface.h ../../Inc/planner.h \
- ../../Inc/SCurveTrajectory.h ../../Inc/velocity_ctrl.h
+ ../../Inc/SCurveTrajectory.h ../../Inc/velocity_ctrl.h \
+ ../../Inc/calibration.h
 ../../Inc/CAN_processing_v2.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
@@ -131,8 +130,6 @@ Application/User/CAN_processing_v2.o: \
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h:
 ../../Inc/can_common.h:
 ../../Inc/main.h:
 ../../Inc/motorcontrol.h:
@@ -200,3 +197,4 @@ Application/User/CAN_processing_v2.o: \
 ../../Inc/planner.h:
 ../../Inc/SCurveTrajectory.h:
 ../../Inc/velocity_ctrl.h:
+../../Inc/calibration.h:

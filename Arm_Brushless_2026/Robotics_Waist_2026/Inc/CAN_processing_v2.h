@@ -14,6 +14,7 @@
 #ifndef CAN_PROCESSING_V2_H
 #define CAN_PROCESSING_V2_H
 
+
 #include <stdint.h>
 #include "stm32g4xx_hal.h"
 #include "can_common.h"
@@ -21,7 +22,6 @@
 #include "velocity_ctrl.h"
 
 // Externs
-extern volatile ControlMode_t controlMode;
 extern VelCtrlHandle *velCtrl;
 extern volatile bool  newSetpointDetected; // Set by CAN_processing.c
 extern volatile float positionSetpoint;    // Set by CAN_processing.c

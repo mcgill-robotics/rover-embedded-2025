@@ -40,8 +40,6 @@ Middlewares/MotorControl/r_divider_bus_voltage_sensor.o: \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_rcc.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_system.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_adc.h \
@@ -100,8 +98,6 @@ Middlewares/MotorControl/r_divider_bus_voltage_sensor.o: \
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_rcc.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_system.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_adc.h:

@@ -38,8 +38,6 @@ Application/User/stm32g4xx_it.o: \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h \
- ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
  ../../Inc/motorcontrol.h ../../Inc/mc_config.h \
  ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h \
  ../../Inc/mc_type.h ../../Inc/mc_stm_types.h \
@@ -88,7 +86,8 @@ Application/User/stm32g4xx_it.o: \
  ../../Inc/parameters_conversion_g4xx.h ../../Inc/drive_parameters.h \
  ../../Inc/power_stage_parameters.h ../../Inc/pmsm_motor_parameters.h \
  ../../Inc/mc_api.h ../../Inc/velocity_ctrl.h \
- ../../Inc/SCurveTrajectory.h ../../Inc/stm32g4xx_it.h
+ ../../Inc/SCurveTrajectory.h ../../Inc/stm32g4xx_it.h \
+ ../../Inc/calibration.h
 ../../Inc/main.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../../Inc/stm32g4xx_hal_conf.h:
@@ -128,8 +127,6 @@ Application/User/stm32g4xx_it.o: \
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart.h:
-../../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h:
 ../../Inc/motorcontrol.h:
 ../../Inc/mc_config.h:
 ../../MCSDK_v6.4.1-Full/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h:
@@ -189,3 +186,4 @@ Application/User/stm32g4xx_it.o: \
 ../../Inc/velocity_ctrl.h:
 ../../Inc/SCurveTrajectory.h:
 ../../Inc/stm32g4xx_it.h:
+../../Inc/calibration.h:
