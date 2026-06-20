@@ -52,8 +52,6 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-static gps_t gps1;
-// static gps_t gps2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,8 +105,7 @@ int main(void)
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  gps_init(&gps1, &huart4);
-  // gps_init(&gps2, &huart3);
+  gps_init(&huart4, &huart3);  // pass NULL instead of &huart3 for single-GPS mode
 
   setup_simple();
   /* USER CODE END 2 */
@@ -117,7 +114,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
     ubx_nav_pvt_t pvt;
-    if (gps_process(&gps1, &pvt)) {
+    float heading;
+    if (gps_process(&pvt, &heading)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
 
       double lat = ubx_pvt_lat_deg(&pvt);
@@ -126,18 +124,27 @@ int main(void)
       char satellites[50];
       char latitude[50];
       char longitude[50];
+      char heading_str[50];
+      char gps1_pkts[20];
+      char gps2_pkts[20];
       int_to_string(pvt.numSV, satellites, 50);
       float_to_string((float)lat, 8, latitude, 50);
       float_to_string((float)lon, 8, longitude, 50);
+      float_to_string(heading, 2, heading_str, 50);
+      int_to_string(gps_packet_count(0), gps1_pkts, 20);
+      int_to_string(gps_packet_count(1), gps2_pkts, 20);
 
       print_to_usb(satellites);
       print_to_usb(",");
       print_to_usb(latitude);
       print_to_usb(",");
       print_to_usb(longitude);
-      print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
+      print_to_usb(",");
+      print_to_usb(heading_str);
+      print_to_usb(",0.0,0.0,0.0,0.0,0.0\n");
 
-      printf("%s, %s, %s\n", satellites, latitude, longitude);
+      printf("%s, %s, %s, hdg=%s, gps1=%s, gps2=%s\n",
+             satellites, latitude, longitude, heading_str, gps1_pkts, gps2_pkts);
     }
 
     process_simple();
@@ -412,13 +419,11 @@ int __io_putchar(int ch)
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
-  if (huart == gps1.huart) gps_uart_error(&gps1);
-  // if (huart == gps2.huart) gps_uart_error(&gps2);
+  gps_uart_error(huart);
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if (huart == gps1.huart) gps_uart_rx_event(&gps1, Size);
-  // if (huart == gps2.huart) gps_uart_rx_event(&gps2, Size);
+  gps_uart_rx_event(huart, Size);
 }
 /* USER CODE END 4 */
 

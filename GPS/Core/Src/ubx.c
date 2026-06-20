@@ -1,88 +1,187 @@
 #include "ubx.h"
+#include <math.h>
 #include <string.h>
 
-#define UBX_SYNC1     0xB5
-#define UBX_SYNC2     0x62
-#define UBX_CLASS_NAV 0x01
-#define UBX_NAV_PVT   0x07
+#define HDG_ALPHA 0.1f  // 0.0–1.0: lower = smoother, more lag
 
-static void parser_init(ubx_parser_t *p) { memset(p, 0, sizeof(*p)); }
+#define UBX_SYNC1       0xB5
+#define UBX_SYNC2       0x62
+#define UBX_CLASS_NAV   0x01
+#define UBX_NAV_PVT     0x07
+#define UBX_MAX_PAYLOAD 128
 
-static inline void ck_update(ubx_parser_t *p, uint8_t b) {
-    p->ck_a = (uint8_t)(p->ck_a + b);
-    p->ck_b = (uint8_t)(p->ck_b + p->ck_a);
+typedef enum { S_SYNC1, S_SYNC2, S_CLASS, S_ID, S_LEN1, S_LEN2, S_PAYLOAD, S_CK_A, S_CK_B } state_t;
+
+typedef struct {
+    state_t  state;
+    uint8_t  cls, id, ck_a, ck_b;
+    uint16_t len, count;
+    bool     oversized;
+    uint8_t  payload[UBX_MAX_PAYLOAD];
+} parser_t;
+
+typedef struct {
+    UART_HandleTypeDef *huart;
+    uint8_t             rxbuf[256];
+    parser_t            parser;
+    volatile bool       ready;
+    ubx_nav_pvt_t       snap;
+    uint32_t            pkt_count;
+} gps_t;
+
+static gps_t          g_gps[2];
+static int            g_count;
+static ubx_nav_pvt_t  g_last[2];
+static bool           g_has[2];
+static float          g_hdg_sin;
+static float          g_hdg_cos;
+static bool           g_hdg_init;
+
+static float filter_heading(float raw_deg) {
+    float rad = raw_deg * ((float)M_PI / 180.0f);
+    float s = sinf(rad);
+    float c = cosf(rad);
+    if (!g_hdg_init) {
+        g_hdg_sin  = s;
+        g_hdg_cos  = c;
+        g_hdg_init = true;
+    } else {
+        g_hdg_sin = HDG_ALPHA * s + (1.0f - HDG_ALPHA) * g_hdg_sin;
+        g_hdg_cos = HDG_ALPHA * c + (1.0f - HDG_ALPHA) * g_hdg_cos;
+    }
+    float out = atan2f(g_hdg_sin, g_hdg_cos) * (180.0f / (float)M_PI);
+    if (out < 0.0f) out += 360.0f;
+    return out;
 }
 
-static bool parser_feed(ubx_parser_t *p, uint8_t b) {
+static bool feed(parser_t *p, uint8_t b) {
     switch (p->state) {
-    case S_SYNC1:
-        if (b == UBX_SYNC1) p->state = S_SYNC2;
-        break;
+    case S_SYNC1:  if (b == UBX_SYNC1) p->state = S_SYNC2; break;
     case S_SYNC2:
         if      (b == UBX_SYNC2) { p->ck_a = 0; p->ck_b = 0; p->state = S_CLASS; }
         else if (b != UBX_SYNC1)  p->state = S_SYNC1;
         break;
-    case S_CLASS:
-        p->msg_class = b; ck_update(p, b); p->state = S_ID;
-        break;
-    case S_ID:
-        p->msg_id = b; ck_update(p, b); p->state = S_LEN1;
-        break;
-    case S_LEN1:
-        p->length = b; ck_update(p, b); p->state = S_LEN2;
-        break;
+    case S_CLASS:   p->cls = b; p->ck_a += b; p->ck_b += p->ck_a; p->state = S_ID;   break;
+    case S_ID:      p->id  = b; p->ck_a += b; p->ck_b += p->ck_a; p->state = S_LEN1; break;
+    case S_LEN1:    p->len = b; p->ck_a += b; p->ck_b += p->ck_a; p->state = S_LEN2; break;
     case S_LEN2:
-        p->length |= (uint16_t)b << 8; ck_update(p, b);
-        p->count = 0;
-        p->oversized = (p->length > UBX_MAX_PAYLOAD);
-        p->state = (p->length == 0) ? S_CK_A : S_PAYLOAD;
+        p->len |= (uint16_t)b << 8; p->ck_a += b; p->ck_b += p->ck_a;
+        p->count = 0; p->oversized = (p->len > UBX_MAX_PAYLOAD);
+        p->state = p->len ? S_PAYLOAD : S_CK_A;
         break;
     case S_PAYLOAD:
-        ck_update(p, b);
+        p->ck_a += b; p->ck_b += p->ck_a;
         if (!p->oversized) p->payload[p->count] = b;
-        if (++p->count >= p->length) p->state = S_CK_A;
+        if (++p->count >= p->len) p->state = S_CK_A;
         break;
-    case S_CK_A:
-        if (b == p->ck_a) p->state = S_CK_B;
-        else              p->state = S_SYNC1;
-        break;
+    case S_CK_A: p->state = (b == p->ck_a) ? S_CK_B : S_SYNC1; break;
     case S_CK_B:
         p->state = S_SYNC1;
-        if (b == p->ck_b && !p->oversized) return true;
-        break;
+        return b == p->ck_b && !p->oversized;
     }
     return false;
 }
 
-// ── GPS integration ──────────────────────────────────────────────────────────
-
-void gps_init(gps_t *gps, UART_HandleTypeDef *huart) {
-    gps->huart = huart;
-    gps->frame_ready = 0;
-    parser_init(&gps->parser);
-    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
+void gps_init(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huart2) {
+    g_count    = huart2 ? 2 : 1;
+    g_hdg_init = false;
+    g_hdg_sin  = 0.0f;
+    g_hdg_cos  = 0.0f;
+    memset(g_has, 0, sizeof(g_has));
+    for (int i = 0; i < g_count; i++) {
+        g_gps[i].huart = i == 0 ? huart1 : huart2;
+        g_gps[i].ready = false;
+        memset(&g_gps[i].parser, 0, sizeof(g_gps[i].parser));
+        HAL_UARTEx_ReceiveToIdle_IT(g_gps[i].huart, g_gps[i].rxbuf, sizeof(g_gps[i].rxbuf));
+    }
 }
 
-void gps_uart_rx_event(gps_t *gps, uint16_t size) {
-    for (uint16_t i = 0; i < size; i++) {
-        if (parser_feed(&gps->parser, gps->rxbuf[i])
-                && gps->parser.msg_class == UBX_CLASS_NAV
-                && gps->parser.msg_id    == UBX_NAV_PVT
-                && gps->parser.length    == sizeof(ubx_nav_pvt_t)) {
-            memcpy(&gps->pvt_snapshot, gps->parser.payload, sizeof(ubx_nav_pvt_t));
-            gps->frame_ready = 1;
+void gps_uart_rx_event(UART_HandleTypeDef *huart, uint16_t size) {
+    for (int i = 0; i < g_count; i++) {
+        if (g_gps[i].huart != huart) continue;
+        gps_t *g = &g_gps[i];
+        for (uint16_t j = 0; j < size; j++) {
+            if (feed(&g->parser, g->rxbuf[j])
+                    && g->parser.cls == UBX_CLASS_NAV
+                    && g->parser.id  == UBX_NAV_PVT
+                    && g->parser.len == sizeof(ubx_nav_pvt_t)) {
+                memcpy(&g->snap, g->parser.payload, sizeof(ubx_nav_pvt_t));
+                g->ready = true;
+                g->pkt_count++;
+            }
+        }
+        HAL_UARTEx_ReceiveToIdle_IT(huart, g->rxbuf, sizeof(g->rxbuf));
+        return;
+    }
+}
+
+void gps_uart_error(UART_HandleTypeDef *huart) {
+    for (int i = 0; i < g_count; i++) {
+        if (g_gps[i].huart == huart) {
+            HAL_UARTEx_ReceiveToIdle_IT(huart, g_gps[i].rxbuf, sizeof(g_gps[i].rxbuf));
+            return;
         }
     }
-    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
 }
 
-void gps_uart_error(gps_t *gps) {
-    HAL_UARTEx_ReceiveToIdle_IT(gps->huart, gps->rxbuf, sizeof(gps->rxbuf));
-}
+bool gps_process(ubx_nav_pvt_t *out, float *heading_deg) {
+    if (g_count == 1) {
+        if (!g_gps[0].ready) return false;
+        g_gps[0].ready = false;
+        *out = g_gps[0].snap;
+        if (heading_deg) *heading_deg = filter_heading(out->headMot * 1e-5f);
+        return true;
+    }
 
-bool gps_process(gps_t *gps, ubx_nav_pvt_t *out) {
-    if (!gps->frame_ready) return false;
-    gps->frame_ready = 0;
-    *out = gps->pvt_snapshot;
+    if (!g_gps[0].ready && !g_gps[1].ready) return false;
+
+    if (g_gps[0].ready) {
+        g_gps[0].ready = false;
+        g_last[0] = g_gps[0].snap;
+        g_has[0]  = true;
+    }
+    if (g_gps[1].ready) {
+        g_gps[1].ready = false;
+        g_last[1] = g_gps[1].snap;
+        g_has[1]  = true;
+    }
+
+    bool fix0 = g_has[0] && ubx_pvt_fix_valid(&g_last[0]);
+    bool fix1 = g_has[1] && ubx_pvt_fix_valid(&g_last[1]);
+
+    if (fix0 && fix1) {
+        *out = g_last[0];
+        out->lat    = (int32_t)(((int64_t)g_last[0].lat    + g_last[1].lat)    / 2);
+        out->lon    = (int32_t)(((int64_t)g_last[0].lon    + g_last[1].lon)    / 2);
+        out->height = (int32_t)(((int64_t)g_last[0].height + g_last[1].height) / 2);
+        out->hMSL   = (int32_t)(((int64_t)g_last[0].hMSL   + g_last[1].hMSL)   / 2);
+        out->hAcc   = (uint32_t)(((uint64_t)g_last[0].hAcc  + g_last[1].hAcc)  / 2);
+        out->vAcc   = (uint32_t)(((uint64_t)g_last[0].vAcc  + g_last[1].vAcc)  / 2);
+        out->numSV  = g_last[0].numSV > g_last[1].numSV ? g_last[0].numSV : g_last[1].numSV;
+
+        double dlat  = (double)(g_last[0].lat - g_last[1].lat) * 1e-7;
+        double dlon  = (double)(g_last[0].lon - g_last[1].lon) * 1e-7;
+        double lat_r = (double)g_last[1].lat  * 1e-7 * (M_PI / 180.0);
+        double hdg   = atan2(dlon * cos(lat_r), dlat) * (180.0 / M_PI);
+        if (hdg < 0.0) hdg += 360.0;
+
+        out->headVeh = (int32_t)(hdg * 1e5);
+        if (heading_deg) *heading_deg = filter_heading((float)hdg);
+    } else if (fix0) {
+        *out = g_last[0];
+        if (heading_deg) *heading_deg = filter_heading(g_last[0].headMot * 1e-5f);
+    } else if (fix1) {
+        *out = g_last[1];
+        if (heading_deg) *heading_deg = filter_heading(g_last[1].headMot * 1e-5f);
+    } else {
+        *out = g_has[0] ? g_last[0] : g_last[1];
+        if (heading_deg) *heading_deg = filter_heading(out->headMot * 1e-5f);
+    }
+
     return true;
+}
+
+uint32_t gps_packet_count(int idx) {
+    if (idx < 0 || idx >= g_count) return 0;
+    return g_gps[idx].pkt_count;
 }
