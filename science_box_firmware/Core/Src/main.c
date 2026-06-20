@@ -25,7 +25,7 @@
 // Including the C standard libraries
 #include <stdio.h>			// STD
 #include <string.h>			// Strings (for organizing data)
-
+#include "rosjam.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -150,6 +150,10 @@ int main(void)
   MX_TIM17_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+  // Initialize USB connection
+  setup_simple();
+
+
   // Initialize servo PWM timers
   // IMPORTANT: Set the timers and channels accordingly
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1); 		// Servo 1
@@ -170,6 +174,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // Setup USB
+    process_simple();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -231,9 +238,10 @@ int main(void)
 	  // Send the data via the USB interface
 	  // Write to buffer
 	  sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, ph4=%d ; m1=%d, m2=%d, m3=%d, m4=%d ; co2[0]=%d, co2[1]=%d ; tof=%ld\r\n", ph1_val, ph2_val, ph3_val, ph4_val, mois1_val, mois2_val, mois3_val, mois4_val, co2_val1, co2_val2, tof_val);
-	  // Send data
+	  // Send data via USB
+    send_msg_raw(buffer, 150);
 
-	  HAL_Delay(1000); // lower it if necessary
+    // NO HAL_Delay!!! (rosjam USB doesn't like that)
 
   }
   /* USER CODE END 3 */
@@ -492,8 +500,8 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.ProtocolException = DISABLE;
   hfdcan2.Init.NominalPrescaler = 16;
   hfdcan2.Init.NominalSyncJumpWidth = 1;
-  hfdcan2.Init.NominalTimeSeg1 = 2;
-  hfdcan2.Init.NominalTimeSeg2 = 2;
+  hfdcan2.Init.NominalTimeSeg1 = 1;
+  hfdcan2.Init.NominalTimeSeg2 = 1;
   hfdcan2.Init.DataPrescaler = 1;
   hfdcan2.Init.DataSyncJumpWidth = 1;
   hfdcan2.Init.DataTimeSeg1 = 1;
@@ -951,8 +959,8 @@ static void MX_USB_PCD_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
@@ -970,8 +978,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(USR_LED_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -992,8 +1000,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

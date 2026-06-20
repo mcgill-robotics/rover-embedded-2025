@@ -60,9 +60,17 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Remove wrong libob.a library dependency when using cpp files
 list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 
+
+# Add the custom USB libraries
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u _printf_float")
+
+add_subdirectory(../ROSJam2/src "${CMAKE_CURRENT_BINARY_DIR}/ROSJam2_build")
+
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
+    rosjam2
     # Add user defined libraries
 )
+
+
