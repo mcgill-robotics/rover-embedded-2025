@@ -26,7 +26,7 @@ int32_t max(int32_t a, int32_t b);
 
 void process_servo(void);
 void create_substring(char *buffer, char *destination, int start, int end);
-
+int process_servo_uart(char *buffer, int length);
 void init_servos(void);
 void write_servo(TIM_HandleTypeDef *htim, uint16_t angle);
 void set_pan(float angle);
