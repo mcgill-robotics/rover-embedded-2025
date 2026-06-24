@@ -48,7 +48,8 @@ static inline double ubx_pvt_lat_deg(const ubx_nav_pvt_t *p) { return p->lat * 1
 static inline double ubx_pvt_lon_deg(const ubx_nav_pvt_t *p) { return p->lon * 1e-7; }
 
 // Define to enable Kalman filtering on heading output; comment out for raw heading.
-#define USE_KALMAN_FILTER
+// #define USE_KALMAN_FILTER
+// #define USE_HEADING
 
 #ifdef USE_KALMAN_FILTER
 #define KF_Q   2.0f   // process noise  (deg²) — raise if rover turns fast

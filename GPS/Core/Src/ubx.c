@@ -32,7 +32,7 @@ static int           g_count;
 static ubx_nav_pvt_t g_last[2];
 static bool          g_has[2];
 
-// ── Heading filter ────────────────────────────────────────────────────────────
+#ifdef USE_HEADING
 #ifdef USE_KALMAN_FILTER
 
 typedef struct { float x; float P; bool init; } hdg_kf_t;
@@ -66,7 +66,7 @@ static float filter_heading(float z) {
 #else
 #define filter_heading(z) (z)
 #endif
-// ─────────────────────────────────────────────────────────────────────────────
+#endif
 
 static bool feed(parser_t *p, uint8_t b) {
     switch (p->state) {
@@ -97,17 +97,20 @@ static bool feed(parser_t *p, uint8_t b) {
 }
 
 void gps_init(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huart2) {
-    g_count = huart2 ? 2 : 1;
+    UART_HandleTypeDef *uarts[2] = {huart1, huart2};
+    g_count = 0;
     memset(g_has, 0, sizeof(g_has));
 #ifdef USE_KALMAN_FILTER
     g_kf.init = false;
 #endif
-    for (int i = 0; i < g_count; i++) {
-        g_gps[i].huart     = i == 0 ? huart1 : huart2;
-        g_gps[i].ready     = false;
-        g_gps[i].pkt_count = 0;
-        memset(&g_gps[i].parser, 0, sizeof(g_gps[i].parser));
-        HAL_UARTEx_ReceiveToIdle_IT(g_gps[i].huart, g_gps[i].rxbuf, sizeof(g_gps[i].rxbuf));
+    for (int i = 0; i < 2; i++) {
+        if (!uarts[i]) continue;
+        g_gps[g_count].huart     = uarts[i];
+        g_gps[g_count].ready     = false;
+        g_gps[g_count].pkt_count = 0;
+        memset(&g_gps[g_count].parser, 0, sizeof(g_gps[g_count].parser));
+        HAL_UARTEx_ReceiveToIdle_IT(uarts[i], g_gps[g_count].rxbuf, sizeof(g_gps[g_count].rxbuf));
+        g_count++;
     }
 }
 
@@ -144,7 +147,9 @@ bool gps_process(ubx_nav_pvt_t *out, float *heading_deg) {
         if (!g_gps[0].ready) return false;
         g_gps[0].ready = false;
         *out = g_gps[0].snap;
+#ifdef USE_HEADING
         if (heading_deg) *heading_deg = filter_heading(out->headMot * 1e-5f);
+#endif
         return true;
     }
 
@@ -166,6 +171,7 @@ bool gps_process(ubx_nav_pvt_t *out, float *heading_deg) {
         out->vAcc   = (uint32_t)(((uint64_t)g_last[0].vAcc  + g_last[1].vAcc)  / 2);
         out->numSV  = g_last[0].numSV > g_last[1].numSV ? g_last[0].numSV : g_last[1].numSV;
 
+#ifdef USE_HEADING
         double dlat  = (double)(g_last[0].lat - g_last[1].lat) * 1e-7;
         double dlon  = (double)(g_last[0].lon - g_last[1].lon) * 1e-7;
         double lat_r = (double)g_last[1].lat  * 1e-7 * (M_PI / 180.0);
@@ -174,15 +180,22 @@ bool gps_process(ubx_nav_pvt_t *out, float *heading_deg) {
 
         out->headVeh = (int32_t)(hdg * 1e5);
         if (heading_deg) *heading_deg = filter_heading((float)hdg);
+#endif
     } else if (fix0) {
         *out = g_last[0];
+#ifdef USE_HEADING
         if (heading_deg) *heading_deg = filter_heading(g_last[0].headMot * 1e-5f);
+#endif
     } else if (fix1) {
         *out = g_last[1];
+#ifdef USE_HEADING
         if (heading_deg) *heading_deg = filter_heading(g_last[1].headMot * 1e-5f);
+#endif
     } else {
         *out = g_has[0] ? g_last[0] : g_last[1];
+#ifdef USE_HEADING
         if (heading_deg) *heading_deg = filter_heading(out->headMot * 1e-5f);
+#endif
     }
 
     return true;
