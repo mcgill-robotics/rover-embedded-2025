@@ -1,3 +1,5 @@
+#ifndef USE_NMEA_GPS
+
 #include "ubx.h"
 #include <math.h>
 #include <string.h>
@@ -205,3 +207,5 @@ uint32_t gps_packet_count(int idx) {
     if (idx < 0 || idx >= g_count) return 0;
     return g_gps[idx].pkt_count;
 }
+
+#endif

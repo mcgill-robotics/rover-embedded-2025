@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "ubx.h"
+#ifdef USE_NMEA_GPS
+#include "tinygps.h"
+#endif
 #include "rosjam.h"
 #include "rosjam_config.h"
 #include "tusb.h"
@@ -51,6 +54,15 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+
+#ifdef USE_NMEA_GPS
+uint8_t uart4buf[100];
+uint8_t data_buffer[1024];
+int data_ready = 0;
+#endif
+uint8_t uart3buf[100];
+int pantilt_to_send = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,7 +114,13 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  gps_init(/*&huart4*/ NULL, &huart3);  // pass NULL instead of &huart3 for single-GPS mode
+  #ifdef USE_NMEA_GPS
+  gps_init();
+  gps_set_selector(0);
+  HAL_UART_Receive_IT(&huart4, uart4buf, 100);
+  #else
+  gps_init(&huart4, NULL);
+  #endif
 
   setup_simple();
   /* USER CODE END 2 */
@@ -110,6 +128,42 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+    #ifdef USE_NMEA_GPS
+    if (data_ready){
+      for (int i=0;i<data_ready;i++){
+        combined_gps_data_t data;
+        if (gps_process(&data, 0, uart4buf[i])) {
+          HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+          char satellites_buf_used[100];
+          char satellites[50];
+          char latitude[50];
+          char longitude[50];
+          int_to_string(data.satellites, satellites, 50);
+          
+          // print_to_usb(satellites_buf_used);
+          print_to_usb(satellites);
+          print_to_usb(",");
+          float_to_string(data.lat, 8, latitude, 50);
+          // int_to_string(used, satellites_buf_used, 100);
+          // print_to_usb("used lat: ");
+          // print_to_usb(satellites_buf_used);
+          // print_to_usb("\n");
+          printf("lat: %lf\n", data.lat);
+          print_to_usb(latitude);
+          print_to_usb(",");
+          float_to_string(data.lng, 8, longitude, 50);
+          // int_to_string(used, satellites_buf_used, 100);
+          // print_to_usb("used lat: ");
+          // print_to_usb(satellites_buf_used);
+          // print_to_usb("\n");
+          printf("long: %lf\n", data.lng);
+          print_to_usb(longitude);
+          print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
+        }
+      }
+      data_ready = 0;
+    }
+    #else
     ubx_nav_pvt_t pvt;
     float heading;
     if (gps_process(&pvt, &heading) && ubx_pvt_fix_valid(&pvt)) {
@@ -118,40 +172,46 @@ int main(void)
       char satellites[50];
       char latitude[50];
       char longitude[50];
-      #ifdef USE_HEADING
-      char heading_str[50];
-      #endif
-      char gps1_pkts[20];
-      char gps2_pkts[20];
+      //#ifdef USE_HEADING
+      //char heading_str[50];
+      //#endif
+      //char gps1_pkts[20];
+      //char gps2_pkts[20];
       int_to_string(pvt.numSV, satellites, 50);
-      float_to_string((float)ubx_pvt_lat_deg(&pvt), 7, latitude, 50);
-      float_to_string((float)ubx_pvt_lon_deg(&pvt), 7, longitude, 50);
-      #ifdef USE_HEADING
-      float_to_string(heading, 2, heading_str, 50);
-      #endif
-      int_to_string(gps_packet_count(0), gps1_pkts, 20);
-      int_to_string(gps_packet_count(1), gps2_pkts, 20);
+      float_to_string((float)ubx_pvt_lat_deg(&pvt), 8, latitude, 50);
+      float_to_string((float)ubx_pvt_lon_deg(&pvt), 8, longitude, 50);
+      //#ifdef USE_HEADING
+      //float_to_string(heading, 2, heading_str, 50);
+      //#endif
+      //int_to_string(gps_packet_count(0), gps1_pkts, 20);
+      //int_to_string(gps_packet_count(1), gps2_pkts, 20);
 
       print_to_usb(satellites);
       print_to_usb(",");
       print_to_usb(latitude);
       print_to_usb(",");
       print_to_usb(longitude);
-      print_to_usb(",");
-      print_to_usb(gps1_pkts);
-      print_to_usb(",");
-      print_to_usb(gps2_pkts);
-      #ifdef USE_HEADING
-      print_to_usb(",");
-      print_to_usb(heading_str);
-      print_to_usb("\n0.0,0.0,0.0,0.0,0.0\n");
-      #else
-      print_to_usb("\n");
-      #endif
-      
+      //print_to_usb(gps1_pkts);
+      //print_to_usb(",");
+      //print_to_usb(gps2_pkts);
+      //#ifdef USE_HEADING
+      //print_to_usb(",");
+      //print_to_usb(heading_str);
+      //print_to_usb("\n0.0,0.0,0.0,0.0,0.0\n");
+      //#else
+      //print_to_usb("\n");
+      //#endif
+      print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
 
       // printf("%s, %s, %s, hdg=%s, gps1=%s, gps2=%s\n",
       //       satellites, latitude, longitude, heading_str, gps1_pkts, gps2_pkts);
+    }
+    #endif
+
+    // send to pantilt code
+    if (tud_cdc_n_ready(USB_CDC_ITF) && pantilt_to_send<=0){
+      pantilt_to_send = tud_cdc_n_read(USB_CDC_ITF, uart3buf, 1000);
+      HAL_UART_Transmit_IT(&huart3, uart3buf, pantilt_to_send);
     }
 
     process_simple();
@@ -223,7 +283,11 @@ static void MX_UART4_Init(void)
 
   /* USER CODE END UART4_Init 1 */
   huart4.Instance = UART4;
+  #ifdef USE_NMEA_GPS
+  huart4.Init.BaudRate = 9600;
+  #else
   huart4.Init.BaudRate = 115200;
+  #endif
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
@@ -379,11 +443,35 @@ int __io_putchar(int ch)
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+  #ifdef USE_NMEA_GPS
+  if (huart == &huart4){
+    uint32_t err =  HAL_UART_GetError(huart);
+    printf("uart 4 failed\n");
+  }
+  #else
   gps_uart_error(huart);
+  #endif
 }
 
+#ifdef USE_NMEA_GPS
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  if (huart == &huart4) {
+    if (data_ready + 100 > 1024) {
+      data_ready = 0;
+    }
+    memcpy((data_buffer + data_ready), uart4buf, 100);
+    data_ready += 100;
+    HAL_UART_Receive_IT(&huart4, uart4buf, 100);
+  }
+}
+#else
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   gps_uart_rx_event(huart, Size);
+}
+#endif
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+  pantilt_to_send = 0;
 }
 /* USER CODE END 4 */
 

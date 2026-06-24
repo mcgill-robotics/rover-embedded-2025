@@ -34,6 +34,12 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
+
+# Toggle: set to ON for TinyGPS++ NMEA parser, OFF for UBX binary parser
+set(USE_NMEA_GPS OFF)
+if(USE_NMEA_GPS)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE USE_NMEA_GPS)
+endif()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u _printf_float")
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -69,3 +75,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     rosjam2
     # Add user defined libraries
 )
+
+add_subdirectory(src/tinygps)
+tiny_gps_add(${CMAKE_PROJECT_NAME})

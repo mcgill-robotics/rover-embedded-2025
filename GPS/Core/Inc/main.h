@@ -61,7 +61,7 @@ void Error_Handler(void);
 #define USER_LED_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+// Toggle USE_NMEA_GPS in CMakeLists.txt option(USE_NMEA_GPS ...)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -1,6 +1,8 @@
 #ifndef UBX_H
 #define UBX_H
 
+#ifndef USE_NMEA_GPS
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "stm32g4xx_hal.h"
@@ -72,6 +74,8 @@ uint32_t gps_packet_count(int idx);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif // UBX_H
