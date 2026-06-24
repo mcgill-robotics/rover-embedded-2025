@@ -2,8 +2,6 @@
 #include <math.h>
 #include <string.h>
 
-#define HDG_ALPHA 0.1f  // 0.0–1.0: lower = smoother, more lag
-
 #define UBX_SYNC1       0xB5
 #define UBX_SYNC2       0x62
 #define UBX_CLASS_NAV   0x01
@@ -29,30 +27,46 @@ typedef struct {
     uint32_t            pkt_count;
 } gps_t;
 
-static gps_t          g_gps[2];
-static int            g_count;
-static ubx_nav_pvt_t  g_last[2];
-static bool           g_has[2];
-static float          g_hdg_sin;
-static float          g_hdg_cos;
-static bool           g_hdg_init;
+static gps_t         g_gps[2];
+static int           g_count;
+static ubx_nav_pvt_t g_last[2];
+static bool          g_has[2];
 
-static float filter_heading(float raw_deg) {
-    float rad = raw_deg * ((float)M_PI / 180.0f);
-    float s = sinf(rad);
-    float c = cosf(rad);
-    if (!g_hdg_init) {
-        g_hdg_sin  = s;
-        g_hdg_cos  = c;
-        g_hdg_init = true;
-    } else {
-        g_hdg_sin = HDG_ALPHA * s + (1.0f - HDG_ALPHA) * g_hdg_sin;
-        g_hdg_cos = HDG_ALPHA * c + (1.0f - HDG_ALPHA) * g_hdg_cos;
-    }
-    float out = atan2f(g_hdg_sin, g_hdg_cos) * (180.0f / (float)M_PI);
-    if (out < 0.0f) out += 360.0f;
-    return out;
+// ── Heading filter ────────────────────────────────────────────────────────────
+#ifdef USE_KALMAN_FILTER
+
+typedef struct { float x; float P; bool init; } hdg_kf_t;
+static hdg_kf_t g_kf;
+
+static float wrap180(float a) {
+    while (a >  180.0f) a -= 360.0f;
+    while (a < -180.0f) a += 360.0f;
+    return a;
 }
+
+// Scalar Kalman: random-walk process model, direct heading measurement.
+// Predict: P⁻ = P + Q
+// Update:  K = P⁻/(P⁻+R),  x += K·wrap180(z−x),  P = (1−K)·P⁻
+static float filter_heading(float z) {
+    if (!g_kf.init) {
+        g_kf.x    = z;
+        g_kf.P    = KF_R;
+        g_kf.init = true;
+        return z;
+    }
+    g_kf.P   += KF_Q;
+    float K   = g_kf.P / (g_kf.P + KF_R);
+    g_kf.x   += K * wrap180(z - g_kf.x);
+    g_kf.P   *= (1.0f - K);
+    if (g_kf.x <    0.0f) g_kf.x += 360.0f;
+    if (g_kf.x >= 360.0f) g_kf.x -= 360.0f;
+    return g_kf.x;
+}
+
+#else
+#define filter_heading(z) (z)
+#endif
+// ─────────────────────────────────────────────────────────────────────────────
 
 static bool feed(parser_t *p, uint8_t b) {
     switch (p->state) {
@@ -83,14 +97,15 @@ static bool feed(parser_t *p, uint8_t b) {
 }
 
 void gps_init(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huart2) {
-    g_count    = huart2 ? 2 : 1;
-    g_hdg_init = false;
-    g_hdg_sin  = 0.0f;
-    g_hdg_cos  = 0.0f;
+    g_count = huart2 ? 2 : 1;
     memset(g_has, 0, sizeof(g_has));
+#ifdef USE_KALMAN_FILTER
+    g_kf.init = false;
+#endif
     for (int i = 0; i < g_count; i++) {
-        g_gps[i].huart = i == 0 ? huart1 : huart2;
-        g_gps[i].ready = false;
+        g_gps[i].huart     = i == 0 ? huart1 : huart2;
+        g_gps[i].ready     = false;
+        g_gps[i].pkt_count = 0;
         memset(&g_gps[i].parser, 0, sizeof(g_gps[i].parser));
         HAL_UARTEx_ReceiveToIdle_IT(g_gps[i].huart, g_gps[i].rxbuf, sizeof(g_gps[i].rxbuf));
     }
@@ -135,22 +150,14 @@ bool gps_process(ubx_nav_pvt_t *out, float *heading_deg) {
 
     if (!g_gps[0].ready && !g_gps[1].ready) return false;
 
-    if (g_gps[0].ready) {
-        g_gps[0].ready = false;
-        g_last[0] = g_gps[0].snap;
-        g_has[0]  = true;
-    }
-    if (g_gps[1].ready) {
-        g_gps[1].ready = false;
-        g_last[1] = g_gps[1].snap;
-        g_has[1]  = true;
-    }
+    if (g_gps[0].ready) { g_gps[0].ready = false; g_last[0] = g_gps[0].snap; g_has[0] = true; }
+    if (g_gps[1].ready) { g_gps[1].ready = false; g_last[1] = g_gps[1].snap; g_has[1] = true; }
 
     bool fix0 = g_has[0] && ubx_pvt_fix_valid(&g_last[0]);
     bool fix1 = g_has[1] && ubx_pvt_fix_valid(&g_last[1]);
 
     if (fix0 && fix1) {
-        *out = g_last[0];
+        *out        = g_last[0];
         out->lat    = (int32_t)(((int64_t)g_last[0].lat    + g_last[1].lat)    / 2);
         out->lon    = (int32_t)(((int64_t)g_last[0].lon    + g_last[1].lon)    / 2);
         out->height = (int32_t)(((int64_t)g_last[0].height + g_last[1].height) / 2);

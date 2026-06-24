@@ -47,6 +47,14 @@ static inline bool   ubx_pvt_fix_valid(const ubx_nav_pvt_t *p) {
 static inline double ubx_pvt_lat_deg(const ubx_nav_pvt_t *p) { return p->lat * 1e-7; }
 static inline double ubx_pvt_lon_deg(const ubx_nav_pvt_t *p) { return p->lon * 1e-7; }
 
+// Define to enable Kalman filtering on heading output; comment out for raw heading.
+#define USE_KALMAN_FILTER
+
+#ifdef USE_KALMAN_FILTER
+#define KF_Q   2.0f   // process noise  (deg²) — raise if rover turns fast
+#define KF_R 100.0f   // measurement noise (deg²) — ~10° std-dev; raise for noisy baseline
+#endif
+
 // huart2 may be NULL for single-GPS mode
 void gps_init(UART_HandleTypeDef *huart1, UART_HandleTypeDef *huart2);
 

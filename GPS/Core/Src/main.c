@@ -115,11 +115,8 @@ int main(void)
   while (1) {
     ubx_nav_pvt_t pvt;
     float heading;
-    if (gps_process(&pvt, &heading)) {
+    if (gps_process(&pvt, &heading) && ubx_pvt_fix_valid(&pvt)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-
-      double lat = ubx_pvt_lat_deg(&pvt);
-      double lon = ubx_pvt_lon_deg(&pvt);
 
       char satellites[50];
       char latitude[50];
@@ -128,8 +125,8 @@ int main(void)
       char gps1_pkts[20];
       char gps2_pkts[20];
       int_to_string(pvt.numSV, satellites, 50);
-      float_to_string((float)lat, 8, latitude, 50);
-      float_to_string((float)lon, 8, longitude, 50);
+      float_to_string((float)ubx_pvt_lat_deg(&pvt), 7, latitude, 50);
+      float_to_string((float)ubx_pvt_lon_deg(&pvt), 7, longitude, 50);
       float_to_string(heading, 2, heading_str, 50);
       int_to_string(gps_packet_count(0), gps1_pkts, 20);
       int_to_string(gps_packet_count(1), gps2_pkts, 20);
