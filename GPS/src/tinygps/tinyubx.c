@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "tinyubx.h"
 #include <string.h>
 
@@ -87,3 +91,7 @@ bool ubx_process(ubx_parser_t *p, ubx_nav_pvt_t *data, uint8_t byte) {
     memcpy(data, p->payload, sizeof(ubx_nav_pvt_t));
     return true;
 }
+
+#ifdef __cplusplus
+}
+#endif

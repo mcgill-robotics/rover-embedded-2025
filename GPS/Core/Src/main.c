@@ -126,17 +126,17 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    gps_pvt_t snap;
-    if (gps_read_snapshot(&gps_1, &snap)) {
+    gps_data_t gps_1_data;
+    if (gps_read_snapshot(&gps_1, &gps_1_data)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
 
       char satellites[50];
       char latitude[50];
       char longitude[50];
 
-      int_to_string(snap.numSV, satellites, 50);
-      float_to_string(snap.lat, 8, latitude, 50);
-      float_to_string(snap.lon, 8, longitude, 50);
+      int_to_string(gps_1_data.numSV, satellites, 50);
+      float_to_string(gps_1_data.lat, 8, latitude, 50);
+      float_to_string(gps_1_data.lon, 8, longitude, 50);
 
       printf("sat: %s, lat: %s, lon: %s\n", satellites, latitude, longitude);
 

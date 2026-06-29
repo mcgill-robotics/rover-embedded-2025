@@ -520,7 +520,7 @@ bool gps_process(gps_t *g, uint8_t byte) {
     return true;
 }
 
-bool gps_read_snapshot(gps_t *g, gps_pvt_t *out) {
+bool gps_read_snapshot(gps_t *g, gps_data_t *out) {
     if (!g->frame_ready) return false;
     __disable_irq();
     g->frame_ready = false;

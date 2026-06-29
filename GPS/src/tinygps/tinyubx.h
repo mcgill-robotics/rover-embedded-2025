@@ -1,6 +1,10 @@
 #ifndef TINYUBX_H
 #define TINYUBX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -75,5 +79,9 @@ typedef struct __attribute__((packed)) {
 } ubx_nav_pvt_t;
 
 bool ubx_process(ubx_parser_t *p, ubx_nav_pvt_t *data, uint8_t byte);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

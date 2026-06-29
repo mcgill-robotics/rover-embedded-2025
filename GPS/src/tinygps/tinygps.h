@@ -21,7 +21,7 @@ typedef struct {
     double  headMot;  // deg heading of motion
     int     numSV;    // number of satellites
     int     fixType;
-} gps_pvt_t;
+} gps_data_t;
 
 typedef struct {
     UART_HandleTypeDef *huart;
@@ -31,12 +31,12 @@ typedef struct {
         void           *nmea;   // TinyGPSPlus*, opaque from C
     };
     volatile bool       frame_ready;
-    gps_pvt_t           snapshot;
+    gps_data_t          snapshot;
 } gps_t;
 
 void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart);
 bool gps_process(gps_t *g, uint8_t byte);
-bool gps_read_snapshot(gps_t *g, gps_pvt_t *out);
+bool gps_read_snapshot(gps_t *g, gps_data_t *out);
 
 #ifdef __cplusplus
 }
