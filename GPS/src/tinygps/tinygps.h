@@ -6,35 +6,37 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
+#include "stm32g4xx_hal.h"
+#include "tinyubx.h"
 
-typedef struct combined_gps_data_t {
-  double lat;
-  double lng;
-  double course;
-  double kmph;
-  double alt;
-  int satellites;
-  int valid_gps_count;
-  double bearing;
-} combined_gps_data_t;
+#define GPS_UBX  0
+#define GPS_NMEA 1
 
-// Initializes the TinyGPS library and gps
-void gps_init();
+typedef struct {
+    double  lat;      // degrees
+    double  lon;      // degrees
+    double  alt;      // m above sea level
+    double  gSpeed;   // m/s ground speed
+    double  headMot;  // deg heading of motion
+    int     numSV;    // number of satellites
+    int     fixType;
+} gps_pvt_t;
 
-void gps_set_selector(int g);
+typedef struct {
+    UART_HandleTypeDef *huart;
+    int                 type;   // GPS_UBX or GPS_NMEA
+    union {
+        ubx_parser_t    ubx;
+        void           *nmea;   // TinyGPSPlus*, opaque from C
+    };
+    volatile bool       frame_ready;
+    gps_pvt_t           snapshot;
+} gps_t;
 
-// process char c from gps g. If gps has processed a valid sentence, buf is filled and it returns true.
-// if not, false is return and buf is left as is. 
-bool gps_process(combined_gps_data_t* data, int g, char c);
-
-// send a command to the gps in buf with size bufz. If command is valid and was process it returns true.
-// Possible commands:
-// kmph X   | sets the max kmph which will be cut by the prefilter (if prefilter active)
-// hdop X   | sets the max hdop which will be cut by the prefilter (if prefilter active)
-// filter X | sets the filter mode (0 default, no filter)
-// gps X    | selects only one gps (0 or 1)
-bool gps_command(const char *buf, int bufz);
-
+void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart);
+bool gps_process(gps_t *g, uint8_t byte);
+bool gps_read_snapshot(gps_t *g, gps_pvt_t *out);
 
 #ifdef __cplusplus
 }

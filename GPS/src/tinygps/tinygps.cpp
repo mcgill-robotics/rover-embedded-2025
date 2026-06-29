@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tinygps.hpp"
 #include "tinygps.h"
+#include "tinyubx.h"
 
 #include "stm32g4xx_hal.h"
 #include <cmath>
@@ -446,7 +447,6 @@ void TinyGPSCustom::begin(TinyGPSPlus &gps, const char *_sentenceName,
   memset(stagingBuffer, '\0', sizeof(stagingBuffer));
   memset(buffer, '\0', sizeof(buffer));
 
-  // Insert this item into the GPS tree
   gps.insertCustom(this, _sentenceName, _termNumber);
 }
 
@@ -475,257 +475,58 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName,
 }
 
 extern "C" {
-struct Time {
-   uint16_t year;
-   uint8_t month;
-   uint8_t day;
-   uint8_t hour;
-   uint8_t minute;
-   uint8_t second;
-   uint8_t centisecond;
-};
 
-struct single_gps_data {
-  double lat;
-  double lng;
-  double course;
-  double kmph;
-  double alt;
-  int satellites;
-  struct Time time;
-  double hdop;
-  char fix_mode;
-  char fix_quality;
-};
+void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart) {
+    g->huart       = huart;
+    g->type        = type;
+    g->frame_ready = false;
+    memset(&g->ubx, 0, sizeof(g->ubx));
 
-// limits for prefilter
-static int max_hdop = 10;
-static int max_kmph = 50;
+    huart->Init.BaudRate = (type == GPS_UBX) ? 115200 : 9600;
+    HAL_UART_Init(huart);
 
-// 0 = averaging
-// 1 = averaging + prefilter
-// 3 = averaging + prefilter + advanced filter
-static int filter_mode = 0;
-
-// 0 = gps1
-// 1 = gps2
-// -1 = no select
-static int gps_selector = -1;
-
-static TinyGPSPlus *gps[2] = {0};
-
-
-const struct Time gps_time(int g) {
-  return (Time){
-      .year =         gps[g]->date.year(),
-      .month =        gps[g]->date.month(),
-      .day =          gps[g]->date.day(),
-      .hour =         gps[g]->time.hour(),
-      .minute =       gps[g]->time.minute(),
-      .second =       gps[g]->time.second(),
-      .centisecond =  gps[g]->time.centisecond(),
-  };
+    if (type == GPS_NMEA)
+        g->nmea = new TinyGPSPlus();
 }
 
-// Returns a TinyGPSPlus class as void pointer
-void gps_init() { 
-  gps[0] = new TinyGPSPlus();
-  gps[1] = new TinyGPSPlus();
-}
+bool gps_process(gps_t *g, uint8_t byte) {
+    if (g->type == GPS_UBX) {
+        ubx_nav_pvt_t pvt;
+        if (!ubx_process(&g->ubx, &pvt, byte)) return false;
+        
+        // Check for succesful fix
+        if (pvt.fixType < 2 || !(pvt.flags & 0x01)) return false;
+        g->snapshot.lat     = pvt.lat     * 1e-7;
+        g->snapshot.lon     = pvt.lon     * 1e-7;
+        g->snapshot.alt     = pvt.hMSL    * 1e-3;
+        g->snapshot.gSpeed  = pvt.gSpeed  * 1e-3;
+        g->snapshot.headMot = pvt.headMot * 1e-5;
+        g->snapshot.numSV   = pvt.numSV;
+        g->snapshot.fixType = pvt.fixType;
+    } else {
+        TinyGPSPlus *nmea = (TinyGPSPlus *)g->nmea;
 
-// Encode one character at a time
-bool gps_encode(int g, char c) {
-  return gps[g]->encode(c);
-}
-
-
-bool gps_parse(int g, struct single_gps_data *data) {
-  if (g < 0 || g > 1 || data == NULL)
-    return false;
-  bool valid = true;
-
-  if (filter_mode > 0) {
-    if (!gps[g]->location.isValid())
-      valid = false;
-    if (!gps[g]->speed.isValid())
-      valid = false;
-    if (!gps[g]->altitude.isValid())
-      valid = false;
-    if (!gps[g]->hdop.isValid())
-      valid = false;
-    if (!gps[g]->satellites.isValid())
-      valid = false;
-    if (!gps[g]->course.isValid())
-      valid = false;
-  }
-
-  *data = (struct single_gps_data) {
-    .lat = gps[g]->location.lat(), 
-    .lng = gps[g]->location.lng(), 
-    .course = gps[g]->course.deg(), 
-    .kmph = gps[g]->speed.kmph(), 
-    .alt = gps[g]->altitude.meters(), 
-    .satellites = gps[g]->satellites.value(),
-    .time = gps_time(g),
-    .hdop = gps[g]->hdop.hdop(),
-    .fix_mode = gps[g]->location.FixMode(),
-    .fix_quality = gps[g]->location.FixQuality(),
-  };
-  return valid;
-}
-
-static double bearing(double alng, double alat, double blng, double blat) {
-  double dlng = blng - alng;
-  double dlat = blat - alat;
-  double bearing = atan2(dlng, dlat) * RAD_TO_DEG;
-  if (bearing < 0)
-    bearing += 360;
-  return bearing;
-}
-
-static double gps_bearing(struct single_gps_data *g1, struct single_gps_data *g2) {
-  return bearing(g1->lng, g1->lat, g2->lng, g2->lat);
-}
-
-static bool gps_prefilter(struct single_gps_data data) {
-  // 1 = ideal
-  // 2-5 = excellent
-  // 5-10 = moderate
-  // 10-20 = not accurate
-  // 20+ = don't trust at all
-  if (data.hdop > max_hdop)
-    return false;
-
-  if (data.fix_mode == 'N')
-    return false;
-
-  if (data.fix_quality == '0')
-    return false;
-
-  // If exceeding max rover speed, drop data as being inaccurate
-  if (data.kmph > max_kmph)
-    return false;
-
-  return true;
-}
-
-static void gps_combine(struct single_gps_data &g1, struct single_gps_data &g2,
-                 combined_gps_data_t *output) {
-    // Just averaging for now
-    // Filtering should be set up in here
-    output->lat = (g1.lat + g2.lat) / 2.0;
-    output->lng = (g1.lng + g2.lng) / 2.0;
-    output->alt = (g1.alt + g2.alt) / 2.0;
-    output->course = (g1.course + g2.course) / 2.0;
-    output->kmph = (g1.kmph + g2.kmph) / 2.0;
-    output->satellites = (g1.satellites + g2.satellites) / 2.0;
-    output->valid_gps_count = 2;
-    output->bearing = gps_bearing(&g1, &g2);
-}
-
-// 0 = gps1, 1 = gps2
-bool gps_process(combined_gps_data_t* data, int g, char c) {
-  static struct single_gps_data gps_data[2] = {0};
-  static bool gps_valid[2] = {true, true};
-
-  // No new data
-  if (!gps_encode(g, c) || (gps_selector >= 0 && gps_selector != g))
-    return false;
-  
-  // Parse and prefilter
-  gps_valid[g] = gps_parse(g, &gps_data[g]);
-  if (gps_valid[g] && filter_mode >= 1) {
-    gps_valid[g] = gps_prefilter(gps_data[g]);
-  }
-
-  // New data is invalid, no reason to continue
-  if (!gps_valid[g])
-    return false;
-
-  // struct combined_gps_data ret_data = {0};
-
-  // If there is no gps selector and both data valid
-  if (gps_selector < 0 && gps_valid[0] && gps_valid[1]) {
-      gps_combine(gps_data[0], gps_data[1], data);
-      // Otherwise if only gps g is valid or selector points to g
-      // We don't consider the other option since in this case the new data comes from g
-  } else if (gps_selector == g || (gps_valid[g] && !gps_valid[!g])) {
-    *data = {
-        .lat = gps_data[g].lat,
-        .lng = gps_data[g].lng,
-        .course = gps_data[g].course,
-        .kmph = gps_data[g].kmph,
-        .alt = gps_data[g].alt,
-        .satellites = gps_data[g].satellites,
-        .valid_gps_count = 1,
-        .bearing = -1, // Should prob try to calculate
-    };
-  }
-  
-  // Sending only basic gps data - similar to what was sent from old pantilt
-  // Cut off number of digits (5 for number of satellites and 8 for coordinates)
-  // char satellites[6];
-  // char longitude[9];
-  // char latitude[9];
-  // snprintf(satellites, 6, "%d", ret_data.satellites);
-  // snprintf(longitude, 9, "%f", ret_data.lng);
-  // snprintf(latitude, 9, "%f", ret_data.lat);
-  // snprintf(buf, sizeof(buf), "%s, %s, %s", satellites, longitude, latitude);
-  //sprintf(buf, "%d,%f,%f\n", ret_data.satellites, ret_data.lng, ret_data.lat);
-
-  // Send complete gps data
-  /*
-  sprintf(buf, "%d, %f, %f, %f, %f,%f, %d, %f\n", 
-    ret_data.satellites, ret_data.lng, ret_data.lat, ret_data.course, ret_data.kmph, 
-    ret_data.alt, ret_data.valid_gps_count, ret_data.bearing);
-    */
-  return true;
-}
-
-static void gps_set_max_hdop(int hdop) { max_hdop = hdop; }
-
-static void gps_set_max_kmph(int kmph) { max_kmph = kmph; }
-
-static void gps_set_filter_mode(int mode) {
-  if (mode < 0)
-    filter_mode = 0;
-  else if (mode > 2)
-    filter_mode = 2;
-  else
-    filter_mode = mode;
-}
-
-void gps_set_selector(int g) {
-  if (g == 0)
-    gps_selector = g;
-  else if (g == 1)
-    gps_selector = g;
-  else
-   gps_selector = -1;
-
-}
-
-bool gps_command(const char *buf, int bufz) {
-  const char *kmph_cmd = "kmph ";
-  const char *hdop_cmd = "hdop ";
-  const char *filter_cmd = "filter ";
-  const char *gps_cmd = "gps ";
-
-  if (strncmp(buf, kmph_cmd, strlen(kmph_cmd)) == 0) {
-    max_kmph = strtol(buf + strlen(kmph_cmd), NULL, 10);
+        // Check for succesful fix
+        if (!nmea->encode((char)byte) || !nmea->location.isValid()) return false;
+        g->snapshot.lat     = nmea->location.lat();
+        g->snapshot.lon     = nmea->location.lng();
+        g->snapshot.alt     = nmea->altitude.meters();
+        g->snapshot.gSpeed  = nmea->speed.mps();
+        g->snapshot.headMot = nmea->course.deg();
+        g->snapshot.numSV   = (int)nmea->satellites.value();
+        g->snapshot.fixType = (nmea->location.FixQuality() != TinyGPSLocation::Invalid) ? 3 : 0;
+    }
+    g->frame_ready = true;
     return true;
-  } else if (strncmp(buf, hdop_cmd, strlen(hdop_cmd)) == 0) {
-    max_hdop = strtol(buf + strlen(hdop_cmd), NULL, 10);
-    return true;
-  } else if (strncmp(buf, filter_cmd, strlen(filter_cmd)) == 0) {
-    gps_set_filter_mode(strtol(buf+strlen(filter_cmd), NULL, 10));
-    return true;
-  } else if (strncmp(buf, gps_cmd, strlen(gps_cmd)) == 0) {
-    gps_set_selector(strtol(buf+strlen(gps_cmd),NULL,10));
-    return true;
-  }
+}
 
-  return false;
+bool gps_read_snapshot(gps_t *g, gps_pvt_t *out) {
+    if (!g->frame_ready) return false;
+    __disable_irq();
+    g->frame_ready = false;
+    *out = g->snapshot;
+    __enable_irq();
+    return true;
 }
 
 }

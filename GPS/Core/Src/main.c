@@ -31,7 +31,6 @@
 #include "rosjam.h"
 #include "tusb_config.h"
 #include "tusb.h"
-#include <complex.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -54,17 +53,18 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t uart4buf[100];
-uint8_t uart3buf[100];
-uint8_t data_buffer[1024];
-int data_ready = 0;
-int pantilt_to_send = 0;
+gps_t gps_1;
+static uint8_t gps_1_byte;
+
+uint8_t pantilt_buffer[100];
+int pantilt_ready = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,6 +73,7 @@ static void MX_GPIO_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_UART4_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -114,105 +115,47 @@ int main(void)
   MX_USB_PCD_Init();
   MX_UART4_Init();
   MX_USART3_UART_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  gps_init();
   setup_simple();
-  gps_set_selector(0);
-  
-  HAL_UART_Receive_IT(&huart4, uart4buf, 100);
-  // HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
+  gps_init(&gps_1, GPS_UBX, &huart4);
+  HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    
-    // uint8_t c;
-    // if (HAL_UART_Receive(&huart4, uart4buf, 1, 10) == HAL_OK) {
-      // HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-    // }
-      // char c_buf[3];
-      // c_buf[0] = *uart4buf;
-      // c_buf[1] = '\n';
-      // c_buf[2] = '\0';
-      // print_to_usb(c_buf);
-      // if (gps_process((char*)buf, 0, c)) {
-      //   print_to_usb((char*) buf);
-      //   // HAL_UART_Transmit(&hlpuart1, (uint8_t *)buf, 512, 100);
-      // }
-    // }
-    // memset(buf, 0, 512);
-    // print_to_usb("looping\n");
-    if (data_ready){
-      // for (int i=0;i<2048;i++){
-      //   char msg[2];
-      //   // msg[0] = 'r';
-      //   // msg[1] = 'x';
-      //   // msg[2] = ':';
-      //   msg[0] = *uart4buf;
-      //   // msg[4] = '\n';
-      //   msg[1] = '\0';
-      // print_to_usb("data start\n");
-      // send_msg_raw(uart4buf, 100);
-      // print_to_usb("data end\n");
-      // }
-      for (int i=0;i<data_ready;i++){
-        combined_gps_data_t data;
-        if (gps_process(&data, 0, uart4buf[i])) {
-          HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-          char satellites_buf_used[100];
-          char satellites[50];
-          char latitude[50];
-          char longitude[50];
-          int_to_string(data.satellites, satellites, 50);
-          
-          // print_to_usb(satellites_buf_used);
-          print_to_usb(satellites);
-          print_to_usb(",");
-          float_to_string(data.lat, 8, latitude, 50);
-          // int_to_string(used, satellites_buf_used, 100);
-          // print_to_usb("used lat: ");
-          // print_to_usb(satellites_buf_used);
-          // print_to_usb("\n");
-          printf("lat: %lf\n", data.lat);
-          print_to_usb(latitude);
-          print_to_usb(",");
-          float_to_string(data.lng, 8, longitude, 50);
-          // int_to_string(used, satellites_buf_used, 100);
-          // print_to_usb("used lat: ");
-          // print_to_usb(satellites_buf_used);
-          // print_to_usb("\n");
-          printf("long: %lf\n", data.lng);
-          print_to_usb(longitude);
-          print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
-        }
-      }
-      data_ready = 0;
+    gps_pvt_t snap;
+    if (gps_read_snapshot(&gps_1, &snap)) {
+      HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+
+      char satellites[50];
+      char latitude[50];
+      char longitude[50];
+
+      int_to_string(snap.numSV, satellites, 50);
+      float_to_string(snap.lat, 8, latitude, 50);
+      float_to_string(snap.lon, 8, longitude, 50);
+
+      printf("sat: %s, lat: %s, lon: %s\n", satellites, latitude, longitude);
+
+      print_to_usb(satellites);
+      print_to_usb(",");
+      print_to_usb(latitude);
+      print_to_usb(",");
+      print_to_usb(longitude);
+      print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
     }
     
-    if (tud_cdc_n_ready(USB_CDC_ITF) && pantilt_to_send<=0){
-      pantilt_to_send = tud_cdc_n_read(USB_CDC_ITF, uart3buf, 1000);
-      HAL_UART_Transmit_IT(&huart3, uart3buf, pantilt_to_send)
-    }
-    /*
-    if (HAL_UART_Receive(&huart5, &c, 1, 100) == HAL_OK) {
-      if (gps_process(buf, 1, c)) {
-        HAL_UART_Transmit(&hlpuart1, (uint8_t *)buf, 512, 100);
+    if (pantilt_ready == 0) {
+      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_buffer, sizeof(pantilt_buffer));
+      if (count > 0) {
+        pantilt_ready = count;
+        HAL_UART_Transmit_IT(&huart3, pantilt_buffer, pantilt_ready);
       }
     }
-      
-    memset(buf, 0, 512);
-    */
-  
-    // Send any data we receive from software to gps as a command
-    /*
-    if (HAL_UART_Receive(&hlpuart1, buf, 512, HAL_MAX_DELAY) == HAL_OK) {
-      HAL_UART_Transmit(&hlpuart1, "cmd\n", strlen("cmd\n"), HAL_MAX_DELAY);
-      gps_command(buf, 512);
-    }
-    memset(buf, 0, 512);
-    */
+
     process_simple();
     /* USER CODE END WHILE */
 
@@ -237,10 +180,11 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
   RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
@@ -267,6 +211,53 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief LPUART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPUART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
+  hlpuart1.Instance = LPUART1;
+  hlpuart1.Init.BaudRate = 115200;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.StopBits = UART_STOPBITS_1;
+  hlpuart1.Init.Parity = UART_PARITY_NONE;
+  hlpuart1.Init.Mode = UART_MODE_TX_RX;
+  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPUART1_Init 2 */
+
+  /* USER CODE END LPUART1_Init 2 */
+
+}
+
+/**
   * @brief UART4 Initialization Function
   * @param None
   * @retval None
@@ -282,7 +273,7 @@ static void MX_UART4_Init(void)
 
   /* USER CODE END UART4_Init 1 */
   huart4.Instance = UART4;
-  huart4.Init.BaudRate = 9600;
+  huart4.Init.BaudRate = 115200;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
@@ -408,21 +399,12 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : PA3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF12_LPUART1;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : USER_LED_Pin */
   GPIO_InitStruct.Pin = USER_LED_Pin;
@@ -441,36 +423,31 @@ static void MX_GPIO_Init(void)
 int __io_putchar(int ch)
 {
  // Write character to ITM ch.0
- ITM_SendChar(ch);
+ // ITM_SendChar(ch);
+ uint8_t c = (uint8_t) ch;
+ HAL_UART_Transmit(&hlpuart1, &c, 1, 10);
  return(ch);
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
   if (huart == &huart4){
-    uint32_t err =  HAL_UART_GetError(huart);
-    printf("uart 4 failed\n");
+    uint32_t error = HAL_UART_GetError(huart);
+    printf("UART4 error 0x%02lX:%s%s\n", error,
+      (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+      (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
+    HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
   }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == &huart4) {
-    // HAL_UART_Transmit(&hlpuart1, "data\n", strlen("data\n"), 100);
-    if (data_ready+100 > 1024){
-      data_ready = 0;
-    }
-    memcpy((data_buffer+data_ready), uart4buf, 100);
-    data_ready+=100;
-    HAL_UART_Receive_IT(&huart4, uart4buf, 100);
-  } 
-  // else if (huart->Instance == LPUART1) {
-  //   HAL_UART_Transmit(&hlpuart1, "COMMAND\n", strlen("COMMAND\n"), 100);
-  //   HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lpuart1buf, 512);
-  // }
-
+    gps_process(&gps_1, gps_1_byte);
+    HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
+  }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  pantilt_to_send = 0;
+  pantilt_ready = 0;
 }
 /* USER CODE END 4 */
 
@@ -481,10 +458,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
+    // Blink LED fast if something went wrong
+    HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+    for (volatile int i = 0; i < 500000; i++);
   }
   /* USER CODE END Error_Handler_Debug */
 }
