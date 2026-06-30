@@ -580,7 +580,9 @@ bool gps_read_combined(gps_t *a, gps_t *b, gps_data_t *out) {
     if (!ok_a) { *out = db; return true; }
     if (!ok_b) { *out = da; return true; }
 
-    float wa = (float)da.numSV, wb = (float)db.numSV, wt = wa + wb;
+    float wa = (float) da.numSV;
+    float wb = (float) db.numSV;
+    float wt = wa + wb;
     if (wt == 0.0f) { *out = da; return true; }
 
     out->lat     = (da.lat     * wa + db.lat     * wb) / wt;

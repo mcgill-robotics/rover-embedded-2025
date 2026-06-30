@@ -435,23 +435,30 @@ int __io_putchar(int ch)
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
-  if (huart == &huart4){
+  if (huart == gps_1.huart){
     uint32_t error = HAL_UART_GetError(huart);
     printf("UART4 error 0x%02lX:%s%s\n", error,
       (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
       (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
-    HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
+    HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   }
+  // if (huart == gps_2.huart){
+  //   uint32_t error = HAL_UART_GetError(huart);
+  //   printf("UART3 error 0x%02lX:%s%s\n", error,
+  //     (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+  //     (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
+  //   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
+  // }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == gps_1.huart) {
     gps_process(&gps_1, gps_1_byte);
-    HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
+    HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   }
   // if (huart == gps2.huart) {
   //   gps_process(&gps_2, gps_2_byte);
-  //   HAL_UART_Receive_IT(&huartX, &gps_2_byte, 1);
+  //   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
   // }
 }
 
