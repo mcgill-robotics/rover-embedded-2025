@@ -52,6 +52,25 @@ class Gripper():
             raise ConnectionError("Cannot read frm serial port, not connected to board")
         message = ("s").encode()
         self.ser.write(message)
+        
+
+    def cw_roll(self):
+        if self.is_connected is False:
+            raise ConnectionError("Cannot read frm serial port, not connected to board")
+        message = ("d").encode()
+        self.ser.write(message)
+
+    def ccw_roll(self):
+        if self.is_connected is False:
+            raise ConnectionError("Cannot read frm serial port, not connected to board")
+        message = ("w").encode()
+        self.ser.write(message)
+
+    def stop_roll(self):
+        if self.is_connected is False:
+            raise ConnectionError("Cannot read frm serial port, not connected to board")
+        message = ("r").encode()
+        self.ser.write(message)
 
 
 if __name__ == "__main__":
@@ -66,12 +85,22 @@ if __name__ == "__main__":
 
 
     while True:
-        board.open_gripper()
-
-        time.sleep(1)
+        
         board.close_gripper()
-   
         time.sleep(1)
-        board.stop_gripper()
 
+        board.stop_gripper()
         time.sleep(1)
+
+        board.open_gripper()
+        time.sleep(1)
+
+        board.cw_roll()
+        time.sleep(1)
+
+        board.ccw_roll()
+        time.sleep(1)
+
+        board.stop_roll()
+        time.sleep(1)
+

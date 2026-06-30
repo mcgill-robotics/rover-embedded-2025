@@ -159,6 +159,8 @@ void SysTickFunction(void) {
 
 }
 
+volatile uint32_t enc_count = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -169,6 +171,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+
 
   /* USER CODE END 1 */
 
@@ -204,7 +207,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-
+  HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   //initialize motors for all 3 motors
@@ -245,7 +248,7 @@ int main(void)
   //set up Encoders
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL); // roll encoder
-  if (HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL) != HAL_OK) HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin); // pitch encoder
+  HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL); // pitch encoder
   //TIM_CHANNEL_ALL: Enable both channel needed for encoder
 
 
@@ -253,6 +256,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // roll PWM
   HAL_TIM_PWM_Start(&htim20, TIM_CHANNEL_1);  // gripper PWM
+
   // For Driver, running in PH/EN mode, PWM port (EN) always to 1
   HAL_GPIO_WritePin(PWM_pitch_GPIO_Port, PWM_pitch_Pin, 1);   // EN/IN1 = 1
   HAL_GPIO_WritePin(PWM_roll_GPIO_Port, PWM_roll_Pin, 1);   // EN/IN1 = 1
@@ -269,7 +273,7 @@ int main(void)
 
   gripper_motor.ENCODER_type->CNT = 41744; //gripper
   roll_motor.ENCODER_type->CNT = 41744; //roll
-  pitch_motor.ENCODER_type->CNT = 41744; //pitch
+  //pitch_motor.ENCODER_type->CNT = 41744; //pitch
 
   set_motor_speed_raw(&gripper_motor, 0);
   set_motor_speed_raw(&pitch_motor, 0);
@@ -341,15 +345,100 @@ int main(void)
   //setPIDGoalA(&pitch_motor, 45);
 
 
-  setup_simple(); // usb comm
+  //setup_simple(); // usb comm
 
 
-  HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
+  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   while (1)
   {
-	  process_simple();
+
+
+	  //process_simple();
+	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
+	 HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+
+	  enc_count = __HAL_TIM_GET_COUNTER(&htim5);
+
+	  //pitch_motor.ENCODER_type->CNT;
+
+//	  //pitch
+//
+//
+//		  //close pitch
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 500);
+//		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop gripper
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //open gripper
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  500);
+//		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop gripper
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+//
+//	  //roll
+//
+//
+//		  //close roll
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
+//		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop roll
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //open roll
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
+//		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop roll
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+//
+//
+//	  //gripper
+//
+//
+//		  //close gripper
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
+//		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop gripper
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //open gripper
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
+//		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+//
+//		  HAL_Delay(2000);
+//
+//		  //stop gripper
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+//
+//		  HAL_Delay(2000);
+
 
 
 //	    // Non-blocking LED blink
@@ -363,17 +452,28 @@ int main(void)
 
 	    char readchar = read_char();
 	    if (readchar == 'c'){
-	    	print_to_usb("close\n");
+	    	print_to_usb("close gripper\n");
 	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
 	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
 	    }else if (readchar == 'o'){
-	    	print_to_usb("open\n");
+	    	print_to_usb("open gripper\n");
 	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
 	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 	    }else if (readchar == 's'){
-	    	print_to_usb("stop\n");
+	    	print_to_usb("stop gripper\n");
 	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-	    }
+	    }else if (readchar == 'w'){
+	    	print_to_usb("ccw roll\n");
+	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+		}else if (readchar == 'd'){
+			print_to_usb("cw roll\n");
+			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+		}else if (readchar == 'r'){
+			print_to_usb("stop roll\n");
+			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+		}
 
 	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
 //	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);

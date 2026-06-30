@@ -8,9 +8,9 @@ C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotic
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:340:6:HAL_TIM_PWM_MspInit	24	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:373:6:HAL_TIM_Base_MspInit	24	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:406:6:HAL_TIM_Encoder_MspInit	64	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:484:6:HAL_TIM_MspPostInit	48	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:557:6:HAL_TIM_PWM_MspDeInit	16	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:590:6:HAL_TIM_Base_MspDeInit	16	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:623:6:HAL_TIM_Encoder_MspDeInit	16	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:688:6:HAL_PCD_MspInit	104	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:727:6:HAL_PCD_MspDeInit	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:493:6:HAL_TIM_MspPostInit	48	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:566:6:HAL_TIM_PWM_MspDeInit	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:599:6:HAL_TIM_Base_MspDeInit	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:632:6:HAL_TIM_Encoder_MspDeInit	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:703:6:HAL_PCD_MspInit	104	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/stm32g4xx_hal_msp.c:742:6:HAL_PCD_MspDeInit	16	static
