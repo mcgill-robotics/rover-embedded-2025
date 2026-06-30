@@ -26,8 +26,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "tinyubx.h"
 
 #include "stm32g4xx_hal.h"
-#include <cmath>
-#include <cstdlib>
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -91,6 +89,7 @@ bool TinyGPSPlus::encode(char c) {
 //
 // internal utilities
 //
+
 int TinyGPSPlus::fromHex(char a) {
   if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
@@ -474,12 +473,37 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName,
   *ppelt = pElt;
 }
 
+// EKF: static position model (F=I), direct lat/lon measurement (H=I).
+// hAcc_m: 1-sigma horizontal accuracy in metres used to build R.
+static void apply_ekf(gps_t *g, float hAcc_m) {
+    static const float Q_VAL    = 1e-8f;
+    static const float DEG_PER_M = 1.0f / 111111.0f;
+
+    float fx[2] = { g->ekf.x[0], g->ekf.x[1] };
+    float F[4]  = { 1,0, 0,1 };
+    float Q[4]  = { Q_VAL,0, 0,Q_VAL };
+    ekf_predict(&g->ekf, fx, F, Q);
+
+    float z[2]  = { (float)g->snapshot.lat, (float)g->snapshot.lon };
+    float hx[2] = { g->ekf.x[0], g->ekf.x[1] };
+    float H[4]  = { 1,0, 0,1 };
+    float sigma = hAcc_m * DEG_PER_M;
+    float r     = sigma * sigma;
+    float R[4]  = { r,0, 0,r };
+
+    if (ekf_update(&g->ekf, z, hx, H, R)) {
+        g->snapshot.lat = g->ekf.x[0];
+        g->snapshot.lon = g->ekf.x[1];
+    }
+}
+
 extern "C" {
 
-void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart) {
+void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart, bool use_ekf) {
     g->huart       = huart;
     g->type        = type;
     g->frame_ready = false;
+    g->use_ekf     = use_ekf;
     memset(&g->ubx, 0, sizeof(g->ubx));
 
     huart->Init.BaudRate = (type == GPS_UBX) ? 115200 : 9600;
@@ -487,6 +511,12 @@ void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart) {
 
     if (type == GPS_NMEA)
         g->nmea = new TinyGPSPlus();
+
+    if (use_ekf) {
+        // Large initial P so first measurement dominates
+        float pdiag[2] = { 1.0, 1.0 };
+        ekf_initialize(&g->ekf, pdiag);
+    }
 }
 
 bool gps_process(gps_t *g, uint8_t byte) {
@@ -503,6 +533,7 @@ bool gps_process(gps_t *g, uint8_t byte) {
         g->snapshot.headMot = pvt.headMot * 1e-5;
         g->snapshot.numSV   = pvt.numSV;
         g->snapshot.fixType = pvt.fixType;
+        if (g->use_ekf) apply_ekf(g, pvt.hAcc * 1e-3f);
     } else {
         TinyGPSPlus *nmea = (TinyGPSPlus *)g->nmea;
 
@@ -515,6 +546,11 @@ bool gps_process(gps_t *g, uint8_t byte) {
         g->snapshot.headMot = nmea->course.deg();
         g->snapshot.numSV   = (int)nmea->satellites.value();
         g->snapshot.fixType = (nmea->location.FixQuality() != TinyGPSLocation::Invalid) ? 3 : 0;
+        // 5 m/HDOP baseline; upgrade to per-sentence accuracy if receiver provides it
+        if (g->use_ekf) {
+            float hAcc_m = nmea->hdop.isValid() ? (nmea->hdop.value() / 100.0f) * 5.0f : 10.0f;
+            apply_ekf(g, hAcc_m);
+        }
     }
     g->frame_ready = true;
     return true;

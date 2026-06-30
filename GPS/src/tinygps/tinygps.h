@@ -10,6 +10,10 @@ extern "C" {
 #include "stm32g4xx_hal.h"
 #include "tinyubx.h"
 
+#define EKF_N 2
+#define EKF_M 2
+#include "tinyekf.h"
+
 #define GPS_UBX  0
 #define GPS_NMEA 1
 
@@ -32,9 +36,11 @@ typedef struct {
     };
     volatile bool       frame_ready;
     gps_data_t          snapshot;
+    bool                use_ekf;
+    ekf_t               ekf;
 } gps_t;
 
-void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart);
+void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart, bool use_ekf);
 bool gps_process(gps_t *g, uint8_t byte);
 bool gps_read_snapshot(gps_t *g, gps_data_t *out);
 
