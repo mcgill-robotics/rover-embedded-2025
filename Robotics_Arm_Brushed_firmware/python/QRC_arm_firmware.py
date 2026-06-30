@@ -85,22 +85,12 @@ if __name__ == "__main__":
 
 
     while True:
-        
-        board.close_gripper()
-        time.sleep(1)
-
-        board.stop_gripper()
-        time.sleep(1)
-
-        board.open_gripper()
-        time.sleep(1)
-
-        board.cw_roll()
-        time.sleep(1)
-
-        board.ccw_roll()
-        time.sleep(1)
-
-        board.stop_roll()
-        time.sleep(1)
-
+        command = input("Input command here(o,c,s): ")
+        if command == "o":
+            board.open_gripper()
+        else if command == "c":
+            board.close_gripper()
+        else if command == "s":
+            board.stop_gripper()
+        else:
+            print("Invalid command")
