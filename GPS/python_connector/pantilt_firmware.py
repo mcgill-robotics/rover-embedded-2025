@@ -84,13 +84,20 @@ class PanTiltGPS():
         if self.is_connected is False:
             raise ConnectionError("Cannot read from serial port, not connected to board.")
             
-        data = self.gps_ser.read(self.gps_ser.in_waiting or 1)
+        try:
+            data = self.gps_ser.read(self.gps_ser.in_waiting or 1)
+        except serial.SerialException:
+            self.is_connected = False
+            return
         if data:
             self.buffer += data
             while True:
                 if b'\n' in self.buffer:
                     line, self.buffer = self.buffer.split(b'\n', 1)
-                    line = line.decode('utf-8').strip()
+                    try:
+                        line = line.decode('utf-8').strip()
+                    except UnicodeDecodeError:
+                        continue
                     self._parse_data(line)
                 else:
                     break
@@ -101,11 +108,14 @@ class PanTiltGPS():
         data = line.split(',')
         if len(data) != 9:
             return
-        self.gps_sats = float(data[0])
-        self.coords[0] = float(data[1])
-        self.coords[1] = float(data[2])
-        for i in range(3,9):
-            self.imu[i-3] = float(data[i])
+        try:
+            self.gps_sats = float(data[0])
+            self.coords[0] = float(data[1])
+            self.coords[1] = float(data[2])
+            for i in range(3,9):
+                self.imu[i-3] = float(data[i])
+        except ValueError:
+            pass
 
     def run(self):
         ''' Runs the object's main loop. Call this function in your main loop.
@@ -169,12 +179,15 @@ class PanTiltGPS():
         '''
         if self.is_connected is False:
             raise ConnectionError("Cannot write from serial port, not connected to board.")
-        message = (f"{angle},0.0\n").encode()
-        self.pantilt_ser.write(message)
+        try:
+            message = (f"{angle},0.0\n").encode()
+            self.pantilt_ser.write(message)
+        except serial.SerialException as e:
+            raise ConnectionError(f"Failed to write pan angle. Error: {e}")
 
     def add_tilt_angle(self, angle: float):
         ''' Adds an increment of angle to the tilt servo.
-        
+
         Parameters
         ----------
         angle : float
@@ -182,13 +195,16 @@ class PanTiltGPS():
 
         Raises
         ------
-        ConnectionError 
+        ConnectionError
             If there is no connection, and the servo cannot be controlled
         '''
         if self.is_connected is False:
             raise ConnectionError("Cannot write from serial port, not connected to board.")
-        message = (f"0.0,{angle}\n").encode()
-        self.pantilt_ser.write(message)
+        try:
+            message = (f"0.0,{angle}\n").encode()
+            self.pantilt_ser.write(message)
+        except serial.SerialException as e:
+            raise ConnectionError(f"Failed to write tilt angle. Error: {e}")
 
 
 

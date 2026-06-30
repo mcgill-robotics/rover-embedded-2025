@@ -108,9 +108,9 @@ HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
 **3. Feed bytes**
 ```c
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart == &huart4) {
+    if (huart == gps_1.huart) {
         gps_process(&gps_1, gps_1_byte);
-        HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
+        HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
     }
 }
 ```
