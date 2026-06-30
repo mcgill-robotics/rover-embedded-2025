@@ -476,8 +476,14 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName,
 // EKF: static position model (F=I), direct lat/lon measurement (H=I).
 // hAcc_m: 1-sigma horizontal accuracy in metres used to build R.
 static void apply_ekf(gps_t *g, float hAcc_m) {
-    static const float Q_VAL    = 1e-8f;
+    static const float Q_VAL    = 1e-10f;  // ponytail: tune up if filter too slow to track motion
     static const float DEG_PER_M = 1.0f / 111111.0f;
+
+    if (g->ekf.x[0] == 0.0f) {
+        g->ekf.x[0] = (float)g->snapshot.lat;
+        g->ekf.x[1] = (float)g->snapshot.lon;
+        return;
+    }
 
     float fx[2] = { g->ekf.x[0], g->ekf.x[1] };
     float F[4]  = { 1,0, 0,1 };
@@ -562,6 +568,28 @@ bool gps_read_snapshot(gps_t *g, gps_data_t *out) {
     g->frame_ready = false;
     *out = g->snapshot;
     __enable_irq();
+    return true;
+}
+
+bool gps_read_combined(gps_t *a, gps_t *b, gps_data_t *out) {
+    gps_data_t da, db;
+    bool ok_a = gps_read_snapshot(a, &da);
+    bool ok_b = gps_read_snapshot(b, &db);
+
+    if (!ok_a && !ok_b) return false;
+    if (!ok_a) { *out = db; return true; }
+    if (!ok_b) { *out = da; return true; }
+
+    float wa = (float)da.numSV, wb = (float)db.numSV, wt = wa + wb;
+    if (wt == 0.0f) { *out = da; return true; }
+
+    out->lat     = (da.lat     * wa + db.lat     * wb) / wt;
+    out->lon     = (da.lon     * wa + db.lon     * wb) / wt;
+    out->alt     = (da.alt     * wa + db.alt     * wb) / wt;
+    out->gSpeed  = (da.gSpeed  * wa + db.gSpeed  * wb) / wt;
+    out->headMot = (da.headMot * wa + db.headMot * wb) / wt;
+    out->numSV   = da.numSV + db.numSV;
+    out->fixType = (da.fixType < db.fixType) ? da.fixType : db.fixType;
     return true;
 }
 

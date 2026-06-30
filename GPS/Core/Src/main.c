@@ -61,9 +61,11 @@ PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
 gps_t gps_1;
+// gps_t gps_2;
 static uint8_t gps_1_byte;
+// static uint8_t gps_2_byte;
 
-uint8_t pantilt_buffer[100];
+uint8_t pantilt_data[100];
 int pantilt_ready = 0;
 /* USER CODE END PV */
 
@@ -117,26 +119,29 @@ int main(void)
   MX_USART3_UART_Init();
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
   setup_simple();
+
   gps_init(&gps_1, GPS_UBX, &huart4, true);
+  // gps_init(&gps_2, GPS_UBX, &huart3, true);
   HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
+  // HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    gps_data_t gps_1_data;
-    if (gps_read_snapshot(&gps_1, &gps_1_data)) {
+    gps_data_t data;
+    // if (gps_read_combined(&gps_1, &gps_2, &data)) {
+    if (gps_read_snapshot(&gps_1, &data)) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
 
       char satellites[50];
       char latitude[50];
       char longitude[50];
 
-      int_to_string(gps_1_data.numSV, satellites, 50);
-      float_to_string(gps_1_data.lat, 8, latitude, 50);
-      float_to_string(gps_1_data.lon, 8, longitude, 50);
+      int_to_string(data.numSV, satellites, 50);
+      float_to_string(data.lat, 8, latitude, 50);
+      float_to_string(data.lon, 8, longitude, 50);
 
       printf("sat: %s, lat: %s, lon: %s\n", satellites, latitude, longitude);
 
@@ -149,10 +154,10 @@ int main(void)
     }
     
     if (pantilt_ready == 0) {
-      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_buffer, sizeof(pantilt_buffer));
+      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data, sizeof(pantilt_data));
       if (count > 0) {
         pantilt_ready = count;
-        HAL_UART_Transmit_IT(&huart3, pantilt_buffer, pantilt_ready);
+        HAL_UART_Transmit_IT(&huart3, pantilt_data, pantilt_ready);
       }
     }
 
@@ -440,10 +445,14 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == &huart4) {
+  if (huart == gps_1.huart) {
     gps_process(&gps_1, gps_1_byte);
     HAL_UART_Receive_IT(&huart4, &gps_1_byte, 1);
   }
+  // if (huart == gps2.huart) {
+  //   gps_process(&gps_2, gps_2_byte);
+  //   HAL_UART_Receive_IT(&huartX, &gps_2_byte, 1);
+  // }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {

@@ -43,6 +43,7 @@ typedef struct {
 void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart, bool use_ekf);
 bool gps_process(gps_t *g, uint8_t byte);
 bool gps_read_snapshot(gps_t *g, gps_data_t *out);
+bool gps_read_combined(gps_t *a, gps_t *b, gps_data_t *out);
 
 #ifdef __cplusplus
 }
