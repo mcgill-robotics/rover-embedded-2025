@@ -67,6 +67,7 @@ static uint8_t gps_1_byte;
 UART_HandleTypeDef *pantilt_uart = &huart3;
 uint8_t pantilt_data[100];
 volatile int pantilt_ready = 0;
+static uint32_t pantilt_line_len = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -152,10 +153,18 @@ int main(void)
     }
     
     if (pantilt_ready == 0) {
-      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data, sizeof(pantilt_data));
-      if (count > 0) {
-        pantilt_ready = count;
-        HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_ready);
+      uint32_t space = sizeof(pantilt_data) - pantilt_line_len;
+      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data + pantilt_line_len, space);
+      for (uint32_t i = 0; i < count && pantilt_ready == 0; i++) {
+        pantilt_line_len++;
+        if (pantilt_data[pantilt_line_len - 1] == '\n') {
+          pantilt_ready = pantilt_line_len;
+          HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_ready);
+          pantilt_line_len = 0;
+        }
+      }
+      if (pantilt_line_len >= sizeof(pantilt_data)) {
+        pantilt_line_len = 0;
       }
     }
 
