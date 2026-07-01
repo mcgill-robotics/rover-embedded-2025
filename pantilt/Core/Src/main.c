@@ -72,6 +72,7 @@ static void MX_UART4_Init(void);
 int uart_data_ready = 0;
 char buffer[100];
 int buffer_size = 0;
+static volatile uint16_t pantilt_rx_size = 0;
 /* USER CODE END 0 */
 
 /**
@@ -120,7 +121,7 @@ int main(void)
     // process_simple();
     // process_servo();
     if (uart_data_ready){
-      int res = process_servo_uart(buffer, 100);
+      int res = process_servo_uart(buffer, pantilt_rx_size);
       HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) buffer, 100);
       uart_data_ready = 0;
     }
@@ -410,8 +411,15 @@ int __io_putchar(int ch)
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  pantilt_rx_size = Size;
   uart_data_ready = 1;
   printf("received\n");
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+  if (huart == &huart4) {
+    HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) buffer, 100);
+  }
 }
 /* USER CODE END 4 */
 
