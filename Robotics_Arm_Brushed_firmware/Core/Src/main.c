@@ -100,64 +100,6 @@ int LMSW2_flag_pitch_down = 0;
 int LMSW5_flag_roll = 0;
 int LMSW6_flag_gripper = 0;
 
-volatile uint8_t systick_10ms_flag = 0;
-
-
-int systick_counts = 0;
-int syscounter = 0;
-void SysTickFunction(void) {
-	/*
-	 * THIS IS CALLED EVERY 1ms
-	 */
-
-	for (int i = 0; i < NB_MOTORS; i++){
-
-		Motor * motor =  all_motors_list[i];
-
-		// !!!! debugging; remove when fixed encoder
-		if (motor->motorName != PITCH){
-			continue;
-		}
-
-		// poll limit switch after interrupt triggered
-		//if (is_debouncing(motor->Motor_Encoding_Struct)){
-			//if (try_calibrate_encoder()){
-				// reset to stop polling and set switch to non pressed state
-	//			set_debounce(motor, 0);
-	//			reset_debounce_buffer();
-				// align wheel if initial calibration
-//				if (motor->steering_state == CALIBRATION){
-//					setPIDGoalA(motor, 90);
-//				}
-//				motor->steering_state = LEAVE_LIMIT;
-			//}
-		//}
-
-		//normal systick loop execution
-		switch (motor->steering_state) {
-			case (PID):
-				updatePID(motor);// TODO FIX
-				break;
-			case(CALIBRATION):
-				set_calibration_motor_movement(motor);
-				break;
-			case(LEAVE_LIMIT):
-				//leave_limit_switch(); // TODO FIX
-				break;
-		}
-		//set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
-
-
-		//	if (is_debouncing()){
-	//		if(systick_counts++==100){
-	//			systick_counts=0;
-	//			set_debounce(0);
-	//		}
-	//	}
-
-	}
-
-}
 
 volatile uint32_t enc_count = 0;
 
@@ -224,9 +166,9 @@ int main(void)
    * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
    * - limit switch reset counts: depends how angles defined -- corresponds to 180
    */
-  motor_encoding_struct_init(&gripper_encoding, 33024, 50000);
-  motor_encoding_struct_init(&pitch_encoding, 33024, 50000);
-  motor_encoding_struct_init(&roll_encoding, 33024, 50000);
+  motor_encoding_struct_init(&gripper_encoding, 33024, 0);
+  motor_encoding_struct_init(&pitch_encoding, 33024, 0);
+  motor_encoding_struct_init(&roll_encoding, 33024, 0);
 
 
 
@@ -236,9 +178,9 @@ int main(void)
    * - kPw; // proportional gain (how far away from goal)
    * - kDw; //derivative gain (smoothing)
    */
-  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 50, 5);
-  motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 50, 5);
-  motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 50, 5);
+  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 10, 0);
+  motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 10, 0);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 10, 0);
 
 
   all_motors_list[0] = &gripper_motor;
@@ -271,9 +213,9 @@ int main(void)
    * offset such that can go 180 right and 180 left without getting to 0 counts(- values)
    */
 
-  gripper_motor.ENCODER_type->CNT = 41744; //gripper
-  roll_motor.ENCODER_type->CNT = 41744; //roll
-  //pitch_motor.ENCODER_type->CNT = 41744; //pitch
+  gripper_motor.ENCODER_type->CNT = 0; //gripper
+  roll_motor.ENCODER_type->CNT = 0; //roll
+  pitch_motor.ENCODER_type->CNT = 0; //pitch
 
   set_motor_speed_raw(&gripper_motor, 0);
   set_motor_speed_raw(&pitch_motor, 0);
@@ -285,9 +227,9 @@ int main(void)
   set_motor_direction(&roll_motor, 1);
 
 
-  set_counts(&gripper_encoding, 41744);
-  set_counts(&pitch_encoding, 41744);
-  set_counts(&roll_encoding, 41744);
+  set_counts(&gripper_encoding, 0);
+  set_counts(&pitch_encoding, 0);
+  set_counts(&roll_encoding, 0);
 
 
 //  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
@@ -356,12 +298,14 @@ int main(void)
 
 
 	  //process_simple();
-	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
-	 HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+	 //__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
+	 //HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 
-	  enc_count = __HAL_TIM_GET_COUNTER(&htim5);
+	 setPIDGoalA(&pitch_motor, 360);
 
-	  //pitch_motor.ENCODER_type->CNT;
+	  //enc_count = __HAL_TIM_GET_COUNTER(&htim5);
+
+	  enc_count = pitch_motor.ENCODER_type->CNT;
 
 //	  //pitch
 //
@@ -450,30 +394,32 @@ int main(void)
 
 
 
-	    char readchar = read_char();
-	    if (readchar == 'c'){
-	    	print_to_usb("close gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-	    }else if (readchar == 'o'){
-	    	print_to_usb("open gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-	    }else if (readchar == 's'){
-	    	print_to_usb("stop gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-	    }else if (readchar == 'w'){
-	    	print_to_usb("ccw roll\n");
-	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
-		}else if (readchar == 'd'){
-			print_to_usb("cw roll\n");
-			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
-		}else if (readchar == 'r'){
-			print_to_usb("stop roll\n");
-			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-		}
+//	    char readchar = read_char();
+//	    if (readchar == 'c'){
+//	    	print_to_usb("close gripper\n");
+//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+//	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+//	    }else if (readchar == 'o'){
+//	    	print_to_usb("open gripper\n");
+//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+//	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+//	    }else if (readchar == 's'){
+//	    	print_to_usb("stop gripper\n");
+//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//	    }else if (readchar == 'w'){
+//	    	print_to_usb("ccw roll\n");
+//	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+//	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+//		}else if (readchar == 'd'){
+//			print_to_usb("cw roll\n");
+//			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+//			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+//		}else if (readchar == 'r'){
+//			print_to_usb("stop roll\n");
+//			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+//		}
+
+
 
 	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
 //	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);

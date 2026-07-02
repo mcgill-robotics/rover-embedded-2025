@@ -32,7 +32,7 @@ int calibrationMode = 0; // if calibrating, lower the speed!
 // I will mention this to whoever is controlling the steering.
 
 static volatile atomic_int gripperGoalAngle = ATOMIC_VAR_INIT (0);
-static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (41744);
+static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (0);
 static volatile atomic_int rollGoalAngle = ATOMIC_VAR_INIT (0);
 
 uint32_t last_blink2 = 0;
@@ -66,13 +66,6 @@ int updatePIDImpl(Motor * motor, int goal) {
 	//return 1 when goal reached
 	//angleError = goal - get_counts(motor->Motor_Encoding_Struct);
 	angleError = goal - currCounts;
-	if (currCounts == 30000){
-		// Non-blocking LED blink
-		if (HAL_GetTick() - last_blink2 >= 1000) {
-			HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
-			last_blink2 = HAL_GetTick();
-		}
-	}
 
 //	if (currCounts >= 66512){
 //		motor->ENCODER_type->CNT = motor->ENCODER_type->CNT % 66512 + 33488;
@@ -90,8 +83,10 @@ int updatePIDImpl(Motor * motor, int goal) {
 
 
 	// --> define kPw and kDw for each individual motor !
-    //angleCorrection = motor->kPw * angleError + motor->kDw * (angleError - motor->Motor_Encoding_Struct->oldAngleError);
-    angleCorrection = angleError/33024.0f * 4499;
+    angleCorrection = motor->kPw * angleError + motor->kDw * (angleError - motor->Motor_Encoding_Struct->oldAngleError);
+
+	//angleCorrection = angleError/33024.0f * 4499;
+
 	// Set direction based on allowed error
 	if (angleCorrection < 0){
 		set_motor_direction(motor, 0);

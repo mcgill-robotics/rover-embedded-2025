@@ -193,7 +193,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
-  systick_10ms_flag = 1;
+  SysTickFunction();
 
 
   /* USER CODE END SysTick_IRQn 1 */

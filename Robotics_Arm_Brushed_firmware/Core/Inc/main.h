@@ -138,7 +138,7 @@ void Error_Handler(void);
 #define NB_MOTORS 3
 extern Motor * all_motors_list[NB_MOTORS];
 
-extern volatile uint8_t systick_10ms_flag;
+//extern volatile uint8_t systick_10ms_flag;
 
 /* USER CODE END Private defines */
 

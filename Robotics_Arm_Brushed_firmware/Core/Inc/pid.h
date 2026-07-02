@@ -9,7 +9,7 @@
 //#define kPw 50 defined in motor struct
 //#define kDw 5  // defined in motor struct
 
-#define ALLOWED_ERROR 20
+#define ALLOWED_ERROR 200
 #define ALLOWED_ERROR_ZERO 300
 
 
