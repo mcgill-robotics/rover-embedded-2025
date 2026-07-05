@@ -2,50 +2,54 @@
 #include "servo.h"
 #include <stdint.h>
 
-int32_t pan_angle = 90;
-int32_t tilt_angle = 90;
+double pan_angle = 90;
+double tilt_angle = 90;
 
-int32_t min(int32_t a, int32_t b) {
+double min(double a, double b) {
     return (a < b) ? a : b;
 }
 
-int32_t max(int32_t a, int32_t b) {
+double max(double a, double b) {
     return (a > b) ? a : b;
 }
 
-int process_servo_uart(char *buffer, int length) {
+
+int process_servo_uart(char *buffer, int length, ProcessResult* res) {
+    int comma_count = 0;
     int comma_index = -1;
     int index = 0;
 
     char pan_angle_string[50];
     char tilt_angle_string[50];
-    float new_pan_angle;
-    float new_tilt_angle;
+    double new_pan_angle;
+    double new_tilt_angle;
 
     while(index < length) {
         char incoming = buffer[index];
 
         if (incoming == '\n') {
-            if (comma_index != -1) {
+            if (comma_index != -1&&comma_count==1) {
                 create_substring(buffer, pan_angle_string, 0, comma_index - 1);
                 create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
-
-                new_pan_angle = string_to_float(pan_angle_string);
+                // uses atof so invalid input just turns into 0, so no change to output happens
+                new_pan_angle = string_to_float(pan_angle_string); 
                 new_tilt_angle = string_to_float(tilt_angle_string);
 
                 set_pan(new_pan_angle);
                 set_tilt(new_tilt_angle);
-                return 1;
+                return index+1;
             }
-
-            return 0;
+            return index+1;
         } else {
-            if (incoming == ',') comma_index = index;
+            if (incoming == ',') {
+                comma_index = index;
+                comma_count++;
+            }
             buffer[index] = incoming;
             index++;
         }
     }
-    return 0;
+    return index;
 }
 
 void create_substring(char *buffer, char *destination, int start, int end) {
@@ -79,8 +83,8 @@ void process_servo(void) {
 
     char pan_angle_string[50];
     char tilt_angle_string[50];
-    float new_pan_angle;
-    float new_tilt_angle;
+    double new_pan_angle;
+    double new_tilt_angle;
 
     while(has_data()) {
         char incoming = read_char();
@@ -110,19 +114,18 @@ void process_servo(void) {
     }
 }
 
-void write_servo(TIM_HandleTypeDef *htim, uint16_t angle) {
-    uint16_t pulse = MIN_PERIOD + (angle * (MAX_PERIOD - MIN_PERIOD) / MAX_ANGLE);
-    __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, pulse);
+void write_servo(TIM_HandleTypeDef *htim, double angle) {
+    double pulse = MIN_PERIOD + (angle * (MAX_PERIOD - MIN_PERIOD) / MAX_ANGLE);
+    __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, (uint16_t) pulse);
 }
 
-void set_pan(float angle) {
-    int32_t int_angle = (int32_t) (angle * PAN_GEAR_RATIO);
-    pan_angle = max(MIN_ANGLE, min((pan_angle + int_angle), MAX_ANGLE));
-    write_servo(PAN_SERVO, (uint16_t) pan_angle);
+void set_pan(double angle) {
+    pan_angle = max(MIN_ANGLE, min((pan_angle + angle), MAX_PAN_ANGLE));
+    double servo_angle = (pan_angle / PAN_GEAR_RATIO);
+    write_servo(PAN_SERVO, servo_angle);
 }
 
-void set_tilt(float angle) {
-    int32_t int_angle = (int32_t) angle;
-    tilt_angle = max(MIN_ANGLE, min((tilt_angle + int_angle), MAX_ANGLE));
-    write_servo(TILT_SERVO, (uint16_t) tilt_angle);
+void set_tilt(double angle) {
+    tilt_angle = max(MIN_ANGLE, min((tilt_angle + angle), MAX_TILT_ANGLE));
+    write_servo(TILT_SERVO, tilt_angle);
 }

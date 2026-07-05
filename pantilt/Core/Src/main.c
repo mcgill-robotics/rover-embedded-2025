@@ -70,9 +70,23 @@ static void MX_UART4_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int uart_data_ready = 0;
-char buffer[100];
-int buffer_size = 0;
+#define BUF_SIZE 100
+char buffer1[BUF_SIZE];
+char buffer2[BUF_SIZE]
+;
+char* active_buf = buffer1;
+char* inactive_buf = buffer2;
 static volatile uint16_t pantilt_rx_size = 0;
+
+void swap_buffer(){
+  if (active_buf == buffer2){
+    active_buf = buffer1;
+    inactive_buf = buffer2;
+  } else {
+    active_buf = buffer2;
+    inactive_buf = buffer1;
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -111,7 +125,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   // setup_simple();
   init_servos();
-  HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) buffer, 100);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf, BUF_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,8 +135,17 @@ int main(void)
     // process_simple();
     // process_servo();
     if (uart_data_ready){
-      int res = process_servo_uart(buffer, pantilt_rx_size);
-      HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) buffer, 100);
+      HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+      int total_bytes_read = 0;
+      ProcessResult result = PROC_OK;
+      while (result != PROC_NEED_MORE){
+        int bytes_read = process_servo_uart(active_buf+total_bytes_read, pantilt_rx_size, &result);
+        total_bytes_read+=bytes_read;
+        pantilt_rx_size-=bytes_read;
+      }
+      memcpy(inactive_buf, active_buf+total_bytes_read, pantilt_rx_size);
+      swap_buffer();
+      HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf+pantilt_rx_size, BUF_SIZE-pantilt_rx_size);
       uart_data_ready = 0;
     }
     /* USER CODE END WHILE */
@@ -387,6 +410,7 @@ static void MX_USB_PCD_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
 
   /* USER CODE END MX_GPIO_Init_1 */
@@ -395,6 +419,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : USER_LED_Pin */
+  GPIO_InitStruct.Pin = USER_LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(USER_LED_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -411,14 +445,14 @@ int __io_putchar(int ch)
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  pantilt_rx_size = Size;
+  pantilt_rx_size += Size;
   uart_data_ready = 1;
   printf("received\n");
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (huart == &huart4) {
-    HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) buffer, 100);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf, BUF_SIZE);
   }
 }
 /* USER CODE END 4 */
