@@ -66,8 +66,7 @@ static uint8_t gps_1_byte;
 
 UART_HandleTypeDef *pantilt_uart = &huart3;
 uint8_t pantilt_data[100];
-volatile int pantilt_ready = 0;
-static uint32_t pantilt_line_len = 0;
+volatile int pantilt_bytes = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -152,19 +151,11 @@ int main(void)
       print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
     }
     
-    if (pantilt_ready == 0) {
-      uint32_t space = sizeof(pantilt_data) - pantilt_line_len;
-      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data + pantilt_line_len, space);
-      for (uint32_t i = 0; i < count && pantilt_ready == 0; i++) {
-        pantilt_line_len++;
-        if (pantilt_data[pantilt_line_len - 1] == '\n') {
-          pantilt_ready = pantilt_line_len;
-          HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_ready);
-          pantilt_line_len = 0;
-        }
-      }
-      if (pantilt_line_len >= sizeof(pantilt_data)) {
-        pantilt_line_len = 0;
+    if (pantilt_bytes == 0) {
+      uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data, sizeof(pantilt_data));
+      if (count > 0){
+        pantilt_bytes = count;
+        HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_bytes);
       }
     }
 
@@ -410,7 +401,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
   //   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
   // }
   if (huart == pantilt_uart) {
-    pantilt_ready = 0;
+    pantilt_bytes = 0;
   }
 }
 
@@ -427,7 +418,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == pantilt_uart)
-    pantilt_ready = 0;
+    pantilt_bytes = 0;
 }
 /* USER CODE END 4 */
 

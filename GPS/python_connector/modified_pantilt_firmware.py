@@ -153,9 +153,36 @@ if __name__ == "__main__":
     except ConnectionError as e:
         print(e)
         exit(1)
-
-    board.add_pan_angle(30)
-    board.add_tilt_angle(30)
+    step_p = 1
+    step_t = 5
+    while input().strip()=="":
+        board.add_pan_angle(10)
+        time.sleep(0.05)
+        board.add_tilt_angle(10)
+    board.add_pan_angle(-360)
+    time.sleep(0.05)
+    board.add_tilt_angle(-270)
+    while True:
+        for i in range(int(360/step_p)):
+            board.add_pan_angle(step_p)
+            time.sleep(0.02)
+        for i in range(int(360/step_p)):
+            board.add_pan_angle(-step_p)
+            time.sleep(0.02)
+    # while True:
+    #     for i in range(int(270/step_t)):
+    #         print("dir 1")
+    #         board.add_pan_angle(step_p)
+    #         time.sleep(0.05)
+    #         board.add_tilt_angle(step_t)
+    #         time.sleep(0.05)
+    #     for i in range(int(270/step_t)):
+    #         print("dir 2")
+    #         board.add_pan_angle(-step_p)
+    #         time.sleep(0.05)  
+    #         board.add_tilt_angle(-step_t)
+    #         time.sleep(0.05)  
+        # board.add_tilt_angle(30)
 
     while True:
         board.run()
