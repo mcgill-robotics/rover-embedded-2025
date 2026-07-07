@@ -206,7 +206,7 @@ void USB_HP_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_HP_IRQn 0 */
   tud_int_handler(0);
-  return:
+  return;
   /* USER CODE END USB_HP_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
   /* USER CODE BEGIN USB_HP_IRQn 1 */
@@ -221,7 +221,7 @@ void USB_LP_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_IRQn 0 */
   tud_int_handler(0);
-  return:
+  return;
   /* USER CODE END USB_LP_IRQn 0 */
   HAL_PCD_IRQHandler(&hpcd_USB_FS);
   /* USER CODE BEGIN USB_LP_IRQn 1 */

@@ -23,7 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 // Including the C standard libraries
-#include <stdio.h>			// STD
+#include <stdio.h>			// STDIO
 #include <string.h>			// Strings (for organizing data)
 #include "rosjam.h"
 /* USER CODE END Includes */
@@ -74,6 +74,8 @@ uint16_t mois4_val = 0;
 uint16_t co2_val1= 0;
 uint16_t co2_val2 = 0;
 uint32_t tof_val = 0;
+
+uint16_t timer = 0;
 
 char buffer[150];
 
@@ -237,12 +239,17 @@ int main(void)
 
 	  // Send the data via the USB interface
 	  // Write to buffer
-	  sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, ph4=%d ; m1=%d, m2=%d, m3=%d, m4=%d ; co2[0]=%d, co2[1]=%d ; tof=%ld\r\n", ph1_val, ph2_val, ph3_val, ph4_val, mois1_val, mois2_val, mois3_val, mois4_val, co2_val1, co2_val2, tof_val);
-	  // Send data via USB
-    send_msg_raw(buffer, 150);
-
+    printf("ping");
+    timer++;
+    if (timer == 4000){
+      sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, ph4=%d ; m1=%d, m2=%d, m3=%d, m4=%d ; co2[0]=%d, co2[1]=%d ; tof=%ld\r\n", ph1_val, ph2_val, ph3_val, ph4_val, mois1_val, mois2_val, mois3_val, mois4_val, co2_val1, co2_val2, tof_val);
+	    // Send data via USB
+      printf(buffer);
+      send_msg_raw(buffer, 150);
+      timer = 0;
+    }
+	  
     // NO HAL_Delay!!! (rosjam USB doesn't like that)
-
   }
   /* USER CODE END 3 */
 }
