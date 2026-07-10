@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "cobs.h"
+#include "varint.h"
 
 uint8_t encode_buffer[10000];
 uint8_t decode_buffer[10000];
@@ -13,8 +14,8 @@ int float_to_string(float number, int precision, char* buf, int buf_len){
     snprintf(buf, len + 1, "%.*f", number);
 }
 
-int main(){
-	char buf[1000];
+void test_cobs(){
+		char buf[1000];
 	float_to_string(12.33454565, 2, buf, 1000);
 	printf("%s\n", buf);
 	char* test1 = "ab123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890bcdefghaasdfasfaf";
@@ -76,4 +77,34 @@ int main(){
 	// 	printf("%hhx\n", encode_buffer[i]);
 		
 	// }
+}
+
+void test_varint(){
+	uint32_t i = 1243234234;
+	uint8_t buf[5];
+	int bytes_used = encode_varint(i, buf);
+	printf("Used %d\n", bytes_used);
+	for (int i =0; i< 5;i++){
+		printf("%d\n", buf[i]);
+	}
+	uint32_t num;
+	varint_decode_state_t state = decode_varint(buf, &num);
+	switch (state)
+	{
+	case VARINT_OK:
+		printf("ok\n");
+		break;
+	case VARINT_TOO_BIG:
+		printf("too big\n");
+		break;
+	}
+	printf("%d\n", num);
+	if (i==num){
+		printf("decoded correctly\n");
+	}
+
+}
+
+int main(){
+	test_varint();
 }

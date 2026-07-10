@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "rosjam.h"
 #include "stdio.h"
+#include "tusb.h"
 #include "stm32g4xx_hal_def.h"
 #include <stdint.h>
 #include <string.h>
@@ -120,7 +121,7 @@ int main(void)
   init_interface(&endpoint4, "uart3", uart3buf, ENDPOINT_BUF_LEN);
   init_interface(&endpoint5, "uart4", uart4buf, ENDPOINT_BUF_LEN);
   init_interface(&endpoint6, "uart5", uart5buf, ENDPOINT_BUF_LEN);
-  // must call init before registering interfaces
+  // // must call init before registering interfaces
   init_rosjam_usb();
   register_interface(&endpoint0);
   register_interface(&endpoint1);
@@ -138,24 +139,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   int counter = 0;
+  // char* str = "Hello World! diag: This is a longer message\n";
+  // int str_len = strlen(str);
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     // if (tud_cdc_n_ready(0)){
-    //   char* str = "Hello World! diag: This is a longer message\n";
-    //   int written = encode( (uint8_t*)str, strlen(str), (uint8_t*)data, 1000, 0);
-    //   tud_cdc_n_write(0, data, written);
+      
+    //   // int written = encode( (uint8_t*)str, strlen(str), (uint8_t*)data, 1000, 0);
+    //   tud_cdc_n_write(0, str,str_len);
     //   tud_cdc_n_write_flush(0);
-      // serialize(&test ,"test", "Hello World! diag: This is a longer message\n");
-      // serialize_simple("test", "Hello World! diag: This is a longer message\n");
+    //   // serialize(&test ,"test", "Hello World! diag: This is a longer message\n");
+    //   // serialize_simple("test", "Hello World! diag: This is a longer message\n");
     // }
     
     if (needs_blink){
         // HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, 1);
         
-        HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
+        // HAL_GPIO_TogglePin (USER_LED_GPIO_Port, USER_LED_Pin);
         needs_blink = 0;
     } 
     // else {
@@ -226,14 +229,12 @@ int main(void)
       }
       char base[100];
       char* str = "Hello jetson this is some longer data this is some longer data this is some longer data ";
-      char* str2 = "from ";
-      int strlen2 = strlen(str2);
-      memcpy(base, str2, strlen2);
+      char* str2 = " from ";
+      int baselen = strlen(str);
+      memcpy(base, str, baselen+1);
       char* topic = endpoint->topic;
       int topic_len = strlen(topic);
-      memcpy(base+strlen2, topic, topic_len);
-      *(base+strlen2+topic_len) = ' ';
-      memcpy(base+strlen2+topic_len+1, str, strlen(str)+1);
+      strcat(base, str2);
       char convert_buf[100];
       int_to_string(counter, convert_buf, 100);
       strcat(base, convert_buf);
@@ -251,6 +252,7 @@ int main(void)
     //   send_msg(&endpoint6, "Hello World! uart5: This is a longer message  uart5: This is a longer message Hello World! Hello World! uart0: This is a longer message  uart0: This is a longer message Hello World!");
     // }
     process();
+    
     // tud_task();
   }
   /* USER CODE END 3 */

@@ -29,13 +29,14 @@ void mark_read(Buffer* buf, int read){
 }
 
 
-uint8_t* get_tagged_write_space(Buffer* buf, uint32_t size){
+buffer_alloc_state_t get_tagged_write_space(Buffer* buf, uint32_t size, uint8_t** write_head){
 	uint32_t metadata_size = 4; //+4 for metadata about string size
 	uint32_t size_with_padding = get_size_with_pad(size);
 	uint32_t to_reserve = size_with_padding+metadata_size;
-	
+	buffer_alloc_state_t state = BUFFER_OK;
 	if (size > buf->capacity){
-		return NULL;
+		*write_head = NULL;
+		return BUFFER_TOO_SMALL;
 	}
 	int available = buf->capacity - buf->size;
 	uint8_t* write_position;
@@ -45,8 +46,10 @@ uint8_t* get_tagged_write_space(Buffer* buf, uint32_t size){
 		buf-> read_offset = 0;
 		buf -> size = to_reserve;
 		write_position = buf -> buf;
+		state = BUFFER_CLEARED;
 	} else {
 		if (tail_space < to_reserve){
+			state = BUFFER_MOVED;
 			if (buf->size < buf->read_offset){
 				memcpy(buf->buf, buf->buf+buf->read_offset, buf->size);
 			} else {
@@ -63,16 +66,24 @@ uint8_t* get_tagged_write_space(Buffer* buf, uint32_t size){
 		buf -> size += to_reserve;
 	}
 	((uint32_t*) write_position)[0] = size;
-	write_position = write_position+metadata_size;
-	return write_position;
+	*write_head = write_position+metadata_size;
+	return state;
 }
 
+void reclaim_allocated(Buffer* buf, int size){
+	if (size > buf->size){
+		buf->size = 0;
+	} else {
+		(buf->size)-=size;
+	}
+}
 
-uint8_t* get_write_space(Buffer* buf, int size){
+buffer_alloc_state_t get_write_space(Buffer* buf, int size, uint8_t** write_head){
 	uint32_t to_reserve = size;
-	
+	buffer_alloc_state_t state = BUFFER_OK;
 	if (size > buf->capacity){
-		return NULL;
+		*write_head = NULL;
+		return BUFFER_TOO_SMALL;
 	}
 	int available = buf->capacity - buf->size;
 	uint8_t* write_position;
@@ -82,8 +93,10 @@ uint8_t* get_write_space(Buffer* buf, int size){
 		buf-> read_offset = 0;
 		buf -> size = to_reserve;
 		write_position = buf -> buf;
+		state = BUFFER_CLEARED;
 	} else {
 		if (tail_space < to_reserve){
+			state = BUFFER_MOVED;
 			if (buf->size < buf->read_offset){
 				memcpy(buf->buf, buf->buf+buf->read_offset, buf->size);
 			} else {
@@ -99,5 +112,6 @@ uint8_t* get_write_space(Buffer* buf, int size){
 		write_position = buf -> buf+buf->read_offset+buf->size;
 		buf -> size += to_reserve;
 	}
-	return write_position;
+	*write_head = write_position;
+	return state;
 }

@@ -44,16 +44,29 @@ The project uses CMake to build the library and example program.
   
 ## Features
 Optional features are features that not all clients or endpoints will need to implement
+
+**Protocol features:**
 - [x] Basic COBS + messagepack data transmission
-- [ ] Bridge to software control
-- [ ] (Optional) Add per endpoint receive callbacks
+- [ ] Remove MessagePack from message format keep only for payload
+  - [ ] Implement VarInt based TLV with ASCII tags based format
+
 - [ ] High priority messages?
-- [ ] Diagnostic channel handler
+- [ ] Diagnostic messages
   - [ ] Ping (with timestamp passthrough for latency measurements)
   - [ ] Packet ID on diagnostic packets
   - [ ] (Optional) Heartbeat
   - [ ] Board Info (HW/FW version)
   - [ ] Protocol version
+  - [ ] 
+**Embedded Implementation**
+
+- [ ] Implement a stream compatible COBS API to reduce copying
+- [ ] Implement a zero-copy parser for the new custom message format (copy only needed for the message pack payload)
+- [ ] (Optional) Add per endpoint receive callbacks
+
+**Other**
+
+- [ ] Bridge to software control
 
 ## To-do
 - [ ] On deserialize be more lenient to allow extra fields to extend protocol in the future.

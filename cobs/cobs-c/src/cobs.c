@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "cobs.h"
 
 #define MAX_CHUNK_SIZE 255
 
@@ -9,6 +10,258 @@
  */
 int cobs_estimate_encoded_size(int buf_size){
 	return 1+(buf_size/(MAX_CHUNK_SIZE-1)+1)+buf_size;// 1 delimiter(back) + chunk overhead (rounded up) + data size
+}
+
+/**
+ * Estimates decoded size from cobs frame
+ */
+int cobs_estimate_decoded_size(int buf_size){
+	return buf_size-buf_size/MAX_CHUNK_SIZE-1;// 1 delimiter(back) + chunk overhead (rounded up) + data size
+}
+
+
+void cobs_setup_stream_reader(cobs_reader_t* reader){
+	reader -> state = COBS_SYNC;
+	reader -> chunk_bytes_left = 0;
+	reader -> overhead_next = 1;
+}
+
+void cobs_consume_message(cobs_reader_t* reader){
+	reader->current_frame_size=0;
+}
+
+cobs_result_t cobs_stream_decode_buf(cobs_reader_t* reader, uint8_t* buf, int available, uint8_t* output, int output_length, uint8_t delim, int* written_bytes, int* read_bytes){
+	*read_bytes = 0;
+	*written_bytes = 0;
+	while (*read_bytes<available){
+		switch (reader->state)
+		{
+		case COBS_SYNC: {
+			if (*buf == delim) {
+				reader->state = COBS_OVERHEAD;
+			}
+			buf++;
+			(*read_bytes)++;
+			break;
+		}
+		case COBS_OVERHEAD: {
+			(*read_bytes)++;
+			int value = *buf;
+			buf++;
+			if (value == delim){
+				reader->state = COBS_OVERHEAD;
+				return COBS_DONE;
+			}  
+			reader->chunk_bytes_left = value-1;
+			if (value == MAX_CHUNK_SIZE){
+				reader->overhead_next = 1;
+			} else {
+				reader ->overhead_next = 0;
+			}
+			reader->state = COBS_CHUNK;
+			break;
+		}
+		case COBS_CHUNK: {
+			if (*written_bytes>=output_length){
+				break;
+			}
+			int to_write = reader->chunk_bytes_left; 
+			if (to_write==0){
+				reader->state = COBS_STUFFED_BYTE;
+			} else {
+				int output_space_left = output_length-*written_bytes;
+				int input_available = available-*read_bytes;
+				int state = 0;
+				if (output_space_left >= to_write){
+					if (reader->overhead_next){
+						reader->state = COBS_OVERHEAD;
+					} else {
+						reader->state = COBS_STUFFED_BYTE;
+					}
+				} else {
+					if (input_available < output_space_left){
+						to_write = input_available;
+						state = -1;
+					} else {
+						to_write = output_space_left;
+						state = -2;
+					}
+					
+				}
+				memcmp(output, buf, to_write);
+				buf+=to_write;
+				(*read_bytes)+=to_write;
+				(reader->chunk_bytes_left)-=to_write;
+				output+=to_write;
+				(*written_bytes)+=to_write;
+				if (state == -1){
+					(reader->current_frame_size)+=*written_bytes;
+					return COBS_OUTPUT_FULL;
+				} else if (state == -2){
+					(reader->current_frame_size)+=*written_bytes;
+					return COBS_INCOMPLETE_FRAME;
+				}
+			}
+			break;
+		}
+		case COBS_STUFFED_BYTE: {
+			if (*written_bytes>=output_length){
+				break;
+			}
+			(*read_bytes)++;
+			int value = *buf;
+			buf++;
+			if (value == delim){
+				reader->state = COBS_OVERHEAD;
+				(reader->current_frame_size)+=*written_bytes;
+				return COBS_DONE;
+			}  
+			*written_bytes++;
+			*output = delim;
+			output++;
+			reader->chunk_bytes_left = value-1;
+			if (value == MAX_CHUNK_SIZE){
+				reader->overhead_next = 1;
+			} else {
+				reader ->overhead_next = 0;
+			}
+			reader->state = COBS_CHUNK;
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	(reader->current_frame_size)+=*written_bytes;
+	if (*read_bytes == available){
+		if (reader->state == COBS_SYNC){
+			return COBS_NO_FRAME;
+		} else {
+			return COBS_INCOMPLETE_FRAME;
+		}
+	}
+	if (*written_bytes == output_length){
+		return COBS_OUTPUT_FULL;
+	}
+}
+/**
+ * Support streaming through a pseudo read style api (actually based on tinyusb read)
+ */
+cobs_result_t cobs_stream_decode(cobs_reader_t* reader, uint32_t (*read)(uint8_t, void*, uint32_t), int itf, int available, uint8_t* output, int output_length, uint8_t delim, int* written_bytes, int* read_bytes){
+	*read_bytes = 0;
+	*written_bytes = 0;
+	uint8_t temp[1];
+	while (*read_bytes<available){
+		switch (reader->state)
+		{
+		case COBS_SYNC: {
+			read(itf, temp, 1);
+			if (*temp == delim) {
+				reader->state = COBS_OVERHEAD;
+			}
+			(*read_bytes)++;
+			break;
+		}
+		case COBS_OVERHEAD: {
+			read(itf, temp, 1);
+			(*read_bytes)++;
+			int value = *temp;
+			if (value == delim){
+				reader->state = COBS_OVERHEAD;
+				(reader->current_frame_size)+=*written_bytes;
+				return COBS_DONE;
+			}  
+			reader->chunk_bytes_left = value-1;
+			if (value == MAX_CHUNK_SIZE){
+				reader->overhead_next = 1;
+			} else {
+				reader ->overhead_next = 0;
+			}
+			reader->state = COBS_CHUNK;
+			break;
+		}
+		case COBS_CHUNK: {
+			if (*written_bytes>=output_length){
+				break;
+			}
+			int to_write = reader->chunk_bytes_left; 
+			if (to_write==0){
+				reader->state = COBS_STUFFED_BYTE;
+			} else {
+				int output_space_left = output_length-*written_bytes;
+				int input_available = available-*read_bytes;
+				int state = 0;
+				if (output_space_left >= to_write){
+					if (reader->overhead_next){
+						reader->state = COBS_OVERHEAD;
+					} else {
+						reader->state = COBS_STUFFED_BYTE;
+					}
+				} else {
+					if (input_available < output_space_left){
+						to_write = input_available;
+						state = -1;
+					} else {
+						to_write = output_space_left;
+						state = -2;
+					}
+					
+				}
+				read(itf, output, to_write);
+				(*read_bytes)+=to_write;
+				(reader->chunk_bytes_left)-=to_write;
+				output+=to_write;
+				(*written_bytes)+=to_write;
+				if (state == -1){
+					(reader->current_frame_size)+=*written_bytes;
+					return COBS_OUTPUT_FULL;
+				} else if (state == -2){
+					(reader->current_frame_size)+=*written_bytes;
+					return COBS_INCOMPLETE_FRAME;
+				}
+			}
+			break;
+		}
+		case COBS_STUFFED_BYTE: {
+			if (*written_bytes>=output_length){
+				break;
+			}
+			read(itf, temp, 1);
+			(*read_bytes)++;
+			int value = *temp;
+			if (value == delim){
+				reader->state = COBS_OVERHEAD;
+				(reader->current_frame_size)+=*written_bytes;
+				return COBS_DONE;
+			}  
+			*written_bytes++;
+			*output = delim;
+			output++;
+			reader->chunk_bytes_left = value-1;
+			if (value == MAX_CHUNK_SIZE){
+				reader->overhead_next = 1;
+			} else {
+				reader ->overhead_next = 0;
+			}
+			reader->state = COBS_CHUNK;
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	(reader->current_frame_size)+=*written_bytes;
+	if (*read_bytes == available){
+		if (reader->state == COBS_SYNC){
+			return COBS_NO_FRAME;
+		} else {
+			
+			return COBS_INCOMPLETE_FRAME;
+		}
+	}
+	if (*written_bytes == output_length){
+		return COBS_OUTPUT_FULL;
+	}
 }
 
 /**

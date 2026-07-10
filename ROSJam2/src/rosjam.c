@@ -11,6 +11,7 @@
 #include "tusb_config.h"
 #include "tusb.h"
 #include "stdio.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,8 @@
 // #include "cobs.h"
 
 ActiveEndpoints currentEndpoints;
+cobs_reader_t cobs_reader;
+int mid_cobs_frame = 0;
 
 int drop_dangling = 0;
 
@@ -88,6 +91,11 @@ uint8_t temp_data_buf[ENDPOINT_BUF_LEN];
 uint8_t temp_frame_buf[ENDPOINT_BUF_LEN];
 uint8_t global_rx_buf[ENDPOINT_BUF_LEN];
 
+void reset_cobs_reader(){
+	cobs_setup_stream_reader(&cobs_reader);
+	mid_cobs_frame = 0;
+}
+
 void init_rosjam_usb(){
 	currentEndpoints.global_rx_buffer.buf = global_rx_buf;
 	currentEndpoints.global_rx_buffer.capacity = ENDPOINT_BUF_LEN;
@@ -103,6 +111,7 @@ void init_rosjam_usb(){
     	.speed = TUSB_SPEED_AUTO
   	};
   	tusb_init(BOARD_TUD_RHPORT, &dev_init);
+	reset_cobs_reader();
 }
 
 /**
@@ -161,8 +170,9 @@ void send_data(RosjamEndpoint* endpoint, uint8_t* data, int data_len){
 	Buffer* buffer = &(endpoint->tx_buf);
 	int json_size = serialize(temp_frame_buf, ENDPOINT_BUF_LEN, endpoint->topic, (uint8_t*) data, data_len);
 	int cobs_size = cobs_estimate_encoded_size(json_size);
-	uint8_t* write_head = get_tagged_write_space(buffer, cobs_size);
-	if (write_head != NULL){
+	uint8_t* write_head;
+	buffer_alloc_state_t alloc_state = get_tagged_write_space(buffer, cobs_size, &write_head);
+	if (write_head != NULL && alloc_state != BUFFER_TOO_SMALL){
 		cobs_encode(temp_frame_buf, json_size, write_head, cobs_size, 0);
 	}
 }
@@ -231,7 +241,8 @@ int send_next_messages(){
 				break;
 			}
 			if (currentEndpoints.endpoints[next_endpoint_idx]==currentEndpoints.diag){
-					led_state=!led_state;
+					// led_state=!led_state;
+					printf("Sent message from diag\n");
 			}
 			total_sent+=str_size;
 			// send as many complete messages as possible
@@ -248,6 +259,7 @@ int send_next_messages(){
 		buf = &(currentEndpoints.endpoints[next_endpoint_idx]->tx_buf);
 		msg_bytes_actual = get_first_message(buf, &str_size, &start);
 	}
+	printf("Sent %d\n", counter);
 	currentEndpoints.hasPending = 0;
 	return total_sent;
 }
@@ -265,9 +277,73 @@ __weak void receivedFromUSB(RosjamEndpoint *endpoint, char *message, int message
 		// if (endpoint == currentEndpoints.diag){
 		// 	led_state = !led_state;
 		// }
-		// if (strcmp(endpoint->topic, "diag0")==0){
+		if (strcmp(endpoint->topic, "diag0")==0){
+			led_state = !led_state;
+			printf("%s\n",message_string);
 			send_msg(currentEndpoints.diag, message_string);
-		// }
+		}
+	}
+}
+
+void check_rx_next(){
+	if (!tud_cdc_n_ready(USB_CDC_ITF)){
+		return;
+	}
+	int available = tud_cdc_n_available(USB_CDC_ITF);
+	if (available == 0){
+		return;
+	}
+	// uint8_t temp[100];
+	// int read_data_count = tud_cdc_n_read(USB_CDC_ITF, temp, 100);
+	int output_size_estimate = cobs_estimate_decoded_size(available)+1;
+	uint8_t* write_head;
+	Buffer* buffer = &currentEndpoints.global_rx_buffer;
+	buffer_alloc_state_t alloc_state = get_write_space(buffer, output_size_estimate, &write_head);
+	if (alloc_state == BUFFER_TOO_SMALL){
+		available = buffer->capacity-buffer->size;
+		alloc_state = get_write_space(buffer, available, &write_head);
+	} else if (alloc_state == BUFFER_CLEARED){
+		if (mid_cobs_frame){
+			reset_cobs_reader();
+		}
+	} else {
+		printf("hello");
+	}
+	while (true) {
+		int written_bytes;
+		int read_bytes;
+		// memset(write_head, 0, output_size_estimate);
+		cobs_result_t decode_result =  cobs_stream_decode(&cobs_reader, &tud_cdc_n_read, USB_CDC_ITF, available, write_head, output_size_estimate, 0, &written_bytes, &read_bytes);
+		if (decode_result != COBS_DONE){
+			reclaim_allocated(buffer, output_size_estimate-written_bytes);
+		}
+		 if (decode_result == COBS_INCOMPLETE_FRAME){
+			mid_cobs_frame = 1;
+			break;
+		} else if (decode_result == COBS_NO_FRAME){
+			mid_cobs_frame = 0;	
+			break;
+		} else if (decode_result==COBS_OUTPUT_FULL){
+			break;
+		}
+		
+		if (decode_result == COBS_DONE){
+			mid_cobs_frame = 0;
+			// decode data here
+			int data_size;
+			
+			RosjamEndpoint* endpoint = deserialize(&currentEndpoints, (char*)buffer->buf+buffer->read_offset,  cobs_reader.current_frame_size, (char*)temp_data_buf, ENDPOINT_BUF_LEN, &data_size);
+			if (endpoint != NULL){
+				// call callback for user to process
+				receivedFromUSB(endpoint, (char*)temp_data_buf, data_size);
+			}
+			mark_read(buffer, cobs_reader.current_frame_size);
+			cobs_consume_message(&cobs_reader);
+
+		}
+		available-=read_bytes;
+		output_size_estimate-=written_bytes;
+		write_head+=written_bytes;
 	}
 }
 
@@ -287,9 +363,9 @@ void check_rx(){
 			to_read = buffer -> capacity;
 		}
 		// read data into rx buffer
-		uint8_t* write_head = get_write_space(buffer, to_read);
-		if (write_head != NULL){
-			
+		uint8_t* write_head;
+		buffer_alloc_state_t alloc_state = get_write_space(buffer, to_read, &write_head);
+		if (write_head != NULL && alloc_state != BUFFER_TOO_SMALL){
 			tud_cdc_n_read(USB_CDC_ITF, write_head, to_read);
 		}
 		do {
@@ -324,8 +400,8 @@ void check_rx(){
 }
 
 void process(){
-	
 	check_rx();
+	// check_rx_next();
 	send_next_messages();
 	tud_cdc_n_write_flush(USB_CDC_ITF); //make sure small messages get immediately sent
 	tud_task();
