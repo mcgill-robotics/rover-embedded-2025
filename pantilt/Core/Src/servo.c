@@ -37,8 +37,10 @@ int process_servo_uart(char *buffer, int length, ProcessResult* res) {
 
                 set_pan(new_pan_angle);
                 set_tilt(new_tilt_angle);
+                *res = PROC_OK;
                 return index+1;
             }
+            *res = PROC_INVALID;
             return index+1;
         } else {
             if (incoming == ',') {
@@ -49,6 +51,7 @@ int process_servo_uart(char *buffer, int length, ProcessResult* res) {
             index++;
         }
     }
+    *res = PROC_NEED_MORE;
     return index;
 }
 
