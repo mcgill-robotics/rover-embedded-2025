@@ -1,0 +1,11 @@
+../Application/User/velocity_ctrl.c:51:16:computeStoppingDistance	0	static
+../Application/User/velocity_ctrl.c:139:6:velCtrlInitStatic	0	static
+../Application/User/velocity_ctrl.c:159:6:velCtrlSetDemand	0	static
+../Application/User/velocity_ctrl.c:169:6:velCtrlSetPositionLimits	0	static
+../Application/User/velocity_ctrl.c:177:6:velCtrlClearPositionLimits	0	static
+../Application/User/velocity_ctrl.c:183:6:velCtrlStart	0	static
+../Application/User/velocity_ctrl.c:194:6:velCtrlStop	0	static
+../Application/User/velocity_ctrl.c:205:9:velCtrl_ISRStep	24	static
+../Application/User/velocity_ctrl.c:375:9:velCtrlGetVelocity	0	static
+../Application/User/velocity_ctrl.c:379:9:velCtrlGetAccel	0	static
+../Application/User/velocity_ctrl.c:383:9:velCtrlGetPosition	0	static

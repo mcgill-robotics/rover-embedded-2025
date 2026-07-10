@@ -1,0 +1,10 @@
+../Application/User/can_telemetry.c:84:16:pack_ping	1
+../Application/User/can_telemetry.c:74:16:pack_status	1
+../Application/User/can_telemetry.c:67:16:pack_temperature	1
+../Application/User/can_telemetry.c:59:16:pack_phase_currents	1
+../Application/User/can_telemetry.c:52:16:pack_bus_voltage	1
+../Application/User/can_telemetry.c:45:16:pack_position	1
+../Application/User/can_telemetry.c:38:16:pack_motor_speed	1
+../Application/User/can_telemetry.c:116:6:Telemetry_Tick_1ms	4
+../Application/User/can_telemetry.c:170:6:Telemetry_SetEnabled	9
+../Application/User/can_telemetry.c:187:6:Telemetry_SetPeriod	8

@@ -1,0 +1,7 @@
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:439:13:FOC_Clear	1
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:79:13:FOC_Init	1
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:156:6:TSK_MF_StopProcessing	1
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:473:13:FOC_InitAdditionalMethods	1
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:496:13:FOC_CalcCurrRef	2
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:175:13:TSK_MediumFrequencyTaskM1	28
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/mc_tasks_foc.c:551:16:FOC_HighFrequencyTask	4

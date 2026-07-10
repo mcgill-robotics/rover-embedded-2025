@@ -1,0 +1,5 @@
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32_mc_common_it.c:70:6:TIM4_IRQHandler	3
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32_mc_common_it.c:109:6:USART2_IRQHandler	14
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32_mc_common_it.c:187:6:HardFault_Handler	1
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32_mc_common_it.c:206:6:SysTick_Handler	3
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32_mc_common_it.c:254:6:EXTI15_10_IRQHandler	2
