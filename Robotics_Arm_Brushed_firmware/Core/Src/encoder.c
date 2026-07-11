@@ -15,13 +15,15 @@
 
 //int counts;
 //int need_debounce = 0;
-int debounce_buffer = 0; // 32 bits buffer to fill with switch state
+//int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
 
 void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
-		int lm_sw_reset_counts){
+		int max_rotation_angle, int min_rotation_angle){
 	encoding->ENCODER_MAX_COUNTS = encoder_max_counts;
-	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
+	encoding->MAX_ROTATION_ANGLE = max_rotation_angle;
+	encoding->MIN_ROTATION_ANGLE = min_rotation_angle;
+	encoding->nb_full_rotations = 0;
 	encoding->curr_counts = 0;
 	encoding->need_debounce = 0;
 	encoding->oldAngleError = 0;
@@ -34,13 +36,17 @@ void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_ma
 //}
 //* integrated into main loop
 
+
 //void set_debounce(Motor_Encoding_Struct * encoding, int debounce_state){
 //	encoding->need_debounce = debounce_state;
 //}
 //* integrated into main loop
 
+
+
 void set_counts(Motor_Encoding_Struct * encoding, int n){
 //	counts = ((n%MAX_COUNTS)+MAX_COUNTS)%MAX_COUNTS;
+
 	encoding->curr_counts = n;
 }
 
@@ -48,20 +54,39 @@ int get_counts(Motor_Encoding_Struct * encoding){
 	return encoding->curr_counts;
 }
 
+void update_counts(Motor_Encoding_Struct * encoding, int n){
+
+	int delta = n - encoding->curr_counts;
+
+	if (delta > encoding->ENCODER_MAX_COUNTS / 2){
+		encoding->nb_full_rotations -= 1;
+
+	}else if (delta < -0.5 * encoding->ENCODER_MAX_COUNTS){
+		encoding->nb_full_rotations += 1;
+	}
+
+	encoding->curr_counts = n + encoding->ENCODER_MAX_COUNTS * encoding->nb_full_rotations;
+
+}
+
+
+
 float count_to_angle(Motor_Encoding_Struct * encoding, int n){
 	//remove the offset from the angle to get the raw count
-	int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
-//	int new_n = abs(no_offset%MAX_COUNTS);
 
-	float angle=((float)no_offset/(float) encoding->ENCODER_MAX_COUNTS)*360;
+	float angle=((float) n /(float) encoding->ENCODER_MAX_COUNTS) * 360;
+
 	return angle;
 }
 
 int angle_to_count(Motor_Encoding_Struct * encoding, double n){
-	float new_n = fabs(fmod(n,360));
-	int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
-	return (int) ((new_n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
+	//clamp angle to valid angle area
+	if (n > encoding->MAX_ROTATION_ANGLE) n = encoding->MAX_ROTATION_ANGLE;
+	else if (n < encoding->MIN_ROTATION_ANGLE) n = encoding->MIN_ROTATION_ANGLE;
+
+	return (int) ((n/(360)) * encoding->ENCODER_MAX_COUNTS);
 }
+
 
 //void reset_debounce_buffer(){
 //	debounce_buffer = 0;
@@ -82,7 +107,7 @@ int angle_to_count(Motor_Encoding_Struct * encoding, double n){
 int lmsw_pitch_up_recalibrate(Motor * motor){
 	//reset the maximum number of counts
 	//set the current number of counts to the MAX
-	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE;
 	set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
 	return 1;
 }
@@ -90,7 +115,7 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
 int lmsw_pitch_down_recalibrate(Motor * motor){
 	//reset to minimum number of counts
 	//TODO: ITS NOT SUPPOSED TO BE 0, WHATS THE ACTUAL MIN VALUE????
-	int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+	int offset = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
 	set_counts(motor->Motor_Encoding_Struct, offset);
 	return 1;
 }
@@ -98,14 +123,14 @@ int lmsw_pitch_down_recalibrate(Motor * motor){
 int lmsw_roll_recalibrate(Motor * motor){
 	//reset to minimum number of counts
 		//reset counts to 0 -> offset-ed
-		int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+		int offset = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
 		set_counts(motor->Motor_Encoding_Struct, offset);
 		return 1;
 }
 
 int lmsw_gripper_recalibrate(Motor * motor){
 	//reset calibration & set current number of counts to MAX
-	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE;
 	set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
 	return 1;
 }

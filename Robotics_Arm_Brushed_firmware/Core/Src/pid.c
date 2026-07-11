@@ -21,6 +21,8 @@
 
 int currCounts = 0;
 int angleError = 0;
+int corr_speed = 0;
+
 float angleCorrection = 0;
 int currentGoal =0;
 int calibrationMode = 0; // if calibrating, lower the speed!
@@ -48,24 +50,15 @@ int updatePIDImpl(Motor * motor, int goal) {
 	 *
 	 * For assignment 3.1: implement this function to get your rat to drive forwards indefinitely in a straight line. Refer to pseudocode
 	 * example document on the google drive for some pointers
-	 *
-	 * TIPS (assignment 3.1): Create kPw and kDw variables, use a variable to store the previous error for use in computing your
-	 * derivative term. You may get better performance by having your kDw term average the previous handful of error values instead of the
-	 * immediately previous one, or using a stored error from 10-15 cycles ago (stored in an array?). This is because systick calls so frequently
-	 * that the error change may be very small and hard to operate on.
-	 *
-	 * For assignment 3.2: implement this function so it calculates distanceError as the difference between your goal distance and the average of
-	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
-	 * right encoder counts. Refer to stocked example document on the google drive for some pointers.
 	 */
 
 
-	currCounts = motor->ENCODER_type->CNT;
+	//currCounts = motor->ENCODER_type->CNT;
 	currentGoal = goal; //goal correct frm testing encoder
 
 	//return 1 when goal reached
-	//angleError = goal - get_counts(motor->Motor_Encoding_Struct);
-	angleError = goal - currCounts;
+	angleError = goal - get_counts(motor->Motor_Encoding_Struct);
+	//angleError = goal - currCounts;
 
 //	if (currCounts >= 66512){
 //		motor->ENCODER_type->CNT = motor->ENCODER_type->CNT % 66512 + 33488;
@@ -113,8 +106,9 @@ int updatePIDImpl(Motor * motor, int goal) {
 
 	// Clamp to valid PWM range
 	int MAX_PWM = 4499;
-	if (angleCorrection > MAX_PWM)  angleCorrection = 4499/16;
-	if (angleCorrection < -MAX_PWM) angleCorrection = 4499/16;
+	corr_speed = angleCorrection;
+	if (angleCorrection > MAX_PWM) corr_speed = 4499;
+	else if (angleCorrection < -MAX_PWM) corr_speed = 4499;
 
 	set_motor_speed_raw(motor, abs(angleCorrection));
 

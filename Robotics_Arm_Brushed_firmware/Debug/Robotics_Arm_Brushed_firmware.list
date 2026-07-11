@@ -1605,7 +1605,7 @@ int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
 
 void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
-		int lm_sw_reset_counts){
+		int max_rotation_angle){
  8000f80:	b480      	push	{r7}
  8000f82:	b085      	sub	sp, #20
  8000f84:	af00      	add	r7, sp, #0
@@ -1616,7 +1616,7 @@ void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_ma
  8000f8c:	68fb      	ldr	r3, [r7, #12]
  8000f8e:	68ba      	ldr	r2, [r7, #8]
  8000f90:	601a      	str	r2, [r3, #0]
-	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
+	encoding->MAX_ROTATION_ANGLE = max_rotation_angle;
  8000f92:	68fb      	ldr	r3, [r7, #12]
  8000f94:	687a      	ldr	r2, [r7, #4]
  8000f96:	605a      	str	r2, [r3, #4]
@@ -1685,7 +1685,7 @@ float count_to_angle(Motor_Encoding_Struct * encoding, int n){
  8000fea:	6078      	str	r0, [r7, #4]
  8000fec:	6039      	str	r1, [r7, #0]
 	//remove the offset from the angle to get the raw count
-	int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
+	int no_offset = n-(encoding->MAX_ROTATION_ANGLE - encoding->ENCODER_MAX_COUNTS/2);
  8000fee:	687b      	ldr	r3, [r7, #4]
  8000ff0:	685a      	ldr	r2, [r3, #4]
  8000ff2:	687b      	ldr	r3, [r7, #4]
@@ -1743,7 +1743,7 @@ int angle_to_count(Motor_Encoding_Struct * encoding, double n){
  800106c:	ee07 0a90 	vmov	s15, r0
  8001070:	eef0 7ae7 	vabs.f32	s15, s15
  8001074:	edc7 7a05 	vstr	s15, [r7, #20]
-	int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
+	int offset = (encoding->MAX_ROTATION_ANGLE - encoding->ENCODER_MAX_COUNTS/2);
  8001078:	68fb      	ldr	r3, [r7, #12]
  800107a:	685a      	ldr	r2, [r3, #4]
  800107c:	68fb      	ldr	r3, [r7, #12]
@@ -1790,7 +1790,7 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
  80010d2:	6078      	str	r0, [r7, #4]
 	//reset the maximum number of counts
 	//set the current number of counts to the MAX
-	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE;
  80010d4:	687b      	ldr	r3, [r7, #4]
  80010d6:	689b      	ldr	r3, [r3, #8]
  80010d8:	685a      	ldr	r2, [r3, #4]
@@ -1823,7 +1823,7 @@ int lmsw_pitch_down_recalibrate(Motor * motor){
  8001104:	6078      	str	r0, [r7, #4]
 	//reset to minimum number of counts
 	//TODO: ITS NOT SUPPOSED TO BE 0, WHATS THE ACTUAL MIN VALUE????
-	int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+	int offset = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
  8001106:	687b      	ldr	r3, [r7, #4]
  8001108:	689b      	ldr	r3, [r3, #8]
  800110a:	685a      	ldr	r2, [r3, #4]
@@ -1859,7 +1859,7 @@ int lmsw_roll_recalibrate(Motor * motor){
  800113a:	6078      	str	r0, [r7, #4]
 	//reset to minimum number of counts
 		//reset counts to 0 -> offset-ed
-		int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
+		int offset = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
  800113c:	687b      	ldr	r3, [r7, #4]
  800113e:	689b      	ldr	r3, [r3, #8]
  8001140:	685a      	ldr	r2, [r3, #4]
@@ -1894,7 +1894,7 @@ int lmsw_gripper_recalibrate(Motor * motor){
  800116e:	af00      	add	r7, sp, #0
  8001170:	6078      	str	r0, [r7, #4]
 	//reset calibration & set current number of counts to MAX
-	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->MAX_ROTATION_ANGLE;
  8001172:	687b      	ldr	r3, [r7, #4]
  8001174:	689b      	ldr	r3, [r3, #8]
  8001176:	685a      	ldr	r2, [r3, #4]
@@ -1974,7 +1974,7 @@ int main(void)
   MX_TIM8_Init();
  80011da:	f000 fda3 	bl	8001d24 <MX_TIM8_Init>
   /*
-   * (int encoder_max_counts, int lm_sw_reset_counts, GPIO_TypeDef* limit_port, uint16_t limit_pin)
+   * (int encoder_max_counts, int max_rotation_angle, GPIO_TypeDef* limit_port, uint16_t limit_pin)
    * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
    * - limit switch reset counts: depends how angles defined -- corresponds to 180
    */

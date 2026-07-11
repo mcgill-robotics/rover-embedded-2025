@@ -8,13 +8,13 @@
 #include "calibration.h"
 
 
-int hit = 0; // for testing
+volatile int hit = 0;
 
 void SysTickFunction(void) {
 	/*
 	 * THIS IS CALLED EVERY 1ms
 	 */
-	hit = 1;
+
 	for (int i = 0; i < NB_MOTORS; i++){
 
 		Motor * motor =  all_motors_list[i];
@@ -46,7 +46,10 @@ void SysTickFunction(void) {
 				//leave_limit_switch(); // TODO FIX
 				break;
 		}
-		set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
+
+
+		update_counts(motor, (uint16_t) motor->ENCODER_type->CNT);
+		hit += 1;
 
 		//	if (is_debouncing()){
 	//		if(systick_counts++==100){

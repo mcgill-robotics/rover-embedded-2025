@@ -9,15 +9,14 @@
 //reset angles for left and for right motors
 //#define LIMIT_SWITCH_RESET_COUNTS 50000 //(depends how angles defined -- corresponds to 180)
 
-
-
 void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
-		int lm_sw_reset_counts);
+		int max_rotation_angle, int min_rotation_angle);
 
 
 //int is_debouncing(Motor_Encoding_Struct * encoding);
 //void set_debounce(Motor_Encoding_Struct * encoding, int debounce_state);
 void set_counts(Motor_Encoding_Struct * encoding, int n);
+void update_counts(Motor_Encoding_Struct * encoding, int n);
 int get_counts(Motor_Encoding_Struct * encoding);
 float count_to_angle(Motor_Encoding_Struct * encoding, int n);
 int angle_to_count(Motor_Encoding_Struct * encoding, double n);

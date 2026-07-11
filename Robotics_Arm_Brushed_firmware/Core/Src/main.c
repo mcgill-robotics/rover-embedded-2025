@@ -21,12 +21,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include "calibration.h"
 #include "CAN_processing.h"
 #include "motorControl.h"
 #include "encoder.h"
 #include "pid.h" // use arguments to pass the specific motor used?
-#include "rosjam.h"
+#include "rosjam.h" // for usb communication
 
 /* USER CODE END Includes */
 
@@ -91,17 +92,21 @@ static void MX_TIM8_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+//the 3 motors controlled; used for pid looping
 Motor * all_motors_list[NB_MOTORS];
 
-
 int CAN_flag = 0;
+
 int LMSW1_flag_pitch_up = 0;
 int LMSW2_flag_pitch_down = 0;
 int LMSW5_flag_roll = 0;
 int LMSW6_flag_gripper = 0;
 
 
-volatile uint32_t enc_count = 0;
+volatile uint32_t curr_goal_angle = 360; //testing only
+volatile uint32_t roll_curr_counts = 0; //testing only
+
 
 /* USER CODE END 0 */
 
@@ -148,11 +153,12 @@ int main(void)
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
 
-
+  //ensure code running on board
   HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   //initialize motors for all 3 motors
+
   Motor gripper_motor;
   Motor pitch_motor;
   Motor roll_motor;
@@ -162,30 +168,38 @@ int main(void)
   Motor_Encoding_Struct roll_encoding;
 
   /*
-   * (int encoder_max_counts, int lm_sw_reset_counts, GPIO_TypeDef* limit_port, uint16_t limit_pin)
-   * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
-   * - limit switch reset counts: depends how angles defined -- corresponds to 180
+   * Motor_Encoding_Struct * encoding: the specific motor's encoder info struct
+   * int encoder_max_counts: nb of counts for 360 degree turn; 16*516*4.0. (gear ratio* gear ratio * pulses)
+   * int max_rotation_angle: Max rotation counts motor allowed
+   * int min_rotation_angle: Min rotation counts motor allowed
    */
-  motor_encoding_struct_init(&gripper_encoding, 33024, 0);
-  motor_encoding_struct_init(&pitch_encoding, 33024, 0);
-  motor_encoding_struct_init(&roll_encoding, 33024, 0);
+  motor_encoding_struct_init(&gripper_encoding, 33024, 3600, 0);
+  motor_encoding_struct_init(&pitch_encoding, 33024, 3600, 0); //TO CHANGE 3600; should be like 180
+  motor_encoding_struct_init(&roll_encoding, 33024, 3600, 0); //TO CHANGE 3600; should be like 180
 
 
-
-  /* (Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder, MotorName motorName,
-   * 		GPIO_TypeDef* DIR_port, uint16_t DIR_pin, int kPw, int kDw)
-   * - motorName: as defined by the motorName enum.
-   * - kPw; // proportional gain (how far away from goal)
-   * - kDw; //derivative gain (smoothing)
+  /* Motor* motor,
+   * TIM_TypeDef * PWM_Type,
+   * TIM_TypeDef * ENCODER_Type,
+   * MotorName motorName: as defined by motorName enum
+   * GPIO_TypeDef* DIR_port: for setting pwm speed and direction;
+   * uint16_t DIR_pin: for setting pwm speed and direction;
+   * int kPw: proportional gain (how far away frm goal)
+   * int kDw: derivative gain (smoothing)
    */
   motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 10, 0);
   motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 10, 0);
   motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 10, 0);
 
-
   all_motors_list[0] = &gripper_motor;
   all_motors_list[1] = &roll_motor;
   all_motors_list[2] = &pitch_motor;
+
+  //Setup Motor PWM
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // roll PWM
+  HAL_TIM_PWM_Start(&htim20, TIM_CHANNEL_1);  // gripper PWM
+
 
   //set up Encoders
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // gripper encoder
@@ -193,12 +207,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL); // pitch encoder
   //TIM_CHANNEL_ALL: Enable both channel needed for encoder
 
-
-  //Setup Motor PWM
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // pitch PWM
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // roll PWM
-  HAL_TIM_PWM_Start(&htim20, TIM_CHANNEL_1);  // gripper PWM
-
+  //encoder PWM setup
   // For Driver, running in PH/EN mode, PWM port (EN) always to 1
   HAL_GPIO_WritePin(PWM_pitch_GPIO_Port, PWM_pitch_Pin, 1);   // EN/IN1 = 1
   HAL_GPIO_WritePin(PWM_roll_GPIO_Port, PWM_roll_Pin, 1);   // EN/IN1 = 1
@@ -208,15 +217,18 @@ int main(void)
   // Initialize motor state
 
   //setting encoder positions
-  //change depending on gear ratio of the motor
-  /*
-   * offset such that can go 180 right and 180 left without getting to 0 counts(- values)
-   */
 
+  //initial encoder count setup
   gripper_motor.ENCODER_type->CNT = 0; //gripper
   roll_motor.ENCODER_type->CNT = 0; //roll
   pitch_motor.ENCODER_type->CNT = 0; //pitch
 
+  //curr_counts kept for each motor set to match current CNT
+  set_counts(&gripper_encoding, 0);
+  set_counts(&pitch_encoding, 0);
+  set_counts(&roll_encoding, 0);
+
+  //initialize the speed to 0
   set_motor_speed_raw(&gripper_motor, 0);
   set_motor_speed_raw(&pitch_motor, 0);
   set_motor_speed_raw(&roll_motor, 0);
@@ -225,11 +237,6 @@ int main(void)
   set_motor_direction(&gripper_motor, 1);
   set_motor_direction(&pitch_motor, 1);
   set_motor_direction(&roll_motor, 1);
-
-
-  set_counts(&gripper_encoding, 0);
-  set_counts(&pitch_encoding, 0);
-  set_counts(&roll_encoding, 0);
 
 
 //  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
@@ -281,37 +288,26 @@ int main(void)
   int LMSW5_isDebouncing = 0;
   int LMSW6_isDebouncing = 0;
 
-  uint32_t last_blink = 0;
-
-  int count = 0;
-  //setPIDGoalA(&pitch_motor, 45);
 
 
   //setup_simple(); // usb comm
 
-
-  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
-
-
   while (1)
   {
 
+	  //process_simple(); // usb to keep comms on
 
-	  //process_simple();
-	 //__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
-	 //HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 
-	 setPIDGoalA(&pitch_motor, 360);
+	  setPIDGoalA(&gripper_motor, curr_goal_angle);
+	  roll_curr_counts = gripper_motor.ENCODER_type->CNT;
 
-	  //enc_count = __HAL_TIM_GET_COUNTER(&htim5);
-
-	  enc_count = pitch_motor.ENCODER_type->CNT;
+//		FOR TESTING THE 3 MOTORS ONLY
 
 //	  //pitch
 //
 //
 //		  //close pitch
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 500);
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
 //		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 //
 //		  HAL_Delay(2000);
@@ -322,7 +318,7 @@ int main(void)
 //		  HAL_Delay(2000);
 //
 //		  //open gripper
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  500);
+//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  2000);
 //		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
 //
 //		  HAL_Delay(2000);
@@ -336,7 +332,7 @@ int main(void)
 //
 //
 //		  //close roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 2000);
 //		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
 //
 //		  HAL_Delay(2000);
@@ -347,7 +343,7 @@ int main(void)
 //		  HAL_Delay(2000);
 //
 //		  //open roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
+//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 2000);
 //		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
 //
 //		  HAL_Delay(2000);
@@ -362,7 +358,7 @@ int main(void)
 //
 //
 //		  //close gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 2000);
 //		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
 //
 //		  HAL_Delay(2000);
@@ -373,7 +369,7 @@ int main(void)
 //		  HAL_Delay(2000);
 //
 //		  //open gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
+//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 2000);
 //		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
 //
 //		  HAL_Delay(2000);
@@ -382,7 +378,7 @@ int main(void)
 //		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
 //
 //		  HAL_Delay(2000);
-
+//
 
 
 //	    // Non-blocking LED blink
@@ -393,6 +389,7 @@ int main(void)
 
 
 
+	  //USB COMMUNICATION
 
 //	    char readchar = read_char();
 //	    if (readchar == 'c'){
@@ -420,38 +417,7 @@ int main(void)
 //		}
 
 
-
-	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//
-//	  //HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
-//	  //^ moved on top
-//
-//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0); //  PH = 1 = go forward
-//
-//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//
-//	  HAL_Delay(3000);
-//
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//	  HAL_Delay(2000);
-//
-//	  //reverse direction
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//
-//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-//
-//	  HAL_Delay(3000);
-//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//	  HAL_Delay(2000);
-
-
-//	  if (TIM5->CNT >= 41750){
-//		  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//	  }
-
+//		CAN MESSAGE PROCESSING
 
 //	  // Process Message if available
 //	  if (CAN_flag){
@@ -468,13 +434,11 @@ int main(void)
 //		//HAL_Delay(1000);
 //	  }
 //
-//
-////	  if (systick_10ms_flag) {
-////		  systick_10ms_flag = 0;
-////
-////		  SysTickFunction();
-////	  }
-//
+
+
+
+//		LIMIT SWITCH CHECKS
+
 //	  if (LMSW1_flag_pitch_up){
 //		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
 //			if (!switch_state){
@@ -920,7 +884,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 33024;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -969,7 +933,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
+  htim4.Init.Period = 33024;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -1018,7 +982,7 @@ static void MX_TIM5_Init(void)
   htim5.Instance = TIM5;
   htim5.Init.Prescaler = 0;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = 33024;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
