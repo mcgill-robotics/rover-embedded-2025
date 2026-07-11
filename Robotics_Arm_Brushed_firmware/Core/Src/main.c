@@ -102,6 +102,7 @@ int LMSW6_flag_gripper = 0;
 
 
 volatile uint32_t enc_count = 0;
+volatile uint32_t curr_goal_angle = 360; //testing only
 
 /* USER CODE END 0 */
 
@@ -301,7 +302,7 @@ int main(void)
 	 //__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
 	 //HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 
-	 setPIDGoalA(&pitch_motor, 360);
+	  setPIDGoalA(&pitch_motor, curr_goal_angle);
 
 	  //enc_count = __HAL_TIM_GET_COUNTER(&htim5);
 

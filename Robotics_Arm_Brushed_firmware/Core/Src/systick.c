@@ -14,7 +14,7 @@ void SysTickFunction(void) {
 	/*
 	 * THIS IS CALLED EVERY 1ms
 	 */
-	hit = 1;
+	hit += 1;
 	for (int i = 0; i < NB_MOTORS; i++){
 
 		Motor * motor =  all_motors_list[i];
@@ -46,7 +46,7 @@ void SysTickFunction(void) {
 				//leave_limit_switch(); // TODO FIX
 				break;
 		}
-		set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
+		set_counts(motor->Motor_Encoding_Struct, (uint32_t) motor->ENCODER_type->CNT);
 
 		//	if (is_debouncing()){
 	//		if(systick_counts++==100){

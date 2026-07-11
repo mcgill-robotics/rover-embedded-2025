@@ -50,17 +50,21 @@ int get_counts(Motor_Encoding_Struct * encoding){
 
 float count_to_angle(Motor_Encoding_Struct * encoding, int n){
 	//remove the offset from the angle to get the raw count
-	int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
+	//int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
 //	int new_n = abs(no_offset%MAX_COUNTS);
+	int no_offset = n;
 
 	float angle=((float)no_offset/(float) encoding->ENCODER_MAX_COUNTS)*360;
 	return angle;
 }
 
 int angle_to_count(Motor_Encoding_Struct * encoding, double n){
-	float new_n = fabs(fmod(n,360));
-	int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
-	return (int) ((new_n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
+	//float new_n = fabs(fmod(n,360));
+	//int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
+
+	int offset = 0;
+
+	return (int) ((n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
 }
 
 //void reset_debounce_buffer(){
