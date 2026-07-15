@@ -24,10 +24,12 @@ void test_cobs(){
 	*write_head = 'a';
 	write_head++;
 	printf("Og len: %d\n", strlen(test1));
+	cobs_reader_t reader;
+	cobs_setup_stream_reader(&reader);
 	for (int i=0;i<5;i++){
 		int slen = strlen(test1);
 		printf("estimate: %d \n", cobs_estimate_encoded_size(slen));
-		int len = cobs_encode(test1, slen, write_head, cobs_estimate_encoded_size(slen), 'a');
+		int len = cobs_encode(&reader, test1, slen, write_head, cobs_estimate_encoded_size(slen), 'a');
 		printf("Wrote %d \n", len);
 		printf("delim %c\n", *(write_head+len-1));
 		write_head+=len;
@@ -46,9 +48,9 @@ void test_cobs(){
 	printf("all: %s\n", encode_buffer);
 	while (remaining>0){
 		int written;
-		
+		int read_bytes;
 		printf("frame %d: %p, %p\n", read, write_head, read_head);
-		int len2 = cobs_decode(read_head, remaining, write_head, remaining_decode-1, 'a', &written);
+		int len2 = cobs_stream_decode_buf(read_head, remaining, write_head, remaining_decode-1, 'a', &written, &read_bytes);
 		printf("Read: %d\n", len2);
 		if (len2 == -3 || len2 == -2){
 			break;
@@ -106,5 +108,6 @@ void test_varint(){
 }
 
 int main(){
-	test_varint();
+	// test_varint();
+	test_cobs()
 }
