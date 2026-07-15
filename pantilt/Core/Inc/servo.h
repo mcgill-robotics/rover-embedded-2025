@@ -18,6 +18,9 @@
 
 #define PAN_GEAR_RATIO 2.0
 
+extern double pan_angle;
+extern double tilt_angle;
+
 extern TIM_HandleTypeDef htim1; // PWM_2
 extern TIM_HandleTypeDef htim2; // PWM_1
 

@@ -24,6 +24,7 @@
 #include "rosjam.h"
 #include "servo.h"
 #include "stm32g4xx_hal.h"
+#include "stm32g4xx_hal_uart.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -70,10 +71,19 @@ static void MX_UART4_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int uart_data_ready = 0;
+int uart_send_ready = 0;
+
+char pan_buffer[40];
+char tilt_buffer[40];
+char angle_buffer[100];
+
+#define ANGLE_REPORT_PERIOD_MS 20   // 50 Hz — leaves an idle gap between lines
+static uint32_t last_angle_report_tick = 0;
+
 #define BUF_SIZE 100
 char buffer1[BUF_SIZE];
-char buffer2[BUF_SIZE]
-;
+char buffer2[BUF_SIZE];
+
 char* active_buf = buffer1;
 char* inactive_buf = buffer2;
 static volatile uint16_t pantilt_rx_size = 0;
@@ -132,8 +142,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // process_simple();
-    // process_servo();
     if (uart_data_ready){
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
       int total_bytes_read = 0;
@@ -147,6 +155,15 @@ int main(void)
       swap_buffer();
       HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf+pantilt_rx_size, BUF_SIZE-pantilt_rx_size);
       uart_data_ready = 0;
+    }
+
+    if (uart_send_ready == 0 && (HAL_GetTick() - last_angle_report_tick) >= ANGLE_REPORT_PERIOD_MS) {
+      last_angle_report_tick = HAL_GetTick();
+      float_to_string(pan_angle, 4, pan_buffer, sizeof(pan_buffer));
+      float_to_string(tilt_angle, 4, tilt_buffer, sizeof(tilt_buffer));
+      sprintf(angle_buffer, "%s,%s\n", pan_buffer, tilt_buffer);
+      HAL_UART_Transmit_IT(&huart4, (const uint8_t*) angle_buffer, strlen(angle_buffer));
+      uart_send_ready = 1;
     }
     /* USER CODE END WHILE */
 
@@ -452,8 +469,13 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (huart == &huart4) {
+    pantilt_rx_size = 0;
     HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf, BUF_SIZE);
   }
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+  if (huart == &huart4) uart_send_ready = 0;
 }
 /* USER CODE END 4 */
 

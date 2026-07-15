@@ -2,186 +2,150 @@ import serial
 
 class PanTiltGPS():
 
-    ''' This class represents the pan tilt/gps/servo board.
-        
-    
+    ''' Represents the UART board with GPS and pantilt relay over a single USB CDC port.
+
+    The board exposes one serial port that:
+      - outputs GPS data as: satellites,latitude,longitude,...\\n
+      - accepts pantilt commands forwarded to the servo board over UART
+
     Attributes
     ----------
-    gps_port: str
-        The port to connect to for the gps (read only).
-    pantilt_port: str
-        The port to connect to for pantilt (write only).
+    port: str
+        The USB CDC port for both GPS output and pantilt input.
     baud_rate: int
-        The baud rate of the connection
-    pantilt_ser: serial.Serial
-        The serial object from pyserial for the connection to pantilt
-    gps_ser: serial.Serial
-        The serial object from pyserial for the connection to gps
+        The baud rate of the connection.
+    ser: serial.Serial
+        The serial connection to the board.
     is_connected: bool
-        Whether the board is connected to the computer
+        Whether the board is connected to the computer.
     buffer: bytes
-        The buffer of bytes received from the serial port
+        Receive buffer for incomplete lines.
     gps_sats: float
-        Number of satellites connected to the gps
+        Number of satellites connected to the GPS.
     coords: list[float]
-        The latitude and longitude
-    imu: list[float]
-        The imu data received from the board
-
-    Notes
-    ------
-    The board has been limited to a 100Hz loop. To increase this rate, it needs to be changed on the firmware.
-    2 Serial ports are available, gps is read only while pantilt is write only
+        The latitude and longitude [lat, lon].
+    heading: float
+        The heading of motion in degrees.
+    pan_angle: float
+        The reported pan angle.
+    tilt_angle: float
+        The reported tilt angle.
     '''
 
-    def __init__(self, gps_port: str, pantilt_port:str, baud_rate: int = 115200):
-        ''' The initializer for the PanTiltGPS object.
-        
+    def __init__(self, port: str, baud_rate: int = 115200):
+        '''
         Parameters
         ----------
-        gps_port: str
-            The port of the computer that the gps board is connected to (COM? for Windows, /dev/ttyACM? for Linux)
-        pantilt_port: str
-            The port of the computer that the pantilt board is connected to (COM? for Windows, /dev/ttyACM? for Linux)
+        port: str
+            The USB CDC port (COM? for Windows, /dev/ttyACM? for Linux).
         baud_rate: int, optional
-            The baud rate of the connection. Default is 115200 bps
+            The baud rate of the connection. Default is 115200 bps.
         '''
-        self.gps_port: str = gps_port
-        self.pantilt_port: str = pantilt_port
+        self.port: str = port
         self.baud_rate: int = baud_rate
-        self.gps_ser: serial.Serial = None
-        self.pantilt_ser: serial.Serial = None
+        self.ser: serial.Serial = None
         self.is_connected: bool = False
-        self.buffer : bytes = b""
+        self.buffer: bytes = b""
         self.gps_sats: float = 0
         self.coords: list[float] = [-1.0, -1.0]
-        self.imu: list[float] = [0, 0, 0, 0, 0, 0]
+        self.heading: float
+        self.pan_angle: float
+        self.tilt_angle: float
 
     def connect(self):
-        ''' Connects to the Pan Tilt/GPS board. Run this before using this object.
+        ''' Connects to the board. Run this before using this object.
 
         Raises
         ------
-        ConnectionError:
-            If if fails to connect to the board.
+        ConnectionError
+            If it fails to connect to the board.
         '''
         try:
-            self.gps_ser = serial.Serial(self.gps_port, self.baud_rate, timeout=1)
-            self.pantilt_ser = serial.Serial(self.pantilt_port, self.baud_rate, timeout=1)
+            self.ser = serial.Serial(self.port, self.baud_rate, timeout=1)
             self.is_connected = True
         except serial.SerialException as e:
-            raise ConnectionError(f"Failed to connect to Pan Tilt Board. Error: {e}")
-        
+            raise ConnectionError(f"Failed to connect to board. Error: {e}")
 
     def _read_serial_gps(self):
-        ''' Reads from serial if it is available
-        
-        Raises
-        ------
-        ConnectionError 
-            If there is no connection, and reading cannot be done.
-        '''
-        if self.is_connected is False:
+        ''' Reads GPS data from serial if available. '''
+        if not self.is_connected:
             raise ConnectionError("Cannot read from serial port, not connected to board.")
-            
+
         try:
-            data = self.gps_ser.read(self.gps_ser.in_waiting or 1)
+            data = self.ser.read(self.ser.in_waiting or 1)
         except serial.SerialException:
             self.is_connected = False
             return
         if data:
             self.buffer += data
-            while True:
-                if b'\n' in self.buffer:
-                    line, self.buffer = self.buffer.split(b'\n', 1)
-                    try:
-                        line = line.decode('utf-8').strip()
-                    except UnicodeDecodeError:
-                        continue
-                    self._parse_data(line)
-                else:
-                    break
-                
+            while b'\n' in self.buffer:
+                line, self.buffer = self.buffer.split(b'\n', 1)
+                try:
+                    self._parse_data(line.decode('utf-8').strip())
+                except UnicodeDecodeError:
+                    pass
+
     def _parse_data(self, line: str):
-        '''  Parses the data for a received line from the board.
-        '''
+        ''' Parses a GPS data line from the board (satellites,lat,lon,...). '''
         data = line.split(',')
-        if len(data) != 9:
+        if len(data) < 1:
             return
-        try:
-            self.gps_sats = float(data[0])
-            self.coords[0] = float(data[1])
-            self.coords[1] = float(data[2])
-            for i in range(3,9):
-                self.imu[i-3] = float(data[i])
-        except ValueError:
-            pass
+        
+        # GPS data
+        if data[0] == "g":
+            if len(data) < 5:
+                return
+            try:
+                self.gps_sats = float(data[1])
+                self.coords[0] = float(data[2])
+                self.coords[1] = float(data[3])
+                self.heading = float(data[4])
+            except ValueError:
+                pass
+        
+        # Pantilt data
+        elif data[0] == "p":
+            if len(data) < 3:
+                return
+            try:
+                self.pan_angle = float(data[1])
+                self.tilt_angle = float(data[2])
+            except ValueError:
+                pass
 
     def run(self):
-        ''' Runs the object's main loop. Call this function in your main loop.
-        '''
+        ''' Runs the object's main loop. Call this function in your main loop. '''
         self._read_serial_gps()
 
     def is_gps_connected(self) -> bool:
-        ''' Returns whether the GPS has at least one satellite connection
-        
-        Returns
-        -------
-        bool
-            True if the gps is connected, False if not
-        '''
-        return (self.gps_sats >= 3)
-    
+        ''' Returns whether the GPS has at least 3 satellite connections. '''
+        return self.gps_sats >= 3
+
     def get_gps_satellites(self) -> float:
-        ''' Gets the number of satelittes connected to the GPS.
-        
-        Returns
-        -------
-        float
-            The number of GPS satelittes connected.
-        '''
+        ''' Gets the number of satellites connected to the GPS. '''
         return self.gps_sats
 
     def get_gps(self) -> list[float]:
-        ''' Gets the last available gps coordinates (latitude, longitude)
-        
-        Returns
-        -------
-        list[float]
-            The list of latitude and longitude coordinates
-        '''
-        new_list = [float(self.gps_sats), self.coords[0], self.coords[1]]
-        return new_list
-    
-    def get_imu_data(self) -> list[float]:
-        ''' Gets the last available imu data.
-            The format is (Accel X, Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z)
-        
-        Returns
-        -------
-        list[float]
-            The list of acceleration and gyro values obtained. See description for format.
-        '''
-        return self.imu
+        ''' Gets the last available GPS coordinates as [satellites, latitude, longitude]. '''
+        return [float(self.gps_sats), self.coords[0], self.coords[1]]
 
     def add_pan_angle(self, angle: float):
         ''' Adds an increment of angle to the pan servo.
-        
+
         Parameters
         ----------
         angle : float
-            The increment to add to the angle of the pan servo
+            The increment to add to the pan servo angle.
 
         Raises
         ------
-        ConnectionError 
-            If there is no connection, and the servo cannot be controlled
+        ConnectionError
+            If there is no connection.
         '''
-        if self.is_connected is False:
-            raise ConnectionError("Cannot write from serial port, not connected to board.")
+        if not self.is_connected:
+            raise ConnectionError("Cannot write to serial port, not connected to board.")
         try:
-            message = (f"{angle},0.0\n").encode()
-            self.pantilt_ser.write(message)
+            self.ser.write(f"{angle},0.0\n".encode())
         except serial.SerialException as e:
             raise ConnectionError(f"Failed to write pan angle. Error: {e}")
 
@@ -191,41 +155,61 @@ class PanTiltGPS():
         Parameters
         ----------
         angle : float
-            The increment to add to the angle of the tilt servo
+            The increment to add to the tilt servo angle.
 
         Raises
         ------
         ConnectionError
-            If there is no connection, and the servo cannot be controlled
+            If there is no connection.
         '''
-        if self.is_connected is False:
-            raise ConnectionError("Cannot write from serial port, not connected to board.")
+        if not self.is_connected:
+            raise ConnectionError("Cannot write to serial port, not connected to board.")
         try:
-            message = (f"0.0,{angle}\n").encode()
-            self.pantilt_ser.write(message)
+            self.ser.write(f"0.0,{angle}\n".encode())
         except serial.SerialException as e:
             raise ConnectionError(f"Failed to write tilt angle. Error: {e}")
 
 
-
 if __name__ == "__main__":
-    # Test script
     import time
-    board = PanTiltGPS("COM3", "COM4") #TODO: adjust ports 
+    board = PanTiltGPS("/dev/ttyACM0")
     try:
         board.connect()
     except ConnectionError as e:
         print(e)
         exit(1)
-
-    board.add_pan_angle(30)
-    board.add_tilt_angle(30)
+    step_p = 1
+    step_t = 5
+    while input().strip()=="":
+        board.add_pan_angle(10)
+        time.sleep(0.05)
+        board.add_tilt_angle(10)
+    board.add_pan_angle(-360)
+    time.sleep(0.05)
+    board.add_tilt_angle(-270)
+    while True:
+        for i in range(int(360/step_p)):
+            board.add_pan_angle(step_p)
+            time.sleep(0.02)
+        for i in range(int(360/step_p)):
+            board.add_pan_angle(-step_p)
+            time.sleep(0.02)
+    # while True:
+    #     for i in range(int(270/step_t)):
+    #         print("dir 1")
+    #         board.add_pan_angle(step_p)
+    #         time.sleep(0.05)
+    #         board.add_tilt_angle(step_t)
+    #         time.sleep(0.05)
+    #     for i in range(int(270/step_t)):
+    #         print("dir 2")
+    #         board.add_pan_angle(-step_p)
+    #         time.sleep(0.05)
+    #         board.add_tilt_angle(-step_t)
+    #         time.sleep(0.05)
+    #     board.add_tilt_angle(30)
 
     while True:
-        # print data, no servo for now
         board.run()
-        is_gps = board.is_gps_connected()
-        gps = board.get_gps()
-        imu = board.get_imu_data()
-        print(f'GPS ON?: {is_gps} || GPS: {gps} || IMU: {imu}')
+        print(f'GPS ON?: {board.is_gps_connected()} || GPS: {board.get_gps()}')
         time.sleep(0.05)

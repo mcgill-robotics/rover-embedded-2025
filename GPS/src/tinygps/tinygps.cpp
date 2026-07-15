@@ -473,10 +473,11 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName,
   *ppelt = pElt;
 }
 
-// EKF: static position model (F=I), direct lat/lon measurement (H=I).
-// hAcc_m: 1-sigma horizontal accuracy in metres used to build R.
+// 2x2 Kalman filter used for latitude/longitude
+// R value is determined from GPS accuracy measurements
 static void apply_ekf(gps_t *g, float hAcc_m) {
-    static const float Q_VAL    = 1e-10f;  // ponytail: tune up if filter too slow to track motion
+    // Change Q value to average out more or less
+    static const float Q_VAL = 1e-10f;
     static const float DEG_PER_M = 1.0f / 111111.0f;
 
     if (g->ekf.x[0] == 0.0f) {
@@ -512,11 +513,11 @@ void gps_init(gps_t *g, int type, UART_HandleTypeDef *huart, bool use_ekf) {
     g->use_ekf     = use_ekf;
     memset(&g->ubx, 0, sizeof(g->ubx));
 
+    // Old NMEA GPS runs at 9600 baud while new GPS M10G-5883 module runs at 115200 baud
     huart->Init.BaudRate = (type == GPS_UBX) ? 115200 : 9600;
     HAL_UART_Init(huart);
 
-    if (type == GPS_NMEA)
-        g->nmea = new TinyGPSPlus();
+    if (type == GPS_NMEA) g->nmea = new TinyGPSPlus();
 
     if (use_ekf) {
         // Large initial P so first measurement dominates
@@ -552,7 +553,8 @@ bool gps_process(gps_t *g, uint8_t byte) {
         g->snapshot.headMot = nmea->course.deg();
         g->snapshot.numSV   = (int)nmea->satellites.value();
         g->snapshot.fixType = (nmea->location.FixQuality() != TinyGPSLocation::Invalid) ? 3 : 0;
-        // 5 m/HDOP baseline; upgrade to per-sentence accuracy if receiver provides it
+        // Get an estimate of accuracy on NMEA using the HDOP value
+        // Estimate each value for dilution of precision is equivalent to 5 m
         if (g->use_ekf) {
             float hAcc_m = nmea->hdop.isValid() ? (nmea->hdop.value() / 100.0f) * 5.0f : 10.0f;
             apply_ekf(g, hAcc_m);

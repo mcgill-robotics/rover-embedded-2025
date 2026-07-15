@@ -44,7 +44,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+// #define DUAL_GPS
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,19 +53,34 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+char satellites[50];
+char latitude[50];
+char longitude[50];
+char heading[50];
+
 gps_t gps_1;
-// gps_t gps_2;
+#ifdef DUAL_GPS
+gps_t gps_2;
+#endif
 static uint8_t gps_1_byte;
-// static uint8_t gps_2_byte;
+#ifdef DUAL_GPS
+static uint8_t gps_2_byte;
+#endif
 
 UART_HandleTypeDef *pantilt_uart = &huart3;
 uint8_t pantilt_data[100];
+
+#define PANTILT_BUFFER_SIZE 100
+static uint8_t pantilt_buffers[2][PANTILT_BUFFER_SIZE];
+static volatile int pantilt_index = 0;
+int pantilt_ready = 0;
 volatile int pantilt_bytes = 0;
 /* USER CODE END PV */
 
@@ -75,6 +90,7 @@ static void MX_GPIO_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_UART4_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -116,44 +132,77 @@ int main(void)
   MX_USB_PCD_Init();
   MX_UART4_Init();
   MX_USART3_UART_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
   setup_simple();
 
   gps_init(&gps_1, GPS_UBX, &huart4, true);
-  // gps_init(&gps_2, GPS_UBX, &huart3, true);
+  #ifdef DUAL_GPS
+  gps_init(&gps_2, GPS_UBX, &huart3, true);
+  #endif
   HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
-  // HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
+  #ifdef DUAL_GPS
+  HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
+  #endif
+
+  HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
     gps_data_t data;
-    // if (gps_read_combined(&gps_1, &gps_2, &data)) {
+    #ifdef DUAL_GPS
+    if (gps_read_combined(&gps_1, &gps_2, &data)) {
+    #else
     if (gps_read_snapshot(&gps_1, &data)) {
+    #endif
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-
-      char satellites[50];
-      char latitude[50];
-      char longitude[50];
 
       int_to_string(data.numSV, satellites, 50);
       float_to_string(data.lat, 8, latitude, 50);
       float_to_string(data.lon, 8, longitude, 50);
+      float_to_string(data.headMot, 8, heading, 50);
 
-      printf("sat: %s, lat: %s, lon: %s\n", satellites, latitude, longitude);
+      printf("sat: %s, lat: %s, lon: %s, head: %s\n", satellites, latitude, longitude, heading);
 
+      print_to_usb("g,");
       print_to_usb(satellites);
       print_to_usb(",");
       print_to_usb(latitude);
       print_to_usb(",");
       print_to_usb(longitude);
-      print_to_usb(",0.0,0.0,0.0,0.0,0.0,0.0\n");
+      print_to_usb(",");
+      print_to_usb(heading);
+      print_to_usb("\n");
+    }
+
+    if (pantilt_ready == 1) {
+      char *parsed = (char*)pantilt_buffers[1 - pantilt_index];
+      int comma_count = 0;
+      int newline_pos = -1;
+
+      for (int i = 0; i < PANTILT_BUFFER_SIZE - 1; i++) {
+        if (parsed[i] == ',') comma_count++;
+        if (parsed[i] == '\n') {
+          newline_pos = i;
+          parsed[i + 1] = '\0';
+          break;
+        }
+      }
+
+      if (comma_count == 1 && newline_pos >= 0) {
+        parsed[newline_pos + 1] = '\0';
+        print_to_usb("p,");
+        print_to_usb(parsed);
+      }
+
+      pantilt_ready = 0;
     }
     
     if (pantilt_bytes == 0) {
       uint32_t count = tud_cdc_n_read(USB_CDC_ITF, pantilt_data, sizeof(pantilt_data));
-      if (count > 0){
+      if (count > 0) {
         pantilt_bytes = count;
         HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_bytes);
       }
@@ -210,6 +259,53 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief LPUART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPUART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
+  hlpuart1.Instance = LPUART1;
+  hlpuart1.Init.BaudRate = 115200;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.StopBits = UART_STOPBITS_1;
+  hlpuart1.Init.Parity = UART_PARITY_NONE;
+  hlpuart1.Init.Mode = UART_MODE_TX_RX;
+  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPUART1_Init 2 */
+
+  /* USER CODE END LPUART1_Init 2 */
+
 }
 
 /**
@@ -355,9 +451,9 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USER_LED_GPIO_Port, USER_LED_Pin, GPIO_PIN_RESET);
@@ -393,15 +489,18 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
       (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
     HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   }
-  // if (huart == gps_2.huart){
-  //   uint32_t error = HAL_UART_GetError(huart);
-  //   printf("UART3 error 0x%02lX:%s%s\n", error,
-  //     (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
-  //     (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
-  //   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
-  // }
+  #ifdef DUAL_GPS
+  if (huart == gps_2.huart){
+    uint32_t error = HAL_UART_GetError(huart);
+    printf("UART3 error 0x%02lX:%s%s\n", error,
+      (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+      (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
+    HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
+  }
+  #endif
   if (huart == pantilt_uart) {
     pantilt_bytes = 0;
+    HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   }
 }
 
@@ -410,15 +509,24 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     gps_process(&gps_1, gps_1_byte);
     HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   }
-  // if (huart == gps2.huart) {
-  //   gps_process(&gps_2, gps_2_byte);
-  //   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
-  // }
+  #ifdef DUAL_GPS
+  if (huart == gps_2.huart) {
+    gps_process(&gps_2, gps_2_byte);
+    HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
+  }
+  #endif
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  if (huart == pantilt_uart) {
+    pantilt_index = 1 - pantilt_index;
+    pantilt_ready = 1;
+    HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
+  }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == pantilt_uart)
-    pantilt_bytes = 0;
+  if (huart == pantilt_uart) pantilt_bytes = 0;
 }
 /* USER CODE END 4 */
 
