@@ -21,15 +21,15 @@ typedef struct cobs_reader_t {
 	cobs_state_t state;
 	uint8_t overhead_next;
 	uint32_t current_frame_size;
+	uint32_t last_read_bytes;
+	uint32_t last_written_bytes;
 } cobs_reader_t;
 
 
 int cobs_estimate_encoded_size(int buf_size);
-// int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim, int* written);
 int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim);
-// cobs_result_t cobs_stream_decode(cobs_reader_t* reader, uint32_t (*read)(uint8_t, void*, uint32_t), int itf, int available, uint8_t* output, int output_length, uint8_t delim, int* written_bytes, int* read_bytes);
 void cobs_setup_stream_reader(cobs_reader_t* reader);
-cobs_result_t cobs_stream_decode_buf(cobs_reader_t* reader, uint8_t* buf, int available, uint8_t* output, int output_length, uint8_t delim, int* written_bytes, int* read_bytes);
+cobs_result_t cobs_stream_decode(cobs_reader_t* reader, uint8_t* buf, int available, uint8_t* output, int output_length, uint8_t delim);
 int cobs_estimate_decoded_size(int buf_size);
 void cobs_consume_message(cobs_reader_t* reader);
 #endif

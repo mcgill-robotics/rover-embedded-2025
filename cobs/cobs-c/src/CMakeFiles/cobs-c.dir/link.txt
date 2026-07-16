@@ -1,0 +1,2 @@
+/data/data/com.termux/files/usr/bin/llvm-ar qc libcobs-c.a "CMakeFiles/cobs-c.dir/cobs.c.o" "CMakeFiles/cobs-c.dir/varint.c.o"
+/data/data/com.termux/files/usr/bin/llvm-ranlib libcobs-c.a
