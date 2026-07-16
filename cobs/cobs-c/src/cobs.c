@@ -211,9 +211,11 @@ int cobs_encode(uint8_t* input, int input_length, uint8_t* output, int output_le
 
 int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim, int* written, int* read){
 	cobs_reader_t reader;
-	cobs_result_t result = COBS_INCOMPLETE_FRAME;
 	cobs_setup_stream_reader(&reader);
-	return cobs_stream_decode(&reader, input, input_length, output, output_length, delim);
+	cobs_result_t result = cobs_stream_decode(&reader, input, input_length, output, output_length, delim);
+	if (written) *written = reader.last_written_bytes;
+	if (read) *read = reader.last_read_bytes;
+	return (result == COBS_DONE) ? (int)reader.last_read_bytes : -1;
 }
 
 

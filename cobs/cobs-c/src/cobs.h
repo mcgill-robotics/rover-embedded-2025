@@ -32,4 +32,5 @@ void cobs_setup_stream_reader(cobs_reader_t* reader);
 cobs_result_t cobs_stream_decode(cobs_reader_t* reader, uint8_t* buf, int available, uint8_t* output, int output_length, uint8_t delim);
 int cobs_estimate_decoded_size(int buf_size);
 void cobs_consume_message(cobs_reader_t* reader);
+int cobs_decode(uint8_t* input, int input_length, uint8_t* output, int output_length, uint8_t delim, int* written, int* read);
 #endif

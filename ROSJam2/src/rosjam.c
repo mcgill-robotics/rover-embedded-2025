@@ -307,7 +307,7 @@ void check_rx(){
 			uint8_t cobs_decode_buf[2048];
 			int written_bytes;
 			int in_buffer = buffer->size-buffer->read_offset;
-			int read_bytes = cobs_decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes);
+			int read_bytes = cobs_decode(buffer->buf+buffer->read_offset, in_buffer, cobs_decode_buf, 2048, 0, &written_bytes, NULL);
 			if (read_bytes == -2){
 				// printf("Dropping\n");
 				// drop_dangling = 0;

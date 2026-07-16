@@ -68,4 +68,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     rosjam2
     tinygps
+    cobs-c
 )
