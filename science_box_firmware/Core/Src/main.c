@@ -26,6 +26,7 @@
 #include <stdio.h>			// STDIO
 #include <string.h>			// Strings (for organizing data)
 #include "rosjam.h"
+// #include "vl53l3cx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -79,12 +80,7 @@ uint16_t timer = 0;
 
 char buffer[150];
 
-// DEBUG: JTAG
-int __io_putchar(int ch) {
- // Write character to ITM ch.0
- ITM_SendChar(ch);
- return(ch);
-}
+
 
 /* USER CODE END PV */
 
@@ -108,7 +104,90 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+  // DEBUG: JTAG
+int __io_putchar(int ch) {
+ // Write character to ITM ch.0
+ ITM_SendChar(ch);
+ return(ch);
+}
 
+static int32_t I2C_WriteReg(uint16_t addr, uint8_t *pdata, uint16_t count) {
+    if (HAL_I2C_Master_Transmit(&hi2c4, addr, pdata, count, 100) != HAL_OK)
+        return -1;
+    return 0;
+}
+
+static int32_t I2C_ReadReg(uint16_t addr, uint8_t *pdata, uint16_t count) {
+    if (HAL_I2C_Master_Receive(&hi2c4, addr, pdata, count, 100) != HAL_OK)
+        return -1;
+    return 0;
+}
+
+static int32_t I2C_GetTick(void) {
+    return (int32_t)HAL_GetTick();
+}
+
+// VL53L3CX_Object_t sensor;
+
+// void ToF_Init(void) {
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+//     HAL_Delay(10);
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+//     HAL_Delay(200);
+
+//     VL53L3CX_IO_t io;
+//     io.Address  = VL53L3CX_DEVICE_ADDRESS;
+//     io.WriteReg = I2C_WriteReg;
+//     io.ReadReg  = I2C_ReadReg;
+//     io.GetTick  = I2C_GetTick;
+//     io.Init     = 0; // I2C already initialized by MX_I2C4_Init
+//     io.DeInit   = NULL;
+
+//     VL53L3CX_RegisterBusIO(&sensor, &io);
+//     VL53L3CX_Init(&sensor);
+//     VL53L3CX_Start(&sensor, VL53L3CX_MODE_BLOCKING_CONTINUOUS);
+// }
+
+// int32_t ToF_Read(void) {
+//     VL53L3CX_Result_t result;
+
+//     if (VL53L3CX_GetDistance(&sensor, &result) != VL53L3CX_OK) {
+//         return -1;
+//     }
+
+//     for (uint32_t i = 0; i < result.ZoneResult[0].NumberOfTargets; i++) {
+//         if (result.ZoneResult[0].Status[i] == 0) {
+//             return result.ZoneResult[0].Distance[i];
+//         }
+//     }
+
+//     return -1;
+// }
+
+uint16_t Get_Position(float position) {
+	return position * 100 + 100;
+}
+
+// Position goes from 0 to 1
+void Turn_Servo(uint8_t number, float position) {
+	position = Get_Position(position);
+	if (number == 1) {
+		__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, position);
+	}
+	if (number == 2) {
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, position);
+	}
+	if (number == 3) {
+		__HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, position);
+	}
+	if (number == 4) {
+		__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, position);
+	}
+	if (number == 5) {
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, position);
+	}
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -155,6 +234,12 @@ int main(void)
   // Initialize USB connection
   setup_simple();
 
+    // K30 I2C communication
+  uint8_t cmd[4] = {0x22, 0x00, 0x08, 0x2A};
+  uint8_t data[4];
+
+  // ToF Sensor
+  // ToF_Init();
 
   // Initialize servo PWM timers
   // IMPORTANT: Set the timers and channels accordingly
@@ -186,15 +271,20 @@ int main(void)
 	  // Servo driving
 
 	  // Get servo signals from USB
+    // The message will be formatted as: "S1:xx;S2:xx;S3:xx;S4:xx\n"
+    
 
 	  // Set the duty cycle for the servos to the values given
-	  __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, i);
-	  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, i);
-	  __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, i);
-	  __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, i);
-	  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, i);
-	  i +=2;
-	  if (i > 100) i = 50;
+    // Servos
+    i += 1;
+    if (50 > i && i >= 25) {
+      Turn_Servo(1, 0);
+    } else if (25 > i && i >= 0) {
+      Turn_Servo(1, 1);
+    } else {
+      i = 0;
+    }
+    if (i > 200) i = 100;
 
 	  // ADC configuration and logic: polling
 	  HAL_ADC_Start(&hadc1);
@@ -233,18 +323,34 @@ int main(void)
 
 	  HAL_ADC_Stop(&hadc2);
 
+    // Reading the values of the CO2 and the ToF sensors via I2C
+    // CO2
+    HAL_I2C_Master_Transmit(&hi2c2, (0x68 << 1), cmd, 4, 100);
+    HAL_Delay(40);
+    if (HAL_I2C_Master_Receive(&hi2c2, (0x68 << 1), data, 4, 100) == HAL_OK) {
+      co2_val1 = (data[1] << 8) | data[2];
+    } else {
+      co2_val1 = -1;
+    }
 
-	  // DEBUG: printing every value through JTAG
+    HAL_I2C_Master_Transmit(&hi2c4, (0x68 << 1), cmd, 4, 100);
+    HAL_Delay(40);
+    if (HAL_I2C_Master_Receive(&hi2c4, (0x68 << 1), data, 4, 100) == HAL_OK) {
+      co2_val2 = (data[1] << 8) | data[2];
+    } else {
+      co2_val2 = -1;
+    }
+
+    // ToF Sensor
+    // tof_val = ToF_Read();
 
 
 	  // Send the data via the USB interface
 	  // Write to buffer
-    printf("ping");
     timer++;
     if (timer == 4000){
       sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, ph4=%d ; m1=%d, m2=%d, m3=%d, m4=%d ; co2[0]=%d, co2[1]=%d ; tof=%ld\r\n", ph1_val, ph2_val, ph3_val, ph4_val, mois1_val, mois2_val, mois3_val, mois4_val, co2_val1, co2_val2, tof_val);
 	    // Send data via USB
-      printf(buffer);
       send_msg_raw(buffer, 150);
       timer = 0;
     }

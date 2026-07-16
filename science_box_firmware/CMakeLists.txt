@@ -71,6 +71,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     rosjam2
     # Add user defined libraries
+    # vl53l3cx
 )
 
 
