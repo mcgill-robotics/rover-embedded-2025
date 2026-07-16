@@ -4,6 +4,6 @@ C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotic
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:51:7:count_to_angle	24	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:61:5:angle_to_count	40	static
 C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:86:5:lmsw_pitch_up_recalibrate	16	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:94:5:lmsw_pitch_down_recalibrate	24	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:102:5:lmsw_roll_recalibrate	24	static
-C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:110:5:lmsw_gripper_recalibrate	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:100:5:lmsw_pitch_down_recalibrate	24	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:108:5:lmsw_roll_recalibrate	24	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/encoder.c:116:5:lmsw_gripper_recalibrate	16	static

@@ -21,7 +21,7 @@
 // This function is going to trigger on startup (see call in main loop)
 
 void CalibrateMotor(Motor * motor) {
-	motor->steering_state = CALIBRATION;
+	motor->motor_state = CALIBRATION;
 }
  // Note: Part 2. of the calibration sequence as described above is implemented
 // in Calibrate_endoder in encoder.c

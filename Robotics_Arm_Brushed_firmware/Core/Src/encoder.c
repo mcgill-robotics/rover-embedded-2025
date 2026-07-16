@@ -86,8 +86,14 @@ int angle_to_count(Motor_Encoding_Struct * encoding, double n){
 int lmsw_pitch_up_recalibrate(Motor * motor){
 	//reset the maximum number of counts
 	//set the current number of counts to the MAX
-	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
-	set_counts(motor->Motor_Encoding_Struct, (uint16_t) motor->ENCODER_type->CNT);
+	HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+
+	motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS = motor->Motor_Encoding_Struct->curr_counts;
+	set_motor_speed_raw(motor, 0);
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts));
+
+
+
 	return 1;
 }
 

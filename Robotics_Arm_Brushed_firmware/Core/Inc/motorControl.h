@@ -15,8 +15,9 @@ extern TIM_TypeDef* ROLL_PWM_TIMER;
 typedef enum {
     PID = 0,
     CALIBRATION = 1,
-	LEAVE_LIMIT = 2
-} SteeringState;
+	LEAVE_LIMIT = 2, 
+	FREE_MOVE = 3
+} motor_state;
 
 typedef enum {
 	GRIPPER = 0,
@@ -42,7 +43,7 @@ typedef struct {
 	MotorName				motorName;
 	GPIO_TypeDef* 			DIR_port;
 	uint16_t				DIR_pin;
-	SteeringState			steering_state;
+	motor_state				motor_state;
 	int						kPw; // proportional gain (how far away from goal)
 	int 					kDw; //derivative gain (smoothing)
 
@@ -54,7 +55,7 @@ void motor_struct_init(Motor * motor, TIM_TypeDef * pwm,
 		MotorName motorName, GPIO_TypeDef* DIR_port, uint16_t DIR_pin, int kPw, int kDw);
 
 
-void stop_motor();
+void stop_motor(Motor * motor);
 void set_motor_speed_percent(Motor * motor, float n);
 void set_motor_speed_raw(Motor * motor, int n);
 void set_motor_direction(Motor * motor, int n);

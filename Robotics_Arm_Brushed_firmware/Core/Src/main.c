@@ -102,7 +102,7 @@ int LMSW6_flag_gripper = 0;
 
 
 volatile uint32_t enc_count = 0;
-volatile uint32_t curr_goal_angle = 360; //testing only
+volatile uint32_t curr_goal_angle = 3600; //testing only
 
 /* USER CODE END 0 */
 
@@ -148,9 +148,6 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
-
-
-  HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   //initialize motors for all 3 motors
@@ -238,33 +235,37 @@ int main(void)
 //  CalibrateMotor(&pitch_motor);
 
 
-  	  // CAN initialization
-  	  // Configure accept-all filter for standard IDs into FIFO0 /
-      FDCAN_FilterTypeDef filter;
-      filter.IdType = FDCAN_STANDARD_ID;
-      //filter.IdType = FDCAN_CLASSIC_CAN;
-      filter.FilterIndex = 0;
-      filter.FilterType = FDCAN_FILTER_MASK;
-      filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-      filter.FilterID1 = 0x000; // ID pattern: don't care /
-      filter.FilterID2 = 0x000; // Mask: 0 = all bits ignored = accept all /
-      if (HAL_FDCAN_ConfigFilter(&hfdcan2, &filter) != HAL_OK) {
-          Error_Handler();
-      }
+//CAN NOT USED IN CURRENT ITERATION DUE TO ISSUES ON BOARD; UNABLE TO DO CAN
 
-      if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
-          Error_Handler();
-      }
+  	  // // CAN initialization
 
-      // Activate RX FIFO0 new message notification //
-      if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
-              0) != HAL_OK) {
-          Error_Handler();
-      }
 
-      if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
-          Error_Handler();
-      }
+  	  // // Configure accept-all filter for standard IDs into FIFO0 /
+      // FDCAN_FilterTypeDef filter;
+      // filter.IdType = FDCAN_STANDARD_ID;
+      // //filter.IdType = FDCAN_CLASSIC_CAN;
+      // filter.FilterIndex = 0;
+      // filter.FilterType = FDCAN_FILTER_MASK;
+      // filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+      // filter.FilterID1 = 0x000; // ID pattern: don't care /
+      // filter.FilterID2 = 0x000; // Mask: 0 = all bits ignored = accept all /
+      // if (HAL_FDCAN_ConfigFilter(&hfdcan2, &filter) != HAL_OK) {
+      //     Error_Handler();
+      // }
+
+      // if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
+      //     Error_Handler();
+      // }
+
+      // // Activate RX FIFO0 new message notification //
+      // if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
+      //         0) != HAL_OK) {
+      //     Error_Handler();
+      // }
+
+      // if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
+      //     Error_Handler();
+      // }
 
 
 
@@ -282,119 +283,103 @@ int main(void)
   int LMSW5_isDebouncing = 0;
   int LMSW6_isDebouncing = 0;
 
-  uint32_t last_blink = 0;
 
-  int count = 0;
-  //setPIDGoalA(&pitch_motor, 45);
-
-
-  //setup_simple(); // usb comm
+  //Set gripper to not use PID
+  gripper_motor.motor_state = FREE_MOVE;
 
 
-  //HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
+  setup_simple(); // usb comm
+
+
+  HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
 
   while (1)
   {
+	  process_simple();
 
 
-	  //process_simple();
-	 //__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 2000);
-	 //HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-
-	  setPIDGoalA(&pitch_motor, curr_goal_angle);
-
-	  //enc_count = __HAL_TIM_GET_COUNTER(&htim5);
-
-	  enc_count = pitch_motor.ENCODER_type->CNT;
-
-//	  //pitch
-//
-//
-//		  //close pitch
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 500);
-//		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop gripper
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //open gripper
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  500);
-//		  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop gripper
-//		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
-//
-//	  //roll
-//
-//
-//		  //close roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
-//		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //open roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 500);
-//		  HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop roll
-//		  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
-//
-//
-//	  //gripper
-//
-//
-//		  //close gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
-//		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //open gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 500);
-//		  HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
-//
-//		  HAL_Delay(2000);
-//
-//		  //stop gripper
-//		  __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-//
-//		  HAL_Delay(2000);
+	  //pitch
 
 
+		//   //close pitch
+		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+		//   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 
-//	    // Non-blocking LED blink
-//	    if (HAL_GetTick() - last_blink >= 1000) {
-//	        HAL_GPIO_TogglePin(LED_gripper_GPIO_Port, LED_gripper_Pin);
-//	        last_blink = HAL_GetTick();
-//	    }
+		//   HAL_Delay(2000);
+
+		//   //stop gripper
+		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
+
+		//   //open gripper
+		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  4499);
+		//   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+
+		//   HAL_Delay(2000);
+
+		//   //stop gripper
+		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
+
+	  // //roll
+
+
+		//   //close roll
+		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+		//   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
+
+		//   HAL_Delay(2000);
+
+		//   //stop roll
+		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
+
+		//   //open roll
+		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+		//   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
+
+		//   HAL_Delay(2000);
+
+		//   //stop roll
+		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
+
+
+	  // //gripper
+
+
+		//   //close gripper
+		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+		//   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+
+		//   HAL_Delay(2000);
+
+		//   //stop gripper
+		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
+
+		//   //open gripper
+		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+		//   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+
+		//   HAL_Delay(2000);
+
+		//   //stop gripper
+		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+
+		//   HAL_Delay(2000);
 
 
 
 
+
+//
 //	    char readchar = read_char();
 //	    if (readchar == 'c'){
 //	    	print_to_usb("close gripper\n");
@@ -419,39 +404,9 @@ int main(void)
 //			print_to_usb("stop roll\n");
 //			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
 //		}
+//
+//
 
-
-
-	  //MOTOR TESTING; ACTUAL CODE SHOULD START AT CAN FLAG
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//
-//	  //HAL_GPIO_WritePin(PWM_gripper_GPIO_Port, PWM_gripper_Pin, 1);   // IN1 = 1
-//	  //^ moved on top
-//
-//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0); //  PH = 1 = go forward
-//
-//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//
-//	  HAL_Delay(3000);
-//
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//	  HAL_Delay(2000);
-//
-//	  //reverse direction
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//
-//	  HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-//
-//	  HAL_Delay(3000);
-//	  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//
-//	  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//	  HAL_Delay(2000);
-
-
-//	  if (TIM5->CNT >= 41750){
-//		  HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
-//	  }
 
 
 //	  // Process Message if available
@@ -470,15 +425,12 @@ int main(void)
 //	  }
 //
 //
-////	  if (systick_10ms_flag) {
-////		  systick_10ms_flag = 0;
-////
-////		  SysTickFunction();
-////	  }
-//
+
+
+
 //	  if (LMSW1_flag_pitch_up){
 //		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
-//			if (!switch_state){
+//			if (switch_state){
 //				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
 //			}
 //
@@ -498,8 +450,8 @@ int main(void)
 //			lmsw_pitch_up_recalibrate(&pitch_motor); // actual action to do on switch
 //		 }
 //	  }
-//
-//
+
+
 //
 //	  if (LMSW2_flag_pitch_down){
 //		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
@@ -1312,21 +1264,27 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : Limit_switch_6_Pin Limit_switch_5_Pin Limit_switch_4_Pin */
   GPIO_InitStruct.Pin = Limit_switch_6_Pin|Limit_switch_5_Pin|Limit_switch_4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Limit_switch_3_Pin */
   GPIO_InitStruct.Pin = Limit_switch_3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Limit_switch_3_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Limit_switch_2_Pin Limit_switch_1_Pin */
-  GPIO_InitStruct.Pin = Limit_switch_2_Pin|Limit_switch_1_Pin;
+  /*Configure GPIO pin : Limit_switch_2_Pin */
+  GPIO_InitStruct.Pin = Limit_switch_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Limit_switch_2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Limit_switch_1_Pin */
+  GPIO_InitStruct.Pin = Limit_switch_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(Limit_switch_1_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);

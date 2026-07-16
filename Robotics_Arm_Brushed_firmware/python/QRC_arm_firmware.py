@@ -75,7 +75,7 @@ class Gripper():
 
 if __name__ == "__main__":
     import time
-    board = Gripper("COM8")
+    board = Gripper("COM5")
 
     try:
         board.connect()
@@ -88,9 +88,9 @@ if __name__ == "__main__":
         command = input("Input command here(o,c,s): ")
         if command == "o":
             board.open_gripper()
-        else if command == "c":
+        elif command == "c":
             board.close_gripper()
-        else if command == "s":
+        elif command == "s":
             board.stop_gripper()
         else:
             print("Invalid command")

@@ -11,6 +11,7 @@
 int hit = 0; // for testing
 
 void SysTickFunction(void) {
+	// return;
 	/*
 	 * THIS IS CALLED EVERY 1ms
 	 */
@@ -35,7 +36,7 @@ void SysTickFunction(void) {
 		//}
 
 		//normal systick loop execution
-		switch (motor->steering_state) {
+		switch (motor->motor_state) {
 			case (PID):
 				updatePID(motor);// TODO FIX
 				break;
@@ -44,6 +45,8 @@ void SysTickFunction(void) {
 				break;
 			case(LEAVE_LIMIT):
 				//leave_limit_switch(); // TODO FIX
+				break;
+			case(FREE_MOVE):
 				break;
 		}
 		set_counts(motor->Motor_Encoding_Struct, (uint32_t) motor->ENCODER_type->CNT);

@@ -43,7 +43,7 @@ void motor_struct_init(Motor* motor, TIM_TypeDef * pwm, TIM_TypeDef * encoder,
 	motor->kPw = kPw;
 	motor->kDw = kDw;
 
-	motor->steering_state = PID; // initialize the state to PID
+	motor->motor_state = PID; // initialize the state to PID
 }
 
 
