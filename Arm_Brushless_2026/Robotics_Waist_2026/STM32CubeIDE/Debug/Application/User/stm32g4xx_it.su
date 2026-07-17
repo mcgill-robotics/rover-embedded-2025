@@ -1,0 +1,5 @@
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32g4xx_it.c:81:6:EXTI3_IRQHandler	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32g4xx_it.c:95:6:EXTI4_IRQHandler	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32g4xx_it.c:108:6:FDCAN1_IT0_IRQHandler	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32g4xx_it.c:122:6:FDCAN1_IT1_IRQHandler	0	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Waist_2026/Src/stm32g4xx_it.c:136:6:TIM6_DAC_IRQHandler	8	static

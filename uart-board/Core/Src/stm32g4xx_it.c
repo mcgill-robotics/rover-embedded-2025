@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "tusb.h"
 #include "tusb_config.h"
-#include "json_serde/serialization.h"
+// #include "json_serde/serialization.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
