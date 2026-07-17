@@ -1,0 +1,8 @@
+../Application/User/planner.c:37:5:plannerInit	24	static
+../Application/User/planner.c:111:16:calculateVirtualHistory	16	static
+../Application/User/planner.c:221:16:determineSwitchingTimes	24	static
+../Application/User/planner.c:76:6:buildNewCurve	64	static
+../Application/User/planner.c:481:16:decellerate2Stop	8	static
+../Application/User/planner.c:529:6:calculateNewRamp	64	static
+../Application/User/planner.c:586:6:PosCtrl_ISRStep	56	static
+../Application/User/planner.c:781:6:Planner_MainStep	4	static
