@@ -1,0 +1,11 @@
+../Application/User/CAN_processing_v2.c:125:6:Handle_Run_Command.part.0.isra	5
+../Application/User/CAN_processing_v2.c:125:6:Handle_Run_Command	4
+../Application/User/CAN_processing_v2.c:237:6:Handle_Read_Command	10
+../Application/User/CAN_processing_v2.c:94:6:Process_Single_ESC_Command	5
+../Application/User/CAN_processing_v2.c:291:6:sendCANResponse	2
+../Application/User/CAN_processing_v2.c:330:7:SingleExtractFloatFromCAN	1
+../Application/User/CAN_processing_v2.c:337:9:extract_multiple_speeds	1
+../Application/User/CAN_processing_v2.c:344:7:half_to_float	5
+../Application/User/CAN_processing_v2.c:107:6:Process_Multiple_ESC_Command	6
+../Application/User/CAN_processing_v2.c:54:6:CAN_Parse_MSG	14
+../Application/User/CAN_processing_v2.c:374:7:extract_multiple_positions_arm	6

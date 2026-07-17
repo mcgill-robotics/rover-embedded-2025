@@ -1,0 +1,5 @@
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c:33:9:RI_SetRegisterGlobal	4	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c:167:9:RI_SetRegisterMotor1	24	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c:576:9:RI_GetRegisterGlobal	8	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c:721:11:RI_GetRegisterMotor1	80	static
+C:/Users/james/Documents/2.Robotics/rover-embedded-2025/Arm_Brushless_2026/Robotics_Elbow_2026/Src/sync_registers.c:1262:9:RI_MovString	4	static

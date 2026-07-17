@@ -1,0 +1,2 @@
+../Application/User/esc_sensors.c:42:6:ESC_Sensors_Update	1
+../Application/User/esc_sensors.c:63:23:ESC_Sensors_Get	1

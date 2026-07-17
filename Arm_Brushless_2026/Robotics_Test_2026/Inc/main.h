@@ -1,0 +1,142 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.h
+  * @brief          : Header for main.c file.
+  *                   This file contains the common defines of the application.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2026 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __MAIN_H
+#define __MAIN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+#include "stm32g4xx_hal.h"
+#include "motorcontrol.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "velocity_ctrl.h"
+/* USER CODE END Includes */
+
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
+typedef enum {
+    MODE_IDLE,
+    MODE_CALIBRATING,
+    MODE_POSITION,
+    MODE_VELOCITY
+} ControlMode_t;
+extern volatile ControlMode_t controlMode;  /* defined in main.c */
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+extern VelCtrlHandle *velCtrl;
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+
+/* USER CODE BEGIN EFP */
+float radToDegrees(float positionRad);
+float degreesToRad(float positionDegrees);
+float Read_Encoder_Position_Rad(void);
+float outputShaftToInput(float positionRad, float ratio);
+float inputShaftToOutput(float positionRad, float ratio);
+
+/* USER CODE END EFP */
+
+/* Private defines -----------------------------------------------------------*/
+#define M1_PWM_UL_Pin GPIO_PIN_13
+#define M1_PWM_UL_GPIO_Port GPIOC
+#define M1_BUS_VOLTAGE_Pin GPIO_PIN_0
+#define M1_BUS_VOLTAGE_GPIO_Port GPIOA
+#define M1_CURR_SHUNT_U_Pin GPIO_PIN_1
+#define M1_CURR_SHUNT_U_GPIO_Port GPIOA
+#define M1_OPAMP1_OUT_Pin GPIO_PIN_2
+#define M1_OPAMP1_OUT_GPIO_Port GPIOA
+#define M1_OPAMP1_INT_GAIN_Pin GPIO_PIN_3
+#define M1_OPAMP1_INT_GAIN_GPIO_Port GPIOA
+#define M1_OPAMP2_INT_GAIN_Pin GPIO_PIN_5
+#define M1_OPAMP2_INT_GAIN_GPIO_Port GPIOA
+#define M1_OPAMP2_OUT_Pin GPIO_PIN_6
+#define M1_OPAMP2_OUT_GPIO_Port GPIOA
+#define M1_CURR_SHUNT_V_Pin GPIO_PIN_7
+#define M1_CURR_SHUNT_V_GPIO_Port GPIOA
+#define M1_CURR_SHUNT_W_Pin GPIO_PIN_0
+#define M1_CURR_SHUNT_W_GPIO_Port GPIOB
+#define M1_OPAMP3_OUT_Pin GPIO_PIN_1
+#define M1_OPAMP3_OUT_GPIO_Port GPIOB
+#define M1_OPAMP3_INT_GAIN_Pin GPIO_PIN_2
+#define M1_OPAMP3_INT_GAIN_GPIO_Port GPIOB
+#define M1_TEMPERATURE_Pin GPIO_PIN_14
+#define M1_TEMPERATURE_GPIO_Port GPIOB
+#define M1_PWM_WL_Pin GPIO_PIN_15
+#define M1_PWM_WL_GPIO_Port GPIOB
+#define LED_STATUS_Pin GPIO_PIN_6
+#define LED_STATUS_GPIO_Port GPIOC
+#define M1_PWM_UH_Pin GPIO_PIN_8
+#define M1_PWM_UH_GPIO_Port GPIOA
+#define M1_PWM_VH_Pin GPIO_PIN_9
+#define M1_PWM_VH_GPIO_Port GPIOA
+#define M1_PWM_WH_Pin GPIO_PIN_10
+#define M1_PWM_WH_GPIO_Port GPIOA
+#define M1_PWM_VL_Pin GPIO_PIN_12
+#define M1_PWM_VL_GPIO_Port GPIOA
+#define TMS_Pin GPIO_PIN_13
+#define TMS_GPIO_Port GPIOA
+#define TCK_Pin GPIO_PIN_14
+#define TCK_GPIO_Port GPIOA
+#define Start_Stop_Pin GPIO_PIN_10
+#define Start_Stop_GPIO_Port GPIOC
+#define Start_Stop_EXTI_IRQn EXTI15_10_IRQn
+#define LIMIT_SW_LOWER_Pin GPIO_PIN_3
+#define LIMIT_SW_LOWER_GPIO_Port GPIOB
+#define LIMIT_SW_LOWER_EXTI_IRQn EXTI3_IRQn
+#define LIMIT_SW_UPPER_Pin GPIO_PIN_4
+#define LIMIT_SW_UPPER_GPIO_Port GPIOB
+#define LIMIT_SW_UPPER_EXTI_IRQn EXTI4_IRQn
+#define M1_ENCODER_A_Pin GPIO_PIN_6
+#define M1_ENCODER_A_GPIO_Port GPIOB
+#define M1_ENCODER_B_Pin GPIO_PIN_7
+#define M1_ENCODER_B_GPIO_Port GPIOB
+
+/* USER CODE BEGIN Private defines */
+#define JOINT_MIN_DEG   (0.0f)
+#define JOINT_MAX_DEG   (45.0f)
+
+/* Pre-computed radian equivalents — use these everywhere in C code.
+   Avoids calling degreesToRad() (which needs math.h) in header context. */
+#define JOINT_MIN_RAD   (JOINT_MIN_DEG * (3.14159265f / 180.0f))
+#define JOINT_MAX_RAD   (JOINT_MAX_DEG * (3.14159265f / 180.0f))
+/* USER CODE END Private defines */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __MAIN_H */
