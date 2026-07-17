@@ -24,9 +24,7 @@
 #include "class/cdc/cdc_device.h"
 #include "device/usbd.h"
 #include "rosjam.h"
-#include "json_serde/serialization.h"
 #include "stdio.h"
-#include "cobs.h"
 #include <stdint.h>
 /* USER CODE END Includes */
 
@@ -70,15 +68,15 @@ static void MX_UART4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-RosjamEndpoint endpoint0;
-RosjamEndpoint endpoint1;
-RosjamEndpoint endpoint2;
-RosjamEndpoint endpoint3;
-RosjamEndpoint endpoint4;
-RosjamEndpoint endpoint5;
-RosjamEndpoint endpoint6;
+// RosjamEndpoint endpoint0;
+// RosjamEndpoint endpoint1;
+// RosjamEndpoint endpoint2;
+// RosjamEndpoint endpoint3;
+// RosjamEndpoint endpoint4;
+// RosjamEndpoint endpoint5;
+// RosjamEndpoint endpoint6;
 
-Buffer test;
+// Buffer test;
 /* USER CODE END 0 */
 
 /**
