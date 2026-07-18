@@ -136,9 +136,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   setup_simple();
 
-  gps_init(&gps_1, GPS_UBX, &huart4, true);
+  gps_init(&gps_1, GPS_UBX, &huart3, true);
   #ifdef DUAL_GPS
-  gps_init(&gps_2, GPS_UBX, &huart3, true);
+  gps_init(&gps_2, GPS_UBX, &huart4, true);
   #endif
   HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   #ifdef DUAL_GPS
