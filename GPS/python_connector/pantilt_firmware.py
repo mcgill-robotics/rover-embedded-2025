@@ -6,7 +6,7 @@ DELIMITER = 0x00
 def cobs_encode(data: bytes) -> bytes:
     """COBS-encodes data (must not contain the delimiter byte after encoding)."""
 
-    output = bytearray(b'\x00') # Placeholder
+    output = bytearray(b'\x00')
     code_pos = 0
     code = 1
     for byte in data:
@@ -96,10 +96,17 @@ class PanTiltGPS():
         self.buffer: bytes = b""
         self.gps_sats: float = 0
         self.coords: list[float] = [-1.0, -1.0]
-        self.heading: float
-        self.pan_angle: float
-        self.tilt_angle: float
+        self.heading: float = 0.0
+        self.pan_angle: float = 0.0
+        self.tilt_angle: float = 0.0
+        # Diagnostic data
+        self.gps1_valid_frames: int = 0
+        self.gps1_error_frames: int = 0
+        self.gps2_valid_frames: int = 0
+        self.gps2_error_frames: int = 0
+        # Terminal functionality
         self.terminal_rx: bytearray = bytearray()
+        self.secondary_mode: str = "gps"
 
     def connect(self):
         """
@@ -172,6 +179,19 @@ class PanTiltGPS():
         elif msg_type == b"t":
             self.terminal_rx += payload
 
+        elif msg_type == b"d":
+            fields = text.split(',')
+            if len(fields) < 5:
+                return
+            try:
+                self.gps1_valid_frames = int(fields[0])
+                self.gps1_error_frames = int(fields[1])
+                self.gps2_valid_frames = int(fields[2])
+                self.gps2_error_frames = int(fields[3])
+            except ValueError:
+                pass
+            self.secondary_mode = "term" if fields[4] == "t" else "gps"
+
     def send_frame(self, msg_type: bytes, payload: bytes):
         """Encodes and writes a [type][payload] COBS frame to the board."""
 
@@ -196,8 +216,14 @@ class PanTiltGPS():
         return self.gps_sats
 
     def get_gps(self) -> list[float]:
-        """Gets the last available GPS coordinates as [satellites, latitude, longitude]."""
-        return [float(self.gps_sats), self.coords[0], self.coords[1]]
+        """Gets the last available GPS coordinates as [satellites, latitude, longitude, heading]."""
+
+        return [float(self.gps_sats), self.coords[0], self.coords[1], self.heading]
+    
+    def get_pantilt(self) -> list[float]:
+        """Gets the last available pantilt angles as [pan angle, tilt angle]."""
+        
+        return [self.pan_angle, self.tilt_angle]
 
     def add_pan_angle(self, angle: float):
         """
@@ -292,6 +318,14 @@ class PanTiltGPS():
         data = bytes(self.terminal_rx)
         self.terminal_rx.clear()
         return data
+    
+    def get_diagnostic_data(self):
+        """
+        Returns the diagnostic data from the board as [gps1_valid_frames, gps1_error_frames, gps_2_valid_frames, gps_2_error_frames, mode].
+        The two possible modes are `gps` or `term`.
+        """
+
+        return [self.gps1_valid_frames, self.gps1_error_frames, self.gps2_valid_frames, self.gps2_error_frames, self.secondary_mode]
 
 
 if __name__ == "__main__":
@@ -302,24 +336,10 @@ if __name__ == "__main__":
     except ConnectionError as e:
         print(e)
         exit(1)
-    step_p = 1
-    step_t = 5
-    while input().strip()=="":
-        board.add_pan_angle(10)
-        time.sleep(0.05)
-        board.add_tilt_angle(10)
-    board.add_pan_angle(-360)
-    time.sleep(0.05)
-    board.add_tilt_angle(-270)
-    while True:
-        for i in range(int(360/step_p)):
-            board.add_pan_angle(step_p)
-            time.sleep(0.02)
-        for i in range(int(360/step_p)):
-            board.add_pan_angle(-step_p)
-            time.sleep(0.02)
 
     while True:
         board.run()
-        print(f'GPS ON?: {board.is_gps_connected()} || GPS: {board.get_gps()}')
+        print(f"GPS lock: {board.is_gps_connected()}, GPS: {board.get_gps()}")
+        print(f"Pantilt: {board.get_pantilt()}")
+        print(f"Diagnostic: {board.get_diagnostic_data()}")
         time.sleep(0.05)

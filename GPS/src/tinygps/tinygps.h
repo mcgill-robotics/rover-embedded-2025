@@ -45,6 +45,11 @@ bool gps_process(gps_t *g, uint8_t byte);
 bool gps_read_snapshot(gps_t *g, gps_data_t *out);              // Used to get gps_data_t from a single GPS
 bool gps_read_combined(gps_t *a, gps_t *b, gps_data_t *out);    // Used to get gps_data_t from two different GPS
 
+// Link-health counters, independent of whether a fix has ever been acquired.
+// Useful to confirm wiring/baud/framing are correct while no satellite lock is available.
+uint32_t gps_get_valid_frames(gps_t *g);  // Checksum-valid sentences/frames received
+uint32_t gps_get_error_frames(gps_t *g);  // Checksum-failed sentences/frames received
+
 #ifdef __cplusplus
 }
 #endif

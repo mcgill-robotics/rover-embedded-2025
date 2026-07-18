@@ -62,6 +62,9 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+#define GPS1_TYPE GPS_UBX
+#define GPS2_TYPE GPS_UBX
+
 char satellites[50];
 char latitude[50];
 char longitude[50];
@@ -88,6 +91,7 @@ volatile int gps2_tx_len = 0;
 
 // Terminal
 #define TERM_BUFFER_SIZE 100
+#define TERM_BAUD_RATE 115200
 static uint8_t term_buffers[2][TERM_BUFFER_SIZE];
 static volatile int term_index = 0;
 static volatile int term_ready = 0;
@@ -121,19 +125,21 @@ typedef enum {
 
 static volatile gps2_uart_mode_t gps2_mode = GPS2_MODE_GPS2;
 
-// Switches what gps2_uart is doing right now
+// Switches between GPS 2 and terminal
 static void set_gps2_mode(gps2_uart_mode_t mode) {
   if (mode == gps2_mode) return;
-  HAL_UART_AbortReceive_IT(gps2_uart);
+  HAL_UART_AbortReceive(gps2_uart);
   gps2_mode = mode;
   switch (mode) {
     case GPS2_MODE_GPS2:
-      gps_init(&gps_2, GPS_UBX, gps2_uart, true);
+      gps_init(&gps_2, GPS2_TYPE, gps2_uart, true);
       HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
       break;
     case GPS2_MODE_TERMINAL:
       term_index = 0;
       term_ready = 0;
+      gps2_uart->Init.BaudRate = TERM_BAUD_RATE;
+      HAL_UART_Init(gps2_uart);
       HAL_UARTEx_ReceiveToIdle_IT(gps2_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
       break;
   }
@@ -179,7 +185,7 @@ static void process_usb_frame(uint8_t *frame, int len) {
     case 'm':
       if (payload_len == 3 && !memcmp(payload, "gps", 3)) set_gps2_mode(GPS2_MODE_GPS2);
       else if (payload_len == 4 && !memcmp(payload, "term", 4)) set_gps2_mode(GPS2_MODE_TERMINAL);
-      break;// pan,tilt -> forwarded as a text line to the pantilt board
+      break;
     case 't':
       process_terminal_frame(payload, payload_len);
       break;
@@ -224,11 +230,11 @@ int main(void)
   setup_simple();
   cobs_setup_stream_reader(&usb_cobs_reader);
 
-  gps_init(&gps_1, GPS_UBX, &huart3, true);
+  gps_init(&gps_1, GPS1_TYPE, &huart3, true);
   HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
 
   // Boots in GPS2_MODE_GPS2
-  gps_init(&gps_2, GPS_UBX, gps2_uart, true);
+  gps_init(&gps_2, GPS2_TYPE, gps2_uart, true);
   HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
 
   HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
@@ -251,6 +257,19 @@ int main(void)
       char gps_payload[200];
       int gps_payload_len = snprintf(gps_payload, sizeof(gps_payload), "%s,%s,%s,%s", satellites, latitude, longitude, heading);
       send_frame('g', (uint8_t*)gps_payload, gps_payload_len);
+    }
+
+    // Diagnostic data to check whether GPS are working as expected
+    static uint32_t last_status_tick = 0;
+    uint32_t now = HAL_GetTick();
+    if (now - last_status_tick >= 500) {
+      last_status_tick = now;
+      char status_payload[64];
+      int status_len = snprintf(status_payload, sizeof(status_payload), "%lu,%lu,%lu,%lu,%c",
+        (unsigned long)gps_get_valid_frames(&gps_1), (unsigned long)gps_get_error_frames(&gps_1),
+        (unsigned long)gps_get_valid_frames(&gps_2), (unsigned long)gps_get_error_frames(&gps_2),
+        (gps2_mode == GPS2_MODE_TERMINAL) ? 't' : 'g');
+      send_frame('d', (uint8_t*)status_payload, status_len);
     }
 
     // Send pantilt angle reporting to Jetson

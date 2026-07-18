@@ -42,21 +42,22 @@ def main(stdscr, port, baud):
         board.run()
 
         stdscr.erase()
-        gps_line = f"sats={board.gps_sats:.0f}  lat={board.coords[0]:.6f}  lon={board.coords[1]:.6f}  heading={getattr(board, 'heading', 0.0):.1f}"
-        pan = getattr(board, "pan_angle", 0.0)
-        tilt = getattr(board, "tilt_angle", 0.0)
+        gps_line = f"sats={board.gps_sats:.0f}  lat={board.coords[0]:.6f}  lon={board.coords[1]:.6f}  heading={board.heading:.1f}"
         stdscr.addstr(0, 0, f"GPS   {gps_line}  ({'locked' if board.is_gps_connected() else 'no lock'})")
-        stdscr.addstr(1, 0, f"PAN/TILT  pan={pan:.1f}  tilt={tilt:.1f}  step={step:.1f}")
-        stdscr.addstr(2, 0, f"MODE  {mode}")
+        stdscr.addstr(1, 0, f"PAN/TILT  pan={board.pan_angle:.1f}  tilt={board.tilt_angle:.1f}  step={step:.1f}")
+        stdscr.addstr(2, 0, f"GPS RX  gps1 ok={board.gps1_valid_frames} err={board.gps1_error_frames}   gps2 ok={board.gps2_valid_frames} err={board.gps2_error_frames}")
+        board_mode = "terminal" if board.secondary_mode == "term" else "control"
+        mismatch = "  (!! board disagrees, switch may not have taken effect)" if board_mode != mode else ""
+        stdscr.addstr(3, 0, f"MODE  {mode}  (board confirms: {board_mode}){mismatch}")
 
         if mode == CONTROL:
-            stdscr.addstr(4, 0, "arrows=pan/tilt  +/-=step  t=terminal mode  q=quit")
+            stdscr.addstr(5, 0, "arrows=pan/tilt  +/-=step  t=terminal mode  q=quit")
         else:
             term_log += board.read_terminal().decode("utf-8", errors="replace")
             term_log = term_log[-2000:]
-            stdscr.addstr(4, 0, "keys forwarded raw to secondary UART  ESC=back to control mode")
-            for i, line in enumerate(term_log.splitlines()[-(curses.LINES - 6):]):
-                stdscr.addstr(6 + i, 0, line[: curses.COLS - 1])
+            stdscr.addstr(5, 0, "keys forwarded raw to secondary UART  ESC=back to control mode")
+            for i, line in enumerate(term_log.splitlines()[-(curses.LINES - 7):]):
+                stdscr.addstr(7 + i, 0, line[: curses.COLS - 1])
 
         stdscr.refresh()
 
@@ -82,12 +83,15 @@ def main(stdscr, port, baud):
             elif ch == ord("t"):
                 board.set_secondary_mode("term")
                 mode = TERMINAL
+                term_log = ""
         else:
             if ch == 27: # ESC
                 board.set_secondary_mode("gps")
                 mode = CONTROL
             elif 0 <= ch < 256:
-                board.write_terminal(bytes([ch]))
+                data = bytes([ch])
+                board.write_terminal(data)
+                term_log += data.decode("utf-8", errors="replace")
 
 
 if __name__ == "__main__":
