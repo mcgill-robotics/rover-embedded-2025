@@ -9,6 +9,8 @@
 #include "uart_debugging.h"
 #include "parameters_conversion.h"
 #include <stdbool.h>
+#include "pwm_curr_fdbk.h"
+#include "ntc_temperature_sensor.h"
 
 
 // Define the bit masks to retrieve the relevent portions of data from the CAN id
@@ -64,9 +66,8 @@ static float g_speedThresh = 50.0f;    // threshold below which we treat speed a
 
 static StartWatchdog s_startWd = { .firstTick = 0, .attempts = 0 };
 
-
-
-
+extern PWMC_Handle_t *pwmcHandle[NBR_OF_MOTORS];
+extern NTC_Handle_t   TempSensor_M1;
 
 //The next functions here are to retrieve the correct pattern of bits from the received CAN message
 uint8_t get_CAN_transmitter (uint16_t CAN_ID) {
@@ -207,25 +208,54 @@ void Process_Single_ESC_Command (ParsedCANID *CANMessageID, uint8_t *rxData){
 				float phaseVoltage = MC_GetPhaseVoltageAmplitudeMotor1();
 				sendCANResponse(CANMessageID, phaseVoltage);
 				break;
-		case(CURRENT):
-				float phaseCurrent = MC_GetPhaseCurrentAmplitudeMotor1();
-				sendCANResponse(CANMessageID, phaseCurrent);
-				break;
-		case(GET_ALL_FAULTS):
-				float currentFaults = MC_GetOccurredFaultsMotor1();
-				sendCANResponse(CANMessageID, currentFaults);
-				break;
-		case(GET_CURRENT_STATE):
-				float currentState = MC_GetSTMStateMotor1();
-				sendCANResponse(CANMessageID, currentState);
-				break;
-		case(GET_TEMPERATURE):
-				//TODO --> need to poll the gpio, check the datasheet later for whichever pin this is
-				break;
-		case(GET_PING):
-				float feedback = 69;// ;)
-				sendCANResponse(CANMessageID, feedback);
-				break;
+        case(CURRENT):
+        {
+            // Original phase-current amplitude (kept for later)
+//          float phaseCurrent = MC_GetPhaseCurrentAmplitudeMotor1();
+
+            // DIAGNOSTIC: MEASURED q-axis (torque) current, Amps
+            qd_f_t iqd = MCI_GetIqd_F(&Mci[0]);
+            float phaseCurrent = iqd.q;
+            sendCANResponse(CANMessageID, phaseCurrent);
+            break;
+        }
+
+        case(GET_ALL_FAULTS):
+        {
+            // Temporarily overridden with COMMANDED q-axis (torque) current
+//          float currentFaults = MC_GetOccurredFaultsMotor1();
+
+            qd_f_t iqdref = MCI_GetIqdref_F(&Mci[0]);
+            float currentFaults = iqdref.q;
+            sendCANResponse(CANMessageID, currentFaults);
+            break;
+        }
+
+        case(GET_CURRENT_STATE):
+        {
+            // Original state (kept for later)
+//          float currentState = MC_GetSTMStateMotor1();
+
+            // DIAGNOSTIC: MEASURED mechanical speed, RPM (encoder-derived)
+            float currentState = MCI_GetAvrgMecSpeed_F(&Mci[0]);
+            sendCANResponse(CANMessageID, currentState);
+            break;
+        }
+
+        case(GET_TEMPERATURE):
+        {
+            // DIAGNOSTIC: averaged NTC temperature, degrees C
+            float currentTemp = (float)NTC_GetAvTemp_C(&TempSensor_M1);
+            sendCANResponse(CANMessageID, currentTemp);
+            break;
+        }
+
+        case(GET_PING):
+        {
+            float feedback = 69;// ;)
+            sendCANResponse(CANMessageID, feedback);
+            break;
+        }
 		default:
 			break;
 		}
@@ -902,4 +932,3 @@ int16_t extract_multiple_speeds(const uint8_t *rxData){
     int16_t value = (int16_t)((rxData[offset + 1] << 8) | rxData[offset]);
     return value;
 }
-
