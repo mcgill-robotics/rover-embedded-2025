@@ -48,9 +48,9 @@ class PanTiltGPS():
         self.buffer: bytes = b""
         self.gps_sats: float = 0
         self.coords: list[float] = [-1.0, -1.0]
-        self.heading: float
-        self.pan_angle: float
-        self.tilt_angle: float
+        self.heading: float = 0.0
+        self.pan_angle: float = 0.0
+        self.tilt_angle: float = 0.0
 
     def connect(self):
         ''' Connects to the board. Run this before using this object.
@@ -128,6 +128,9 @@ class PanTiltGPS():
     def get_gps(self) -> list[float]:
         ''' Gets the last available GPS coordinates as [satellites, latitude, longitude]. '''
         return [float(self.gps_sats), self.coords[0], self.coords[1]]
+    
+    def get_pantilt(self) -> list[float]:
+        return [self.pan_angle, self.tilt_angle]
 
     def add_pan_angle(self, angle: float):
         ''' Adds an increment of angle to the pan servo.
@@ -180,34 +183,38 @@ if __name__ == "__main__":
         exit(1)
     step_p = 1
     step_t = 5
-    while input().strip()=="":
-        board.add_pan_angle(10)
-        time.sleep(0.05)
-        board.add_tilt_angle(10)
-    board.add_pan_angle(-360)
-    time.sleep(0.05)
-    board.add_tilt_angle(-270)
+    #while input().strip()=="":
+    #    board.add_pan_angle(10)
+    #    time.sleep(0.05)
+    #    board.add_tilt_angle(10)
+    #board.add_pan_angle(-360)
+    #time.sleep(0.05)
+    #board.add_tilt_angle(-270)
+    #while True:
+    #    for i in range(int(360/step_p)):
+    #        board.add_pan_angle(step_p)
+    #        time.sleep(0.02)
+    #    for i in range(int(360/step_p)):
+    #        board.add_pan_angle(-step_p)
+    #        time.sleep(0.02)
     while True:
-        for i in range(int(360/step_p)):
+        for i in range(int(270/step_t)):
+            print("dir 1")
             board.add_pan_angle(step_p)
-            time.sleep(0.02)
-        for i in range(int(360/step_p)):
+            time.sleep(0.05)
+            board.add_tilt_angle(step_t)
+            time.sleep(0.05)
+            board.run()
+            print(f'GPS ON?: {board.is_gps_connected()} || GPS: {board.get_gps()} || PANTILT: {board.get_pantilt()}')
+        for i in range(int(270/step_t)):
+            print("dir 2")
             board.add_pan_angle(-step_p)
-            time.sleep(0.02)
-    # while True:
-    #     for i in range(int(270/step_t)):
-    #         print("dir 1")
-    #         board.add_pan_angle(step_p)
-    #         time.sleep(0.05)
-    #         board.add_tilt_angle(step_t)
-    #         time.sleep(0.05)
-    #     for i in range(int(270/step_t)):
-    #         print("dir 2")
-    #         board.add_pan_angle(-step_p)
-    #         time.sleep(0.05)
-    #         board.add_tilt_angle(-step_t)
-    #         time.sleep(0.05)
-    #     board.add_tilt_angle(30)
+            time.sleep(0.05)
+            board.add_tilt_angle(-step_t)
+            time.sleep(0.05)
+            board.run()
+            print(f'GPS ON?: {board.is_gps_connected()} || GPS: {board.get_gps()} || PANTILT: {board.get_pantilt()}')
+        board.add_tilt_angle(30)
 
     while True:
         board.run()
