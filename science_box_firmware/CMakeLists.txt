@@ -37,9 +37,12 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON) #added
+
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
+    #${CMAKE_PROJECT_NAME}/Drivers/vl53l3cx  #added
 )
 
 # Add sources to executable
@@ -50,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+    #${CMAKE_PROJECT_NAME}/Drivers/vl53l3cx  #added
 )
 
 # Add project symbols (macros)
@@ -66,12 +70,12 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u _printf_float")
 
 add_subdirectory(../ROSJam2/src "${CMAKE_CURRENT_BINARY_DIR}/ROSJam2_build")
 
+
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     rosjam2
     # Add user defined libraries
-    # vl53l3cx
 )
 
 
