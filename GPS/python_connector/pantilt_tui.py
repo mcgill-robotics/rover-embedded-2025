@@ -42,11 +42,15 @@ def main(stdscr, port, baud):
         board.run()
 
         stdscr.erase()
-        gps_line = f"sats={board.gps_sats:.0f}  lat={board.coords[0]:.6f}  lon={board.coords[1]:.6f}  heading={board.heading:.1f}"
+        sats, lat, lon = board.get_gps()
+        heading = board.get_heading()
+        pan_angle, tilt_angle = board.get_pantilt()
+        (gps1_ok, gps1_err), (gps2_ok, gps2_err) = board.get_gps_diag()
+        gps_line = f"sats={sats:.0f}  lat={lat:.6f}  lon={lon:.6f}  heading={heading:.1f}"
         stdscr.addstr(0, 0, f"GPS   {gps_line}  ({'locked' if board.is_gps_connected() else 'no lock'})")
-        stdscr.addstr(1, 0, f"PAN/TILT  pan={board.pan_angle:.1f}  tilt={board.tilt_angle:.1f}  step={step:.1f}")
-        stdscr.addstr(2, 0, f"GPS RX  gps1 ok={board.gps1_valid_frames} err={board.gps1_error_frames}   gps2 ok={board.gps2_valid_frames} err={board.gps2_error_frames}")
-        board_mode = "terminal" if board.secondary_mode == "term" else "control"
+        stdscr.addstr(1, 0, f"PAN/TILT  pan={pan_angle:.1f}  tilt={tilt_angle:.1f}  step={step:.1f}")
+        stdscr.addstr(2, 0, f"GPS RX  gps1 ok={gps1_ok} err={gps1_err}   gps2 ok={gps2_ok} err={gps2_err}")
+        board_mode = "terminal" if board.get_mode() == "term" else "control"
         mismatch = "  (!! board disagrees, switch may not have taken effect)" if board_mode != mode else ""
         stdscr.addstr(3, 0, f"MODE  {mode}  (board confirms: {board_mode}){mismatch}")
 
@@ -81,12 +85,12 @@ def main(stdscr, port, baud):
             elif ch in (ord("-"), ord("_")):
                 step = max(1.0, step - 1.0)
             elif ch == ord("t"):
-                board.set_secondary_mode("term")
+                board.set_mode("term")
                 mode = TERMINAL
                 term_log = ""
         else:
             if ch == 27: # ESC
-                board.set_secondary_mode("gps")
+                board.set_mode("gps")
                 mode = CONTROL
             elif 0 <= ch < 256:
                 data = bytes([ch])

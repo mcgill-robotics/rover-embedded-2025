@@ -94,19 +94,25 @@ class PanTiltGPS():
         self.ser: serial.Serial = None
         self.is_connected: bool = False
         self.buffer: bytes = b""
+
+        # GPS data
         self.gps_sats: float = 0
         self.coords: list[float] = [-1.0, -1.0]
         self.heading: float = 0.0
+
+        # Pantilt data
         self.pan_angle: float = 0.0
         self.tilt_angle: float = 0.0
+
         # Diagnostic data
         self.gps1_valid_frames: int = 0
         self.gps1_error_frames: int = 0
         self.gps2_valid_frames: int = 0
         self.gps2_error_frames: int = 0
+
         # Terminal functionality
         self.terminal_rx: bytearray = bytearray()
-        self.secondary_mode: str = "gps"
+        self.mode: str = "gps"
 
     def connect(self):
         """
@@ -190,7 +196,7 @@ class PanTiltGPS():
                 self.gps2_error_frames = int(fields[3])
             except ValueError:
                 pass
-            self.secondary_mode = "term" if fields[4] == "t" else "gps"
+            self.mode = "term" if fields[4] == "t" else "gps"
 
     def send_frame(self, msg_type: bytes, payload: bytes):
         """Encodes and writes a [type][payload] COBS frame to the board."""
@@ -216,9 +222,17 @@ class PanTiltGPS():
         return self.gps_sats
 
     def get_gps(self) -> list[float]:
-        """Gets the last available GPS coordinates as [satellites, latitude, longitude, heading]."""
+        """Gets the last available GPS coordinates as [satellites, latitude, longitude]."""
 
-        return [float(self.gps_sats), self.coords[0], self.coords[1], self.heading]
+        return [float(self.gps_sats), self.coords[0], self.coords[1]]
+    
+    def get_heading(self) -> float:
+        """
+        Returns the GPS heading based on motion. This will only work while the rover is moving.
+        It is very likely to be quite inaccurate.
+        """
+
+        return self.heading
     
     def get_pantilt(self) -> list[float]:
         """Gets the last available pantilt angles as [pan angle, tilt angle]."""
@@ -263,7 +277,7 @@ class PanTiltGPS():
             raise ConnectionError("Cannot write to serial port, not connected to board.")
         self.send_frame(b"p", f"0.0,{angle}".encode())
 
-    def set_secondary_mode(self, mode: str):
+    def set_mode(self, mode: str):
         """
         Switches what the second UART port (independent of pantilt) is used for.
 
@@ -289,7 +303,7 @@ class PanTiltGPS():
     def write_terminal(self, data: bytes):
         """
         Sends raw bytes to the secondary UART. Only takes effect while
-        that port is in terminal mode (see `set_secondary_mode`).
+        that port is in terminal mode (see `set_mode`).
 
         Parameters
         ----------
@@ -319,14 +333,15 @@ class PanTiltGPS():
         self.terminal_rx.clear()
         return data
     
-    def get_diagnostic_data(self):
-        """
-        Returns the diagnostic data from the board as [gps1_valid_frames, gps1_error_frames, gps_2_valid_frames, gps_2_error_frames, mode].
-        The two possible modes are `gps` or `term`.
-        """
+    def get_gps_diag(self):
+        """Returns the number of valid and error frames for each of the two GPS."""
 
-        return [self.gps1_valid_frames, self.gps1_error_frames, self.gps2_valid_frames, self.gps2_error_frames, self.secondary_mode]
+        return [[self.gps1_valid_frames, self.gps1_error_frames], [self.gps2_valid_frames, self.gps2_error_frames]]
 
+    def get_mode(self) -> str:
+        "Returns the current mode of the GPS 2 UART. Can either be `gps` or `term`."
+
+        return self.mode
 
 if __name__ == "__main__":
     import time
