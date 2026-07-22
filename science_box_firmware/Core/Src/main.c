@@ -26,7 +26,7 @@
 #include <stdio.h>			// STDIO
 #include <string.h>			// Strings (for organizing data)
 #include "rosjam.h"
-#include "vl53l3cx.h"
+// #include "vl53l3cx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,14 +65,12 @@ PCD_HandleTypeDef hpcd_USB_FS;
 uint16_t ph1_val = 0;
 uint16_t ph2_val = 0;
 uint16_t ph3_val = 0;
-uint16_t ph4_val = 0;
 
 uint16_t mois1_val = 0;
 uint16_t mois2_val = 0;
 uint16_t mois3_val = 0;
-uint16_t mois4_val = 0;
 
-uint32_t tof_val = 0;
+// uint32_t tof_val = 0;
 
 uint16_t timer = 0;
 
@@ -109,42 +107,42 @@ int __io_putchar(int ch) {
  return(ch);
 }
 
-VL53L3CX_Object_t sensor;
+// VL53L3CX_Object_t sensor;
 
-void ToF_Init(void) {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
-    HAL_Delay(200);
+// void ToF_Init(void) {
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+//     HAL_Delay(10);
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+//     HAL_Delay(200);
 
-    VL53L3CX_IO_t io;
-    io.Address  = VL53L3CX_DEVICE_ADDRESS;
-    io.WriteReg = I2C_WriteReg;
-    io.ReadReg  = I2C_ReadReg;
-    io.GetTick  = I2C_GetTick;
-    io.Init     = 0; // I2C already initialized by MX_I2C4_Init
-    io.DeInit   = NULL;
+//     VL53L3CX_IO_t io;
+//     io.Address  = VL53L3CX_DEVICE_ADDRESS;
+//     io.WriteReg = I2C_WriteReg;
+//     io.ReadReg  = I2C_ReadReg;
+//     io.GetTick  = I2C_GetTick;
+//     io.Init     = 0; // I2C already initialized by MX_I2C4_Init
+//     io.DeInit   = NULL;
 
-    VL53L3CX_RegisterBusIO(&sensor, &io);
-    VL53L3CX_Init(&sensor);
-    VL53L3CX_Start(&sensor, VL53L3CX_MODE_BLOCKING_CONTINUOUS);
-}
+//     VL53L3CX_RegisterBusIO(&sensor, &io);
+//     VL53L3CX_Init(&sensor);
+//     VL53L3CX_Start(&sensor, VL53L3CX_MODE_BLOCKING_CONTINUOUS);
+// }
 
-int32_t ToF_Read(void) {
-    VL53L3CX_Result_t result;
+// int32_t ToF_Read(void) {
+//     VL53L3CX_Result_t result;
 
-    if (VL53L3CX_GetDistance(&sensor, &result) != VL53L3CX_OK) {
-        return -1;
-    }
+//     if (VL53L3CX_GetDistance(&sensor, &result) != VL53L3CX_OK) {
+//         return -1;
+//     }
 
-    for (uint32_t i = 0; i < result.ZoneResult[0].NumberOfTargets; i++) {
-        if (result.ZoneResult[0].Status[i] == 0) {
-            return result.ZoneResult[0].Distance[i];
-        }
-    }
+//     for (uint32_t i = 0; i < result.ZoneResult[0].NumberOfTargets; i++) {
+//         if (result.ZoneResult[0].Status[i] == 0) {
+//             return result.ZoneResult[0].Distance[i];
+//         }
+//     }
 
-    return -1;
-}
+//     return -1;
+// }
 
 uint16_t Get_Position(float position) {
 	return position * 100 + 100;
@@ -217,7 +215,7 @@ int main(void)
   setup_simple();
 
   // ToF Sensor
-  ToF_Init();
+  // ToF_Init();
 
   // Initialize servo PWM timers
   // IMPORTANT: Set the timers and channels accordingly
@@ -254,15 +252,17 @@ int main(void)
 
 	  // Set the duty cycle for the servos to the values given
     // Servos
-    i += 1;
-    if (50 > i && i >= 25) {
-      Turn_Servo(1, 0);
-    } else if (25 > i && i >= 0) {
-      Turn_Servo(1, 1);
-    } else {
-      i = 0;
-    }
-    if (i > 200) i = 100;
+    //  ---- This is a test to check servos -----
+    // i += 1;
+    // if (50 > i && i >= 25) {
+    //   Turn_Servo(1, 0);
+    // } else if (25 > i && i >= 0) {
+    //   Turn_Servo(1, 1);
+    // } else {
+    //   i = 0;
+    // }
+    // if (i > 200) i = 100;
+
 
 	  // ADC configuration and logic: polling
 	  HAL_ADC_Start(&hadc1);
@@ -276,10 +276,6 @@ int main(void)
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 100);
 	  ph3_val = HAL_ADC_GetValue(&hadc1);		// Ch4
-
-	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  mois4_val = HAL_ADC_GetValue(&hadc1);		// Ch6
 
 	  HAL_ADC_Stop(&hadc1);
 
@@ -295,23 +291,13 @@ int main(void)
 	  HAL_ADC_PollForConversion(&hadc2, 100);
 	  mois3_val = HAL_ADC_GetValue(&hadc2);		// Ch10
 
-	  HAL_ADC_Start(&hadc2);
-	  HAL_ADC_PollForConversion(&hadc2, 100);
-	  ph4_val = HAL_ADC_GetValue(&hadc2);		// Ch17
-
 	  HAL_ADC_Stop(&hadc2);
-
-    // Reading the values of the ToF sensors via I2C
-
-    // ToF Sensor
-    tof_val = ToF_Read();
-
 
 	  // Send the data via the USB interface
 	  // Write to buffer
     timer++;
     if (timer == 4000){
-      sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, ph4=%d ; m1=%d, m2=%d, m3=%d, m4=%d; tof=%ld\r\n", ph1_val, ph2_val, ph3_val, ph4_val, mois1_val, mois2_val, mois3_val, mois4_val, tof_val);
+      sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d\r\n", ph1_val, ph2_val, ph3_val, mois1_val, mois2_val, mois3_val);
 	    // Send data via USB
       send_msg_raw(buffer, 150);
       timer = 0;
