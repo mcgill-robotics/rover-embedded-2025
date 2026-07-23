@@ -42,8 +42,7 @@ def main(stdscr, port, baud):
         board.run()
 
         stdscr.erase()
-        sats, lat, lon = board.get_gps()
-        heading = board.get_heading()
+        sats, lat, lon, heading = board.get_gps()
         pan_angle, tilt_angle = board.get_pantilt()
         (gps1_ok, gps1_err), (gps2_ok, gps2_err) = board.get_gps_diag()
         gps_line = f"sats={sats:.0f}  lat={lat:.6f}  lon={lon:.6f}  heading={heading:.1f}"

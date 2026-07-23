@@ -222,17 +222,9 @@ class PanTiltGPS():
         return self.gps_sats
 
     def get_gps(self) -> list[float]:
-        """Gets the last available GPS coordinates as [satellites, latitude, longitude]."""
+        """Gets the last available GPS coordinates as [satellites, latitude, longitude, heading]."""
 
-        return [float(self.gps_sats), self.coords[0], self.coords[1]]
-    
-    def get_heading(self) -> float:
-        """
-        Returns the GPS heading based on motion. This will only work while the rover is moving.
-        It is very likely to be quite inaccurate.
-        """
-
-        return self.heading
+        return [float(self.gps_sats), self.coords[0], self.coords[1], self.heading]
     
     def get_pantilt(self) -> list[float]:
         """Gets the last available pantilt angles as [pan angle, tilt angle]."""
