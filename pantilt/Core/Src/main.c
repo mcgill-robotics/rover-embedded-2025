@@ -77,7 +77,7 @@ char pan_buffer[40];
 char tilt_buffer[40];
 char angle_buffer[100];
 
-#define ANGLE_REPORT_PERIOD_MS 20   // 50 Hz — leaves an idle gap between lines
+#define ANGLE_REPORT_PERIOD_MS 100
 static uint32_t last_angle_report_tick = 0;
 
 #define BUF_SIZE 100

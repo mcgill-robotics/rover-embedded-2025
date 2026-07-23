@@ -573,6 +573,16 @@ bool gps_read_snapshot(gps_t *g, gps_data_t *out) {
     return true;
 }
 
+uint32_t gps_get_valid_frames(gps_t *g) {
+    if (g->type == GPS_UBX) return g->ubx.frames_ok;
+    return ((TinyGPSPlus *)g->nmea)->passedChecksum();
+}
+
+uint32_t gps_get_error_frames(gps_t *g) {
+    if (g->type == GPS_UBX) return g->ubx.frames_crc_err;
+    return ((TinyGPSPlus *)g->nmea)->failedChecksum();
+}
+
 bool gps_read_combined(gps_t *a, gps_t *b, gps_data_t *out) {
     gps_data_t da, db;
     bool ok_a = gps_read_snapshot(a, &da);
