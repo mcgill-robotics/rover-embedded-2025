@@ -26,6 +26,7 @@
 #include <stdio.h>			// STDIO
 #include <string.h>			// Strings (for organizing data)
 #include "rosjam.h"
+#include "stm32g4xx_hal_rtc.h"
 // #include "vl53l3cx.h"
 /* USER CODE END Includes */
 
@@ -53,6 +54,8 @@ FDCAN_HandleTypeDef hfdcan2;
 I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c4;
 
+RTC_HandleTypeDef hrtc;
+
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim5;
@@ -73,9 +76,16 @@ uint16_t mois3_val = 0;
 // uint32_t tof_val = 0;
 
 uint16_t timer = 0;
+uint16_t timestamp = 0;
 
 char buffer[150];
+uint16_t msglength;
 
+
+// Setting up the RTC
+#define RtcHandle &hrtc
+char timestamp_message[50];
+uint8_t sizeTimer;
 
 
 /* USER CODE END PV */
@@ -94,6 +104,7 @@ static void MX_TIM5_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_USB_PCD_Init(void);
+static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -106,6 +117,21 @@ int __io_putchar(int ch) {
  ITM_SendChar(ch);
  return(ch);
 }
+// RTC interrupt callback function
+void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	static RTC_TimeTypeDef sTime;
+
+	// Get current time and date
+	HAL_RTC_GetTime(hrtc, &sTime, RTC_FORMAT_BIN);
+	uint16_t mseconds = (sTime.SubSeconds * 1000) / (sTime.SecondFraction + 1);
+
+	// Send time and date over uart
+	sizeTimer = sprintf(timestamp_message, "%02d:%02d:%02d:%3.3u\r\n", sTime.Hours, sTime.Minutes, sTime.Seconds, mseconds);
+  timestamp++;;
+  timer++;
+}
+
 
 // VL53L3CX_Object_t sensor;
 
@@ -210,6 +236,7 @@ int main(void)
   MX_TIM16_Init();
   MX_TIM17_Init();
   MX_USB_PCD_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   // Initialize USB connection
   setup_simple();
@@ -230,7 +257,22 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);			// Servo 5
   __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 50);
 
-   int i = 50;
+  int i = 50;
+
+  
+  // RTC startup config
+  RTC_TimeTypeDef sTimeinit;
+  uint16_t mseconds = 0;
+  // Disable Wakeup Timer and configure it
+  HAL_RTCEx_DeactivateWakeUpTimer(RtcHandle);
+  // Init the time of the RTC system
+  sTimeinit.Hours = 0;
+  sTimeinit.Minutes = 0;
+  HAL_RTC_SetTime(RtcHandle, &sTimeinit, RTC_FORMAT_BIN);
+
+    // Start Wakeup timer with configuration (32768Hz / 16 = 2048) -> Counter = 2048
+  HAL_RTCEx_SetWakeUpTimer_IT(RtcHandle, 2048-1, RTC_WAKEUPCLOCK_RTCCLK_DIV16);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -243,6 +285,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    // RTC handling
+		// HAL_RTC_GetTime(RtcHandle, &sTime, RTC_FORMAT_BIN);
+		// mseconds = (sTime.SubSeconds * 1000) / (sTime.SecondFraction + 1);
+
 
 	  // Servo driving
 
@@ -295,11 +342,13 @@ int main(void)
 
 	  // Send the data via the USB interface
 	  // Write to buffer
-    timer++;
-    if (timer == 4000){
-      sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d\r\n", ph1_val, ph2_val, ph3_val, mois1_val, mois2_val, mois3_val);
+
+    if (timer > 0){
+        msglength = sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d; %d\r\n", 
+        ph1_val, ph2_val, ph3_val, mois1_val, mois2_val, mois3_val, 
+        timestamp);
 	    // Send data via USB
-      send_msg_raw(buffer, 150);
+      send_msg_raw(buffer, msglength);
       timer = 0;
     }
 	  
@@ -324,9 +373,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
@@ -673,6 +723,79 @@ static void MX_I2C4_Init(void)
   /* USER CODE BEGIN I2C4_Init 2 */
 
   /* USER CODE END I2C4_Init 2 */
+
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+  */
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
+  sTime.SubSeconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 1;
+  sDate.Year = 0;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Enable the WakeUp
+  */
+  if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 0, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
 
 }
 
