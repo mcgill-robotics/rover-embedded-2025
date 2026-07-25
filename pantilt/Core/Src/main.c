@@ -464,11 +464,15 @@ int __io_putchar(int ch)
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   pantilt_rx_size += Size;
   uart_data_ready = 1;
-  printf("received\n");
+  // printf("Received\n");
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (huart == &huart4) {
+    // uint32_t error = HAL_UART_GetError(huart);
+    // printf("UART4 error 0x%02lX:%s%s\n", error,
+    //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+    //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
     pantilt_rx_size = 0;
     HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf, BUF_SIZE);
   }

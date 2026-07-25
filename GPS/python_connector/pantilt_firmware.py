@@ -1,4 +1,5 @@
 import serial
+import sys
 
 DELIMITER = 0x00
 
@@ -44,7 +45,7 @@ def cobs_decode(frame: bytes) -> bytes:
     return bytes(output)
 
 
-class PanTiltGPS():
+class PanTiltGPS:
     """
     Represents the UART board with GPS and pantilt relay over a single USB CDC port.
 
@@ -342,11 +343,11 @@ if __name__ == "__main__":
         board.connect()
     except ConnectionError as e:
         print(e)
-        exit(1)
+        sys.exit(1)
 
     while True:
         board.run()
         print(f"GPS lock: {board.is_gps_connected()}, GPS: {board.get_gps()}")
         print(f"Pantilt: {board.get_pantilt()}")
-        print(f"Diagnostic: {board.get_diagnostic_data()}")
+        print(f"Diagnostic: {board.get_gps_diag()}")
         time.sleep(0.05)

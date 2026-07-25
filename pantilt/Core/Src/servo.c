@@ -2,7 +2,7 @@
 #include "servo.h"
 #include <stdint.h>
 
-double pan_angle = 90;
+double pan_angle = 180;
 double tilt_angle = 90;
 
 double min(double a, double b) {
@@ -13,14 +13,13 @@ double max(double a, double b) {
     return (a > b) ? a : b;
 }
 
-
 int process_servo_uart(char *buffer, int length, ProcessResult* res) {
     int comma_count = 0;
     int comma_index = -1;
     int index = 0;
 
-    char pan_angle_string[50];
-    char tilt_angle_string[50];
+    char pan_angle_string[ANGLE_SUBSTRING_SIZE];
+    char tilt_angle_string[ANGLE_SUBSTRING_SIZE];
     double new_pan_angle;
     double new_tilt_angle;
 
@@ -28,7 +27,7 @@ int process_servo_uart(char *buffer, int length, ProcessResult* res) {
         char incoming = buffer[index];
 
         if (incoming == '\n') {
-            if (comma_index != -1&&comma_count==1) {
+            if (comma_index != -1 && comma_count==1) {
                 create_substring(buffer, pan_angle_string, 0, comma_index - 1);
                 create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
                 // uses atof so invalid input just turns into 0, so no change to output happens
@@ -74,8 +73,8 @@ void init_servos(void) {
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-    write_servo(PAN_SERVO, (uint16_t) pan_angle);
-    write_servo(TILT_SERVO, (uint16_t) tilt_angle);
+    write_servo(PAN_SERVO, pan_angle / PAN_GEAR_RATIO);
+    write_servo(TILT_SERVO, tilt_angle);
 }
 
 int buffer_index = 0;
@@ -84,8 +83,8 @@ int comma_index = -1;
 void process_servo(void) {
     char buffer[100];
 
-    char pan_angle_string[50];
-    char tilt_angle_string[50];
+    char pan_angle_string[ANGLE_SUBSTRING_SIZE];
+    char tilt_angle_string[ANGLE_SUBSTRING_SIZE];
     double new_pan_angle;
     double new_tilt_angle;
 

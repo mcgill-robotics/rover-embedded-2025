@@ -15,8 +15,9 @@
 #define MAX_PAN_ANGLE  360
 #define MAX_TILT_ANGLE  270
 
-
 #define PAN_GEAR_RATIO 2.0
+
+#define ANGLE_SUBSTRING_SIZE 100
 
 extern double pan_angle;
 extern double tilt_angle;

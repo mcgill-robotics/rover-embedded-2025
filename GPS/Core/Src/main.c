@@ -161,10 +161,9 @@ static void process_terminal_frame(uint8_t *data, int len) {
 }
 
 // Sends encoded [type][payload] COBS frame
-#define USB_TX_BUF_SIZE (CMD_BUFFER_SIZE + 1 + (CMD_BUFFER_SIZE + 1) / 254 + 2) // Worst case COBS overhead
 static void send_frame(uint8_t type, const uint8_t *payload, int payload_len) {
   uint8_t raw[CMD_BUFFER_SIZE];
-  uint8_t encoded[USB_TX_BUF_SIZE];
+  uint8_t encoded[cobs_estimate_encoded_size(CMD_BUFFER_SIZE)]; // Worst case COBS overhead
   if (payload_len < 0 || payload_len > (int)sizeof(raw) - 1) return;
   raw[0] = type;
   if (payload_len > 0) memcpy(raw + 1, payload, payload_len);
@@ -185,7 +184,7 @@ static void process_usb_frame(uint8_t *frame, int len) {
         memcpy(pantilt_data, payload, payload_len);
         pantilt_data[payload_len] = '\n';
         pantilt_bytes = payload_len + 1;
-        HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_bytes);
+        if (HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_bytes) != HAL_OK) pantilt_bytes = 0;
       }
       break;
     case 'm':
@@ -602,26 +601,29 @@ int __io_putchar(int ch)
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
   if (huart == gps_1.huart) {
-    uint32_t error = HAL_UART_GetError(huart);
-    printf("UART4 error 0x%02lX:%s%s\n", error,
-      (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
-      (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
+    // uint32_t error = HAL_UART_GetError(huart);
+    // printf("UART4 error 0x%02lX:%s%s\n", error,
+    //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+    //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
     HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
   }
   if (huart == pantilt_uart) {
+    // uint32_t error = HAL_UART_GetError(huart);
+    // printf("USART1(pantilt) error 0x%02lX:%s%s\n", error,
+    //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+    //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
     pantilt_bytes = 0;
     HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   }
   if (huart == gps2_uart) {
     switch (gps2_mode) {
-      case GPS: {
-        uint32_t error = HAL_UART_GetError(huart);
-        printf("USART3(GPS2) error 0x%02lX:%s%s\n", error,
-          (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
-          (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
+      case GPS:
+        // uint32_t error = HAL_UART_GetError(huart);
+        // printf("USART3(GPS2) error 0x%02lX:%s%s\n", error,
+        //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
+        //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
         HAL_UART_Receive_IT(gps_2.huart, &gps_2_byte, 1);
         break;
-      }
       case TERMINAL:
         term_ready = 0;
         HAL_UARTEx_ReceiveToIdle_IT(gps2_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
