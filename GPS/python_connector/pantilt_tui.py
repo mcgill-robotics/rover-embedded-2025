@@ -2,23 +2,16 @@
 Curses TUI for PanTiltGPS.
 Run: python pantilt_tui.py [port] [baud]
 
-Control mode:
-    Arrow keys  pan/tilt
-    +/-         step size
-    t           switch to terminal mode
-    q           quit
-
-Terminal mode:
-    Any key     forwarded raw to secondary UART
-    ESC         back to control mode
+Arrow keys  pan/tilt
++/-         step size
+ESC         quit
+Any other key forwarded raw to the secondary UART
 """
 
 import curses
 import sys
 
 from pantilt_firmware import PanTiltGPS
-
-CONTROL, TERMINAL = "control", "terminal"
 
 
 def main(stdscr, port, baud):
@@ -34,33 +27,25 @@ def main(stdscr, port, baud):
     stdscr.nodelay(True)
     stdscr.timeout(50)
 
-    mode = CONTROL
     step = 5.0
     term_log = ""
 
     while True:
         board.run()
+        term_log += board.read_terminal().decode("utf-8", errors="replace")
+        term_log = term_log[-2000:]
 
         stdscr.erase()
         sats, lat, lon, heading = board.get_gps()
         pan_angle, tilt_angle = board.get_pantilt()
-        (gps1_ok, gps1_err), (gps2_ok, gps2_err) = board.get_gps_diag()
+        gps1_ok, gps1_err = board.get_gps_diag()
         gps_line = f"sats={sats:.0f}  lat={lat:.6f}  lon={lon:.6f}  heading={heading:.1f}"
         stdscr.addstr(0, 0, f"GPS   {gps_line}  ({'locked' if board.is_gps_connected() else 'no lock'})")
         stdscr.addstr(1, 0, f"PAN/TILT  pan={pan_angle:.1f}  tilt={tilt_angle:.1f}  step={step:.1f}")
-        stdscr.addstr(2, 0, f"GPS RX  gps1 ok={gps1_ok} err={gps1_err}   gps2 ok={gps2_ok} err={gps2_err}")
-        board_mode = "terminal" if board.get_mode() == "term" else "control"
-        mismatch = "  (!! board disagrees, switch may not have taken effect)" if board_mode != mode else ""
-        stdscr.addstr(3, 0, f"MODE  {mode}  (board confirms: {board_mode}){mismatch}")
-
-        if mode == CONTROL:
-            stdscr.addstr(5, 0, "arrows=pan/tilt  +/-=step  t=terminal mode  q=quit")
-        else:
-            term_log += board.read_terminal().decode("utf-8", errors="replace")
-            term_log = term_log[-2000:]
-            stdscr.addstr(5, 0, "keys forwarded raw to secondary UART  ESC=back to control mode")
-            for i, line in enumerate(term_log.splitlines()[-(curses.LINES - 7):]):
-                stdscr.addstr(7 + i, 0, line[: curses.COLS - 1])
+        stdscr.addstr(2, 0, f"GPS RX  ok={gps1_ok} err={gps1_err}")
+        stdscr.addstr(4, 0, "arrows=pan/tilt  +/-=step  ESC=quit  other keys forwarded to terminal")
+        for i, line in enumerate(term_log.splitlines()[-(curses.LINES - 6):]):
+            stdscr.addstr(6 + i, 0, line[: curses.COLS - 1])
 
         stdscr.refresh()
 
@@ -68,33 +53,24 @@ def main(stdscr, port, baud):
         if ch == -1:
             continue
 
-        if mode == CONTROL:
-            if ch == ord("q"):
-                break
-            elif ch == curses.KEY_LEFT:
-                board.add_pan_angle(-step)
-            elif ch == curses.KEY_RIGHT:
-                board.add_pan_angle(step)
-            elif ch == curses.KEY_UP:
-                board.add_tilt_angle(step)
-            elif ch == curses.KEY_DOWN:
-                board.add_tilt_angle(-step)
-            elif ch in (ord("+"), ord("=")):
-                step += 1.0
-            elif ch in (ord("-"), ord("_")):
-                step = max(1.0, step - 1.0)
-            elif ch == ord("t"):
-                board.set_mode("term")
-                mode = TERMINAL
-                term_log = ""
-        else:
-            if ch == 27: # ESC
-                board.set_mode("gps")
-                mode = CONTROL
-            elif 0 <= ch < 256:
-                data = bytes([ch])
-                board.write_terminal(data)
-                term_log += data.decode("utf-8", errors="replace")
+        if ch == 27:  # ESC
+            break
+        elif ch == curses.KEY_LEFT:
+            board.add_pan_angle(-step)
+        elif ch == curses.KEY_RIGHT:
+            board.add_pan_angle(step)
+        elif ch == curses.KEY_UP:
+            board.add_tilt_angle(step)
+        elif ch == curses.KEY_DOWN:
+            board.add_tilt_angle(-step)
+        elif ch in (ord("+"), ord("=")):
+            step += 1.0
+        elif ch in (ord("-"), ord("_")):
+            step = max(1.0, step - 1.0)
+        elif 0 <= ch < 256:
+            data = bytes([ch])
+            board.write_terminal(data)
+            term_log += data.decode("utf-8", errors="replace")
 
 
 if __name__ == "__main__":

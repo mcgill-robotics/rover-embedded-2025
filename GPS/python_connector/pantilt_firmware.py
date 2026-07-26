@@ -77,7 +77,7 @@ class PanTiltGPS:
     tilt_angle: float
         The reported tilt angle.
     terminal_rx: bytearray
-        Raw bytes received from the secondary UART while it's in terminal mode.
+        Raw bytes received from the secondary UART.
     """
 
     def __init__(self, port: str, baud_rate: int = 115200):
@@ -108,12 +108,9 @@ class PanTiltGPS:
         # Diagnostic data
         self.gps1_valid_frames: int = 0
         self.gps1_error_frames: int = 0
-        self.gps2_valid_frames: int = 0
-        self.gps2_error_frames: int = 0
 
         # Terminal functionality
         self.terminal_rx: bytearray = bytearray()
-        self.mode: str = "gps"
 
     def connect(self):
         """
@@ -188,16 +185,13 @@ class PanTiltGPS:
 
         elif msg_type == b"d":
             fields = text.split(',')
-            if len(fields) < 5:
+            if len(fields) < 2:
                 return
             try:
                 self.gps1_valid_frames = int(fields[0])
                 self.gps1_error_frames = int(fields[1])
-                self.gps2_valid_frames = int(fields[2])
-                self.gps2_error_frames = int(fields[3])
             except ValueError:
                 pass
-            self.mode = "term" if fields[4] == "t" else "gps"
 
     def send_frame(self, msg_type: bytes, payload: bytes):
         """Encodes and writes a [type][payload] COBS frame to the board."""
@@ -270,33 +264,9 @@ class PanTiltGPS:
             raise ConnectionError("Cannot write to serial port, not connected to board.")
         self.send_frame(b"p", f"0.0,{angle}".encode())
 
-    def set_mode(self, mode: str):
-        """
-        Switches what the second UART port (independent of pantilt) is used for.
-
-        Parameters
-        ----------
-        mode : str
-            One of "gps", "term". Boot default is "gps".
-
-        Raises
-        ------
-        ConnectionError
-            If there is no connection.
-        ValueError
-            If mode isn't one of "gps", "term".
-        """
-
-        if mode not in ("gps", "term"):
-            raise ValueError(f"Invalid mode: {mode!r}, must be 'gps' or 'term'.")
-        if not self.is_connected:
-            raise ConnectionError("Cannot write to serial port, not connected to board.")
-        self.send_frame(b"m", mode.encode())
-
     def write_terminal(self, data: bytes):
         """
-        Sends raw bytes to the secondary UART. Only takes effect while
-        that port is in terminal mode (see `set_mode`).
+        Sends raw bytes to the secondary UART, which is always in terminal mode.
 
         Parameters
         ----------
@@ -327,14 +297,9 @@ class PanTiltGPS:
         return data
     
     def get_gps_diag(self):
-        """Returns the number of valid and error frames for each of the two GPS."""
+        """Returns the number of valid and error frames received by the GPS."""
 
-        return [[self.gps1_valid_frames, self.gps1_error_frames], [self.gps2_valid_frames, self.gps2_error_frames]]
-
-    def get_mode(self) -> str:
-        "Returns the current mode of the GPS 2 UART. Can either be `gps` or `term`."
-
-        return self.mode
+        return [self.gps1_valid_frames, self.gps1_error_frames]
 
 if __name__ == "__main__":
     import time
