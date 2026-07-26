@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "class/cdc/cdc_device.h"
+#include "cmsis_gcc.h"
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal_def.h"
 #include "stm32g4xx_hal_gpio.h"
@@ -214,6 +215,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  while (!tud_cdc_ready()){
+      process_simple(); // keep usb connection running until ready
+  }
+  char* startup_message = "GPS Ready";
+  send_frame('s', (uint8_t*) startup_message, sizeof(startup_message));
   while (1) {
     if (gps_1_ready) {
       int gps_1_filled_index = (gps_1_index == 0) ? 1 : 0;
@@ -265,6 +271,8 @@ int main(void)
 
       if (comma_count == 1 && newline_pos >= 0) {
         send_frame('p', (uint8_t*)parsed, newline_pos);
+      } else {
+        send_frame('s', (uint8_t*)parsed, newline_pos);
       }
 
       pantilt_ready = 0;

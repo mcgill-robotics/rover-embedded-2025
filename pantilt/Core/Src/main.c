@@ -140,6 +140,9 @@ int main(void)
   // setup_simple();
   init_servos();
   HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf, BUF_SIZE);
+  char* startup_message = "Pantilt Ready\n";
+  HAL_UART_Transmit_IT(&huart4, (uint8_t*) startup_message, strlen(startup_message));
+  uart_send_ready = 1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -174,7 +177,7 @@ int main(void)
       last_angle_report_tick = HAL_GetTick();
       float_to_string(pan_angle, 4, pan_buffer, sizeof(pan_buffer));
       float_to_string(tilt_angle, 4, tilt_buffer, sizeof(tilt_buffer));
-      sprintf(angle_buffer, "%s,%s\n", pan_buffer, tilt_buffer);
+      sprintf(angle_buffer, "a;%s,%s\n", pan_buffer, tilt_buffer);
       HAL_UART_Transmit_IT(&huart4, (const uint8_t*) angle_buffer, strlen(angle_buffer));
       uart_send_ready = 1;
       

@@ -109,6 +109,9 @@ class PanTiltGPS:
         self.gps1_valid_frames: int = 0
         self.gps1_error_frames: int = 0
 
+        self.gps_startups = 0
+        self.pantilt_startups = 0
+
         # Terminal functionality
         self.terminal_rx: bytearray = bytearray()
 
@@ -192,6 +195,11 @@ class PanTiltGPS:
                 self.gps1_error_frames = int(fields[1])
             except ValueError:
                 pass
+        elif msg_type == b"s":
+            if text.strip() == "Pantilt Ready":
+                self.pantilt_startups+=1
+            elif text.strip() == "GPS Ready":
+                self.gps_startups+=1
 
     def send_frame(self, msg_type: bytes, payload: bytes):
         """Encodes and writes a [type][payload] COBS frame to the board."""
@@ -301,6 +309,10 @@ class PanTiltGPS:
 
         return [self.gps1_valid_frames, self.gps1_error_frames]
 
+    def get_startup_count(self):
+        """Get Number of startup messages detected (watchdog or manual resets)"""
+        return (self.gps_startups, self.pantilt_startups)
+
 if __name__ == "__main__":
     import time
     board = PanTiltGPS("/dev/ttyACM0")
@@ -315,4 +327,5 @@ if __name__ == "__main__":
         print(f"GPS lock: {board.is_gps_connected()}, GPS: {board.get_gps()}")
         print(f"Pantilt: {board.get_pantilt()}")
         print(f"Diagnostic: {board.get_gps_diag()}")
+        print(f"Startup count: {board.get_startup_count()}")
         time.sleep(0.05)
