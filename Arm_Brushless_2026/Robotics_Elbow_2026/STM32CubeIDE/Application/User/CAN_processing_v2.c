@@ -183,8 +183,7 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
            rather than JOINT_MAX_RAD - JOINT_MIN_RAD so the ceiling
            tracks any runtime tightening of the upper limit. */
         float demand = information;
-        float v_max  = Calibration_GetActiveUpperLimit()
-                     - Calibration_GetActiveLowerLimit();  /* rad/s */
+        float v_max  = 0.5f;  /* rad/s */
         if (demand >  v_max) demand =  v_max;
         if (demand < -v_max) demand = -v_max;
 

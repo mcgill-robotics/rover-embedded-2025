@@ -97,8 +97,8 @@ float inputShaftToOutput(float positionRad, float ratio);
 #define M1_TEMPERATURE_GPIO_Port GPIOB
 #define M1_PWM_WL_Pin GPIO_PIN_15
 #define M1_PWM_WL_GPIO_Port GPIOB
-#define LED_STATUS_Pin GPIO_PIN_6
-#define LED_STATUS_GPIO_Port GPIOC
+#define User_LED_Pin GPIO_PIN_6
+#define User_LED_GPIO_Port GPIOC
 #define M1_PWM_UH_Pin GPIO_PIN_8
 #define M1_PWM_UH_GPIO_Port GPIOA
 #define M1_PWM_VH_Pin GPIO_PIN_9
@@ -114,12 +114,6 @@ float inputShaftToOutput(float positionRad, float ratio);
 #define Start_Stop_Pin GPIO_PIN_10
 #define Start_Stop_GPIO_Port GPIOC
 #define Start_Stop_EXTI_IRQn EXTI15_10_IRQn
-#define LIMIT_SW_LOWER_Pin GPIO_PIN_3
-#define LIMIT_SW_LOWER_GPIO_Port GPIOB
-#define LIMIT_SW_LOWER_EXTI_IRQn EXTI3_IRQn
-#define LIMIT_SW_UPPER_Pin GPIO_PIN_4
-#define LIMIT_SW_UPPER_GPIO_Port GPIOB
-#define LIMIT_SW_UPPER_EXTI_IRQn EXTI4_IRQn
 #define M1_ENCODER_A_Pin GPIO_PIN_6
 #define M1_ENCODER_A_GPIO_Port GPIOB
 #define M1_ENCODER_B_Pin GPIO_PIN_7
