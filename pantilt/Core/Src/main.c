@@ -148,11 +148,20 @@ int main(void)
       ProcessResult result = PROC_OK;
       while (result != PROC_NEED_MORE){
         int bytes_read = process_servo_uart(active_buf+total_bytes_read, pantilt_rx_size, &result);
-        total_bytes_read+=bytes_read;
-        pantilt_rx_size-=bytes_read;
+        // if more is needed do not consume
+        if (result != PROC_NEED_MORE){
+          total_bytes_read+=bytes_read;
+          pantilt_rx_size-=bytes_read;
+        }
       }
-      memcpy(inactive_buf, active_buf+total_bytes_read, pantilt_rx_size);
-      swap_buffer();
+      if (pantilt_rx_size == BUF_SIZE){
+        // buffer is full and more is still required so discard everything
+        pantilt_rx_size = 0;
+
+      } else {
+        memcpy(inactive_buf, active_buf+total_bytes_read, pantilt_rx_size);
+        swap_buffer();
+      }
       HAL_UARTEx_ReceiveToIdle_IT(&huart4, (uint8_t *) active_buf+pantilt_rx_size, BUF_SIZE-pantilt_rx_size);
       uart_data_ready = 0;
     }
