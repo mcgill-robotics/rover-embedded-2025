@@ -321,11 +321,24 @@ if __name__ == "__main__":
     except ConnectionError as e:
         print(e)
         sys.exit(1)
-
-    while True:
+    dir_pan = 1
+    dir_tilt = 1
+    # while True:
+            
         board.run()
         print(f"GPS lock: {board.is_gps_connected()}, GPS: {board.get_gps()}")
-        print(f"Pantilt: {board.get_pantilt()}")
+        pan_angle, tilt_angle = board.get_pantilt()
+        print(f"Pantilt: {(pan_angle, tilt_angle)}")
         print(f"Diagnostic: {board.get_gps_diag()}")
         print(f"Startup count: {board.get_startup_count()}")
+        if pan_angle == 360:
+            dir_pan = -1
+        elif pan_angle == 0:
+            dir_pan = 1
+        if tilt_angle == 270:
+            dir_tilt = -1
+        elif tilt_angle == 0:
+            dir_tilt = 1
+        board.add_tilt_angle(5*dir_tilt)
+        board.add_pan_angle(5*dir_pan);
         time.sleep(0.05)

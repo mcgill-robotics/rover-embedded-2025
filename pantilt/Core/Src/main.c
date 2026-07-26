@@ -150,11 +150,13 @@ int main(void)
   while (1)
   {
     if (uart_data_ready){
-      HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
       int total_bytes_read = 0;
       ProcessResult result = PROC_OK;
       while (result != PROC_NEED_MORE){
         int bytes_read = process_servo_uart(active_buf+total_bytes_read, pantilt_rx_size, &result);
+        if (result == PROC_OK){
+          HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
+        }
         // if more is needed do not consume
         if (result != PROC_NEED_MORE){
           total_bytes_read+=bytes_read;
@@ -177,7 +179,7 @@ int main(void)
       last_angle_report_tick = HAL_GetTick();
       float_to_string(pan_angle, 4, pan_buffer, sizeof(pan_buffer));
       float_to_string(tilt_angle, 4, tilt_buffer, sizeof(tilt_buffer));
-      sprintf(angle_buffer, "a;%s,%s\n", pan_buffer, tilt_buffer);
+      sprintf(angle_buffer, "%s,%s\n", pan_buffer, tilt_buffer);
       HAL_UART_Transmit_IT(&huart4, (const uint8_t*) angle_buffer, strlen(angle_buffer));
       uart_send_ready = 1;
       

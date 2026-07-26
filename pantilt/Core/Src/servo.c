@@ -28,16 +28,12 @@ int process_servo_uart(char *buffer, int length, ProcessResult* res) {
 
         if (incoming == '\n') {
             if (comma_index != -1 && comma_count==1) {
-                if (comma_index-1 < ANGLE_SUBSTRING_SIZE){
-                    create_substring(buffer, pan_angle_string, 0, comma_index - 1);
+                if (comma_index-1 > ANGLE_SUBSTRING_SIZE || index-comma_index > ANGLE_SUBSTRING_SIZE){   
                     *res = PROC_INVALID;
                     return index+1;
                 }
-                if (index-comma_index < ANGLE_SUBSTRING_SIZE){
-                    create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
-                    *res = PROC_INVALID;
-                    return index+1;
-                }
+                create_substring(buffer, pan_angle_string, 0, comma_index - 1);
+                create_substring(buffer, tilt_angle_string, comma_index + 1, index - 1);
                 // uses atof so invalid input just turns into 0, so no change to output happens
                 new_pan_angle = string_to_float(pan_angle_string); 
                 new_tilt_angle = string_to_float(tilt_angle_string);
