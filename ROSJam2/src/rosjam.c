@@ -9,7 +9,18 @@
 #include <stdlib.h>
 
 double string_to_float(char* string){
-	return atof(string);
+	errno = 0;
+	char* next = NULL;
+	double converted_val = strtod(string, next);
+	if (next == string){
+		// Nothing was processed
+		return 0;
+	}
+	if (errno == ERANGE){
+		// out of representable range
+		return 0;
+	}
+	return converted_val;
 }
 
 int float_to_string(double number, int precision, char* buf, int buf_len){
