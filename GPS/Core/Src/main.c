@@ -79,8 +79,9 @@ gps_t gps_1;
 
 #define GPS_1_BUFFER_SIZE (UBX_MAX_PAYLOAD)
 static uint8_t gps_1_buffers[2][GPS_1_BUFFER_SIZE];
+static int buffer_sizes[2];
 static volatile int gps_1_index = 0;
-volatile int gps_1_ready = 0;
+static int gps_1_ready[2] ={0, 0};
 
 UART_HandleTypeDef *pantilt_uart = &huart1;
 uint8_t pantilt_data[100];
@@ -221,11 +222,13 @@ int main(void)
   char* startup_message = "GPS Ready";
   send_frame('s', (uint8_t*) startup_message, sizeof(startup_message));
   while (1) {
-    if (gps_1_ready) {
+    if (gps_1_ready[0] || gps_1_ready[1]) {
       int gps_1_filled_index = (gps_1_index == 0) ? 1 : 0;
-      uint8_t *buf = gps_1_buffers[gps_1_filled_index];
-      for (int i = 0; i < GPS_1_BUFFER_SIZE; i++) gps_process(&gps_1, buf[i]);
-      gps_1_ready = 0;
+      if (gps_1_ready[gps_1_filled_index] != 0){
+        uint8_t *buf = gps_1_buffers[gps_1_filled_index];
+        for (int i = 0; i < buffer_sizes[gps_1_filled_index]; i++) gps_process(&gps_1, buf[i]);
+        gps_1_ready[gps_1_filled_index] = 0;
+      }
     }
 
     gps_data_t data;
@@ -638,13 +641,13 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
   }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == gps_1.huart) {
-    gps_1_index = (gps_1_index == 0) ? 1 : 0;
-    gps_1_ready = 1;
-    HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
-  }
-}
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+//   if (huart == gps_1.huart) {
+//     gps_1_index = (gps_1_index == 0) ? 1 : 0;
+//     gps_1_ready = 1;
+//     HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
+//   }
+// }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart == pantilt_uart) {
@@ -656,6 +659,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     term_index = (term_index == 0) ? 1 : 0;
     term_ready = 1;
     HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
+  } else if (huart == gps_1.huart){
+    buffer_sizes[gps_1_index] = Size;
+    gps_1_ready[gps_1_index] = 1;
+    gps_1_index = (gps_1_index == 0) ? 1 : 0;
+    HAL_UARTEx_ReceiveToIdle_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
   }
 }
 
