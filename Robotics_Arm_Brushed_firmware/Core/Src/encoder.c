@@ -96,6 +96,7 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
 
 
 	return 1;
+	//fix limit switch code
 }
 
 int lmsw_pitch_down_recalibrate(Motor * motor){
