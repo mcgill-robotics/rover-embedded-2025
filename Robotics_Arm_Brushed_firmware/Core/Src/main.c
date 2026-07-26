@@ -284,8 +284,9 @@ int main(void)
   int LMSW6_isDebouncing = 0;
 
 
-  //Set gripper to not use PID
+  //Set gripper and roll port (actually connected to pitch) to not use PID
   gripper_motor.motor_state = FREE_MOVE;
+  pitch_motor.motor_state = FREE_MOVE;
 
 
   setup_simple(); // usb comm
@@ -293,119 +294,138 @@ int main(void)
 
   HAL_GPIO_TogglePin(LED_comms_GPIO_Port, LED_comms_Pin);
 
+  char usb_pid_goal[4];
+
 
   while (1)
   {
 	  process_simple();
 
 
-	  //pitch
-
-
-		//   //close pitch
-		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-		//   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //stop gripper
-		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //open gripper
-		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  4499);
-		//   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-
-		//   HAL_Delay(2000);
-
-		//   //stop gripper
-		//   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-	  // //roll
-
-
-		//   //close roll
-		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
-		//   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
-
-		//   HAL_Delay(2000);
-
-		//   //stop roll
-		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //open roll
-		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
-		//   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //stop roll
-		//   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-
-	  // //gripper
-
-
-		//   //close gripper
-		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-		//   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
-
-		//   HAL_Delay(2000);
-
-		//   //stop gripper
-		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //open gripper
-		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-		//   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
-
-		//   HAL_Delay(2000);
-
-		//   //stop gripper
-		//   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-
-		//   HAL_Delay(2000);
-
-
-
-
-
-//
-//	    char readchar = read_char();
-//	    if (readchar == 'c'){
-//	    	print_to_usb("close gripper\n");
-//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
-//	    }else if (readchar == 'o'){
-//	    	print_to_usb("open gripper\n");
-//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-//	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-//	    }else if (readchar == 's'){
-//	    	print_to_usb("stop gripper\n");
-//	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-//	    }else if (readchar == 'w'){
-//	    	print_to_usb("ccw roll\n");
-//	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-//	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
-//		}else if (readchar == 'd'){
-//			print_to_usb("cw roll\n");
-//			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-//			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
-//		}else if (readchar == 'r'){
-//			print_to_usb("stop roll\n");
-//			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
-//		}
+//	  //pitch
 //
 //
+//		   //close pitch
+//		   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+//		   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop gripper
+//		   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //open gripper
+//		   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,  4499);
+//		   HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop gripper
+//		   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+//
+//	   //roll
+//
+//
+//		   //close roll
+//		   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+//		   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop roll
+//		   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //open roll
+//		   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+//		   HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop roll
+//		   __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+//
+//
+//	   //gripper
+//
+//
+//		   //close gripper
+//		   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+//		   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop gripper
+//		   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //open gripper
+//		   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+//		   HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+//
+//		   HAL_Delay(2000);
+//
+//		   //stop gripper
+//		   __HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+//
+//		   HAL_Delay(2000);
+
+
+
+
+
+
+	    char readchar = read_char();
+	    if (readchar == 'c'){
+	    	print_to_usb("close gripper\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+	    }else if (readchar == 'o'){
+	    	print_to_usb("open gripper\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
+	    }else if (readchar == 's'){
+	    	print_to_usb("stop gripper\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+	    }else if (readchar == 'w'){
+	    	print_to_usb("ccw roll\n");
+	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+		}else if (readchar == 'd'){
+			print_to_usb("cw roll\n");
+			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+		}else if (readchar == 'r'){
+			print_to_usb("stop roll\n");
+			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+		}else if (readchar == 'p'){
+			print_to_usb("pitch pid: \n");
+			usb_pid_goal[0] = read_char();
+			usb_pid_goal[1] = read_char();
+			usb_pid_goal[2] = read_char();
+			usb_pid_goal[3] = 0;
+
+
+
+			double goal =  string_to_float(usb_pid_goal);
+			char buf[6];
+
+			float_to_string(goal, 1, buf, 6);
+
+			print_to_usb(buf);
+			setPIDGoalA(&roll_motor, goal);
+
+		}
+
+
 
 
 
@@ -428,28 +448,28 @@ int main(void)
 
 
 
-//	  if (LMSW1_flag_pitch_up){
-//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
-//			if (switch_state){
-//				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
-//			}
-//
-//		  LMSW1_flag_pitch_up = 0;
-//	  }
-//
-//	  if (LMSW1_isDebouncing){
-//		 //check that at–– least 32 consecutive readings of switch = 1
-//		 //ensures that the switch reading is stabilized
-//		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
-//			LMSW1_buffer = (LMSW1_buffer<<1) | current_switch_reading;
-//
-//		 //only once stable switch reading that perform switch actions
-//		 if (LMSW1_buffer == 0xFFFFFFFF){
-//			LMSW1_isDebouncing = 0;
-//			LMSW1_buffer = 0;
-//			lmsw_pitch_up_recalibrate(&pitch_motor); // actual action to do on switch
-//		 }
-//	  }
+	  if (LMSW1_flag_pitch_up){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+			if (switch_state){
+				LMSW1_isDebouncing = 1;// 1st trigger detected: following code for debouncing
+			}
+
+		  LMSW1_flag_pitch_up = 0;
+	  }
+
+	  if (LMSW1_isDebouncing){
+		 //check that at–– least 32 consecutive readings of switch = 1
+		 //ensures that the switch reading is stabilized
+		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_1_GPIO_Port, Limit_switch_1_Pin);
+			LMSW1_buffer = (LMSW1_buffer<<1) | current_switch_reading;
+
+		 //only once stable switch reading that perform switch actions
+		 if (LMSW1_buffer == 0xFFFFFFFF){
+			LMSW1_isDebouncing = 0;
+			LMSW1_buffer = 0;
+			lmsw_pitch_up_recalibrate(&roll_motor); // actual action to do on switch
+		 }
+	  }
 
 
 //
