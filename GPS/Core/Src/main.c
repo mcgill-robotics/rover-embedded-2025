@@ -65,7 +65,7 @@ PCD_HandleTypeDef hpcd_USB_FS;
 // Define ms between reporting of diagnostic data (valid/error GPS packets received)
 #define DIAG_REPORT_PERIOD_MS 500
 
-#define GPS1_TYPE GPS_UBX
+#define GPS_1_TYPE GPS_UBX
 
 char satellites[50];
 char latitude[50];
@@ -73,7 +73,11 @@ char longitude[50];
 char heading[50];
 
 gps_t gps_1;
-static uint8_t gps_1_byte;
+
+#define GPS_1_BUFFER_SIZE (UBX_MAX_PAYLOAD)
+static uint8_t gps_1_buffers[2][GPS_1_BUFFER_SIZE];
+static volatile int gps_1_index = 0;
+volatile int gps_1_ready = 0;
 
 UART_HandleTypeDef *pantilt_uart = &huart1;
 uint8_t pantilt_data[100];
@@ -197,8 +201,8 @@ int main(void)
   setup_simple();
   cobs_setup_stream_reader(&usb_cobs_reader);
 
-  gps_init(&gps_1, GPS1_TYPE, &huart3, true);
-  HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
+  gps_init(&gps_1, GPS_1_TYPE, &huart3, true);
+  HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
 
   HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
@@ -207,6 +211,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+    if (gps_1_ready) {
+      int gps_1_filled_index = (gps_1_index == 0) ? 1 : 0;
+      uint8_t *buf = gps_1_buffers[gps_1_filled_index];
+      for (int i = 0; i < GPS_1_BUFFER_SIZE; i++) gps_process(&gps_1, buf[i]);
+      gps_1_ready = 0;
+    }
+
     gps_data_t data;
     bool got_fix = gps_read_snapshot(&gps_1, &data);
     if (got_fix) {
@@ -235,7 +246,8 @@ int main(void)
 
     // Send pantilt angle reporting to Jetson
     if (pantilt_ready == 1) {
-      char *parsed = (char*)pantilt_buffers[1 - pantilt_index];
+      int pantilt_filled_index = (pantilt_index == 0) ? 1 : 0;
+      char *parsed = (char*)pantilt_buffers[pantilt_filled_index];
       int comma_count = 0;
       int newline_pos = -1;
 
@@ -256,7 +268,8 @@ int main(void)
 
     // Send terminal output to Jetson
     if (term_ready) {
-      send_frame('t', term_buffers[1 - term_index], term_size);
+      int term_filled_index = (term_index == 0) ? 1 : 0;
+      send_frame('t', term_buffers[term_filled_index], term_size);
       term_ready = 0;
     }
 
@@ -561,7 +574,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
     // printf("UART4 error 0x%02lX:%s%s\n", error,
     //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
     //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
-    HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
+    HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
   }
   if (huart == pantilt_uart) {
     // uint32_t error = HAL_UART_GetError(huart);
@@ -579,19 +592,20 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == gps_1.huart) {
-    gps_process(&gps_1, gps_1_byte);
-    HAL_UART_Receive_IT(gps_1.huart, &gps_1_byte, 1);
+    gps_1_index = (gps_1_index == 0) ? 1 : 0;
+    gps_1_ready = 1;
+    HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
   }
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart == pantilt_uart) {
-    pantilt_index = 1 - pantilt_index;
+    pantilt_index = (pantilt_index == 0) ? 1 : 0;
     pantilt_ready = 1;
     HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   } else if (huart == term_uart) {
     term_size = Size;
-    term_index = 1 - term_index;
+    term_index = (term_index == 0) ? 1 : 0;
     term_ready = 1;
     HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
   }
