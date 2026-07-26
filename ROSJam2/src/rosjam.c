@@ -7,11 +7,12 @@
 #include "stdio.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 
 double string_to_float(char* string){
 	errno = 0;
 	char* next = NULL;
-	double converted_val = strtod(string, next);
+	double converted_val = strtod(string, &next);
 	if (next == string){
 		// Nothing was processed
 		return 0;
