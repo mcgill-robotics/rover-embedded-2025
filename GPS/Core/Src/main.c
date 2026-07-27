@@ -68,24 +68,22 @@ PCD_HandleTypeDef hpcd_USB_FS;
 // Define ms between reporting of diagnostic data (valid/error GPS packets received)
 #define DIAG_REPORT_PERIOD_MS 500
 
-#define GPS_1_TYPE GPS_UBX
+#define GPS_TYPE GPS_UBX
 
 char satellites[50];
 char latitude[50];
 char longitude[50];
 char heading[50];
 
-gps_t gps_1;
+gps_t gps;
 
-#define GPS_1_BUFFER_SIZE (UBX_MAX_PAYLOAD)
-static uint8_t gps_1_buffers[2][GPS_1_BUFFER_SIZE];
+#define GPS_BUFFER_SIZE (UBX_MAX_PAYLOAD)
+static uint8_t gps_buffers[2][GPS_BUFFER_SIZE];
 static int buffer_sizes[2];
-static volatile int gps_1_index = 0;
-static int gps_1_ready[2] ={0, 0};
+static volatile int gps_index = 0;
+static int gps_ready[2] ={0, 0};
 
 UART_HandleTypeDef *pantilt_uart = &huart1;
-uint8_t pantilt_data[100];
-volatile int pantilt_bytes = 0;
 
 // Pantilt
 #define PANTILT_BUFFER_SIZE 100
@@ -94,8 +92,6 @@ static volatile int pantilt_index = 0;
 volatile int pantilt_ready = 0;
 
 UART_HandleTypeDef *term_uart = &huart4;
-uint8_t term_tx_buf[255];
-volatile int term_tx_len = 0;
 
 // Terminal
 #define TERM_BUFFER_SIZE 100
@@ -110,6 +106,29 @@ static uint8_t cmd_buf[CMD_BUFFER_SIZE];
 static int cmd_len = 0;
 static bool cmd_overflow = false;
 static cobs_reader_t usb_cobs_reader;
+static uint8_t usb_chunk[64];
+static uint32_t usb_chunk_len = 0;
+
+// Diagnostic drop/error counters
+static volatile uint32_t usb_tx_dropped = 0;
+static volatile uint32_t uart_errors = 0;
+
+// TX ring for a UART relay
+#define TXQ_SIZE 512
+#define TXQ_MASK (TXQ_SIZE - 1)
+
+typedef struct {
+  UART_HandleTypeDef *huart;
+  uint8_t  buf[TXQ_SIZE];
+  volatile uint16_t head;
+  volatile uint16_t tail;
+  volatile uint16_t inflight;
+  volatile uint8_t  busy;
+  volatile uint32_t dropped;
+} txq_t;
+
+static txq_t pantilt_txq;
+static txq_t term_txq;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,24 +145,47 @@ static void MX_IWDG_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// Trasmit to terminal
-static void process_terminal_frame(uint8_t *data, int len) {
-  if (term_tx_len == 0 && len <= (int)sizeof(term_tx_buf)) {
-    memcpy(term_tx_buf, data, len);
-    term_tx_len = len;
-    HAL_UART_Transmit_IT(term_uart, term_tx_buf, term_tx_len);
+
+// Enqueues n bytes for later transmission. Returns 0 and counts a drop if they don't fit.
+static int txq_push(txq_t *q, const uint8_t *d, int n) {
+  uint16_t head = q->head;
+  uint16_t used = (uint16_t)(head - q->tail) & TXQ_MASK;
+
+  if (n < 0 || (uint16_t)n > (TXQ_MASK - used)) {
+    q->dropped++;
+    return 0;
   }
+
+  for (int i = 0; i < n; i++) q->buf[(head + i) & TXQ_MASK] = d[i];
+  q->head = (uint16_t)(head + n) & TXQ_MASK;
+  return 1;
+}
+
+// Starts the next transmit chunk if the UART is idle and data is queued. Main loop only.
+static void txq_kick(txq_t *q) {
+  if (q->busy) return;
+  uint16_t head = q->head;
+  uint16_t tail = q->tail;
+  if (head == tail) return;
+  uint16_t len = (head > tail) ? (uint16_t)(head - tail) : (uint16_t)(TXQ_SIZE - tail);
+
+  q->busy = 1;
+  q->inflight = len;
+  if (HAL_UART_Transmit_IT(q->huart, &q->buf[tail], len) != HAL_OK) q->busy = 0;
 }
 
 // Sends encoded [type][payload] COBS frame
 static void send_frame(uint8_t type, const uint8_t *payload, int payload_len) {
+  tud_cdc_n_write_flush(USB_CDC_ITF);
   uint8_t raw[CMD_BUFFER_SIZE];
   uint8_t encoded[cobs_estimate_encoded_size(CMD_BUFFER_SIZE)]; // Worst case COBS overhead
   if (payload_len < 0 || payload_len > (int)sizeof(raw) - 1) return;
   raw[0] = type;
   if (payload_len > 0) memcpy(raw + 1, payload, payload_len);
   int n = cobs_encode(raw, payload_len + 1, encoded, sizeof(encoded), 0);
-  if (n > 0) send_msg_raw((char*)encoded, n);
+  if (n <= 0) return;
+  if (tud_cdc_n_write_available(USB_CDC_ITF) < (uint32_t)n) { usb_tx_dropped++; return; }
+  send_msg_raw((char*)encoded, n);
 }
 
 // Dispatches one decoded [type][payload] USB frame.
@@ -155,15 +197,15 @@ static void process_usb_frame(uint8_t *frame, int len) {
 
   switch (type) {
     case 'p':
-      if (pantilt_bytes == 0 && payload_len > 0 && payload_len < (int)sizeof(pantilt_data)) {
-        memcpy(pantilt_data, payload, payload_len);
-        pantilt_data[payload_len] = '\n';
-        pantilt_bytes = payload_len + 1;
-        if (HAL_UART_Transmit_IT(pantilt_uart, pantilt_data, pantilt_bytes) != HAL_OK) pantilt_bytes = 0;
+      if (payload_len > 0 && payload_len < 100) {
+        uint8_t line[100];
+        memcpy(line, payload, payload_len);
+        line[payload_len] = '\n';
+        txq_push(&pantilt_txq, line, payload_len + 1);
       }
       break;
     case 't':
-      process_terminal_frame(payload, payload_len);
+      txq_push(&term_txq, payload, payload_len);
       break;
   }
 }
@@ -206,9 +248,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   setup_simple();
   cobs_setup_stream_reader(&usb_cobs_reader);
+  pantilt_txq.huart = pantilt_uart;
+  term_txq.huart = term_uart;
 
-  gps_init(&gps_1, GPS_1_TYPE, &huart3, true);
-  HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
+  gps_init(&gps, GPS_TYPE, &huart3, true);
+  HAL_UARTEx_ReceiveToIdle_IT(gps.huart, gps_buffers[gps_index], GPS_BUFFER_SIZE);
 
   HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
@@ -217,22 +261,27 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (!tud_cdc_ready()){
-      process_simple(); // keep usb connection running until ready
+    process_simple(); // Keep USB connection running until ready
+#ifdef WATCHDOG_ENABLE
+    HAL_IWDG_Refresh(&hiwdg);
+#endif
   }
+
   char* startup_message = "GPS Ready";
-  send_frame('s', (uint8_t*) startup_message, sizeof(startup_message));
+  send_frame('s', (uint8_t*) startup_message, strlen(startup_message));
+
   while (1) {
-    if (gps_1_ready[0] || gps_1_ready[1]) {
-      int gps_1_filled_index = (gps_1_index == 0) ? 1 : 0;
-      if (gps_1_ready[gps_1_filled_index] != 0){
-        uint8_t *buf = gps_1_buffers[gps_1_filled_index];
-        for (int i = 0; i < buffer_sizes[gps_1_filled_index]; i++) gps_process(&gps_1, buf[i]);
-        gps_1_ready[gps_1_filled_index] = 0;
+    if (gps_ready[0] || gps_ready[1]) {
+      int gps_filled_index = (gps_index == 0) ? 1 : 0;
+      if (gps_ready[gps_filled_index] != 0){
+        uint8_t *buf = gps_buffers[gps_filled_index];
+        for (int i = 0; i < buffer_sizes[gps_filled_index]; i++) gps_process(&gps, buf[i]);
+        gps_ready[gps_filled_index] = 0;
       }
     }
 
     gps_data_t data;
-    bool got_fix = gps_read_snapshot(&gps_1, &data);
+    bool got_fix = gps_read_snapshot(&gps, &data);
     if (got_fix) {
       HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin); // Blink LED for GPS processing
 
@@ -252,8 +301,10 @@ int main(void)
     if (now - last_status_tick >= DIAG_REPORT_PERIOD_MS) {
       last_status_tick = now;
       char status_payload[64];
-      int status_len = snprintf(status_payload, sizeof(status_payload), "%lu,%lu",
-        (unsigned long)gps_get_valid_frames(&gps_1), (unsigned long)gps_get_error_frames(&gps_1));
+      int status_len = snprintf(status_payload, sizeof(status_payload), "%lu,%lu,%lu,%lu,%lu,%lu",
+        (unsigned long)gps_get_valid_frames(&gps), (unsigned long)gps_get_error_frames(&gps),
+        (unsigned long)pantilt_txq.dropped, (unsigned long)term_txq.dropped,
+        (unsigned long)usb_tx_dropped, (unsigned long)uart_errors);
       send_frame('d', (uint8_t*)status_payload, status_len);
     }
 
@@ -288,29 +339,40 @@ int main(void)
       term_ready = 0;
     }
 
-    // Decode COBS stream
-    uint8_t chunk[64];
-    uint32_t count = tud_cdc_n_read(USB_CDC_ITF, chunk, sizeof(chunk));
-    uint8_t *chunk_ptr = chunk;
-    while (count > 0) {
-      cobs_result_t r = cobs_stream_decode(&usb_cobs_reader, chunk_ptr, count,
+    if (usb_chunk_len < sizeof(usb_chunk)) {
+      usb_chunk_len += tud_cdc_n_read(USB_CDC_ITF, usb_chunk + usb_chunk_len, sizeof(usb_chunk) - usb_chunk_len);
+    }
+
+    if (usb_chunk_len > 0) {
+      cobs_result_t r = cobs_stream_decode(&usb_cobs_reader, usb_chunk, usb_chunk_len,
                                             cmd_buf + cmd_len, CMD_BUFFER_SIZE - cmd_len, 0);
-      chunk_ptr += usb_cobs_reader.last_read_bytes;
-      count -= usb_cobs_reader.last_read_bytes;
       cmd_len += usb_cobs_reader.last_written_bytes;
 
-      if (r == COBS_DONE) {
-        if (!cmd_overflow) process_usb_frame(cmd_buf, cmd_len);
-        cmd_len = 0;
-        cmd_overflow = false;
-      } else if (r == COBS_OUTPUT_FULL) {
-        cmd_overflow = true;
-        cmd_len = 0;
-      } else if (r == COBS_RESET) {
-        cmd_len = 0;
-        cmd_overflow = false;
+      if (r == COBS_INCOMPLETE_FRAME) {
+        usb_chunk_len = 0;
+      } else {
+        uint32_t consumed = usb_cobs_reader.last_read_bytes;
+
+        if (r == COBS_DONE) {
+          if (!cmd_overflow) process_usb_frame(cmd_buf, cmd_len);
+          cmd_len = 0;
+          cmd_overflow = false;
+        } else if (r == COBS_OUTPUT_FULL) {
+          cmd_len = 0;
+          cmd_overflow = true;
+        } else if (r == COBS_RESET) {
+          cmd_len = 0;
+          cmd_overflow = false;
+        }
+
+        uint32_t leftover = usb_chunk_len - consumed;
+        if (leftover > 0 && consumed > 0) memmove(usb_chunk, usb_chunk + consumed, leftover);
+        usb_chunk_len = leftover;
       }
     }
+
+    txq_kick(&pantilt_txq);
+    txq_kick(&term_txq);
 
     process_simple();
 
@@ -620,34 +682,21 @@ int __io_putchar(int ch)
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
-  if (huart == gps_1.huart) {
-    // uint32_t error = HAL_UART_GetError(huart);
-    // printf("UART4 error 0x%02lX:%s%s\n", error,
-    //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
-    //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
-    HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
+  uart_errors++;
+  
+  if (huart == gps.huart) {
+    HAL_UARTEx_ReceiveToIdle_IT(gps.huart, gps_buffers[gps_index], GPS_BUFFER_SIZE);
   }
   if (huart == pantilt_uart) {
-    // uint32_t error = HAL_UART_GetError(huart);
-    // printf("USART1(pantilt) error 0x%02lX:%s%s\n", error,
-    //   (error & HAL_UART_ERROR_ORE) ? " ORE" : "",
-    //   (error & HAL_UART_ERROR_FE)  ? " FE"  : "");
-    pantilt_bytes = 0;
+    pantilt_txq.busy = 0;
     HAL_UARTEx_ReceiveToIdle_IT(pantilt_uart, pantilt_buffers[pantilt_index], PANTILT_BUFFER_SIZE);
   }
   if (huart == term_uart) {
     term_ready = 0;
+    term_txq.busy = 0;
     HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
   }
 }
-
-// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-//   if (huart == gps_1.huart) {
-//     gps_1_index = (gps_1_index == 0) ? 1 : 0;
-//     gps_1_ready = 1;
-//     HAL_UART_Receive_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
-//   }
-// }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart == pantilt_uart) {
@@ -659,17 +708,22 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     term_index = (term_index == 0) ? 1 : 0;
     term_ready = 1;
     HAL_UARTEx_ReceiveToIdle_IT(term_uart, term_buffers[term_index], TERM_BUFFER_SIZE);
-  } else if (huart == gps_1.huart){
-    buffer_sizes[gps_1_index] = Size;
-    gps_1_ready[gps_1_index] = 1;
-    gps_1_index = (gps_1_index == 0) ? 1 : 0;
-    HAL_UARTEx_ReceiveToIdle_IT(gps_1.huart, gps_1_buffers[gps_1_index], GPS_1_BUFFER_SIZE);
+  } else if (huart == gps.huart){
+    buffer_sizes[gps_index] = Size;
+    gps_ready[gps_index] = 1;
+    gps_index = (gps_index == 0) ? 1 : 0;
+    HAL_UARTEx_ReceiveToIdle_IT(gps.huart, gps_buffers[gps_index], GPS_BUFFER_SIZE);
   }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == pantilt_uart) pantilt_bytes = 0;
-  if (huart == term_uart) term_tx_len = 0;
+  txq_t *q;
+  if (huart == pantilt_uart) q = &pantilt_txq;
+  else if (huart == term_uart) q = &term_txq;
+  else return;
+
+  q->tail = (uint16_t)(q->tail + q->inflight) & TXQ_MASK;
+  q->busy = 0;
 }
 /* USER CODE END 4 */
 

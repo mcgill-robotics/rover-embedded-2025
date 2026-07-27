@@ -1,11 +1,25 @@
 import serial
 import sys
+import time
 
 DELIMITER = 0x00
+PANTILT_SEND_INTERVAL_S = 0.02 # 20 ms, 50 Hz rate
 
 
 def cobs_encode(data: bytes) -> bytes:
-    """COBS-encodes data (must not contain the delimiter byte after encoding)."""
+    """
+    Encodes data into a COBS frame.
+
+    Parameters
+    ----------
+    data : bytes
+        Raw bytes to encode.
+
+    Returns
+    -------
+    bytes
+        COBS-encoded frame, without a trailing delimiter.
+    """
 
     output = bytearray(b'\x00')
     code_pos = 0
@@ -29,7 +43,24 @@ def cobs_encode(data: bytes) -> bytes:
 
 
 def cobs_decode(frame: bytes) -> bytes:
-    """Decodes one COBS frame (without its trailing delimiter byte)."""
+    """
+    Decodes one COBS frame.
+
+    Parameters
+    ----------
+    frame : bytes
+        Encoded COBS frame.
+
+    Returns
+    -------
+    bytes
+        Decoded payload.
+
+    Raises
+    ------
+    ValueError
+        If the frame is malformed.
+    """
 
     output = bytearray()
     i, n = 0, len(frame)
@@ -47,51 +78,52 @@ def cobs_decode(frame: bytes) -> bytes:
 
 class PanTiltGPS:
     """
-    Represents the UART board with GPS and pantilt relay over a single USB CDC port.
-
-    The board exposes one serial port that:
-      - Outputs GPS data as: satellites,latitude,longitude,heading
-      - Accepts pantilt commands forwarded to the servo board over UART
-      - Allows communication with another terminal from the UART board
+    UART board with GPS and pantilt relay over a single USB CDC port.
 
     Attributes
     ----------
-    port: str
-        The USB CDC port for both GPS output and pantilt input.
-    baud_rate: int
-        The baud rate of the connection.
-    ser: serial.Serial
-        The serial connection to the board.
-    is_connected: bool
-        Whether the board is connected to the computer.
-    buffer: bytes
-        Receive buffer for an incomplete (undelimited) COBS frame.
-    gps_sats: float
-        Number of satellites connected to the GPS.
-    coords: list[float]
-        The latitude and longitude [lat, lon].
-    heading: float
-        The heading of motion in degrees.
-    pan_angle: float
-        The reported pan angle.
-    tilt_angle: float
-        The reported tilt angle.
-    terminal_rx: bytearray
+    port : str
+        USB CDC port for GPS output and pantilt input.
+    baud_rate : int
+        Baud rate of the connection.
+    ser : serial.Serial
+        Serial connection to the board.
+    is_connected : bool
+        Whether the board is connected.
+    buffer : bytes
+        Receive buffer for an incomplete COBS frame.
+    gps_sats : float
+        Number of GPS satellites.
+    coords : list[float]
+        Latitude and longitude [lat, lon].
+    heading : float
+        Heading of motion in degrees.
+    pan_angle : float
+        Reported pan angle.
+    tilt_angle : float
+        Reported tilt angle.
+    combine_pantilt : bool
+        If False, send pan/tilt as separate frames (2x throughput, for drop testing).
+    terminal_rx : bytearray
         Raw bytes received from the secondary UART.
     """
 
-    def __init__(self, port: str, baud_rate: int = 115200):
+    def __init__(self, port: str, baud_rate: int = 115200, combine_pantilt: bool = True):
         """
         Parameters
         ----------
-        port: str
-            The USB CDC port (COM? for Windows, /dev/ttyACM? for Linux).
-        baud_rate: int, optional
-            The baud rate of the connection. Default is 115200 bps.
+        port : str
+            USB CDC port (COM? on Windows, /dev/ttyACM? on Linux).
+        baud_rate : int, optional
+            Baud rate of the connection. Default 115200 bps.
+        combine_pantilt : bool, optional
+            Default True (one combined frame). False sends pan/tilt as
+            separate frames, for throughput testing.
         """
 
         self.port: str = port
         self.baud_rate: int = baud_rate
+        self.combine_pantilt: bool = combine_pantilt
         self.ser: serial.Serial = None
         self.is_connected: bool = False
         self.buffer: bytes = b""
@@ -105,9 +137,18 @@ class PanTiltGPS:
         self.pan_angle: float = 0.0
         self.tilt_angle: float = 0.0
 
+        # Combined deltas from pantilt commands
+        self._pending_pan: float = 0.0
+        self._pending_tilt: float = 0.0
+        self._last_pantilt_send: float = time.monotonic()
+
         # Diagnostic data
         self.gps1_valid_frames: int = 0
         self.gps1_error_frames: int = 0
+        self.pantilt_tx_dropped: int = 0
+        self.terminal_tx_dropped: int = 0
+        self.usb_tx_dropped: int = 0
+        self.uart_errors: int = 0
 
         self.gps_startups = 0
         self.pantilt_startups = 0
@@ -117,12 +158,12 @@ class PanTiltGPS:
 
     def connect(self):
         """
-        Connects to the board. Run this before using this object.
+        Opens the serial connection. Call before anything else.
 
         Raises
         ------
         ConnectionError
-            If it fails to connect to the board.
+            If the connection fails.
         """
 
         try:
@@ -132,7 +173,14 @@ class PanTiltGPS:
             raise ConnectionError(f"Failed to connect to board. Error: {e}")
 
     def _read_serial_gps(self):
-        """Reads GPS data from serial if available."""
+        """
+        Reads and parses GPS/board data from serial, if available.
+
+        Raises
+        ------
+        ConnectionError
+            If not connected to the board.
+        """
 
         if not self.is_connected:
             raise ConnectionError("Cannot read from serial port, not connected to board.")
@@ -157,7 +205,16 @@ class PanTiltGPS:
                 self.parse_frame(payload[0:1], payload[1:])
 
     def parse_frame(self, msg_type: bytes, payload: bytes):
-        """Parses a decoded [type][payload] frame from the board."""
+        """
+        Parses a decoded [type][payload] frame from the board.
+
+        Parameters
+        ----------
+        msg_type : bytes
+            Single-byte frame type identifier.
+        payload : bytes
+            Frame payload.
+        """
 
         text = payload.decode('utf-8', errors='replace')
 
@@ -193,6 +250,11 @@ class PanTiltGPS:
             try:
                 self.gps1_valid_frames = int(fields[0])
                 self.gps1_error_frames = int(fields[1])
+                if len(fields) >= 6:
+                    self.pantilt_tx_dropped = int(fields[2])
+                    self.terminal_tx_dropped = int(fields[3])
+                    self.usb_tx_dropped = int(fields[4])
+                    self.uart_errors = int(fields[5])
             except ValueError:
                 pass
         elif msg_type == b"s":
@@ -202,7 +264,21 @@ class PanTiltGPS:
                 self.gps_startups+=1
 
     def send_frame(self, msg_type: bytes, payload: bytes):
-        """Encodes and writes a [type][payload] COBS frame to the board."""
+        """
+        Encodes and writes a [type][payload] COBS frame to the board.
+
+        Parameters
+        ----------
+        msg_type : bytes
+            Single-byte frame type identifier.
+        payload : bytes
+            Frame payload.
+
+        Raises
+        ------
+        ConnectionError
+            If the write fails.
+        """
 
         try:
             self.ser.write(cobs_encode(msg_type + payload) + bytes([DELIMITER]))
@@ -213,75 +289,121 @@ class PanTiltGPS:
         """Runs the object's main loop. Call this function in your main loop."""
 
         self._read_serial_gps()
+        if self.combine_pantilt:
+            self._flush_pantilt()
+
+    def _flush_pantilt(self):
+        """
+        Sends queued pan/tilt deltas as one combined frame, rate-limited to PANTILT_SEND_INTERVAL_S.
+
+        Raises
+        ------
+        ConnectionError
+            Write fails.
+        """
+
+        if self._pending_pan == 0.0 and self._pending_tilt == 0.0:
+            return
+        now = time.monotonic()
+        if now - self._last_pantilt_send < PANTILT_SEND_INTERVAL_S:
+            return
+        self.send_frame(b"p", f"{self._pending_pan},{self._pending_tilt}".encode())
+        self._pending_pan = 0.0
+        self._pending_tilt = 0.0
+        self._last_pantilt_send = now
 
     def is_gps_connected(self) -> bool:
-        """Returns whether the GPS has at least 3 satellite connections."""
+        """
+        Returns
+        -------
+        bool
+            Whether the GPS has at least 3 satellite connections.
+        """
 
         return self.gps_sats >= 3
 
     def get_gps_satellites(self) -> float:
-        """Gets the number of satellites connected to the GPS."""
+        """
+        Returns
+        -------
+        float
+            Number of satellites connected to the GPS.
+        """
 
         return self.gps_sats
 
     def get_gps(self) -> list[float]:
-        """Gets the last available GPS coordinates as [satellites, latitude, longitude, heading]."""
+        """
+        Returns
+        -------
+        list[float]
+            Last available GPS reading as [satellites, latitude, longitude, heading].
+        """
 
         return [float(self.gps_sats), self.coords[0], self.coords[1], self.heading]
-    
+
     def get_pantilt(self) -> list[float]:
-        """Gets the last available pantilt angles as [pan angle, tilt angle]."""
-        
+        """
+        Returns
+        -------
+        list[float]
+            Last available pantilt angles as [pan angle, tilt angle].
+        """
+
         return [self.pan_angle, self.tilt_angle]
 
     def add_pan_angle(self, angle: float):
         """
-        Adds an increment of angle to the pan servo.
+        Queues a pan angle increment (combine_pantilt True), or sends it immediately as its own frame (False).
 
         Parameters
         ----------
         angle : float
-            The increment to add to the pan servo angle.
+            Increment to add to the pan angle.
 
         Raises
         ------
         ConnectionError
-            If there is no connection.
+            Not connected, or write fails.
         """
 
         if not self.is_connected:
             raise ConnectionError("Cannot write to serial port, not connected to board.")
-        self.send_frame(b"p", f"{angle},0.0".encode())
+        if self.combine_pantilt:
+            self._pending_pan += angle
+        else:
+            self.send_frame(b"p", f"{angle},0".encode())
 
     def add_tilt_angle(self, angle: float):
         """
-        Adds an increment of angle to the tilt servo.
+        Queues a tilt angle increment (combine_pantilt True), or sends it immediately as its own frame (False).
 
         Parameters
         ----------
         angle : float
-            The increment to add to the tilt servo angle.
+            Increment to add to the tilt angle.
 
         Raises
         ------
         ConnectionError
-            If there is no connection.
+            Not connected, or write fails.
         """
 
         if not self.is_connected:
             raise ConnectionError("Cannot write to serial port, not connected to board.")
-        self.send_frame(b"p", f"0.0,{angle}".encode())
+        if self.combine_pantilt:
+            self._pending_tilt += angle
+        else:
+            self.send_frame(b"p", f"0,{angle}".encode())
 
     def write_terminal(self, data: bytes):
         """
-        Sends raw bytes to the secondary UART, which is always in terminal mode.
+        Sends raw bytes to the secondary UART.
 
         Parameters
         ----------
         data : bytes
-            Raw bytes to forward to the terminal device. Max 255 bytes per
-            call (the board's frame buffer is 256 bytes, including the type
-            byte). Split larger payloads into multiple calls.
+            Bytes to forward. Max 255 bytes per call; split larger payloads.
 
         Raises
         ------
@@ -298,24 +420,52 @@ class PanTiltGPS:
         self.send_frame(b"t", data)
 
     def read_terminal(self) -> bytes:
-        """Returns and clears any raw bytes received from the terminal device since the last call."""
+        """
+        Returns and clears any raw bytes received from the terminal device since the last call.
+
+        Returns
+        -------
+        bytes
+            Bytes received from the terminal device since the last call.
+        """
 
         data = bytes(self.terminal_rx)
         self.terminal_rx.clear()
         return data
-    
+
     def get_gps_diag(self):
-        """Returns the number of valid and error frames received by the GPS."""
+        """
+        Returns
+        -------
+        list[int]
+            [valid_frames, error_frames] received by the GPS.
+        """
 
         return [self.gps1_valid_frames, self.gps1_error_frames]
 
+    def get_drop_counts(self):
+        """
+        Returns
+        -------
+        list[int]
+            [pantilt_tx_dropped, terminal_tx_dropped, usb_tx_dropped, uart_errors].
+        """
+
+        return [self.pantilt_tx_dropped, self.terminal_tx_dropped, self.usb_tx_dropped, self.uart_errors]
+
     def get_startup_count(self):
-        """Get Number of startup messages detected (watchdog or manual resets)"""
+        """
+        Returns
+        -------
+        tuple[int, int]
+            (gps_startups, pantilt_startups) seen since connecting.
+        """
+
         return (self.gps_startups, self.pantilt_startups)
 
 if __name__ == "__main__":
     import time
-    board = PanTiltGPS("/dev/ttyACM0")
+    board = PanTiltGPS("/dev/ttyACM0", 115200, False)
     try:
         board.connect()
     except ConnectionError as e:
@@ -323,14 +473,16 @@ if __name__ == "__main__":
         sys.exit(1)
     dir_pan = 1
     dir_tilt = 1
-    # while True:
-            
+    while True:
         board.run()
+
         print(f"GPS lock: {board.is_gps_connected()}, GPS: {board.get_gps()}")
         pan_angle, tilt_angle = board.get_pantilt()
         print(f"Pantilt: {(pan_angle, tilt_angle)}")
         print(f"Diagnostic: {board.get_gps_diag()}")
+        print(f"Drops: {board.get_drop_counts()}")
         print(f"Startup count: {board.get_startup_count()}")
+
         if pan_angle == 360:
             dir_pan = -1
         elif pan_angle == 0:
@@ -339,6 +491,7 @@ if __name__ == "__main__":
             dir_tilt = -1
         elif tilt_angle == 0:
             dir_tilt = 1
+
         board.add_tilt_angle(5*dir_tilt)
         board.add_pan_angle(5*dir_pan);
         time.sleep(0.05)

@@ -2,8 +2,8 @@
 #include "servo.h"
 #include <stdint.h>
 
-double pan_angle = 180;
-double tilt_angle = 90;
+double pan_angle = 280;
+double tilt_angle = 190;
 
 double min(double a, double b) {
     return (a < b) ? a : b;
