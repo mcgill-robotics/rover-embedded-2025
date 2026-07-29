@@ -34,7 +34,7 @@ int calibrationMode = 0; // if calibrating, lower the speed!
 
 static volatile atomic_int gripperGoalAngle = ATOMIC_VAR_INIT (0);
 static volatile atomic_int pitchGoalAngle = ATOMIC_VAR_INIT (0);
-static volatile atomic_int rollGoalAngle = ATOMIC_VAR_INIT (0);
+static volatile atomic_int rollGoalAngle = ATOMIC_VAR_INIT (1000); //set to offset
 
 uint32_t last_blink2 = 0;
 

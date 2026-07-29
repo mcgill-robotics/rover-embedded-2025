@@ -12,7 +12,7 @@
 
 
 void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
-		int lm_sw_reset_counts);
+		int lm_sw_reset_counts, int offset);
 
 
 //int is_debouncing(Motor_Encoding_Struct * encoding);

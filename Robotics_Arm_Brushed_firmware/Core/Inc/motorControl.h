@@ -28,6 +28,7 @@ typedef enum {
 typedef struct {
 	int 			ENCODER_MAX_COUNTS;
 	int 			LMSW_RESET_COUNTS;
+	int 			offset;
 	int				curr_counts;
 	int 			need_debounce;
 	int				oldAngleError;

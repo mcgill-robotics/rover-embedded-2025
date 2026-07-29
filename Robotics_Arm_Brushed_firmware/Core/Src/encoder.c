@@ -19,12 +19,14 @@ int debounce_buffer = 0; // 32 bits buffer to fill with switch state
 
 
 void motor_encoding_struct_init(Motor_Encoding_Struct * encoding, int encoder_max_counts,
-		int lm_sw_reset_counts){
+		int lm_sw_reset_counts, int offset){
 	encoding->ENCODER_MAX_COUNTS = encoder_max_counts;
 	encoding->LMSW_RESET_COUNTS = lm_sw_reset_counts;
+	encoding->offset = offset;
 	encoding->curr_counts = 0;
 	encoding->need_debounce = 0;
 	encoding->oldAngleError = 0;
+	
 }
 
 
@@ -50,21 +52,20 @@ int get_counts(Motor_Encoding_Struct * encoding){
 
 float count_to_angle(Motor_Encoding_Struct * encoding, int n){
 	//remove the offset from the angle to get the raw count
-	//int no_offset = n-(encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
-//	int new_n = abs(no_offset%MAX_COUNTS);
-	int no_offset = n;
+	int no_offset = n - encoding->offset;
 
 	float angle=((float)no_offset/(float) encoding->ENCODER_MAX_COUNTS)*360;
 	return angle;
 }
 
 int angle_to_count(Motor_Encoding_Struct * encoding, double n){
-	//float new_n = fabs(fmod(n,360));
-	//int offset = (encoding->LMSW_RESET_COUNTS - encoding->ENCODER_MAX_COUNTS/2);
 
-	int offset = 0;
+	int offset = encoding->offset;
 
-	return (int) ((n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
+	int raw_count = (int) ((n/(360)) * encoding->ENCODER_MAX_COUNTS) + offset;
+
+	//limit the max nv of counts to the position where it would hit the limit switch
+	return raw_count % encoding->LMSW_RESET_COUNTS;
 }
 
 //void reset_debounce_buffer(){
@@ -86,12 +87,18 @@ int angle_to_count(Motor_Encoding_Struct * encoding, double n){
 int lmsw_pitch_up_recalibrate(Motor * motor){
 	//reset the maximum number of counts
 	//set the current number of counts to the MAX
-	HAL_GPIO_TogglePin(LED_pitch_GPIO_Port, LED_pitch_Pin);
+	HAL_GPIO_TogglePin(LED_roll_GPIO_Port, LED_roll_Pin);
+	motor->motor_state = PID; // dumb way to deal w getting out of calibration
 
-	motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS = motor->Motor_Encoding_Struct->curr_counts;
-	motor->ENCODER_type->CNT =
+	//stop the motor frm turning
 	set_motor_speed_raw(motor, 0);
-	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts));
+
+	//set this position it hit the limit switch as the max
+	set_counts(motor->Motor_Encoding_Struct,motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS);
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
+
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) - 45);
+	
 
 
 
@@ -101,9 +108,20 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
 
 int lmsw_pitch_down_recalibrate(Motor * motor){
 	//reset to minimum number of counts
-	//TODO: ITS NOT SUPPOSED TO BE 0, WHATS THE ACTUAL MIN VALUE????
-	int offset = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS - motor->Motor_Encoding_Struct->ENCODER_MAX_COUNTS/2;
-	set_counts(motor->Motor_Encoding_Struct, offset);
+
+	HAL_GPIO_TogglePin(LED_roll_GPIO_Port, LED_roll_Pin);
+	motor->motor_state = PID; // dumb way to deal w getting out of calibration
+
+	//stop the motor frm turning
+	set_motor_speed_raw(motor, 0);
+
+	//set this position it hit the limit switch as the minx
+	set_counts(motor->Motor_Encoding_Struct,motor->Motor_Encoding_Struct->offset);
+	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->offset;
+
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) + 45);
+	
+
 	return 1;
 }
 
@@ -122,24 +140,24 @@ int lmsw_gripper_recalibrate(Motor * motor){
 	return 1;
 }
 
-//int try_calibrate_encoder(){
-//	// return 1 if calibrated
-//	//if (scan_switch()){
-//		TIM2->CNT = LIMIT_SWITCH_RESET_COUNTS;
-//		set_counts((uint16_t) TIM2->CNT);
-//		return 1;
-//	//}
-//	//return 0;
+// int try_calibrate_encoder(){
+// 	// return 1 if calibrated
+// 	//if (scan_switch()){
+// 		TIM2->CNT = LIMIT_SWITCH_RESET_COUNTS;
+// 		set_counts((uint16_t) TIM2->CNT);
+// 		return 1;
+// 	//}
+// 	//return 0;
 
-//	if (!is_debouncing()){
-//		set_debounce(1);
-//		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
-//		if (steering_state == CALIBRATION){
-//			setPIDGoalA(90); // move wheels back to the middle!
-//		}
-//		steering_state = PID;
-//	}
-//}
+// 	if (!is_debouncing()){
+// 		set_debounce(1);
+// 		TIM2->CNT = angle_to_count(LIMIT_SWITCH_RESET_COUNTS);
+// 		if (steering_state == CALIBRATION){
+// 			setPIDGoalA(90); // move wheels back to the middle!
+// 		}
+// 		steering_state = PID;
+// 	}
+// }
 
 
 

@@ -101,7 +101,6 @@ int LMSW5_flag_roll = 0;
 int LMSW6_flag_gripper = 0;
 
 
-volatile uint32_t enc_count = 0;
 volatile uint32_t curr_goal_angle = 3600; //testing only
 
 /* USER CODE END 0 */
@@ -164,9 +163,13 @@ int main(void)
    * - encoder max counts: Find the one specific with gear ratio of motors (i.e. more than 1 MAX_COUNT)
    * - limit switch reset counts: depends how angles defined -- corresponds to 180
    */
-  motor_encoding_struct_init(&gripper_encoding, 33024, 0);
-  motor_encoding_struct_init(&pitch_encoding, 33024, 0);
-  motor_encoding_struct_init(&roll_encoding, 33024, 0);
+
+  //encoder not used for these 2 motors during comp ; current limit switch limit set at max counts since should not be limited at all for COMP 2026
+  motor_encoding_struct_init(&gripper_encoding, 33024, 66536, 0);
+  motor_encoding_struct_init(&pitch_encoding, 33024, 4294967296, 0);
+
+  //frm the steering motor; 33024 counts for 1 revolution; roll used fr arm's pitch; pitch maxes at 180 degrees + offset + 1 ESTIMATED !! TO CHANGE WHEN ON ARM
+  motor_encoding_struct_init(&roll_encoding, 33024, 17513, 1000);
 
 
 
@@ -176,9 +179,9 @@ int main(void)
    * - kPw; // proportional gain (how far away from goal)
    * - kDw; //derivative gain (smoothing)
    */
-  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 10, 0);
-  motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 10, 0);
-  motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 10, 0);
+  motor_struct_init(&gripper_motor, TIM20, TIM3, &gripper_encoding, 0, DIR_gripper_GPIO_Port, DIR_gripper_Pin, 7, 0);
+  motor_struct_init(&roll_motor, TIM8, TIM4, &roll_encoding, 2, DIR_roll_GPIO_Port, DIR_roll_Pin, 7, 0);
+  motor_struct_init(&pitch_motor, TIM1, TIM5, &pitch_encoding, 1, DIR_pitch_GPIO_Port, DIR_pitch_Pin, 7, 0);
 
 
   all_motors_list[0] = &gripper_motor;
@@ -212,8 +215,15 @@ int main(void)
    */
 
   gripper_motor.ENCODER_type->CNT = 0; //gripper
-  roll_motor.ENCODER_type->CNT = 0; //roll
   pitch_motor.ENCODER_type->CNT = 0; //pitch
+  //starting counts at offset to be able to go backwards
+  roll_motor.ENCODER_type->CNT = roll_encoding.offset; //roll
+
+  set_counts(&gripper_encoding, 0);
+  set_counts(&pitch_encoding, 0);
+  //set program's counts to the offset value too
+  set_counts(&roll_encoding, roll_encoding.offset);
+
 
   set_motor_speed_raw(&gripper_motor, 0);
   set_motor_speed_raw(&pitch_motor, 0);
@@ -225,13 +235,11 @@ int main(void)
   set_motor_direction(&roll_motor, 1);
 
 
-  set_counts(&gripper_encoding, 0);
-  set_counts(&pitch_encoding, 0);
-  set_counts(&roll_encoding, 0);
 
 
 //  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
-//  CalibrateMotor(&roll_motor);
+    CalibrateMotor(&roll_motor);
+
 //  CalibrateMotor(&pitch_motor);
 
 
@@ -472,30 +480,30 @@ int main(void)
 	  }
 
 
-//
-//	  if (LMSW2_flag_pitch_down){
-//		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
-//			if (!switch_state){
-//				LMSW2_isDebouncing = 1;
-//			}
-//		  LMSW2_flag_pitch_down = 0;
-//	  }
-//
-//	  if (LMSW2_isDebouncing){
-//	  		 //check that at–– least 32 consecutive readings of switch = 1
-//	  		 //ensures that the switch reading is stabilized
-//	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
-//	  			LMSW2_buffer = (LMSW2_buffer<<1) | current_switch_reading;
-//
-//	  		 //only once stable switch reading that perform switch actions
-//	  		 if (LMSW2_buffer == 0xFFFFFFFF){
-//	  			LMSW2_isDebouncing = 0;
-//	  			LMSW2_buffer = 0;
-//	  			lmsw_pitch_down_recalibrate(&pitch_motor); // actual action to do on switch
-//	  		 }
-//	  }
-//
-//
+
+	  if (LMSW2_flag_pitch_down){
+		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+			if (switch_state){
+				LMSW2_isDebouncing = 1;
+			}
+		  LMSW2_flag_pitch_down = 0;
+	  }
+
+	  if (LMSW2_isDebouncing){
+	  		 //check that at–– least 32 consecutive readings of switch = 1
+	  		 //ensures that the switch reading is stabilized
+	  		 int current_switch_reading = HAL_GPIO_ReadPin(Limit_switch_2_GPIO_Port, Limit_switch_2_Pin);
+	  			LMSW2_buffer = (LMSW2_buffer<<1) | current_switch_reading;
+
+	  		 //only once stable switch reading that perform switch actions
+	  		 if (LMSW2_buffer == 0xFFFFFFFF){
+	  			LMSW2_isDebouncing = 0;
+	  			LMSW2_buffer = 0;
+	  			lmsw_pitch_down_recalibrate(&roll_motor); // actual action to do on switch
+	  		 }
+	  }
+
+
 //
 //	  if (LMSW5_flag_roll){
 //		  int switch_state = HAL_GPIO_ReadPin(Limit_switch_5_GPIO_Port, Limit_switch_5_Pin);
@@ -1284,19 +1292,19 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : Limit_switch_6_Pin Limit_switch_5_Pin Limit_switch_4_Pin */
   GPIO_InitStruct.Pin = Limit_switch_6_Pin|Limit_switch_5_Pin|Limit_switch_4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Limit_switch_3_Pin */
   GPIO_InitStruct.Pin = Limit_switch_3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Limit_switch_3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Limit_switch_2_Pin */
   GPIO_InitStruct.Pin = Limit_switch_2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Limit_switch_2_GPIO_Port, &GPIO_InitStruct);
 
