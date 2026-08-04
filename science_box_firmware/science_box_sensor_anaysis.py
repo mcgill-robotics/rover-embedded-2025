@@ -2,7 +2,7 @@ import serial
 
 # Uses the PySerial library
 
-port = serial.Serial(port="COM6", baudrate=9600) # Put the name of the serial port for the final code
+port = None
 
 valuesDict = {"ph1": "", "ph2": "", "ph3": "", "m1": "", "m2": "", "m3": ""}
 
@@ -36,13 +36,20 @@ def write_to_csv(filename, value, timestamp):
 
 byte_empty = b'\x00\n'
 
-while True:
+def setup_connection(device):
+    global port # a bit cursed but too lazy to add a class
+    port = serial.Serial(port=device, baudrate=9600) # Put the name of the serial port for the final code
+
+# loop this function
+def read_data():
+    if port is None:
+        return
     # Read the lines from Serial
     value = port.readline()
     stringValue = str(value, "UTF-8")
     print(stringValue)
     if (value == byte_empty):
-        continue
+        return
     # Extract RTC value from the payload
     stringValue = stringValue.split("; ")
     timestamp = stringValue[1]
@@ -53,6 +60,11 @@ while True:
     # Store values into files
     for key, value in valuesDict.items():
         write_to_csv(key, value, timestamp)
+
+if __name__ == "__main__":
+    setup_connection("COM11")
+    while True:
+        read_data()
     
 
 
