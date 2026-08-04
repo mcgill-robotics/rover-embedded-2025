@@ -1,0 +1,5 @@
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:34:6:motor_struct_init	24	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:50:6:stop_motor	24	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:56:6:set_motor_speed_percent	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:60:6:set_motor_speed_raw	16	static
+C:/Users/wei-K/OneDrive - McGill University/Robotics/rover-embedded-2025/Robotics_Arm_Brushed_firmware/Core/Src/motorControl.c:71:6:set_motor_direction	16	static
