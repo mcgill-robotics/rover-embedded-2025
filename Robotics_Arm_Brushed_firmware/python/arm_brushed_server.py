@@ -11,6 +11,7 @@ import uvicorn
 import sys
 import time
 import asyncio
+import get_acm_port
 
 app = FastAPI()
 
@@ -44,8 +45,14 @@ class ThreadState:
         self.serialConnected = False
         self.serial = None
 
+def isValidPort(port):
+    if sys.platform == "linux":
+        return not port.startswith("/dev/ttyS")
+    else: 
+        return True
+
 def fetchPortList():
-   return [ port.device for port in serial.tools.list_ports.comports()]
+   return [ port.device for port in serial.tools.list_ports.comports() if isValidPort(port.device)]
 
 origins = ["*"]
 
@@ -68,6 +75,16 @@ def startSerialThread():
         threadState.activeThread = t
         t.start()
 
+def autoPort():
+    port = None
+    try:
+        port = get_acm_port.get_ACM_port(get_acm_port.Subsystem.ARM_BRUSHED)
+    except get_acm_port.DeviceMatchingException:
+        ports = fetchPortList()
+        if len(ports) > 0:
+            port = ports[0]
+    return port
+
 def forwardCommandLoop():
     serialPort = None
 
@@ -86,15 +103,14 @@ def forwardCommandLoop():
         if serialPort is None:
             port = None
             if threadState.serial is None:
-                ports = fetchPortList()
-                if len(ports) > 0:
-                    port = ports[0]
-                    threadState.serial = port
+                port = autoPort()
+                threadState.serial = port
             else:
                 port = threadState.serial
 
             if port is not None:
                 try:
+                    print(f"Trying to connect to {port}")
                     serialPort = serial.Serial(port, 115200, timeout=1, write_timeout=1)
                     threadState.serialConnected = True
                     print(f"New serial connection to {port}")
@@ -106,7 +122,10 @@ def forwardCommandLoop():
                 if serialPort is not None:
                     serialPort.close()
                 serialPort = None
-                port =message["port"]
+                if message["auto"]:
+                    port = autoPort()
+                else:
+                    port =message["port"]
                 threadState.serial = port
             elif serialPort is not None:
                 if not serialPort.is_open:
@@ -187,6 +206,10 @@ app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    else:
+        port = 8000
     startSerialThread()
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=port)
     threadState.terminated = True

@@ -47,7 +47,16 @@ function App() {
   const connectSerial = (port:string) => {
     setLastCommand(null)
     sendMessage({
-      "port":port
+      "port":port,
+      "auto":false
+    })
+  }
+
+  const connectSerialAuto = () => {
+    setLastCommand(null)
+    sendMessage({
+      "port":null,
+      "auto":true
     })
   }
 
@@ -111,6 +120,7 @@ function App() {
         setConnecting(false)
         setServerConnected(true)
         heartbeat()
+        getPorts().then(()=>{})
       }
       socket.onclose = function(_event){
         disconnectServer()
@@ -243,9 +253,13 @@ function App() {
                   Disconnect
                 </Button>
                 <Text weight="medium">Serial Ports:</Text>
-                <Flex direction="row" gap="3">
-                  {portButtons}
-                </Flex>
+                {portButtons.length==0 ? "No port found":
+                  <Flex direction="row" gap="3">
+                    <Button
+                      onClick={()=>connectSerialAuto()}>Auto</Button>
+                    {portButtons}
+                  </Flex>
+                }
                 <Button 
                   variant="soft"
                   onClick={getPorts}>
