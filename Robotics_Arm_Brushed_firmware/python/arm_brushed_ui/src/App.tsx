@@ -24,6 +24,9 @@ function App() {
     "r":"Roll Stop",
     "s":"Gripper Stop",
     "p":"Pitch angle",
+    "u":"Pitch Up",
+    "i":"Pitch Down",
+    "a":"Pitch Stop"
   }))
 
   const portButtons = ports.map(p => 
@@ -81,6 +84,18 @@ function App() {
         }else if (key == "e"){
           // gripper stop
           sendCommand("s")
+        }
+        else if (key == "z"){
+          // Pitch Up
+          sendCommand("u")
+        }
+        else if (key == "x"){
+          // Pitch Stop
+          sendCommand("a")
+        }
+        else if (key == "c"){
+          // Pitch Down
+          sendCommand("i")
         }
       }
     }, [kbdControl, ws])
@@ -275,32 +290,44 @@ function App() {
       </Card>
      
       <Card variant="classic">
-        <Flex p="2" direction="column" gap="3">
+        <Flex p="2" direction="column" gap="3" wrap="wrap">
           <Text size="5" weight="bold">Control Scheme</Text>
           <Flex direction="row" gap="2">
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Roll CCW: </Text>
               <Kbd variant="soft">a</Kbd>
             </Flex>
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Roll CW: </Text>
               <Kbd variant="soft">d</Kbd>
             </Flex>
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Gripper Open: </Text>
               <Kbd variant="soft">w</Kbd>
             </Flex>
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Gripper Close: </Text>
               <Kbd variant="soft">s</Kbd>
             </Flex>
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Roll Stop: </Text>
               <Kbd variant="soft">q</Kbd>
             </Flex>
-            <Flex direction="row" align="center" gap="2">
+            <Flex direction="row" align="center" gap="1">
               <Text size="1">Gripper Stop: </Text>
               <Kbd variant="soft">e</Kbd>
+            </Flex>
+            <Flex direction="row" align="center" gap="1">
+              <Text size="1">Pitch Up: </Text>
+              <Kbd variant="soft">z</Kbd>
+            </Flex>
+            <Flex direction="row" align="center" gap="1">
+              <Text size="1">Pitch Down: </Text>
+              <Kbd variant="soft">c</Kbd>
+            </Flex>
+            <Flex direction="row" align="center" gap="1">
+              <Text size="1">Pitch Stop: </Text>
+              <Kbd variant="soft">x</Kbd>
             </Flex>
           </Flex>
           <Button 
@@ -315,10 +342,22 @@ function App() {
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
           <Text size="5" weight="bold">Wrist Pitch</Text>
+          {/* PID toggle */}
+          <Flex direction="row" align="center" gap="3">
+            <Button onClick={()=>{sendCommand("l")}}>Enable PID</Button>
+            <Button color="amber" onClick={()=>{sendCommand("m")}}>Disable PID</Button>
+          </Flex>
+          <Text size="1" weight="bold">PID control:</Text>
           <Flex direction="row" align="center" gap="3">
             <TextField.Root color="gray" variant="soft" size="2" placeholder="Angle..." onInput={onInput}/>
             <Button variant="soft" onClick={()=>{sendCommand(`p${angle}`)}}>Send</Button>
             {/* <Button color="red" onClick={()=>{sendMessage('c')}}>Stop</Button> */}
+          </Flex>
+          <Text size="1" weight="bold">Non-PID control:</Text>
+          <Flex direction="row" gap="2">
+            <Button variant="soft" onClick={()=>{sendCommand('u')}}>Up</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('c')}} >Down</Button>
+            <Button color="red" onClick={()=>{sendCommand('x')}}>Stop</Button>
           </Flex>
         </Flex>
       </Card>
