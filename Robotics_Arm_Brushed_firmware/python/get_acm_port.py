@@ -78,8 +78,8 @@ class Subsystem(Enum):
 	)
 	SCIENCE = DeviceInfo(
 		vid="cafe",
-		pid = "5001",
-		serial=20003E001950453055373020,
+		pid = "5005",
+		serial="2B003F001950453055373020",
 		display_name="Science"
 	)
 	
