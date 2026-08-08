@@ -18,11 +18,11 @@ def separate_data(strVals):
         for key in dict_vals.keys():
             # print(val)
             pair = val.split("=")
-            print(pair[0], key)
+            # print(pair[0], key)
             if pair[0] == key:
-                print("match")
+                # print("match")
                 dict_vals[key] = int(pair[1])
-                print(int(pair[1]))
+                # print(int(pair[1]))
 
     return dict_vals
 
@@ -56,7 +56,7 @@ def read_data():
     stringValue = stringValue[0]
     # Convert values into dictionary
     valuesDict = separate_data(stringValue)
-    print(valuesDict)
+    # print(valuesDict)
     # Store values into files
     for key, value in valuesDict.items():
         write_to_csv(key, value, timestamp)
