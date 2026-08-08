@@ -97,7 +97,7 @@ int lmsw_pitch_up_recalibrate(Motor * motor){
 	set_counts(motor->Motor_Encoding_Struct,motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS);
 	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->LMSW_RESET_COUNTS;
 
-	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) - 45);
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) - 5);
 	
 
 
@@ -119,7 +119,7 @@ int lmsw_pitch_down_recalibrate(Motor * motor){
 	set_counts(motor->Motor_Encoding_Struct,motor->Motor_Encoding_Struct->offset);
 	motor->ENCODER_type->CNT = motor->Motor_Encoding_Struct->offset;
 
-	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) + 45);
+	setPIDGoalA(motor, count_to_angle(motor->Motor_Encoding_Struct, motor->Motor_Encoding_Struct->curr_counts) + 5);
 	
 
 	return 1;

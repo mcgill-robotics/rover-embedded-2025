@@ -166,10 +166,11 @@ int main(void)
 
   //encoder not used for these 2 motors during comp ; current limit switch limit set at max counts since should not be limited at all for COMP 2026
   motor_encoding_struct_init(&gripper_encoding, 33024, 66536, 0);
-  motor_encoding_struct_init(&pitch_encoding, 33024, 4294967296, 0);
+  //this encoder is connected to a 32-bit timer, max it can take is 4294967296 (long int)
+  motor_encoding_struct_init(&pitch_encoding, 33024, 66536, 0);
 
-  //frm the steering motor; 33024 counts for 1 revolution; roll used fr arm's pitch; pitch maxes at 180 degrees + offset + 1 ESTIMATED !! TO CHANGE WHEN ON ARM
-  motor_encoding_struct_init(&roll_encoding, 33024, 17513, 1000);
+  //frm the steering motor; 33024 counts for 1 revolution; roll used fr arm's pitch; pitch maxes at 45 degrees + offset + 1(fr mod capping)  ESTIMATED !! TO CHANGE WHEN ON ARM
+  motor_encoding_struct_init(&roll_encoding, 33024, 5129, 1000);
 
 
 
@@ -235,14 +236,6 @@ int main(void)
   set_motor_direction(&roll_motor, 1);
 
 
-
-
-//  CalibrateMotor(&gripper_motor); // Calibrate the motor (see Calibration.c).
-    CalibrateMotor(&roll_motor);
-
-//  CalibrateMotor(&pitch_motor);
-
-
 //CAN NOT USED IN CURRENT ITERATION DUE TO ISSUES ON BOARD; UNABLE TO DO CAN
 
   	  // // CAN initialization
@@ -283,18 +276,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int LMSW1_buffer = 0;
   int LMSW2_buffer = 0;
-  int LMSW5_buffer = 0;
-  int LMSW6_buffer = 0;
+  //int LMSW5_buffer = 0;
+  //int LMSW6_buffer = 0;
 
   int LMSW1_isDebouncing = 0;
   int LMSW2_isDebouncing = 0;
-  int LMSW5_isDebouncing = 0;
-  int LMSW6_isDebouncing = 0;
+  //int LMSW5_isDebouncing = 0;
+  //int LMSW6_isDebouncing = 0;
 
 
   //Set gripper and roll port (actually connected to pitch) to not use PID
   gripper_motor.motor_state = FREE_MOVE;
   pitch_motor.motor_state = FREE_MOVE;
+  roll_motor.motor_state = FREE_MOVE;
 
 
   setup_simple(); // usb comm
@@ -394,34 +388,36 @@ int main(void)
 	    char readchar = read_char();
 	    if (readchar == 'c'){
 	    	print_to_usb("close gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
+	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
 	    }else if (readchar == 'o'){
 	    	print_to_usb("open gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
-	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
-	    }else if (readchar == 's'){
-	    	print_to_usb("stop gripper\n");
-	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-	    }else if (readchar == 'w'){
-	    	print_to_usb("ccw roll\n");
 	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
 	    	HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 1);
+	    }else if (readchar == 's'){
+	    	print_to_usb("stop gripper\n");
+	    	__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+
+
+	    }else if (readchar == 'w'){
+	    	print_to_usb("ccw roll\n");
+	    	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 1);
 		}else if (readchar == 'd'){
 			print_to_usb("cw roll\n");
-			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 4499);
-			HAL_GPIO_WritePin(DIR_gripper_GPIO_Port, DIR_gripper_Pin, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4499);
+			HAL_GPIO_WritePin(DIR_pitch_GPIO_Port, DIR_pitch_Pin, 0);
 		}else if (readchar == 'r'){
 			print_to_usb("stop roll\n");
-			__HAL_TIM_SET_COMPARE(&htim20, TIM_CHANNEL_1, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+
+
 		}else if (readchar == 'p'){
 			print_to_usb("pitch pid: \n");
 			usb_pid_goal[0] = read_char();
 			usb_pid_goal[1] = read_char();
 			usb_pid_goal[2] = read_char();
 			usb_pid_goal[3] = 0;
-
-
 
 			double goal =  string_to_float(usb_pid_goal);
 			char buf[6];
@@ -431,7 +427,45 @@ int main(void)
 			print_to_usb(buf);
 			setPIDGoalA(&roll_motor, goal);
 
-		}
+		}else if (readchar == 'u'){
+
+      if (roll_motor.motor_state == FREE_MOVE){
+        print_to_usb("pitch up\n");
+	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
+
+      }else{
+        print_to_usb("pitch not in free moving mode\n");
+      }
+
+    }else if (readchar == 'i'){
+
+      if (roll_motor.motor_state == FREE_MOVE){
+        print_to_usb("pitch down\n");
+	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+	    	HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
+
+      }else{
+        print_to_usb("pitch not in free moving mode\n");
+      }
+
+    }else if (readchar == 'a'){
+      if (roll_motor.motor_state == FREE_MOVE){
+        print_to_usb("stop pitch\n");
+			  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
+      }else{
+        print_to_usb("pitch not in free moving mode\n");
+      }
+
+    }else if (readchar == 'l'){
+      print_to_usb("enable pid");
+      CalibrateMotor(&roll_motor);
+    
+    }else if (readchar == 'm'){
+      print_to_usb("disable pid");
+      roll_motor.motor_state = FREE_MOVE;
+    }
+
 
 
 
