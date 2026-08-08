@@ -16,6 +16,7 @@ function App() {
   const [lastCommand, setLastCommand] = useState<string|null>(null)
   const HEARTBEAT_INTERVAL = 3000
   const HEARTBEAT_TIMEOUT = 2000
+  const [isScience, setIsScience] = useState(false)
   const commandMap = new Map(Object.entries({
     "o":"Gripper Open",
     "c":"Gripper Close",
@@ -241,9 +242,15 @@ function App() {
   return (
     <>
     <Flex p="5" direction="column" gap="5">
-      <Box alignSelf="start" px="2" flexGrow="1">
+      <Flex gap="2" alignSelf="start" px="2" flexGrow="1">
         <Text align="left" size="6" weight="bold">Arm Brushed Control</Text>
-      </Box>
+        <Button 
+          color="red"
+          variant="soft"
+          onClick={() => setIsScience(!isScience)}>
+          {isScience ? "Switch to Arm" : "Switch to Science"}
+        </Button>
+      </Flex>
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
           <Text size="5" weight="bold">Connection Status</Text>
@@ -294,39 +301,39 @@ function App() {
           <Text size="5" weight="bold">Control Scheme</Text>
           <Flex direction="row" gap="2">
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Roll CCW: </Text>
+              <Text size="1">{isScience ? "Auger Up" : "Roll CCW"}: </Text>
               <Kbd variant="soft">a</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Roll CW: </Text>
+              <Text size="1">{isScience ? "Auger Down" : "Roll CW"}: </Text>
               <Kbd variant="soft">d</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Gripper Open: </Text>
+              <Text size="1">{isScience ? "Lead Screw Right" : "Gripper Open"}: </Text>
               <Kbd variant="soft">w</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Gripper Close: </Text>
+              <Text size="1">{isScience ? "Lead Screw Left" : "Gripper Close"}: </Text>
               <Kbd variant="soft">s</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Roll Stop: </Text>
+              <Text size="1">{isScience ? "Auger Stop" : "Roll Stop"}: </Text>
               <Kbd variant="soft">q</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Gripper Stop: </Text>
+              <Text size="1">{isScience ? "Lead Screw Stop" : "Gripper Stop"}: </Text>
               <Kbd variant="soft">e</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Pitch Up: </Text>
+              <Text size="1">{isScience ? "Drill down" : "Pitch Up"}: </Text>
               <Kbd variant="soft">z</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Pitch Down: </Text>
+              <Text size="1">{isScience ? "Drill Up" : "Pitch Down"}: </Text>
               <Kbd variant="soft">c</Kbd>
             </Flex>
             <Flex direction="row" align="center" gap="1">
-              <Text size="1">Pitch Stop: </Text>
+              <Text size="1">{isScience ? "Drill Stop" : "Pitch Stop"}: </Text>
               <Kbd variant="soft">x</Kbd>
             </Flex>
           </Flex>
@@ -341,7 +348,7 @@ function App() {
       {/* Pitch */}
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
-          <Text size="5" weight="bold">Wrist Pitch</Text>
+          <Text size="5" weight="bold">{isScience ? "Drill turn" : "Wrist Pitch"}</Text>
           {/* PID toggle */}
           <Flex direction="row" align="center" gap="3">
             <Button onClick={()=>{sendCommand("l")}}>Enable PID</Button>
@@ -355,8 +362,8 @@ function App() {
           </Flex>
           <Text size="1" weight="bold">Non-PID control:</Text>
           <Flex direction="row" gap="2">
-            <Button variant="soft" onClick={()=>{sendCommand('u')}}>Up</Button>
-            <Button variant="soft" onClick={()=>{sendCommand('i')}} >Down</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('u')}}>{isScience ? "Drill Down" : "Up"}</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('i')}} >{isScience ? "Empty" : "Down"}</Button>
             <Button color="red" onClick={()=>{sendCommand('a')}}>Stop</Button>
           </Flex>
         </Flex>
@@ -365,10 +372,10 @@ function App() {
     
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
-          <Text size="5" weight="bold">Gripper</Text>
+          <Text size="5" weight="bold">{isScience ? "Lead screw" : "Gripper"}</Text>
           <Flex direction="row" gap="2">
-            <Button variant="soft" onClick={()=>{sendCommand('o')}}>Open</Button>
-            <Button variant="soft" onClick={()=>{sendCommand('c')}} >Close</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('o')}}>{isScience ? "Rover Right" : "Open"}</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('c')}} >{isScience ? "Rover Left" : "Close"}</Button>
             <Button color="red" onClick={()=>{sendCommand('s')}}>Stop</Button>
           </Flex>
         </Flex>
@@ -376,10 +383,10 @@ function App() {
       {/* Roll */}
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
-          <Text size="5" weight="bold">Wrist Roll</Text>
+          <Text size="5" weight="bold">{isScience ? "Drill Up/Down" : "Wrist Roll"}</Text>
           <Flex direction="row" gap="2">
-            <Button variant="soft" onClick={()=>{sendCommand('d')}}>Clockwise</Button>
-            <Button variant="soft" onClick={()=>{sendCommand('w')}}>Counter-Clockwise</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('d')}}>{isScience ? "Auger Up" : "Clockwise"}</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('w')}}>{isScience ? "Auger Down" : "Counter-Clockwise"}</Button>
             <Button color="red" onClick={()=>{sendCommand('r')}}>Stop</Button>
           </Flex>
         </Flex>
