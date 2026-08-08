@@ -356,8 +356,8 @@ function App() {
           <Text size="1" weight="bold">Non-PID control:</Text>
           <Flex direction="row" gap="2">
             <Button variant="soft" onClick={()=>{sendCommand('u')}}>Up</Button>
-            <Button variant="soft" onClick={()=>{sendCommand('c')}} >Down</Button>
-            <Button color="red" onClick={()=>{sendCommand('x')}}>Stop</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('i')}} >Down</Button>
+            <Button color="red" onClick={()=>{sendCommand('a')}}>Stop</Button>
           </Flex>
         </Flex>
       </Card>
