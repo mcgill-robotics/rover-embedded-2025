@@ -4,13 +4,13 @@ import serial
 
 port = None
 
-valuesDict = {"ph1": "", "ph2": "", "ph3": "", "m1": "", "m2": "", "m3": ""}
+valuesDict = {"ph1": "", "ph2": "", "ph3": "", "m1": "", "m2": "", "m3": "", "tof": ""}
 
 
 def separate_data(strVals):
-    dict_vals = {"ph1": "", "ph2": "", "ph3": "", "m1": "", "m2": "", "m3": ""}
+    dict_vals = {"ph1": "", "ph2": "", "ph3": "", "m1": "", "m2": "", "m3": "", "tof": ""}
 
-    # String pattern: ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d\r\n
+    # String pattern: ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d, tof=%ld\r\n
 
     list_values = strVals.split(", ")
     # print(list_values)
@@ -62,7 +62,7 @@ def read_data():
         write_to_csv(key, value, timestamp)
 
 if __name__ == "__main__":
-    setup_connection("COM11")
+    setup_connection("COM3")
     while True:
         read_data()
     
