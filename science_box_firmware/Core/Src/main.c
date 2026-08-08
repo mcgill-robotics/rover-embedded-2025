@@ -27,7 +27,7 @@
 #include <string.h>			// Strings (for organizing data)
 #include "rosjam.h"
 #include "stm32g4xx_hal_rtc.h"
-// #include "vl53l3cx.h"
+#include "vl53l3cx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,7 +73,7 @@ uint16_t mois1_val = 0;
 uint16_t mois2_val = 0;
 uint16_t mois3_val = 0;
 
-// uint32_t tof_val = 0;
+uint32_t tof_val = 0;
 
 uint16_t timer = 0;
 uint16_t timestamp = 0;
@@ -133,42 +133,59 @@ void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
 }
 
 
-// VL53L3CX_Object_t sensor;
+VL53L3CX_Object_t sensor;
 
-// void ToF_Init(void) {
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
-//     HAL_Delay(10);
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
-//     HAL_Delay(200);
+static int32_t I2C_WriteReg(uint16_t addr, uint8_t *pdata, uint16_t count) {
+    if (HAL_I2C_Master_Transmit(&hi2c4, addr, pdata, count, 100) != HAL_OK)
+        return -1;
+    return 0;
+}
 
-//     VL53L3CX_IO_t io;
-//     io.Address  = VL53L3CX_DEVICE_ADDRESS;
-//     io.WriteReg = I2C_WriteReg;
-//     io.ReadReg  = I2C_ReadReg;
-//     io.GetTick  = I2C_GetTick;
-//     io.Init     = 0; // I2C already initialized by MX_I2C4_Init
-//     io.DeInit   = NULL;
+static int32_t I2C_ReadReg(uint16_t addr, uint8_t *pdata, uint16_t count) {
+    if (HAL_I2C_Master_Receive(&hi2c4, addr, pdata, count, 100) != HAL_OK)
+        return -1;
+    return 0;
+}
 
-//     VL53L3CX_RegisterBusIO(&sensor, &io);
-//     VL53L3CX_Init(&sensor);
-//     VL53L3CX_Start(&sensor, VL53L3CX_MODE_BLOCKING_CONTINUOUS);
-// }
+static int32_t I2C_GetTick(void) {
+    return (int32_t)HAL_GetTick();
+}
 
-// int32_t ToF_Read(void) {
-//     VL53L3CX_Result_t result;
+void ToF_Init(void) {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+    HAL_Delay(10);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+    HAL_Delay(200);
 
-//     if (VL53L3CX_GetDistance(&sensor, &result) != VL53L3CX_OK) {
-//         return -1;
-//     }
 
-//     for (uint32_t i = 0; i < result.ZoneResult[0].NumberOfTargets; i++) {
-//         if (result.ZoneResult[0].Status[i] == 0) {
-//             return result.ZoneResult[0].Distance[i];
-//         }
-//     }
+    VL53L3CX_IO_t io;
+    io.Address  = VL53L3CX_DEVICE_ADDRESS;
+    io.WriteReg = I2C_WriteReg;
+    io.ReadReg  = I2C_ReadReg;
+    io.GetTick  = I2C_GetTick;
+    io.Init     = 0; // I2C already initialized by MX_I2C4_Init
+    io.DeInit   = NULL;
 
-//     return -1;
-// }
+    VL53L3CX_RegisterBusIO(&sensor, &io);
+    VL53L3CX_Init(&sensor);
+    VL53L3CX_Start(&sensor, VL53L3CX_MODE_BLOCKING_CONTINUOUS);
+}
+
+
+int32_t ToF_Read(void) {
+    VL53L3CX_Result_t result;
+
+    if (VL53L3CX_GetDistance(&sensor, &result) != VL53L3CX_OK) {
+        return -1;
+    }
+
+    for (uint32_t i = 0; i < result.ZoneResult[0].NumberOfTargets; i++) {
+        if (result.ZoneResult[0].Status[i] == 0) {
+            return result.ZoneResult[0].Distance[i];
+        }
+    }
+    return -1;
+}
 
 uint16_t Get_Position(float position) {
 	return position * 100 + 100;
@@ -242,7 +259,7 @@ int main(void)
   setup_simple();
 
   // ToF Sensor
-  // ToF_Init();
+  ToF_Init();
 
   // Initialize servo PWM timers
   // IMPORTANT: Set the timers and channels accordingly
@@ -314,38 +331,41 @@ int main(void)
 	  // ADC configuration and logic: polling
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  ph1_val = HAL_ADC_GetValue(&hadc1);		// Ch2
+	  ph3_val = HAL_ADC_GetValue(&hadc1);		// Ch2
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  ph2_val = HAL_ADC_GetValue(&hadc1);		// Ch3
+	  mois2_val = HAL_ADC_GetValue(&hadc1);		// Ch14
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  ph3_val = HAL_ADC_GetValue(&hadc1);		// Ch4
+	  mois3_val = HAL_ADC_GetValue(&hadc1);		// Ch3
 
 	  HAL_ADC_Stop(&hadc1);
 
 	  HAL_ADC_Start(&hadc2);
 	  HAL_ADC_PollForConversion(&hadc2, 100);
-	  mois1_val = HAL_ADC_GetValue(&hadc2);		// Ch8
+	  ph1_val = HAL_ADC_GetValue(&hadc2);		// Ch10
 
 	  HAL_ADC_Start(&hadc2);
 	  HAL_ADC_PollForConversion(&hadc2, 100);
-	  mois2_val = HAL_ADC_GetValue(&hadc2);		// Ch9
+	  ph2_val = HAL_ADC_GetValue(&hadc2);		// Ch6
 
 	  HAL_ADC_Start(&hadc2);
 	  HAL_ADC_PollForConversion(&hadc2, 100);
-	  mois3_val = HAL_ADC_GetValue(&hadc2);		// Ch10
+	  mois1_val = HAL_ADC_GetValue(&hadc2);		// Ch17
 
 	  HAL_ADC_Stop(&hadc2);
+
+    // ToF
+    tof_val = ToF_Read();
 
 	  // Send the data via the USB interface
 	  // Write to buffer
 
     if (timer > 0){
-        msglength = sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d; %d\r\n", 
-        ph1_val, ph2_val, ph3_val, mois1_val, mois2_val, mois3_val, 
+        msglength = sprintf(buffer, "ph1=%d, ph2=%d, ph3=%d, m1=%d, m2=%d, m3=%d, tof=%ld; %d\r\n", 
+        ph1_val, ph2_val, ph3_val, mois1_val, mois2_val, mois3_val, tof_val,
         timestamp);
 	    // Send data via USB
       send_msg_raw(buffer, msglength);
@@ -470,7 +490,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -479,17 +499,8 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_3;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_6;
-  sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -544,7 +555,7 @@ static void MX_ADC2_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -557,7 +568,7 @@ static void MX_ADC2_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
@@ -566,21 +577,13 @@ static void MX_ADC2_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_10;
+  sConfig.Channel = ADC_CHANNEL_17;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_17;
-  sConfig.Rank = ADC_REGULAR_RANK_4;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN ADC2_Init 2 */
 
   /* USER CODE END ADC2_Init 2 */
