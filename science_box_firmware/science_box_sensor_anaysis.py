@@ -1,5 +1,7 @@
 import serial
 
+
+import get_acm_port
 # Uses the PySerial library
 
 port = None
@@ -62,7 +64,7 @@ def read_data():
         write_to_csv(key, value, timestamp)
 
 if __name__ == "__main__":
-    setup_connection("COM3")
+    setup_connection(get_acm_port.get_ACM_port(get_acm_port.Subsystem.SCIENCE))
     while True:
         read_data()
     
