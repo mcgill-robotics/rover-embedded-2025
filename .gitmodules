@@ -1,0 +1,3 @@
+[submodule "ROSJam2/libs/tinyusb"]
+	path = ROSJam2/libs/tinyusb
+	url = https://github.com/hathach/tinyusb

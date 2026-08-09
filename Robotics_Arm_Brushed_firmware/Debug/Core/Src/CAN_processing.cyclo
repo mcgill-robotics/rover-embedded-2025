@@ -1,0 +1,13 @@
+../Core/Src/CAN_processing.c:39:9:get_CAN_transmitter	1
+../Core/Src/CAN_processing.c:42:9:get_CAN_action	1
+../Core/Src/CAN_processing.c:45:9:get_CAN_motor_mov_type	1
+../Core/Src/CAN_processing.c:48:9:get_CAN_motor_type	1
+../Core/Src/CAN_processing.c:51:9:get_CAN_SPEC	1
+../Core/Src/CAN_processing.c:54:5:get_CAN_device_ID	1
+../Core/Src/CAN_processing.c:61:6:CAN_Parse_MSG	8
+../Core/Src/CAN_processing.c:142:6:Process_Single_Motor_Command	5
+../Core/Src/CAN_processing.c:205:6:Process_Multiple_Motor_Command	3
+../Core/Src/CAN_processing.c:238:6:ControlSingleMotor	1
+../Core/Src/CAN_processing.c:299:6:sendCANResponse	3
+../Core/Src/CAN_processing.c:343:7:SingleExtractFloatFromCAN	1
+../Core/Src/CAN_processing.c:358:9:extract_multiple_speeds	1

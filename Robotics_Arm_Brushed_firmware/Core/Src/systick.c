@@ -1,0 +1,63 @@
+/*
+ * systick.c
+ */
+
+#include "main.h"
+#include "pid.h"
+#include "encoder.h"
+#include "calibration.h"
+
+
+int hit = 0; // for testing
+
+void SysTickFunction(void) {
+	// return;
+	/*
+	 * THIS IS CALLED EVERY 1ms
+	 */
+	hit += 1;
+	for (int i = 0; i < NB_MOTORS; i++){
+
+		Motor * motor =  all_motors_list[i];
+
+
+		// poll limit switch after interrupt triggered
+		//if (is_debouncing(motor->Motor_Encoding_Struct)){
+			//if (try_calibrate_encoder()){
+				// reset to stop polling and set switch to non pressed state
+	//			set_debounce(motor, 0);
+	//			reset_debounce_buffer();
+				// align wheel if initial calibration
+//				if (motor->steering_state == CALIBRATION){
+//					setPIDGoalA(motor, 90);
+//				}
+//				motor->steering_state = LEAVE_LIMIT;
+			//}
+		//}
+
+		//normal systick loop execution
+		switch (motor->motor_state) {
+			case (PID):
+				updatePID(motor);// TODO FIX
+				break;
+			case(CALIBRATION):
+				set_calibration_motor_movement(motor);
+				break;
+			case(LEAVE_LIMIT):
+				//leave_limit_switch(); // TODO FIX
+				break;
+			case(FREE_MOVE):
+				break;
+		}
+		set_counts(motor->Motor_Encoding_Struct, (uint32_t) motor->ENCODER_type->CNT);
+
+		//	if (is_debouncing()){
+	//		if(systick_counts++==100){
+	//			systick_counts=0;
+	//			set_debounce(0);
+	//		}
+	//	}
+
+	}
+
+}
