@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './App.css'
-import { Badge, Box, Button, Card, Flex, Kbd, Text, TextField } from '@radix-ui/themes'
+import { Badge, Button, Card, Flex, Kbd, Text, TextField } from '@radix-ui/themes'
 
 function App() {
   const [angle, setAngle] = useState("")
@@ -372,7 +372,7 @@ function App() {
     
       <Card variant="classic">
         <Flex p="2" direction="column" gap="3">
-          <Text size="5" weight="bold">{isScience ? "Lead screw" : "Gripper"}</Text>
+          <Text size="5" weight="bold">{isScience ? "Lead Screw" : "Gripper"}</Text>
           <Flex direction="row" gap="2">
             <Button variant="soft" onClick={()=>{sendCommand('o')}}>{isScience ? "Rover Right" : "Open"}</Button>
             <Button variant="soft" onClick={()=>{sendCommand('c')}} >{isScience ? "Rover Left" : "Close"}</Button>
