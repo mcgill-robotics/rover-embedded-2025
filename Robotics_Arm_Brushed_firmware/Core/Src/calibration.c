@@ -33,5 +33,5 @@ void CalibrateMotor(Motor * motor) {
 
 void set_calibration_motor_movement(Motor * motor){
 	set_motor_direction(motor, 1);
-	set_motor_speed_percent(motor, 40);
+	set_motor_speed_percent(motor, 20);
 }

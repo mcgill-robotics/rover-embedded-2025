@@ -170,7 +170,7 @@ int main(void)
   motor_encoding_struct_init(&pitch_encoding, 33024, 66536, 0);
 
   //frm the steering motor; 33024 counts for 1 revolution; roll used fr arm's pitch; pitch maxes at 45 degrees + offset + 1(fr mod capping)  ESTIMATED !! TO CHANGE WHEN ON ARM
-  motor_encoding_struct_init(&roll_encoding, 33024, 5129, 1000);
+  motor_encoding_struct_init(&roll_encoding, 33024, 34025, 1000);
 
 
 
@@ -431,7 +431,7 @@ int main(void)
 
       if (roll_motor.motor_state == FREE_MOVE){
         print_to_usb("pitch up\n");
-	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 900);
 	    	HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 1);
 
       }else{
@@ -442,7 +442,7 @@ int main(void)
 
       if (roll_motor.motor_state == FREE_MOVE){
         print_to_usb("pitch down\n");
-	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 4499);
+	    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 900);
 	    	HAL_GPIO_WritePin(DIR_roll_GPIO_Port, DIR_roll_Pin, 0);
 
       }else{
