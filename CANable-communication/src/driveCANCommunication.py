@@ -5,6 +5,8 @@ from enum import Enum
 
 # global variable 
 IDNumber = 0
+IQMAX_A = 9.34  # from drive_parameters.h (IQMAX_A); used to detect saturation
+
 # Enum classes which are used for the encoding when messages are being sent to the Drive ESCs
 class ActionType(Enum):
     RUN = 0
@@ -203,6 +205,7 @@ class CANStation:
         # Support both RunSpec and ReadSpec enums
         spec_value = spec.value if isinstance(spec, Enum) else int(spec)
 
+
         can_id = build_custom_can_id(
             action=action.value,
             multi_single=1 if is_single else 0,
@@ -380,12 +383,71 @@ class DriveInterface:
         for node in [NodeID.RF_DRIVE, NodeID.RB_DRIVE, NodeID.LB_DRIVE, NodeID.LF_DRIVE]:
             drive.acknowledge_motor_fault(node)
             time.sleep(0.05)
+
+                
+
+    def _sample(self, read_fn, node, timeout=0.03):
+        """Send one read and return just the float value (or None on no/!match)."""
+        read_fn(node)
+        info = self.esc.station.recv_msg(timeout=timeout)
+        if info is None:
+            return None
+        # info = [node_int, spec_meaning, value]; guard against a stray reply
+        if info[0] != node.value:
+            print(f"  (warning: reply from node {info[0]}, expected {node.value})")
+            return None
+        return info[2]
+
+    def read_diagnostics(self, node: NodeID):
+        """Pull the full diagnostic bundle for one ESC and print an interpreted view."""
+        iq_meas  = self._sample(self.read_current,     node)  # measured Iq
+        iq_ref   = self._sample(self.read_all_faults,  node)  # commanded Iq
+        meas_rpm = self._sample(self.read_state,       node)  # measured speed
+        ref_rpm  = self._sample(self.read_speed,       node)  # setpoint
+        temp_c   = self._sample(self.read_temperature, node)  # temperature
+
+        def fmt(v, u=""):
+            return "  n/a " if v is None else f"{v:8.2f}{u}"
+
+        print(f"\n=== Diagnostics: {node.name} ===")
+        print(f"  Iq measured        : {fmt(iq_meas, ' A')}")
+        print(f"  Iq commanded (ref) : {fmt(iq_ref, ' A')}")
+        print(f"  Speed setpoint     : {fmt(ref_rpm, ' RPM')}")
+        print(f"  Speed measured     : {fmt(meas_rpm, ' RPM')}")
+        print(f"  Temperature        : {fmt(temp_c, ' C')}")
+
+        # Signature of an underperformer: torque-current demand railed AND
+        # the wheel not reaching its setpoint. Both anchors are independent of
+        # the (suspect) current-sense scaling.
+        railed = iq_ref is not None and abs(iq_ref) >= 0.9 * self.IQMAX_A
+        short  = (meas_rpm is not None and ref_rpm is not None
+                  and abs(ref_rpm) > 50
+                  and abs(meas_rpm) < 0.8 * abs(ref_rpm))
+        if railed:
+            print("  -> Iq_ref is RAILED at the torque limit")
+        if short:
+            print("  -> Speed is BELOW setpoint")
+        if railed and short:
+            print("  -> SIGNATURE: commanding max torque current and still losing speed")
+        print()
+
+        return {
+            "node": node.name, "iq_meas_A": iq_meas, "iq_ref_A": iq_ref,
+            "speed_setpoint_rpm": ref_rpm, "speed_meas_rpm": meas_rpm, "temp_C": temp_c,
+        }
+
+    def compare_diagnostics(self, good_node: NodeID, suspect_node: NodeID):
+        """Sample a known-good and a suspect ESC back-to-back for an A/B read."""
+        print("\n--- A/B comparison (run both at the same speed under the same load) ---")
+        g = self.read_diagnostics(good_node)
+        s = self.read_diagnostics(suspect_node)
+        return g, s
     
 if __name__ == "__main__":
 
     # Example usage
     # print(can.interface.detect_available_configs())
-    station = CANStation(interface="slcan", channel="COM6", bitrate=500000) #channel must be 0 as zig
+    station = CANStation(interface="slcan", channel="COM10", bitrate=500000) #channel must be 0 as zig
 
     # Create an ESCs class
     escInterface = ESCInterface(station)
@@ -395,14 +457,40 @@ if __name__ == "__main__":
 
 
     ## CODE BELOW HERE
-    # drive.stop_motor(NodeID.LF_DRIVE)
 
-    # drive.run_motor(NodeID.LF_DRIVE, 1500)
-    # drive.read_all_faults(NodeID.LF_DRIVE)
-    # drive.stop_motor(NodeID.LF_DRIVE)
+    #Diagnostic prints 
+    test_speed   = 1000
+    good_node    = NodeID.LF_DRIVE   
+    suspect_node = NodeID.RF_DRIVE   
+
+    # Single-board read:
+    drive.run_motor(suspect_node, test_speed)
+    time.sleep(1.0)                  # let the speed loop settle against the load
+    drive.read_diagnostics(suspect_node)
+    drive.stop_motor(suspect_node)
+
+
+    # Speed Ramp ===============================================
+    # time.sleep(1)
+    # start_speed = 200
+    # for ii in range (50):
+    #     time.sleep(0.25)
+    #     start_speed += 50
+    #     drive.run_motor(NodeID.RB_DRIVE,start_speed)
+        # drive.read_speed(NodeID.RB_DRIVE)
+
+    # Speed Ramp ===============================================
+
+
+    # drive.run_motor(NodeID.LB_DRIVE, 500)
+    # drive.run_motor(NodeID.LB_DRIVE, 500)
+
+    # drive.ping_motor(NodeID.LF_DRIVE)
+    # drive.read_all_faults(NodeID.RB_DRIVE)
+    # drive.stop_motor(NodeID.LB_DRIVE)
 
     
-    station.recv_msg(0.01)
+    station.recv_msg(0.05)
     station.close()
 
 
