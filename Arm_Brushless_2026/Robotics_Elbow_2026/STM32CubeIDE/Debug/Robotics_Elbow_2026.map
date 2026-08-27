@@ -12258,7 +12258,7 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x08000000                g_pfnVectors
                 0x080001d8                        . = ALIGN (0x4)
 
-.text           0x080001d8     0xbf1c
+.text           0x080001d8     0xbf5c
                 0x080001d8                        . = ALIGN (0x4)
  *(.text)
  .text          0x080001d8       0x40 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
@@ -12359,1161 +12359,1160 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x080008d4                COMP4_IRQHandler
  *fill*         0x080008d6        0x2 
  .text.Handle_Run_Command.part.0.isra.0
-                0x080008d8       0xcc ./Application/User/CAN_processing_v2.o
+                0x080008d8      0x108 ./Application/User/CAN_processing_v2.o
  .text.Handle_Read_Command
-                0x080009a4       0xd8 ./Application/User/CAN_processing_v2.o
-                0x080009a4                Handle_Read_Command
+                0x080009e0       0xd8 ./Application/User/CAN_processing_v2.o
+                0x080009e0                Handle_Read_Command
  .text.half_to_float
-                0x08000a7c       0x5c ./Application/User/CAN_processing_v2.o
-                0x08000a7c                half_to_float
+                0x08000ab8       0x5c ./Application/User/CAN_processing_v2.o
+                0x08000ab8                half_to_float
  .text.CAN_Parse_MSG
-                0x08000ad8       0xf0 ./Application/User/CAN_processing_v2.o
-                0x08000ad8                CAN_Parse_MSG
+                0x08000b14       0xf0 ./Application/User/CAN_processing_v2.o
+                0x08000b14                CAN_Parse_MSG
  .text.selectJerk
-                0x08000bc8       0x24 ./Application/User/SCurveTrajectory.o
-                0x08000bc8                selectJerk
+                0x08000c04       0x24 ./Application/User/SCurveTrajectory.o
+                0x08000c04                selectJerk
  .text.ASPEP_start
-                0x08000bec       0x28 ./Application/User/aspep.o
-                0x08000bec                ASPEP_start
+                0x08000c28       0x28 ./Application/User/aspep.o
+                0x08000c28                ASPEP_start
  .text.ASPEP_sendBeacon
-                0x08000c14       0x8c ./Application/User/aspep.o
-                0x08000c14                ASPEP_sendBeacon
+                0x08000c50       0x8c ./Application/User/aspep.o
+                0x08000c50                ASPEP_sendBeacon
  .text.ASPEP_sendPing
-                0x08000ca0       0x8c ./Application/User/aspep.o
-                0x08000ca0                ASPEP_sendPing
+                0x08000cdc       0x8c ./Application/User/aspep.o
+                0x08000cdc                ASPEP_sendPing
  .text.ASPEP_getBuffer
-                0x08000d2c       0x60 ./Application/User/aspep.o
-                0x08000d2c                ASPEP_getBuffer
+                0x08000d68       0x60 ./Application/User/aspep.o
+                0x08000d68                ASPEP_getBuffer
  .text.ASPEP_sendPacket
-                0x08000d8c      0x118 ./Application/User/aspep.o
-                0x08000d8c                ASPEP_sendPacket
+                0x08000dc8      0x118 ./Application/User/aspep.o
+                0x08000dc8                ASPEP_sendPacket
  .text.ASPEP_HWDataTransmittedIT
-                0x08000ea4       0x98 ./Application/User/aspep.o
-                0x08000ea4                ASPEP_HWDataTransmittedIT
+                0x08000ee0       0x98 ./Application/User/aspep.o
+                0x08000ee0                ASPEP_HWDataTransmittedIT
  .text.ASPEP_RXframeProcess
-                0x08000f3c      0x2b4 ./Application/User/aspep.o
-                0x08000f3c                ASPEP_RXframeProcess
+                0x08000f78      0x2b4 ./Application/User/aspep.o
+                0x08000f78                ASPEP_RXframeProcess
  .text.ASPEP_HWDataReceivedIT
-                0x080011f0       0xa0 ./Application/User/aspep.o
-                0x080011f0                ASPEP_HWDataReceivedIT
+                0x0800122c       0xa0 ./Application/User/aspep.o
+                0x0800122c                ASPEP_HWDataReceivedIT
  .text.ASPEP_HWReset
-                0x08001290       0x14 ./Application/User/aspep.o
-                0x08001290                ASPEP_HWReset
+                0x080012cc       0x14 ./Application/User/aspep.o
+                0x080012cc                ASPEP_HWReset
  .text.rezero_shift.part.0
-                0x080012a4       0xb4 ./Application/User/calibration.o
+                0x080012e0       0xb4 ./Application/User/calibration.o
  .text.finalize_calibration
-                0x08001358      0x128 ./Application/User/calibration.o
+                0x08001394      0x128 ./Application/User/calibration.o
  .text.Calibration_Init
-                0x08001480       0xc0 ./Application/User/calibration.o
-                0x08001480                Calibration_Init
+                0x080014bc       0xc0 ./Application/User/calibration.o
+                0x080014bc                Calibration_Init
  .text.Calibration_Restart
-                0x08001540       0x8c ./Application/User/calibration.o
-                0x08001540                Calibration_Restart
+                0x0800157c       0x8c ./Application/User/calibration.o
+                0x0800157c                Calibration_Restart
  .text.Calibration_LimitEdge
-                0x080015cc       0xd0 ./Application/User/calibration.o
-                0x080015cc                Calibration_LimitEdge
+                0x08001608       0xd0 ./Application/User/calibration.o
+                0x08001608                Calibration_LimitEdge
  .text.Calibration_MainStep
-                0x0800169c      0x1c4 ./Application/User/calibration.o
-                0x0800169c                Calibration_MainStep
+                0x080016d8      0x1c4 ./Application/User/calibration.o
+                0x080016d8                Calibration_MainStep
  .text.Calibration_ISRStep
-                0x08001860       0xcc ./Application/User/calibration.o
-                0x08001860                Calibration_ISRStep
+                0x0800189c       0xcc ./Application/User/calibration.o
+                0x0800189c                Calibration_ISRStep
  .text.Calibration_Tick_1ms
-                0x0800192c      0x204 ./Application/User/calibration.o
-                0x0800192c                Calibration_Tick_1ms
+                0x08001968      0x204 ./Application/User/calibration.o
+                0x08001968                Calibration_Tick_1ms
  .text.Calibration_IsDone
-                0x08001b30       0x14 ./Application/User/calibration.o
-                0x08001b30                Calibration_IsDone
+                0x08001b6c       0x14 ./Application/User/calibration.o
+                0x08001b6c                Calibration_IsDone
  .text.Calibration_GetOffset
-                0x08001b44        0xc ./Application/User/calibration.o
-                0x08001b44                Calibration_GetOffset
+                0x08001b80        0xc ./Application/User/calibration.o
+                0x08001b80                Calibration_GetOffset
  .text.Calibration_GetActiveLowerLimit
-                0x08001b50        0xc ./Application/User/calibration.o
-                0x08001b50                Calibration_GetActiveLowerLimit
+                0x08001b8c        0xc ./Application/User/calibration.o
+                0x08001b8c                Calibration_GetActiveLowerLimit
  .text.Calibration_GetActiveUpperLimit
-                0x08001b5c        0xc ./Application/User/calibration.o
-                0x08001b5c                Calibration_GetActiveUpperLimit
+                0x08001b98        0xc ./Application/User/calibration.o
+                0x08001b98                Calibration_GetActiveUpperLimit
  .text.pack_ping
-                0x08001b68        0xc ./Application/User/can_telemetry.o
+                0x08001ba4        0xc ./Application/User/can_telemetry.o
  .text.pack_status
-                0x08001b74       0x1c ./Application/User/can_telemetry.o
+                0x08001bb0       0x1c ./Application/User/can_telemetry.o
  .text.pack_temperature
-                0x08001b90       0x14 ./Application/User/can_telemetry.o
- .text.pack_phase_currents
-                0x08001ba4       0x14 ./Application/User/can_telemetry.o
- .text.pack_bus_voltage
-                0x08001bb8       0x14 ./Application/User/can_telemetry.o
- .text.pack_position
                 0x08001bcc       0x14 ./Application/User/can_telemetry.o
- .text.pack_motor_speed
+ .text.pack_phase_currents
                 0x08001be0       0x14 ./Application/User/can_telemetry.o
+ .text.pack_bus_voltage
+                0x08001bf4       0x14 ./Application/User/can_telemetry.o
+ .text.pack_position
+                0x08001c08       0x14 ./Application/User/can_telemetry.o
+ .text.pack_motor_speed
+                0x08001c1c       0x14 ./Application/User/can_telemetry.o
  .text.Telemetry_Tick_1ms
-                0x08001bf4       0xa0 ./Application/User/can_telemetry.o
-                0x08001bf4                Telemetry_Tick_1ms
+                0x08001c30       0xa0 ./Application/User/can_telemetry.o
+                0x08001c30                Telemetry_Tick_1ms
  .text.ESC_Sensors_Update
-                0x08001c94       0x7c ./Application/User/esc_sensors.o
-                0x08001c94                ESC_Sensors_Update
+                0x08001cd0       0x7c ./Application/User/esc_sensors.o
+                0x08001cd0                ESC_Sensors_Update
  .text.ESC_Sensors_Get
-                0x08001d10        0x8 ./Application/User/esc_sensors.o
-                0x08001d10                ESC_Sensors_Get
+                0x08001d4c        0x8 ./Application/User/esc_sensors.o
+                0x08001d4c                ESC_Sensors_Get
  .text.HF_GetIDSize
-                0x08001d18       0x18 ./Application/User/hf_registers.o
-                0x08001d18                HF_GetIDSize
+                0x08001d54       0x18 ./Application/User/hf_registers.o
+                0x08001d54                HF_GetIDSize
  .text.HF_GetPtrReg
-                0x08001d30      0x11c ./Application/User/hf_registers.o
-                0x08001d30                HF_GetPtrReg
- *fill*         0x08001e4c        0x4 
+                0x08001d6c      0x11c ./Application/User/hf_registers.o
+                0x08001d6c                HF_GetPtrReg
  .text.SystemClock_Config
-                0x08001e50       0x78 ./Application/User/main.o
-                0x08001e50                SystemClock_Config
+                0x08001e88       0x78 ./Application/User/main.o
+                0x08001e88                SystemClock_Config
  .text.startup.main
-                0x08001ec8      0x7b8 ./Application/User/main.o
-                0x08001ec8                main
+                0x08001f00      0x7b8 ./Application/User/main.o
+                0x08001f00                main
  .text.HAL_FDCAN_RxFifo0Callback
-                0x08002680       0x28 ./Application/User/main.o
-                0x08002680                HAL_FDCAN_RxFifo0Callback
+                0x080026b8       0x28 ./Application/User/main.o
+                0x080026b8                HAL_FDCAN_RxFifo0Callback
  .text.HAL_GPIO_EXTI_Callback
-                0x080026a8       0x88 ./Application/User/main.o
-                0x080026a8                HAL_GPIO_EXTI_Callback
+                0x080026e0       0x88 ./Application/User/main.o
+                0x080026e0                HAL_GPIO_EXTI_Callback
  .text.HAL_TIM_PeriodElapsedCallback
-                0x08002730       0xcc ./Application/User/main.o
-                0x08002730                HAL_TIM_PeriodElapsedCallback
- *fill*         0x080027fc        0x4 
+                0x08002768       0xd4 ./Application/User/main.o
+                0x08002768                HAL_TIM_PeriodElapsedCallback
+ *fill*         0x0800283c        0x4 
  .text.degreesToRad
-                0x08002800       0x28 ./Application/User/main.o
-                0x08002800                degreesToRad
+                0x08002840       0x28 ./Application/User/main.o
+                0x08002840                degreesToRad
  .text.radToDegrees
-                0x08002828       0x34 ./Application/User/main.o
-                0x08002828                radToDegrees
+                0x08002868       0x34 ./Application/User/main.o
+                0x08002868                radToDegrees
  .text.Error_Handler
-                0x0800285c        0x4 ./Application/User/main.o
-                0x0800285c                Error_Handler
+                0x0800289c        0x4 ./Application/User/main.o
+                0x0800289c                Error_Handler
  .text.MC_StartMotor1
-                0x08002860        0xc ./Application/User/mc_api.o
-                0x08002860                MC_StartMotor1
+                0x080028a0        0xc ./Application/User/mc_api.o
+                0x080028a0                MC_StartMotor1
  .text.MC_StopMotor1
-                0x0800286c        0xc ./Application/User/mc_api.o
-                0x0800286c                MC_StopMotor1
+                0x080028ac        0xc ./Application/User/mc_api.o
+                0x080028ac                MC_StopMotor1
  .text.MC_ProgramPositionCommandMotor1
-                0x08002878        0xc ./Application/User/mc_api.o
-                0x08002878                MC_ProgramPositionCommandMotor1
+                0x080028b8        0xc ./Application/User/mc_api.o
+                0x080028b8                MC_ProgramPositionCommandMotor1
  .text.MC_GetPhaseCurrentAmplitudeMotor1
-                0x08002884        0xc ./Application/User/mc_api.o
-                0x08002884                MC_GetPhaseCurrentAmplitudeMotor1
+                0x080028c4        0xc ./Application/User/mc_api.o
+                0x080028c4                MC_GetPhaseCurrentAmplitudeMotor1
  .text.MC_GetSTMStateMotor1
-                0x08002890        0xc ./Application/User/mc_api.o
-                0x08002890                MC_GetSTMStateMotor1
+                0x080028d0        0xc ./Application/User/mc_api.o
+                0x080028d0                MC_GetSTMStateMotor1
  .text.MC_ProfilerCommand
-                0x0800289c        0x4 ./Application/User/mc_api.o
-                0x0800289c                MC_ProfilerCommand
+                0x080028dc        0x4 ./Application/User/mc_api.o
+                0x080028dc                MC_ProfilerCommand
  .text.MC_APP_BootHook
-                0x080028a0        0x4 ./Application/User/mc_app_hooks.o
-                0x080028a0                MC_APP_BootHook
+                0x080028e0        0x4 ./Application/User/mc_app_hooks.o
+                0x080028e0                MC_APP_BootHook
  .text.MC_APP_PostMediumFrequencyHook_M1
-                0x080028a4        0x4 ./Application/User/mc_app_hooks.o
-                0x080028a4                MC_APP_PostMediumFrequencyHook_M1
+                0x080028e4        0x4 ./Application/User/mc_app_hooks.o
+                0x080028e4                MC_APP_PostMediumFrequencyHook_M1
  .text.MCI_ExecSpeedRamp
-                0x080028a8       0x14 ./Application/User/mc_interface.o
-                0x080028a8                MCI_ExecSpeedRamp
+                0x080028e8       0x14 ./Application/User/mc_interface.o
+                0x080028e8                MCI_ExecSpeedRamp
  .text.MCI_ExecTorqueRamp
-                0x080028bc       0x14 ./Application/User/mc_interface.o
-                0x080028bc                MCI_ExecTorqueRamp
+                0x080028fc       0x14 ./Application/User/mc_interface.o
+                0x080028fc                MCI_ExecTorqueRamp
  .text.MCI_SetCurrentReferences
-                0x080028d0       0x14 ./Application/User/mc_interface.o
-                0x080028d0                MCI_SetCurrentReferences
+                0x08002910       0x14 ./Application/User/mc_interface.o
+                0x08002910                MCI_SetCurrentReferences
  .text.MCI_ExecPositionCommand
-                0x080028e4       0x74 ./Application/User/mc_interface.o
-                0x080028e4                MCI_ExecPositionCommand
+                0x08002924       0x74 ./Application/User/mc_interface.o
+                0x08002924                MCI_ExecPositionCommand
  .text.MCI_FaultProcessing
-                0x08002958       0x18 ./Application/User/mc_interface.o
-                0x08002958                MCI_FaultProcessing
+                0x08002998       0x18 ./Application/User/mc_interface.o
+                0x08002998                MCI_FaultProcessing
  .text.MCI_ExecBufferedCommands
-                0x08002970       0x70 ./Application/User/mc_interface.o
-                0x08002970                MCI_ExecBufferedCommands
+                0x080029b0       0x70 ./Application/User/mc_interface.o
+                0x080029b0                MCI_ExecBufferedCommands
  .text.MCI_GetSTMState
-                0x080029e0        0x4 ./Application/User/mc_interface.o
-                0x080029e0                MCI_GetSTMState
+                0x08002a20        0x4 ./Application/User/mc_interface.o
+                0x08002a20                MCI_GetSTMState
  .text.MCI_GetCurrentPosition
-                0x080029e4        0x8 ./Application/User/mc_interface.o
-                0x080029e4                MCI_GetCurrentPosition
+                0x08002a24        0x8 ./Application/User/mc_interface.o
+                0x08002a24                MCI_GetCurrentPosition
  .text.MCI_GetOccurredFaults
-                0x080029ec        0x4 ./Application/User/mc_interface.o
-                0x080029ec                MCI_GetOccurredFaults
+                0x08002a2c        0x4 ./Application/User/mc_interface.o
+                0x08002a2c                MCI_GetOccurredFaults
  .text.MCI_GetCurrentFaults
-                0x080029f0        0x4 ./Application/User/mc_interface.o
-                0x080029f0                MCI_GetCurrentFaults
+                0x08002a30        0x4 ./Application/User/mc_interface.o
+                0x08002a30                MCI_GetCurrentFaults
  .text.MCI_StartMotor
-                0x080029f4       0x2c ./Application/User/mc_interface.o
-                0x080029f4                MCI_StartMotor
+                0x08002a34       0x2c ./Application/User/mc_interface.o
+                0x08002a34                MCI_StartMotor
  .text.MCI_StopMotor
-                0x08002a20       0x38 ./Application/User/mc_interface.o
-                0x08002a20                MCI_StopMotor
+                0x08002a60       0x38 ./Application/User/mc_interface.o
+                0x08002a60                MCI_StopMotor
  .text.MCI_FaultAcknowledged
-                0x08002a58       0x24 ./Application/User/mc_interface.o
-                0x08002a58                MCI_FaultAcknowledged
+                0x08002a98       0x24 ./Application/User/mc_interface.o
+                0x08002a98                MCI_FaultAcknowledged
  .text.MCI_GetFaultState
-                0x08002a7c        0xc ./Application/User/mc_interface.o
-                0x08002a7c                MCI_GetFaultState
+                0x08002abc        0xc ./Application/User/mc_interface.o
+                0x08002abc                MCI_GetFaultState
  .text.MCI_GetControlMode
-                0x08002a88        0x4 ./Application/User/mc_interface.o
-                0x08002a88                MCI_GetControlMode
+                0x08002ac8        0x4 ./Application/User/mc_interface.o
+                0x08002ac8                MCI_GetControlMode
  .text.MCI_GetLastRampFinalSpeed
-                0x08002a8c        0x8 ./Application/User/mc_interface.o
-                0x08002a8c                MCI_GetLastRampFinalSpeed
+                0x08002acc        0x8 ./Application/User/mc_interface.o
+                0x08002acc                MCI_GetLastRampFinalSpeed
  .text.MCI_GetLastRampFinalTorque
-                0x08002a94        0x8 ./Application/User/mc_interface.o
-                0x08002a94                MCI_GetLastRampFinalTorque
+                0x08002ad4        0x8 ./Application/User/mc_interface.o
+                0x08002ad4                MCI_GetLastRampFinalTorque
  .text.MCI_GetLastRampFinalDuration
-                0x08002a9c        0x4 ./Application/User/mc_interface.o
-                0x08002a9c                MCI_GetLastRampFinalDuration
+                0x08002adc        0x4 ./Application/User/mc_interface.o
+                0x08002adc                MCI_GetLastRampFinalDuration
  .text.MCI_StopRamp
-                0x08002aa0        0xc ./Application/User/mc_interface.o
-                0x08002aa0                MCI_StopRamp
+                0x08002ae0        0xc ./Application/User/mc_interface.o
+                0x08002ae0                MCI_StopRamp
  .text.MCI_GetAvrgMecSpeedUnit
-                0x08002aac        0x8 ./Application/User/mc_interface.o
-                0x08002aac                MCI_GetAvrgMecSpeedUnit
+                0x08002aec        0x8 ./Application/User/mc_interface.o
+                0x08002aec                MCI_GetAvrgMecSpeedUnit
  .text.MCI_GetMecSpeedRefUnit
-                0x08002ab4        0x8 ./Application/User/mc_interface.o
-                0x08002ab4                MCI_GetMecSpeedRefUnit
+                0x08002af4        0x8 ./Application/User/mc_interface.o
+                0x08002af4                MCI_GetMecSpeedRefUnit
  .text.MCI_GetIab
-                0x08002abc       0x14 ./Application/User/mc_interface.o
-                0x08002abc                MCI_GetIab
+                0x08002afc       0x14 ./Application/User/mc_interface.o
+                0x08002afc                MCI_GetIab
  .text.MCI_GetIalphabeta
-                0x08002ad0       0x14 ./Application/User/mc_interface.o
-                0x08002ad0                MCI_GetIalphabeta
+                0x08002b10       0x14 ./Application/User/mc_interface.o
+                0x08002b10                MCI_GetIalphabeta
  .text.MCI_GetIqd
-                0x08002ae4       0x14 ./Application/User/mc_interface.o
-                0x08002ae4                MCI_GetIqd
+                0x08002b24       0x14 ./Application/User/mc_interface.o
+                0x08002b24                MCI_GetIqd
  .text.MCI_GetIqdref
-                0x08002af8       0x14 ./Application/User/mc_interface.o
-                0x08002af8                MCI_GetIqdref
+                0x08002b38       0x14 ./Application/User/mc_interface.o
+                0x08002b38                MCI_GetIqdref
  .text.MCI_GetVqd
-                0x08002b0c       0x14 ./Application/User/mc_interface.o
-                0x08002b0c                MCI_GetVqd
+                0x08002b4c       0x14 ./Application/User/mc_interface.o
+                0x08002b4c                MCI_GetVqd
  .text.MCI_GetValphabeta
-                0x08002b20       0x14 ./Application/User/mc_interface.o
-                0x08002b20                MCI_GetValphabeta
- .text.MCI_GetTeref
-                0x08002b34        0x8 ./Application/User/mc_interface.o
-                0x08002b34                MCI_GetTeref
- .text.MCI_GetPhaseCurrentAmplitude
-                0x08002b3c       0x24 ./Application/User/mc_interface.o
-                0x08002b3c                MCI_GetPhaseCurrentAmplitude
- .text.MCI_Clear_Iqdref
                 0x08002b60       0x14 ./Application/User/mc_interface.o
-                0x08002b60                MCI_Clear_Iqdref
+                0x08002b60                MCI_GetValphabeta
+ .text.MCI_GetTeref
+                0x08002b74        0x8 ./Application/User/mc_interface.o
+                0x08002b74                MCI_GetTeref
+ .text.MCI_GetPhaseCurrentAmplitude
+                0x08002b7c       0x24 ./Application/User/mc_interface.o
+                0x08002b7c                MCI_GetPhaseCurrentAmplitude
+ .text.MCI_Clear_Iqdref
+                0x08002ba0       0x14 ./Application/User/mc_interface.o
+                0x08002ba0                MCI_Clear_Iqdref
  .text.MCM_Clarke
-                0x08002b74       0x54 ./Application/User/mc_math.o
-                0x08002b74                MCM_Clarke
+                0x08002bb4       0x54 ./Application/User/mc_math.o
+                0x08002bb4                MCM_Clarke
  .text.MCM_Trig_Functions
-                0x08002bc8       0x20 ./Application/User/mc_math.o
-                0x08002bc8                MCM_Trig_Functions
+                0x08002c08       0x20 ./Application/User/mc_math.o
+                0x08002c08                MCM_Trig_Functions
  .text.MCM_Park
-                0x08002be8       0x84 ./Application/User/mc_math.o
-                0x08002be8                MCM_Park
+                0x08002c28       0x84 ./Application/User/mc_math.o
+                0x08002c28                MCM_Park
  .text.MCM_Rev_Park
-                0x08002c6c       0x3c ./Application/User/mc_math.o
-                0x08002c6c                MCM_Rev_Park
+                0x08002cac       0x3c ./Application/User/mc_math.o
+                0x08002cac                MCM_Rev_Park
  .text.MCM_Sqrt
-                0x08002ca8       0x20 ./Application/User/mc_math.o
-                0x08002ca8                MCM_Sqrt
- .text.MCboot   0x08002cc8       0x70 ./Application/User/mc_tasks.o
-                0x08002cc8                MCboot
+                0x08002ce8       0x20 ./Application/User/mc_math.o
+                0x08002ce8                MCM_Sqrt
+ .text.MCboot   0x08002d08       0x70 ./Application/User/mc_tasks.o
+                0x08002d08                MCboot
  .text.TSK_SetChargeBootCapDelayM1
-                0x08002d38        0xc ./Application/User/mc_tasks.o
-                0x08002d38                TSK_SetChargeBootCapDelayM1
+                0x08002d78        0xc ./Application/User/mc_tasks.o
+                0x08002d78                TSK_SetChargeBootCapDelayM1
  .text.TSK_ChargeBootCapDelayHasElapsedM1
-                0x08002d44       0x14 ./Application/User/mc_tasks.o
-                0x08002d44                TSK_ChargeBootCapDelayHasElapsedM1
+                0x08002d84       0x14 ./Application/User/mc_tasks.o
+                0x08002d84                TSK_ChargeBootCapDelayHasElapsedM1
  .text.TSK_SetStopPermanencyTimeM1
-                0x08002d58        0xc ./Application/User/mc_tasks.o
-                0x08002d58                TSK_SetStopPermanencyTimeM1
+                0x08002d98        0xc ./Application/User/mc_tasks.o
+                0x08002d98                TSK_SetStopPermanencyTimeM1
  .text.TSK_StopPermanencyTimeHasElapsedM1
-                0x08002d64       0x14 ./Application/User/mc_tasks.o
-                0x08002d64                TSK_StopPermanencyTimeHasElapsedM1
+                0x08002da4       0x14 ./Application/User/mc_tasks.o
+                0x08002da4                TSK_StopPermanencyTimeHasElapsedM1
  .text.TSK_HighFrequencyTask
-                0x08002d78       0x2c ./Application/User/mc_tasks.o
-                0x08002d78                TSK_HighFrequencyTask
+                0x08002db8       0x2c ./Application/User/mc_tasks.o
+                0x08002db8                TSK_HighFrequencyTask
  .text.TSK_SafetyTask_PWMOFF
-                0x08002da4       0x9c ./Application/User/mc_tasks.o
-                0x08002da4                TSK_SafetyTask_PWMOFF
+                0x08002de4       0x9c ./Application/User/mc_tasks.o
+                0x08002de4                TSK_SafetyTask_PWMOFF
  .text.TSK_SafetyTask
-                0x08002e40       0x18 ./Application/User/mc_tasks.o
-                0x08002e40                TSK_SafetyTask
+                0x08002e80       0x18 ./Application/User/mc_tasks.o
+                0x08002e80                TSK_SafetyTask
  .text.MC_RunMotorControlTasks
-                0x08002e58       0x90 ./Application/User/mc_tasks.o
-                0x08002e58                MC_RunMotorControlTasks
+                0x08002e98       0x90 ./Application/User/mc_tasks.o
+                0x08002e98                MC_RunMotorControlTasks
  .text.TSK_HardwareFaultTask
-                0x08002ee8       0x1c ./Application/User/mc_tasks.o
-                0x08002ee8                TSK_HardwareFaultTask
+                0x08002f28       0x1c ./Application/User/mc_tasks.o
+                0x08002f28                TSK_HardwareFaultTask
  .text.UI_HandleStartStopButton_cb
-                0x08002f04       0x18 ./Application/User/mc_tasks.o
-                0x08002f04                UI_HandleStartStopButton_cb
+                0x08002f44       0x18 ./Application/User/mc_tasks.o
+                0x08002f44                UI_HandleStartStopButton_cb
  .text.mc_lock_pins
-                0x08002f1c      0x17c ./Application/User/mc_tasks.o
-                0x08002f1c                mc_lock_pins
+                0x08002f5c      0x17c ./Application/User/mc_tasks.o
+                0x08002f5c                mc_lock_pins
  .text.FOC_Clear
-                0x08003098       0x5c ./Application/User/mc_tasks_foc.o
-                0x08003098                FOC_Clear
+                0x080030d8       0x5c ./Application/User/mc_tasks_foc.o
+                0x080030d8                FOC_Clear
  .text.FOC_Init
-                0x080030f4      0x104 ./Application/User/mc_tasks_foc.o
-                0x080030f4                FOC_Init
+                0x08003134      0x104 ./Application/User/mc_tasks_foc.o
+                0x08003134                FOC_Init
  .text.FOC_InitAdditionalMethods
-                0x080031f8        0x4 ./Application/User/mc_tasks_foc.o
-                0x080031f8                FOC_InitAdditionalMethods
+                0x08003238        0x4 ./Application/User/mc_tasks_foc.o
+                0x08003238                FOC_InitAdditionalMethods
  .text.FOC_CalcCurrRef
-                0x080031fc       0x50 ./Application/User/mc_tasks_foc.o
-                0x080031fc                FOC_CalcCurrRef
+                0x0800323c       0x50 ./Application/User/mc_tasks_foc.o
+                0x0800323c                FOC_CalcCurrRef
  .text.TSK_MediumFrequencyTaskM1
-                0x0800324c      0x2b8 ./Application/User/mc_tasks_foc.o
-                0x0800324c                TSK_MediumFrequencyTaskM1
+                0x0800328c      0x2b8 ./Application/User/mc_tasks_foc.o
+                0x0800328c                TSK_MediumFrequencyTaskM1
  .text.FOC_HighFrequencyTask
-                0x08003504      0x110 ./Application/User/mc_tasks_foc.o
-                0x08003504                FOC_HighFrequencyTask
+                0x08003544      0x110 ./Application/User/mc_tasks_foc.o
+                0x08003544                FOC_HighFrequencyTask
  .text.RI_SetRegCommandParser
-                0x08003614       0xe0 ./Application/User/mcp.o
-                0x08003614                RI_SetRegCommandParser
+                0x08003654       0xe0 ./Application/User/mcp.o
+                0x08003654                RI_SetRegCommandParser
  .text.RI_GetRegCommandParser
-                0x080036f4       0x8c ./Application/User/mcp.o
-                0x080036f4                RI_GetRegCommandParser
+                0x08003734       0x8c ./Application/User/mcp.o
+                0x08003734                RI_GetRegCommandParser
  .text.MCP_ReceivedPacket
-                0x08003780      0x190 ./Application/User/mcp.o
-                0x08003780                MCP_ReceivedPacket
+                0x080037c0      0x190 ./Application/User/mcp.o
+                0x080037c0                MCP_ReceivedPacket
  .text.MX_MotorControl_Init
-                0x08003910       0x3c ./Application/User/motorcontrol.o
-                0x08003910                MX_MotorControl_Init
+                0x08003950       0x3c ./Application/User/motorcontrol.o
+                0x08003950                MX_MotorControl_Init
  .text.plannerInit
-                0x0800394c       0x9c ./Application/User/planner.o
-                0x0800394c                plannerInit
+                0x0800398c       0x9c ./Application/User/planner.o
+                0x0800398c                plannerInit
  .text.determineSwitchingTimes
-                0x080039e8      0x408 ./Application/User/planner.o
-                0x080039e8                determineSwitchingTimes
+                0x08003a28      0x408 ./Application/User/planner.o
+                0x08003a28                determineSwitchingTimes
  .text.buildNewCurve
-                0x08003df0      0x104 ./Application/User/planner.o
-                0x08003df0                buildNewCurve
+                0x08003e30      0x104 ./Application/User/planner.o
+                0x08003e30                buildNewCurve
  .text.calculateNewRamp
-                0x08003ef4       0xa4 ./Application/User/planner.o
-                0x08003ef4                calculateNewRamp
+                0x08003f34       0xa4 ./Application/User/planner.o
+                0x08003f34                calculateNewRamp
  .text.PosCtrl_ISRStep
-                0x08003f98      0x35c ./Application/User/planner.o
-                0x08003f98                PosCtrl_ISRStep
+                0x08003fd8      0x35c ./Application/User/planner.o
+                0x08003fd8                PosCtrl_ISRStep
  .text.Planner_MainStep
-                0x080042f4       0x9c ./Application/User/planner.o
-                0x080042f4                Planner_MainStep
+                0x08004334       0x9c ./Application/User/planner.o
+                0x08004334                Planner_MainStep
  .text.startTimers
-                0x08004390       0x9c ./Application/User/pwm_common.o
-                0x08004390                startTimers
+                0x080043d0       0x9c ./Application/User/pwm_common.o
+                0x080043d0                startTimers
  .text.waitForPolarizationEnd
-                0x0800442c       0x3c ./Application/User/pwm_common.o
-                0x0800442c                waitForPolarizationEnd
+                0x0800446c       0x3c ./Application/User/pwm_common.o
+                0x0800446c                waitForPolarizationEnd
  .text.PWMC_SetPhaseVoltage
-                0x08004468      0x248 ./Application/User/pwm_curr_fdbk.o
-                0x08004468                PWMC_SetPhaseVoltage
+                0x080044a8      0x248 ./Application/User/pwm_curr_fdbk.o
+                0x080044a8                PWMC_SetPhaseVoltage
  .text.PWMC_SwitchOffPWM
-                0x080046b0        0x4 ./Application/User/pwm_curr_fdbk.o
-                0x080046b0                PWMC_SwitchOffPWM
+                0x080046f0        0x4 ./Application/User/pwm_curr_fdbk.o
+                0x080046f0                PWMC_SwitchOffPWM
  .text.PWMC_SwitchOnPWM
-                0x080046b4        0x4 ./Application/User/pwm_curr_fdbk.o
-                0x080046b4                PWMC_SwitchOnPWM
+                0x080046f4        0x4 ./Application/User/pwm_curr_fdbk.o
+                0x080046f4                PWMC_SwitchOnPWM
  .text.PWMC_CurrentReadingCalibr
-                0x080046b8       0x34 ./Application/User/pwm_curr_fdbk.o
-                0x080046b8                PWMC_CurrentReadingCalibr
+                0x080046f8       0x34 ./Application/User/pwm_curr_fdbk.o
+                0x080046f8                PWMC_CurrentReadingCalibr
  .text.PWMC_OCP_Handler
-                0x080046ec       0x14 ./Application/User/pwm_curr_fdbk.o
-                0x080046ec                PWMC_OCP_Handler
+                0x0800472c       0x14 ./Application/User/pwm_curr_fdbk.o
+                0x0800472c                PWMC_OCP_Handler
  .text.PWMC_OVP_Handler
-                0x08004700       0x1c ./Application/User/pwm_curr_fdbk.o
-                0x08004700                PWMC_OVP_Handler
+                0x08004740       0x1c ./Application/User/pwm_curr_fdbk.o
+                0x08004740                PWMC_OVP_Handler
  .text.PWMC_IsFaultOccurred
-                0x0800471c       0x38 ./Application/User/pwm_curr_fdbk.o
-                0x0800471c                PWMC_IsFaultOccurred
+                0x0800475c       0x38 ./Application/User/pwm_curr_fdbk.o
+                0x0800475c                PWMC_IsFaultOccurred
  .text.RCM_RegisterRegConv
-                0x08004754       0xcc ./Application/User/regular_conversion_manager.o
-                0x08004754                RCM_RegisterRegConv
+                0x08004794       0xcc ./Application/User/regular_conversion_manager.o
+                0x08004794                RCM_RegisterRegConv
  .text.RCM_ExecNextConv
-                0x08004820       0x6c ./Application/User/regular_conversion_manager.o
-                0x08004820                RCM_ExecNextConv
+                0x08004860       0x6c ./Application/User/regular_conversion_manager.o
+                0x08004860                RCM_ExecNextConv
  .text.RCM_ReadOngoingConv
-                0x0800488c       0x44 ./Application/User/regular_conversion_manager.o
-                0x0800488c                RCM_ReadOngoingConv
+                0x080048cc       0x44 ./Application/User/regular_conversion_manager.o
+                0x080048cc                RCM_ReadOngoingConv
  .text.STC_Init
-                0x080048d0       0x2c ./Application/User/speed_torq_ctrl.o
-                0x080048d0                STC_Init
+                0x08004910       0x2c ./Application/User/speed_torq_ctrl.o
+                0x08004910                STC_Init
  .text.STC_SetSpeedSensor
-                0x080048fc        0x4 ./Application/User/speed_torq_ctrl.o
-                0x080048fc                STC_SetSpeedSensor
+                0x0800493c        0x4 ./Application/User/speed_torq_ctrl.o
+                0x0800493c                STC_SetSpeedSensor
  .text.STC_Clear
-                0x08004900       0x18 ./Application/User/speed_torq_ctrl.o
-                0x08004900                STC_Clear
+                0x08004940       0x18 ./Application/User/speed_torq_ctrl.o
+                0x08004940                STC_Clear
  .text.STC_GetMecSpeedRefUnit
-                0x08004918        0x8 ./Application/User/speed_torq_ctrl.o
-                0x08004918                STC_GetMecSpeedRefUnit
+                0x08004958        0x8 ./Application/User/speed_torq_ctrl.o
+                0x08004958                STC_GetMecSpeedRefUnit
  .text.STC_SetControlMode
-                0x08004920        0x8 ./Application/User/speed_torq_ctrl.o
-                0x08004920                STC_SetControlMode
+                0x08004960        0x8 ./Application/User/speed_torq_ctrl.o
+                0x08004960                STC_SetControlMode
  .text.STC_ExecRamp
-                0x08004928       0x90 ./Application/User/speed_torq_ctrl.o
-                0x08004928                STC_ExecRamp
+                0x08004968       0x90 ./Application/User/speed_torq_ctrl.o
+                0x08004968                STC_ExecRamp
  .text.STC_CalcTorqueReference
-                0x080049b8       0x6c ./Application/User/speed_torq_ctrl.o
-                0x080049b8                STC_CalcTorqueReference
+                0x080049f8       0x6c ./Application/User/speed_torq_ctrl.o
+                0x080049f8                STC_CalcTorqueReference
  .text.STC_GetMecSpeedRefUnitDefault
-                0x08004a24        0x8 ./Application/User/speed_torq_ctrl.o
-                0x08004a24                STC_GetMecSpeedRefUnitDefault
+                0x08004a64        0x8 ./Application/User/speed_torq_ctrl.o
+                0x08004a64                STC_GetMecSpeedRefUnitDefault
  .text.STC_GetDefaultIqdref
-                0x08004a2c        0xc ./Application/User/speed_torq_ctrl.o
-                0x08004a2c                STC_GetDefaultIqdref
+                0x08004a6c        0xc ./Application/User/speed_torq_ctrl.o
+                0x08004a6c                STC_GetDefaultIqdref
  .text.STC_ForceSpeedReferenceToCurrentSpeed
-                0x08004a38       0x10 ./Application/User/speed_torq_ctrl.o
-                0x08004a38                STC_ForceSpeedReferenceToCurrentSpeed
+                0x08004a78       0x10 ./Application/User/speed_torq_ctrl.o
+                0x08004a78                STC_ForceSpeedReferenceToCurrentSpeed
  .text.TIM4_IRQHandler
-                0x08004a48       0x20 ./Application/User/stm32_mc_common_it.o
-                0x08004a48                TIM4_IRQHandler
+                0x08004a88       0x20 ./Application/User/stm32_mc_common_it.o
+                0x08004a88                TIM4_IRQHandler
  .text.USART2_IRQHandler
-                0x08004a68      0x120 ./Application/User/stm32_mc_common_it.o
-                0x08004a68                USART2_IRQHandler
+                0x08004aa8      0x120 ./Application/User/stm32_mc_common_it.o
+                0x08004aa8                USART2_IRQHandler
  .text.HardFault_Handler
-                0x08004b88        0x8 ./Application/User/stm32_mc_common_it.o
-                0x08004b88                HardFault_Handler
+                0x08004bc8        0x8 ./Application/User/stm32_mc_common_it.o
+                0x08004bc8                HardFault_Handler
  .text.SysTick_Handler
-                0x08004b90       0x4c ./Application/User/stm32_mc_common_it.o
-                0x08004b90                SysTick_Handler
+                0x08004bd0       0x4c ./Application/User/stm32_mc_common_it.o
+                0x08004bd0                SysTick_Handler
  .text.EXTI15_10_IRQHandler
-                0x08004bdc       0x18 ./Application/User/stm32_mc_common_it.o
-                0x08004bdc                EXTI15_10_IRQHandler
+                0x08004c1c       0x18 ./Application/User/stm32_mc_common_it.o
+                0x08004c1c                EXTI15_10_IRQHandler
  .text.HAL_MspInit
-                0x08004bf4       0x40 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004bf4                HAL_MspInit
- *fill*         0x08004c34        0x4 
+                0x08004c34       0x40 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004c34                HAL_MspInit
+ *fill*         0x08004c74        0x4 
  .text.HAL_ADC_MspInit
-                0x08004c38      0x140 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004c38                HAL_ADC_MspInit
+                0x08004c78      0x140 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004c78                HAL_ADC_MspInit
  .text.HAL_COMP_MspInit
-                0x08004d78       0xe8 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004d78                HAL_COMP_MspInit
+                0x08004db8       0xe8 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004db8                HAL_COMP_MspInit
  .text.HAL_CORDIC_MspInit
-                0x08004e60       0x2c ./Application/User/stm32g4xx_hal_msp.o
-                0x08004e60                HAL_CORDIC_MspInit
+                0x08004ea0       0x2c ./Application/User/stm32g4xx_hal_msp.o
+                0x08004ea0                HAL_CORDIC_MspInit
  .text.HAL_DAC_MspInit
-                0x08004e8c       0x44 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004e8c                HAL_DAC_MspInit
+                0x08004ecc       0x44 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004ecc                HAL_DAC_MspInit
  .text.HAL_FDCAN_MspInit
-                0x08004ed0       0xe4 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004ed0                HAL_FDCAN_MspInit
- *fill*         0x08004fb4        0x4 
+                0x08004f10       0xe4 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004f10                HAL_FDCAN_MspInit
+ *fill*         0x08004ff4        0x4 
  .text.HAL_OPAMP_MspInit
-                0x08004fb8       0xe8 ./Application/User/stm32g4xx_hal_msp.o
-                0x08004fb8                HAL_OPAMP_MspInit
+                0x08004ff8       0xe8 ./Application/User/stm32g4xx_hal_msp.o
+                0x08004ff8                HAL_OPAMP_MspInit
  .text.HAL_TIM_PWM_MspInit
-                0x080050a0       0x2c ./Application/User/stm32g4xx_hal_msp.o
-                0x080050a0                HAL_TIM_PWM_MspInit
- *fill*         0x080050cc        0x4 
+                0x080050e0       0x2c ./Application/User/stm32g4xx_hal_msp.o
+                0x080050e0                HAL_TIM_PWM_MspInit
+ *fill*         0x0800510c        0x4 
  .text.HAL_TIM_Encoder_MspInit
-                0x080050d0       0x78 ./Application/User/stm32g4xx_hal_msp.o
-                0x080050d0                HAL_TIM_Encoder_MspInit
+                0x08005110       0x78 ./Application/User/stm32g4xx_hal_msp.o
+                0x08005110                HAL_TIM_Encoder_MspInit
  .text.HAL_TIM_Base_MspInit
-                0x08005148       0x40 ./Application/User/stm32g4xx_hal_msp.o
-                0x08005148                HAL_TIM_Base_MspInit
+                0x08005188       0x40 ./Application/User/stm32g4xx_hal_msp.o
+                0x08005188                HAL_TIM_Base_MspInit
  .text.HAL_TIM_MspPostInit
-                0x08005188       0xbc ./Application/User/stm32g4xx_hal_msp.o
-                0x08005188                HAL_TIM_MspPostInit
+                0x080051c8       0xbc ./Application/User/stm32g4xx_hal_msp.o
+                0x080051c8                HAL_TIM_MspPostInit
  .text.EXTI3_IRQHandler
-                0x08005244        0x8 ./Application/User/stm32g4xx_it.o
-                0x08005244                EXTI3_IRQHandler
+                0x08005284        0x8 ./Application/User/stm32g4xx_it.o
+                0x08005284                EXTI3_IRQHandler
  .text.EXTI4_IRQHandler
-                0x0800524c        0x8 ./Application/User/stm32g4xx_it.o
-                0x0800524c                EXTI4_IRQHandler
+                0x0800528c        0x8 ./Application/User/stm32g4xx_it.o
+                0x0800528c                EXTI4_IRQHandler
  .text.FDCAN1_IT0_IRQHandler
-                0x08005254        0xc ./Application/User/stm32g4xx_it.o
-                0x08005254                FDCAN1_IT0_IRQHandler
+                0x08005294        0xc ./Application/User/stm32g4xx_it.o
+                0x08005294                FDCAN1_IT0_IRQHandler
  .text.FDCAN1_IT1_IRQHandler
-                0x08005260        0xc ./Application/User/stm32g4xx_it.o
-                0x08005260                FDCAN1_IT1_IRQHandler
+                0x080052a0        0xc ./Application/User/stm32g4xx_it.o
+                0x080052a0                FDCAN1_IT1_IRQHandler
  .text.TIM6_DAC_IRQHandler
-                0x0800526c       0x1c ./Application/User/stm32g4xx_it.o
-                0x0800526c                TIM6_DAC_IRQHandler
+                0x080052ac       0x1c ./Application/User/stm32g4xx_it.o
+                0x080052ac                TIM6_DAC_IRQHandler
  .text.ADC1_2_IRQHandler
-                0x08005288       0x10 ./Application/User/stm32g4xx_mc_it.o
-                0x08005288                ADC1_2_IRQHandler
+                0x080052c8       0x10 ./Application/User/stm32g4xx_mc_it.o
+                0x080052c8                ADC1_2_IRQHandler
  .text.TIM1_UP_TIM16_IRQHandler
-                0x08005298       0x18 ./Application/User/stm32g4xx_mc_it.o
-                0x08005298                TIM1_UP_TIM16_IRQHandler
+                0x080052d8       0x18 ./Application/User/stm32g4xx_mc_it.o
+                0x080052d8                TIM1_UP_TIM16_IRQHandler
  .text.TIM1_BRK_TIM15_IRQHandler
-                0x080052b0       0x3c ./Application/User/stm32g4xx_mc_it.o
-                0x080052b0                TIM1_BRK_TIM15_IRQHandler
+                0x080052f0       0x3c ./Application/User/stm32g4xx_mc_it.o
+                0x080052f0                TIM1_BRK_TIM15_IRQHandler
  .text.RI_SetRegisterGlobal
-                0x080052ec      0x100 ./Application/User/sync_registers.o
-                0x080052ec                RI_SetRegisterGlobal
+                0x0800532c      0x100 ./Application/User/sync_registers.o
+                0x0800532c                RI_SetRegisterGlobal
  .text.RI_SetRegisterMotor1
-                0x080053ec      0x4c4 ./Application/User/sync_registers.o
-                0x080053ec                RI_SetRegisterMotor1
+                0x0800542c      0x4c4 ./Application/User/sync_registers.o
+                0x0800542c                RI_SetRegisterMotor1
  .text.RI_GetRegisterGlobal
-                0x080058b0      0x134 ./Application/User/sync_registers.o
-                0x080058b0                RI_GetRegisterGlobal
+                0x080058f0      0x134 ./Application/User/sync_registers.o
+                0x080058f0                RI_GetRegisterGlobal
  .text.RI_GetRegisterMotor1
-                0x080059e4      0x714 ./Application/User/sync_registers.o
-                0x080059e4                RI_GetRegisterMotor1
+                0x08005a24      0x714 ./Application/User/sync_registers.o
+                0x08005a24                RI_GetRegisterMotor1
  .text.UASPEP_INIT
-                0x080060f8       0x84 ./Application/User/usart_aspep_driver.o
-                0x080060f8                UASPEP_INIT
+                0x08006138       0x84 ./Application/User/usart_aspep_driver.o
+                0x08006138                UASPEP_INIT
  .text.UASPEP_CFG_TRANSMISSION
-                0x0800617c       0x38 ./Application/User/usart_aspep_driver.o
-                0x0800617c                UASPEP_CFG_TRANSMISSION
+                0x080061bc       0x38 ./Application/User/usart_aspep_driver.o
+                0x080061bc                UASPEP_CFG_TRANSMISSION
  .text.UASPEP_CFG_RECEPTION
-                0x080061b4       0x3c ./Application/User/usart_aspep_driver.o
-                0x080061b4                UASPEP_CFG_RECEPTION
+                0x080061f4       0x3c ./Application/User/usart_aspep_driver.o
+                0x080061f4                UASPEP_CFG_RECEPTION
  .text.UASPEP_IDLE_ENABLE
-                0x080061f0       0x18 ./Application/User/usart_aspep_driver.o
-                0x080061f0                UASPEP_IDLE_ENABLE
+                0x08006230       0x18 ./Application/User/usart_aspep_driver.o
+                0x08006230                UASPEP_IDLE_ENABLE
  .text.computeStoppingDistance
-                0x08006208       0xe4 ./Application/User/velocity_ctrl.o
+                0x08006248       0xe4 ./Application/User/velocity_ctrl.o
  .text.velCtrlInitStatic
-                0x080062ec       0x38 ./Application/User/velocity_ctrl.o
-                0x080062ec                velCtrlInitStatic
+                0x0800632c       0x38 ./Application/User/velocity_ctrl.o
+                0x0800632c                velCtrlInitStatic
  .text.velCtrlSetDemand
-                0x08006324       0x2c ./Application/User/velocity_ctrl.o
-                0x08006324                velCtrlSetDemand
+                0x08006364       0x2c ./Application/User/velocity_ctrl.o
+                0x08006364                velCtrlSetDemand
  .text.velCtrlSetPositionLimits
-                0x08006350       0x10 ./Application/User/velocity_ctrl.o
-                0x08006350                velCtrlSetPositionLimits
+                0x08006390       0x10 ./Application/User/velocity_ctrl.o
+                0x08006390                velCtrlSetPositionLimits
  .text.velCtrlClearPositionLimits
-                0x08006360        0x8 ./Application/User/velocity_ctrl.o
-                0x08006360                velCtrlClearPositionLimits
+                0x080063a0        0x8 ./Application/User/velocity_ctrl.o
+                0x080063a0                velCtrlClearPositionLimits
  .text.velCtrlStart
-                0x08006368       0x1c ./Application/User/velocity_ctrl.o
-                0x08006368                velCtrlStart
+                0x080063a8       0x1c ./Application/User/velocity_ctrl.o
+                0x080063a8                velCtrlStart
  .text.velCtrl_ISRStep
-                0x08006384      0x2bc ./Application/User/velocity_ctrl.o
-                0x08006384                velCtrl_ISRStep
+                0x080063c4      0x2bc ./Application/User/velocity_ctrl.o
+                0x080063c4                velCtrl_ISRStep
  .text.SystemInit
-                0x08006640       0x14 ./Drivers/CMSIS/system_stm32g4xx.o
-                0x08006640                SystemInit
+                0x08006680       0x14 ./Drivers/CMSIS/system_stm32g4xx.o
+                0x08006680                SystemInit
  .text.HAL_InitTick
-                0x08006654       0x4c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
-                0x08006654                HAL_InitTick
+                0x08006694       0x4c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x08006694                HAL_InitTick
  .text.HAL_Init
-                0x080066a0       0x20 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
-                0x080066a0                HAL_Init
+                0x080066e0       0x20 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x080066e0                HAL_Init
  .text.HAL_IncTick
-                0x080066c0       0x18 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
-                0x080066c0                HAL_IncTick
+                0x08006700       0x18 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x08006700                HAL_IncTick
  .text.HAL_GetTick
-                0x080066d8        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
-                0x080066d8                HAL_GetTick
+                0x08006718        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x08006718                HAL_GetTick
  .text.HAL_ADC_Init
-                0x080066e4      0x1e8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
-                0x080066e4                HAL_ADC_Init
+                0x08006724      0x1e8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+                0x08006724                HAL_ADC_Init
  .text.HAL_ADC_ConfigChannel
-                0x080068cc      0x4e0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
-                0x080068cc                HAL_ADC_ConfigChannel
+                0x0800690c      0x4e0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+                0x0800690c                HAL_ADC_ConfigChannel
  .text.HAL_ADCEx_InjectedConfigChannel
-                0x08006dac      0x5fc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
-                0x08006dac                HAL_ADCEx_InjectedConfigChannel
+                0x08006dec      0x5fc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+                0x08006dec                HAL_ADCEx_InjectedConfigChannel
  .text.HAL_ADCEx_MultiModeConfigChannel
-                0x080073a8       0xc8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
-                0x080073a8                HAL_ADCEx_MultiModeConfigChannel
+                0x080073e8       0xc8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+                0x080073e8                HAL_ADCEx_MultiModeConfigChannel
  .text.HAL_COMP_Init
-                0x08007470      0x140 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
-                0x08007470                HAL_COMP_Init
+                0x080074b0      0x140 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+                0x080074b0                HAL_COMP_Init
  .text.HAL_CORDIC_Init
-                0x080075b0       0x34 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
-                0x080075b0                HAL_CORDIC_Init
+                0x080075f0       0x34 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+                0x080075f0                HAL_CORDIC_Init
  .text.HAL_NVIC_SetPriorityGrouping
-                0x080075e4       0x24 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x080075e4                HAL_NVIC_SetPriorityGrouping
+                0x08007624       0x24 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x08007624                HAL_NVIC_SetPriorityGrouping
  .text.HAL_NVIC_SetPriority
-                0x08007608       0x78 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x08007608                HAL_NVIC_SetPriority
+                0x08007648       0x78 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x08007648                HAL_NVIC_SetPriority
  .text.HAL_NVIC_EnableIRQ
-                0x08007680       0x1c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x08007680                HAL_NVIC_EnableIRQ
+                0x080076c0       0x1c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x080076c0                HAL_NVIC_EnableIRQ
  .text.HAL_NVIC_SystemReset
-                0x0800769c       0x24 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x0800769c                HAL_NVIC_SystemReset
+                0x080076dc       0x24 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x080076dc                HAL_NVIC_SystemReset
  .text.HAL_SYSTICK_Config
-                0x080076c0       0x34 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x080076c0                HAL_SYSTICK_Config
+                0x08007700       0x34 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x08007700                HAL_SYSTICK_Config
  .text.HAL_SYSTICK_Callback
-                0x080076f4        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x080076f4                HAL_SYSTICK_Callback
+                0x08007734        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x08007734                HAL_SYSTICK_Callback
  .text.HAL_SYSTICK_IRQHandler
-                0x080076f8        0x8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
-                0x080076f8                HAL_SYSTICK_IRQHandler
+                0x08007738        0x8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x08007738                HAL_SYSTICK_IRQHandler
  .text.HAL_DAC_Init
-                0x08007700       0x2c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
-                0x08007700                HAL_DAC_Init
+                0x08007740       0x2c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x08007740                HAL_DAC_Init
  .text.HAL_DAC_DMAUnderrunCallbackCh1
-                0x0800772c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
-                0x0800772c                HAL_DAC_DMAUnderrunCallbackCh1
+                0x0800776c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x0800776c                HAL_DAC_DMAUnderrunCallbackCh1
  .text.HAL_DAC_IRQHandler
-                0x08007730       0x64 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
-                0x08007730                HAL_DAC_IRQHandler
+                0x08007770       0x64 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x08007770                HAL_DAC_IRQHandler
  .text.HAL_DAC_ConfigChannel
-                0x08007794      0x1d8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
-                0x08007794                HAL_DAC_ConfigChannel
+                0x080077d4      0x1d8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x080077d4                HAL_DAC_ConfigChannel
  .text.HAL_DACEx_DMAUnderrunCallbackCh2
-                0x0800796c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
-                0x0800796c                HAL_DACEx_DMAUnderrunCallbackCh2
+                0x080079ac        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+                0x080079ac                HAL_DACEx_DMAUnderrunCallbackCh2
  .text.HAL_FDCAN_Init
-                0x08007970      0x1dc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007970                HAL_FDCAN_Init
+                0x080079b0      0x1dc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x080079b0                HAL_FDCAN_Init
  .text.HAL_FDCAN_ConfigFilter
-                0x08007b4c       0x58 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007b4c                HAL_FDCAN_ConfigFilter
+                0x08007b8c       0x58 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007b8c                HAL_FDCAN_ConfigFilter
  .text.HAL_FDCAN_Start
-                0x08007ba4       0x30 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ba4                HAL_FDCAN_Start
+                0x08007be4       0x30 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007be4                HAL_FDCAN_Start
  .text.HAL_FDCAN_AddMessageToTxFifoQ
-                0x08007bd4       0xc4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007bd4                HAL_FDCAN_AddMessageToTxFifoQ
+                0x08007c14       0xc4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007c14                HAL_FDCAN_AddMessageToTxFifoQ
  .text.HAL_FDCAN_GetRxMessage
-                0x08007c98      0x140 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007c98                HAL_FDCAN_GetRxMessage
+                0x08007cd8      0x140 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007cd8                HAL_FDCAN_GetRxMessage
  .text.HAL_FDCAN_ActivateNotification
-                0x08007dd8       0xf8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007dd8                HAL_FDCAN_ActivateNotification
+                0x08007e18       0xf8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007e18                HAL_FDCAN_ActivateNotification
  .text.HAL_FDCAN_TxEventFifoCallback
-                0x08007ed0        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ed0                HAL_FDCAN_TxEventFifoCallback
+                0x08007f10        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f10                HAL_FDCAN_TxEventFifoCallback
  .text.HAL_FDCAN_RxFifo1Callback
-                0x08007ed4        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ed4                HAL_FDCAN_RxFifo1Callback
+                0x08007f14        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f14                HAL_FDCAN_RxFifo1Callback
  .text.HAL_FDCAN_TxFifoEmptyCallback
-                0x08007ed8        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ed8                HAL_FDCAN_TxFifoEmptyCallback
+                0x08007f18        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f18                HAL_FDCAN_TxFifoEmptyCallback
  .text.HAL_FDCAN_TxBufferCompleteCallback
-                0x08007edc        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007edc                HAL_FDCAN_TxBufferCompleteCallback
+                0x08007f1c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f1c                HAL_FDCAN_TxBufferCompleteCallback
  .text.HAL_FDCAN_TxBufferAbortCallback
-                0x08007ee0        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ee0                HAL_FDCAN_TxBufferAbortCallback
+                0x08007f20        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f20                HAL_FDCAN_TxBufferAbortCallback
  .text.HAL_FDCAN_TimestampWraparoundCallback
-                0x08007ee4        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ee4                HAL_FDCAN_TimestampWraparoundCallback
+                0x08007f24        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f24                HAL_FDCAN_TimestampWraparoundCallback
  .text.HAL_FDCAN_TimeoutOccurredCallback
-                0x08007ee8        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ee8                HAL_FDCAN_TimeoutOccurredCallback
+                0x08007f28        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f28                HAL_FDCAN_TimeoutOccurredCallback
  .text.HAL_FDCAN_HighPriorityMessageCallback
-                0x08007eec        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007eec                HAL_FDCAN_HighPriorityMessageCallback
+                0x08007f2c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f2c                HAL_FDCAN_HighPriorityMessageCallback
  .text.HAL_FDCAN_ErrorCallback
-                0x08007ef0        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ef0                HAL_FDCAN_ErrorCallback
+                0x08007f30        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f30                HAL_FDCAN_ErrorCallback
  .text.HAL_FDCAN_ErrorStatusCallback
-                0x08007ef4        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ef4                HAL_FDCAN_ErrorStatusCallback
+                0x08007f34        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f34                HAL_FDCAN_ErrorStatusCallback
  .text.HAL_FDCAN_IRQHandler
-                0x08007ef8      0x188 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
-                0x08007ef8                HAL_FDCAN_IRQHandler
+                0x08007f38      0x188 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x08007f38                HAL_FDCAN_IRQHandler
  .text.HAL_GPIO_Init
-                0x08008080      0x37c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
-                0x08008080                HAL_GPIO_Init
+                0x080080c0      0x37c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x080080c0                HAL_GPIO_Init
  .text.HAL_GPIO_ReadPin
-                0x080083fc        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
-                0x080083fc                HAL_GPIO_ReadPin
+                0x0800843c        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x0800843c                HAL_GPIO_ReadPin
  .text.HAL_GPIO_WritePin
-                0x08008408        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
-                0x08008408                HAL_GPIO_WritePin
+                0x08008448        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x08008448                HAL_GPIO_WritePin
  .text.HAL_GPIO_TogglePin
-                0x08008414       0x14 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
-                0x08008414                HAL_GPIO_TogglePin
+                0x08008454       0x14 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x08008454                HAL_GPIO_TogglePin
  .text.HAL_GPIO_EXTI_IRQHandler
-                0x08008428       0x18 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
-                0x08008428                HAL_GPIO_EXTI_IRQHandler
+                0x08008468       0x18 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x08008468                HAL_GPIO_EXTI_IRQHandler
  .text.HAL_OPAMP_Init
-                0x08008440       0xf0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
-                0x08008440                HAL_OPAMP_Init
+                0x08008480       0xf0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+                0x08008480                HAL_OPAMP_Init
  .text.HAL_PWREx_ControlVoltageScaling
-                0x08008530       0xe4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
-                0x08008530                HAL_PWREx_ControlVoltageScaling
+                0x08008570       0xe4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+                0x08008570                HAL_PWREx_ControlVoltageScaling
  .text.HAL_PWREx_DisableUCPDDeadBattery
-                0x08008614       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
-                0x08008614                HAL_PWREx_DisableUCPDDeadBattery
+                0x08008654       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+                0x08008654                HAL_PWREx_DisableUCPDDeadBattery
  .text.HAL_RCC_OscConfig
-                0x08008624      0x48c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
-                0x08008624                HAL_RCC_OscConfig
+                0x08008664      0x48c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x08008664                HAL_RCC_OscConfig
  .text.HAL_RCC_GetSysClockFreq
-                0x08008ab0       0x70 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
-                0x08008ab0                HAL_RCC_GetSysClockFreq
+                0x08008af0       0x70 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x08008af0                HAL_RCC_GetSysClockFreq
  .text.HAL_RCC_ClockConfig
-                0x08008b20      0x208 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
-                0x08008b20                HAL_RCC_ClockConfig
+                0x08008b60      0x208 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x08008b60                HAL_RCC_ClockConfig
  .text.HAL_RCC_GetHCLKFreq
-                0x08008d28        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
-                0x08008d28                HAL_RCC_GetHCLKFreq
+                0x08008d68        0xc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x08008d68                HAL_RCC_GetHCLKFreq
  .text.HAL_RCC_EnableCSS
-                0x08008d34       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
-                0x08008d34                HAL_RCC_EnableCSS
+                0x08008d74       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x08008d74                HAL_RCC_EnableCSS
  .text.HAL_RCCEx_PeriphCLKConfig
-                0x08008d44      0x29c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
-                0x08008d44                HAL_RCCEx_PeriphCLKConfig
+                0x08008d84      0x29c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+                0x08008d84                HAL_RCCEx_PeriphCLKConfig
  .text.TIM_OC1_SetConfig
-                0x08008fe0       0x78 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009020       0x78 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
  .text.TIM_OC3_SetConfig
-                0x08009058       0x80 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009098       0x80 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
  .text.TIM_OC4_SetConfig
-                0x080090d8       0x84 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009118       0x84 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
  .text.HAL_TIM_Base_Init
-                0x0800915c       0xfc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x0800915c                HAL_TIM_Base_Init
+                0x0800919c       0xfc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x0800919c                HAL_TIM_Base_Init
  .text.HAL_TIM_Base_Start_IT
-                0x08009258       0x70 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009258                HAL_TIM_Base_Start_IT
+                0x08009298       0x70 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009298                HAL_TIM_Base_Start_IT
  .text.HAL_TIM_PWM_Init
-                0x080092c8       0xfc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x080092c8                HAL_TIM_PWM_Init
+                0x08009308       0xfc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009308                HAL_TIM_PWM_Init
  .text.HAL_TIM_Encoder_Init
-                0x080093c4      0x144 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x080093c4                HAL_TIM_Encoder_Init
+                0x08009404      0x144 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009404                HAL_TIM_Encoder_Init
  .text.HAL_TIM_OC_DelayElapsedCallback
-                0x08009508        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009508                HAL_TIM_OC_DelayElapsedCallback
+                0x08009548        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009548                HAL_TIM_OC_DelayElapsedCallback
  .text.HAL_TIM_IC_CaptureCallback
-                0x0800950c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x0800950c                HAL_TIM_IC_CaptureCallback
+                0x0800954c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x0800954c                HAL_TIM_IC_CaptureCallback
  .text.HAL_TIM_PWM_PulseFinishedCallback
-                0x08009510        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009510                HAL_TIM_PWM_PulseFinishedCallback
+                0x08009550        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009550                HAL_TIM_PWM_PulseFinishedCallback
  .text.HAL_TIM_TriggerCallback
-                0x08009514        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009514                HAL_TIM_TriggerCallback
+                0x08009554        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009554                HAL_TIM_TriggerCallback
  .text.HAL_TIM_IRQHandler
-                0x08009518      0x1c4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009518                HAL_TIM_IRQHandler
+                0x08009558      0x1c4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x08009558                HAL_TIM_IRQHandler
  .text.TIM_OC2_SetConfig
-                0x080096dc       0x84 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x080096dc                TIM_OC2_SetConfig
+                0x0800971c       0x84 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x0800971c                TIM_OC2_SetConfig
  .text.HAL_TIM_PWM_ConfigChannel
-                0x08009760      0x1cc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
-                0x08009760                HAL_TIM_PWM_ConfigChannel
+                0x080097a0      0x1cc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x080097a0                HAL_TIM_PWM_ConfigChannel
  .text.HAL_TIMEx_MasterConfigSynchronization
-                0x0800992c       0xa4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x0800992c                HAL_TIMEx_MasterConfigSynchronization
+                0x0800996c       0xa4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x0800996c                HAL_TIMEx_MasterConfigSynchronization
  .text.HAL_TIMEx_ConfigBreakDeadTime
-                0x080099d0       0x9c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x080099d0                HAL_TIMEx_ConfigBreakDeadTime
+                0x08009a10       0x9c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009a10                HAL_TIMEx_ConfigBreakDeadTime
  .text.HAL_TIMEx_ConfigBreakInput
-                0x08009a6c       0xb0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009a6c                HAL_TIMEx_ConfigBreakInput
+                0x08009aac       0xb0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009aac                HAL_TIMEx_ConfigBreakInput
  .text.HAL_TIMEx_CommutCallback
-                0x08009b1c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b1c                HAL_TIMEx_CommutCallback
+                0x08009b5c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b5c                HAL_TIMEx_CommutCallback
  .text.HAL_TIMEx_BreakCallback
-                0x08009b20        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b20                HAL_TIMEx_BreakCallback
+                0x08009b60        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b60                HAL_TIMEx_BreakCallback
  .text.HAL_TIMEx_Break2Callback
-                0x08009b24        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b24                HAL_TIMEx_Break2Callback
+                0x08009b64        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b64                HAL_TIMEx_Break2Callback
  .text.HAL_TIMEx_EncoderIndexCallback
-                0x08009b28        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b28                HAL_TIMEx_EncoderIndexCallback
+                0x08009b68        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b68                HAL_TIMEx_EncoderIndexCallback
  .text.HAL_TIMEx_DirectionChangeCallback
-                0x08009b2c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b2c                HAL_TIMEx_DirectionChangeCallback
+                0x08009b6c        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b6c                HAL_TIMEx_DirectionChangeCallback
  .text.HAL_TIMEx_IndexErrorCallback
-                0x08009b30        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b30                HAL_TIMEx_IndexErrorCallback
+                0x08009b70        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b70                HAL_TIMEx_IndexErrorCallback
  .text.HAL_TIMEx_TransitionErrorCallback
-                0x08009b34        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
-                0x08009b34                HAL_TIMEx_TransitionErrorCallback
+                0x08009b74        0x4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x08009b74                HAL_TIMEx_TransitionErrorCallback
  .text.VBS_GetAvBusVoltage_V
-                0x08009b38        0xc ./Middlewares/MotorControl/bus_voltage_sensor.o
-                0x08009b38                VBS_GetAvBusVoltage_V
+                0x08009b78        0xc ./Middlewares/MotorControl/bus_voltage_sensor.o
+                0x08009b78                VBS_GetAvBusVoltage_V
  .text.Circle_Limitation
-                0x08009b44       0x5c ./Middlewares/MotorControl/circle_limitation.o
-                0x08009b44                Circle_Limitation
+                0x08009b84       0x5c ./Middlewares/MotorControl/circle_limitation.o
+                0x08009b84                Circle_Limitation
  .text.EAC_Init
-                0x08009ba0       0x10 ./Middlewares/MotorControl/enc_align_ctrl.o
-                0x08009ba0                EAC_Init
+                0x08009be0       0x10 ./Middlewares/MotorControl/enc_align_ctrl.o
+                0x08009be0                EAC_Init
  .text.EAC_StartAlignment
-                0x08009bb0       0x58 ./Middlewares/MotorControl/enc_align_ctrl.o
-                0x08009bb0                EAC_StartAlignment
+                0x08009bf0       0x58 ./Middlewares/MotorControl/enc_align_ctrl.o
+                0x08009bf0                EAC_StartAlignment
  .text.EAC_Exec
-                0x08009c08       0x30 ./Middlewares/MotorControl/enc_align_ctrl.o
-                0x08009c08                EAC_Exec
+                0x08009c48       0x30 ./Middlewares/MotorControl/enc_align_ctrl.o
+                0x08009c48                EAC_Exec
  .text.ENC_Init
-                0x08009c38       0x74 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009c38                ENC_Init
+                0x08009c78       0x74 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009c78                ENC_Init
  .text.ENC_Clear
-                0x08009cac       0x1c ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009cac                ENC_Clear
+                0x08009cec       0x1c ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009cec                ENC_Clear
  .text.ENC_CalcAngle
-                0x08009cc8       0x34 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009cc8                ENC_CalcAngle
+                0x08009d08       0x34 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009d08                ENC_CalcAngle
  .text.ENC_CalcAvrgMecSpeedUnit
-                0x08009cfc      0x19c ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009cfc                ENC_CalcAvrgMecSpeedUnit
+                0x08009d3c      0x19c ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009d3c                ENC_CalcAvrgMecSpeedUnit
  .text.ENC_SetMecAngle
-                0x08009e98       0x38 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009e98                ENC_SetMecAngle
+                0x08009ed8       0x38 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009ed8                ENC_SetMecAngle
  .text.ENC_IRQHandler
-                0x08009ed0       0x14 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
-                0x08009ed0                ENC_IRQHandler
+                0x08009f10       0x14 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x08009f10                ENC_IRQHandler
  .text.MCPA_dataLog
-                0x08009ee4      0x17c ./Middlewares/MotorControl/mcpa.o
-                0x08009ee4                MCPA_dataLog
+                0x08009f24      0x17c ./Middlewares/MotorControl/mcpa.o
+                0x08009f24                MCPA_dataLog
  .text.MCPA_cfgLog
-                0x0800a060       0xf4 ./Middlewares/MotorControl/mcpa.o
-                0x0800a060                MCPA_cfgLog
+                0x0800a0a0       0xf4 ./Middlewares/MotorControl/mcpa.o
+                0x0800a0a0                MCPA_cfgLog
  .text.NTC_Init
-                0x0800a154       0x24 ./Middlewares/MotorControl/ntc_temperature_sensor.o
-                0x0800a154                NTC_Init
+                0x0800a194       0x24 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+                0x0800a194                NTC_Init
  .text.NTC_CalcAvTemp
-                0x0800a178       0x4c ./Middlewares/MotorControl/ntc_temperature_sensor.o
-                0x0800a178                NTC_CalcAvTemp
+                0x0800a1b8       0x4c ./Middlewares/MotorControl/ntc_temperature_sensor.o
+                0x0800a1b8                NTC_CalcAvTemp
  .text.NTC_GetAvTemp_C
-                0x0800a1c4       0x24 ./Middlewares/MotorControl/ntc_temperature_sensor.o
-                0x0800a1c4                NTC_GetAvTemp_C
+                0x0800a204       0x24 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+                0x0800a204                NTC_GetAvTemp_C
  .text.PID_HandleInit
-                0x0800a1e8       0x10 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a1e8                PID_HandleInit
+                0x0800a228       0x10 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a228                PID_HandleInit
  .text.PID_SetKP
-                0x0800a1f8        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a1f8                PID_SetKP
+                0x0800a238        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a238                PID_SetKP
  .text.PID_SetKI
-                0x0800a1fc        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a1fc                PID_SetKI
+                0x0800a23c        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a23c                PID_SetKI
  .text.PID_GetKP
-                0x0800a200        0x8 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a200                PID_GetKP
+                0x0800a240        0x8 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a240                PID_GetKP
  .text.PID_GetKI
-                0x0800a208        0x8 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a208                PID_GetKI
+                0x0800a248        0x8 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a248                PID_GetKI
  .text.PID_SetIntegralTerm
-                0x0800a210        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a210                PID_SetIntegralTerm
+                0x0800a250        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a250                PID_SetIntegralTerm
  .text.PID_GetKPDivisorPOW2
-                0x0800a214        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a214                PID_GetKPDivisorPOW2
+                0x0800a254        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a254                PID_GetKPDivisorPOW2
  .text.PID_SetKPDivisorPOW2
-                0x0800a218        0xc ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a218                PID_SetKPDivisorPOW2
+                0x0800a258        0xc ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a258                PID_SetKPDivisorPOW2
  .text.PID_GetKIDivisorPOW2
-                0x0800a224        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a224                PID_GetKIDivisorPOW2
- .text.PID_SetLowerIntegralTermLimit
-                0x0800a228        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a228                PID_SetLowerIntegralTermLimit
- .text.PID_SetUpperIntegralTermLimit
-                0x0800a22c        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a22c                PID_SetUpperIntegralTermLimit
- .text.PID_SetKIDivisorPOW2
-                0x0800a230       0x28 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a230                PID_SetKIDivisorPOW2
- .text.PID_SetKD
-                0x0800a258        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a258                PID_SetKD
- .text.PID_GetKD
-                0x0800a25c        0x8 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a25c                PID_GetKD
- .text.PID_GetKDDivisorPOW2
                 0x0800a264        0x4 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a264                PID_GetKDDivisorPOW2
+                0x0800a264                PID_GetKIDivisorPOW2
+ .text.PID_SetLowerIntegralTermLimit
+                0x0800a268        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a268                PID_SetLowerIntegralTermLimit
+ .text.PID_SetUpperIntegralTermLimit
+                0x0800a26c        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a26c                PID_SetUpperIntegralTermLimit
+ .text.PID_SetKIDivisorPOW2
+                0x0800a270       0x28 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a270                PID_SetKIDivisorPOW2
+ .text.PID_SetKD
+                0x0800a298        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a298                PID_SetKD
+ .text.PID_GetKD
+                0x0800a29c        0x8 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a29c                PID_GetKD
+ .text.PID_GetKDDivisorPOW2
+                0x0800a2a4        0x4 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a2a4                PID_GetKDDivisorPOW2
  .text.PID_SetKDDivisorPOW2
-                0x0800a268        0xc ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a268                PID_SetKDDivisorPOW2
+                0x0800a2a8        0xc ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a2a8                PID_SetKDDivisorPOW2
  .text.PI_Controller
-                0x0800a274       0x80 ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a274                PI_Controller
+                0x0800a2b4       0x80 ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a2b4                PI_Controller
  .text.PID_Controller
-                0x0800a2f4       0x3c ./Middlewares/MotorControl/pid_regulator.o
-                0x0800a2f4                PID_Controller
+                0x0800a334       0x3c ./Middlewares/MotorControl/pid_regulator.o
+                0x0800a334                PID_Controller
  .text.PQD_CalcElMotorPower
-                0x0800a330       0x38 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
-                0x0800a330                PQD_CalcElMotorPower
+                0x0800a370       0x38 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+                0x0800a370                PQD_CalcElMotorPower
  .text.PQD_GetAvrgElMotorPowerW
-                0x0800a368       0x34 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
-                0x0800a368                PQD_GetAvrgElMotorPowerW
+                0x0800a3a8       0x34 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+                0x0800a3a8                PQD_GetAvrgElMotorPowerW
  .text.R3_2_ADCxInit
-                0x0800a39c       0xdc ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a3dc       0xdc ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_GetPhaseCurrents
-                0x0800a478      0x17c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800a478                R3_2_GetPhaseCurrents
+                0x0800a4b8      0x17c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a4b8                R3_2_GetPhaseCurrents
  .text.R3_2_SetADCSampPointPolarization
-                0x0800a5f4       0x44 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800a5f4                R3_2_SetADCSampPointPolarization
+                0x0800a634       0x44 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a634                R3_2_SetADCSampPointPolarization
  .text.R3_2_HFCurrentsPolarizationAB
-                0x0800a638       0x58 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a678       0x58 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_HFCurrentsPolarizationC
-                0x0800a690       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a6d0       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_SwitchOnPWM
-                0x0800a6dc       0xc0 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800a6dc                R3_2_SwitchOnPWM
+                0x0800a71c       0xc0 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a71c                R3_2_SwitchOnPWM
  .text.R3_2_RLGetPhaseCurrents
-                0x0800a79c       0x54 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a7dc       0x54 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_RLSwitchOnPWM
-                0x0800a7f0       0x84 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a830       0x84 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_TurnOnLowSides
-                0x0800a874       0x74 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800a874                R3_2_TurnOnLowSides
+                0x0800a8b4       0x74 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a8b4                R3_2_TurnOnLowSides
  .text.R3_2_SwitchOffPWM
-                0x0800a8e8       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800a8e8                R3_2_SwitchOffPWM
+                0x0800a928       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a928                R3_2_SwitchOffPWM
  .text.R3_2_SetAOReferenceVoltage
-                0x0800a934       0x94 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800a974       0x94 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_RLTurnOnLowSides
-                0x0800a9c8       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800aa08       0x4c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .text.R3_2_Init
-                0x0800aa14      0x2a8 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800aa14                R3_2_Init
+                0x0800aa54      0x2a8 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800aa54                R3_2_Init
  .text.R3_2_SetOffsetCalib
-                0x0800acbc       0x1c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800acbc                R3_2_SetOffsetCalib
+                0x0800acfc       0x1c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800acfc                R3_2_SetOffsetCalib
  .text.R3_2_GetOffsetCalib
-                0x0800acd8       0x10 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800acd8                R3_2_GetOffsetCalib
+                0x0800ad18       0x10 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800ad18                R3_2_GetOffsetCalib
  .text.R3_2_CurrentReadingPolarization
-                0x0800ace8      0x134 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800ace8                R3_2_CurrentReadingPolarization
+                0x0800ad28      0x134 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800ad28                R3_2_CurrentReadingPolarization
  .text.R3_2_SetADCSampPointSectX
-                0x0800ae1c       0x88 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800ae1c                R3_2_SetADCSampPointSectX
+                0x0800ae5c       0x88 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800ae5c                R3_2_SetADCSampPointSectX
  .text.R3_2_TIMx_UP_IRQHandler
-                0x0800aea4       0x80 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800aea4                R3_2_TIMx_UP_IRQHandler
+                0x0800aee4       0x80 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800aee4                R3_2_TIMx_UP_IRQHandler
  .text.R3_2_RLDetectionModeEnable
-                0x0800af24       0xd8 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800af24                R3_2_RLDetectionModeEnable
+                0x0800af64       0xd8 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800af64                R3_2_RLDetectionModeEnable
  .text.R3_2_RLDetectionModeDisable
-                0x0800affc      0x130 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800affc                R3_2_RLDetectionModeDisable
+                0x0800b03c      0x130 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800b03c                R3_2_RLDetectionModeDisable
  .text.R3_2_RLDetectionModeSetDuty
-                0x0800b12c       0x7c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800b12c                R3_2_RLDetectionModeSetDuty
+                0x0800b16c       0x7c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800b16c                R3_2_RLDetectionModeSetDuty
  .text.R3_2_RLTurnOnLowSidesAndStart
-                0x0800b1a8       0x9c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
-                0x0800b1a8                R3_2_RLTurnOnLowSidesAndStart
+                0x0800b1e8       0x9c ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0800b1e8                R3_2_RLTurnOnLowSidesAndStart
  .text.RVBS_Init
-                0x0800b244        0xc ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
-                0x0800b244                RVBS_Init
+                0x0800b284        0xc ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+                0x0800b284                RVBS_Init
  .text.RVBS_CalcAvVbus
-                0x0800b250       0x70 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
-                0x0800b250                RVBS_CalcAvVbus
+                0x0800b290       0x70 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+                0x0800b290                RVBS_CalcAvVbus
  .text.REMNG_Init
-                0x0800b2c0       0x10 ./Middlewares/MotorControl/ramp_ext_mngr.o
-                0x0800b2c0                REMNG_Init
+                0x0800b300       0x10 ./Middlewares/MotorControl/ramp_ext_mngr.o
+                0x0800b300                REMNG_Init
  .text.SPD_GetMecAngle
-                0x0800b2d0        0x4 ./Middlewares/MotorControl/speed_pos_fdbk.o
-                0x0800b2d0                SPD_GetMecAngle
+                0x0800b310        0x4 ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x0800b310                SPD_GetMecAngle
  .text.SPD_GetAvrgMecSpeedUnit
-                0x0800b2d4        0x8 ./Middlewares/MotorControl/speed_pos_fdbk.o
-                0x0800b2d4                SPD_GetAvrgMecSpeedUnit
+                0x0800b314        0x8 ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x0800b314                SPD_GetAvrgMecSpeedUnit
  .text.SPD_IsMecSpeedReliable
-                0x0800b2dc       0x6c ./Middlewares/MotorControl/speed_pos_fdbk.o
-                0x0800b2dc                SPD_IsMecSpeedReliable
+                0x0800b31c       0x6c ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x0800b31c                SPD_IsMecSpeedReliable
  .text.SPD_GetS16Speed
-                0x0800b348        0x8 ./Middlewares/MotorControl/speed_pos_fdbk.o
-                0x0800b348                SPD_GetS16Speed
- .text.TC_Init  0x0800b350       0x60 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b350                TC_Init
+                0x0800b388        0x8 ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x0800b388                SPD_GetS16Speed
+ .text.TC_Init  0x0800b390       0x60 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b390                TC_Init
  .text.TC_MoveCommand
-                0x0800b3b0       0xe4 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b3b0                TC_MoveCommand
+                0x0800b3f0       0xe4 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b3f0                TC_MoveCommand
  .text.TC_FollowCommand
-                0x0800b494       0x98 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b494                TC_FollowCommand
+                0x0800b4d4       0x98 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b4d4                TC_FollowCommand
  .text.TC_MoveExecution
-                0x0800b52c       0xf8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b52c                TC_MoveExecution
+                0x0800b56c       0xf8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b56c                TC_MoveExecution
  .text.TC_PositionRegulation
-                0x0800b624       0x88 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b624                TC_PositionRegulation
+                0x0800b664       0x88 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b664                TC_PositionRegulation
  .text.TC_EncAlignmentCommand
-                0x0800b6ac      0x13c ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b6ac                TC_EncAlignmentCommand
+                0x0800b6ec      0x13c ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b6ec                TC_EncAlignmentCommand
  .text.TC_GetCurrentPosition
-                0x0800b7e8       0x20 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b7e8                TC_GetCurrentPosition
+                0x0800b828       0x20 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b828                TC_GetCurrentPosition
  .text.TC_GetTargetPosition
-                0x0800b808        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b808                TC_GetTargetPosition
+                0x0800b848        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b848                TC_GetTargetPosition
  .text.TC_GetMoveDuration
-                0x0800b810        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b810                TC_GetMoveDuration
+                0x0800b850        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b850                TC_GetMoveDuration
  .text.TC_GetControlPositionStatus
-                0x0800b818        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b818                TC_GetControlPositionStatus
+                0x0800b858        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b858                TC_GetControlPositionStatus
  .text.TC_GetAlignmentStatus
-                0x0800b820        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b820                TC_GetAlignmentStatus
+                0x0800b860        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b860                TC_GetAlignmentStatus
  .text.TC_IncTick
-                0x0800b828        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
-                0x0800b828                TC_IncTick
+                0x0800b868        0x8 ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0800b868                TC_IncTick
  .text.VSS_Clear
-                0x0800b830       0x1c ./Middlewares/MotorControl/virtual_speed_sensor.o
-                0x0800b830                VSS_Clear
+                0x0800b870       0x1c ./Middlewares/MotorControl/virtual_speed_sensor.o
+                0x0800b870                VSS_Clear
  .text.VSS_Init
-                0x0800b84c        0x8 ./Middlewares/MotorControl/virtual_speed_sensor.o
-                0x0800b84c                VSS_Init
+                0x0800b88c        0x8 ./Middlewares/MotorControl/virtual_speed_sensor.o
+                0x0800b88c                VSS_Init
  .text.VSS_SetMecAcceleration
-                0x0800b854       0x78 ./Middlewares/MotorControl/virtual_speed_sensor.o
-                0x0800b854                VSS_SetMecAcceleration
- .text.memset   0x0800b8cc       0x10 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
-                0x0800b8cc                memset
- .text.__errno  0x0800b8dc        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-errno.o)
-                0x0800b8dc                __errno
+                0x0800b894       0x78 ./Middlewares/MotorControl/virtual_speed_sensor.o
+                0x0800b894                VSS_SetMecAcceleration
+ .text.memset   0x0800b90c       0x10 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+                0x0800b90c                memset
+ .text.__errno  0x0800b91c        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-errno.o)
+                0x0800b91c                __errno
  .text.__libc_init_array
-                0x0800b8e8       0x48 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-init.o)
-                0x0800b8e8                __libc_init_array
- .text.memcpy   0x0800b930       0x1c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
-                0x0800b930                memcpy
- .text.powf     0x0800b94c       0xae C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_pow.o)
-                0x0800b94c                powf
- .text.finitef  0x0800b9fa       0x14 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_finite.o)
-                0x0800b9fa                finitef
- *fill*         0x0800ba0e        0x2 
+                0x0800b928       0x48 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-init.o)
+                0x0800b928                __libc_init_array
+ .text.memcpy   0x0800b970       0x1c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+                0x0800b970                memcpy
+ .text.powf     0x0800b98c       0xae C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-wf_pow.o)
+                0x0800b98c                powf
+ .text.finitef  0x0800ba3a       0x14 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_finite.o)
+                0x0800ba3a                finitef
+ *fill*         0x0800ba4e        0x2 
  .text.__ieee754_powf
-                0x0800ba10      0x59c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
-                0x0800ba10                __ieee754_powf
- .text.fabsf    0x0800bfac        0xe C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_fabs.o)
-                0x0800bfac                fabsf
- *fill*         0x0800bfba        0x2 
- .text.scalbnf  0x0800bfbc       0xcc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_scalbn.o)
-                0x0800bfbc                scalbnf
+                0x0800ba50      0x59c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
+                0x0800ba50                __ieee754_powf
+ .text.fabsf    0x0800bfec        0xe C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_fabs.o)
+                0x0800bfec                fabsf
+ *fill*         0x0800bffa        0x2 
+ .text.scalbnf  0x0800bffc       0xcc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-sf_scalbn.o)
+                0x0800bffc                scalbnf
  .text.with_errnof
-                0x0800c088       0x1c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
- .text.xflowf   0x0800c0a4       0x16 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
- *fill*         0x0800c0ba        0x2 
+                0x0800c0c8       0x1c C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
+ .text.xflowf   0x0800c0e4       0x16 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
+ *fill*         0x0800c0fa        0x2 
  .text.__math_uflowf
-                0x0800c0bc        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
-                0x0800c0bc                __math_uflowf
+                0x0800c0fc        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
+                0x0800c0fc                __math_uflowf
  .text.__math_oflowf
-                0x0800c0c8        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
-                0x0800c0c8                __math_oflowf
+                0x0800c108        0xc C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-math_errf.o)
+                0x0800c108                __math_oflowf
  .text.__ieee754_sqrtf
-                0x0800c0d4        0x6 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_sqrt.o)
-                0x0800c0d4                __ieee754_sqrtf
+                0x0800c114        0x6 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_sqrt.o)
+                0x0800c114                __ieee754_sqrtf
  *(.glue_7)
- .glue_7        0x0800c0da        0x0 linker stubs
+ .glue_7        0x0800c11a        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x0800c0da        0x0 linker stubs
+ .glue_7t       0x0800c11a        0x0 linker stubs
  *(.eh_frame)
- *fill*         0x0800c0da        0x2 
- .eh_frame      0x0800c0dc        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ *fill*         0x0800c11a        0x2 
+ .eh_frame      0x0800c11c        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
  *(.init)
- .init          0x0800c0dc        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x0800c0dc                _init
- .init          0x0800c0e0        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
+ .init          0x0800c11c        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x0800c11c                _init
+ .init          0x0800c120        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
  *(.fini)
- .fini          0x0800c0e8        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
-                0x0800c0e8                _fini
- .fini          0x0800c0ec        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
-                0x0800c0f4                        . = ALIGN (0x4)
-                0x0800c0f4                        _etext = .
+ .fini          0x0800c128        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crti.o
+                0x0800c128                _fini
+ .fini          0x0800c12c        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtn.o
+                0x0800c134                        . = ALIGN (0x4)
+                0x0800c134                        _etext = .
 
-.vfp11_veneer   0x0800c0f4        0x0
- .vfp11_veneer  0x0800c0f4        0x0 linker stubs
+.vfp11_veneer   0x0800c134        0x0
+ .vfp11_veneer  0x0800c134        0x0 linker stubs
 
-.v4_bx          0x0800c0f4        0x0
- .v4_bx         0x0800c0f4        0x0 linker stubs
+.v4_bx          0x0800c134        0x0
+ .v4_bx         0x0800c134        0x0 linker stubs
 
-.iplt           0x0800c0f4        0x0
- .iplt          0x0800c0f4        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.iplt           0x0800c134        0x0
+ .iplt          0x0800c134        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rodata         0x0800c0f4      0x45c
-                0x0800c0f4                        . = ALIGN (0x4)
+.rodata         0x0800c134      0x45c
+                0x0800c134                        . = ALIGN (0x4)
  *(.rodata)
  *(.rodata*)
  .rodata.CRC4_Lookup4
-                0x0800c0f4       0x10 ./Application/User/aspep.o
+                0x0800c134       0x10 ./Application/User/aspep.o
  .rodata.CRC4_Lookup8
-                0x0800c104      0x100 ./Application/User/aspep.o
+                0x0800c144      0x100 ./Application/User/aspep.o
  .rodata.str1.4
-                0x0800c204       0x4d ./Application/User/can_telemetry.o
- *fill*         0x0800c251        0x3 
+                0x0800c244       0x4d ./Application/User/can_telemetry.o
+ *fill*         0x0800c291        0x3 
  .rodata.CSWTCH.1
-                0x0800c254       0x11 ./Application/User/hf_registers.o
- *fill*         0x0800c265        0x3 
+                0x0800c294       0x11 ./Application/User/hf_registers.o
+ *fill*         0x0800c2a5        0x3 
  .rodata.M1_FOCConfig_reg
-                0x0800c268        0xe ./Application/User/mc_configuration_registers.o
- *fill*         0x0800c276        0x2 
+                0x0800c2a8        0xe ./Application/User/mc_configuration_registers.o
+ *fill*         0x0800c2b6        0x2 
  .rodata.M1_MotorConfig_reg
-                0x0800c278       0x3c ./Application/User/mc_configuration_registers.o
+                0x0800c2b8       0x3c ./Application/User/mc_configuration_registers.o
  .rodata.M1_ApplicationConfig_reg
-                0x0800c2b4       0x10 ./Application/User/mc_configuration_registers.o
+                0x0800c2f4       0x10 ./Application/User/mc_configuration_registers.o
  .rodata.globalConfig_reg
-                0x0800c2c4        0xa ./Application/User/mc_configuration_registers.o
-                0x0800c2c4                globalConfig_reg
- *fill*         0x0800c2ce        0x2 
+                0x0800c304        0xa ./Application/User/mc_configuration_registers.o
+                0x0800c304                globalConfig_reg
+ *fill*         0x0800c30e        0x2 
  .rodata.FIRMWARE_NAME
-                0x0800c2d0       0x14 ./Application/User/mc_configuration_registers.o
-                0x0800c2d0                FIRMWARE_NAME
+                0x0800c310       0x14 ./Application/User/mc_configuration_registers.o
+                0x0800c310                FIRMWARE_NAME
  .rodata.M1_PWR_BOARD
-                0x0800c2e4        0xd ./Application/User/mc_configuration_registers.o
- *fill*         0x0800c2f1        0x3 
+                0x0800c324        0xd ./Application/User/mc_configuration_registers.o
+ *fill*         0x0800c331        0x3 
  .rodata.CTL_BOARD
-                0x0800c2f4        0xd ./Application/User/mc_configuration_registers.o
-                0x0800c2f4                CTL_BOARD
- *fill*         0x0800c301        0x3 
+                0x0800c334        0xd ./Application/User/mc_configuration_registers.o
+                0x0800c334                CTL_BOARD
+ *fill*         0x0800c341        0x3 
  .rodata.R3_2_ParamsM1
-                0x0800c304       0xac ./Application/User/mc_parameters.o
-                0x0800c304                R3_2_ParamsM1
+                0x0800c344       0xac ./Application/User/mc_parameters.o
+                0x0800c344                R3_2_ParamsM1
  .rodata.R3_3_OPAMPParamsM1
-                0x0800c3b0       0x60 ./Application/User/mc_parameters.o
-                0x0800c3b0                R3_3_OPAMPParamsM1
+                0x0800c3f0       0x60 ./Application/User/mc_parameters.o
+                0x0800c3f0                R3_3_OPAMPParamsM1
  .rodata.CHANNEL_OFFSET_TAB
-                0x0800c410        0x6 ./Application/User/usart_aspep_driver.o
- *fill*         0x0800c416        0x2 
+                0x0800c450        0x6 ./Application/User/usart_aspep_driver.o
+ *fill*         0x0800c456        0x2 
  .rodata.AHBPrescTable
-                0x0800c418       0x10 ./Drivers/CMSIS/system_stm32g4xx.o
-                0x0800c418                AHBPrescTable
+                0x0800c458       0x10 ./Drivers/CMSIS/system_stm32g4xx.o
+                0x0800c458                AHBPrescTable
  .rodata.DLCtoBytes
-                0x0800c428       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x0800c468       0x10 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
  .rodata.CSWTCH.115
-                0x0800c438       0x40 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .rodata.CSWTCH.114
                 0x0800c478       0x40 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .rodata.CSWTCH.113
+ .rodata.CSWTCH.114
                 0x0800c4b8       0x40 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .rodata.CSWTCH.112
+ .rodata.CSWTCH.113
                 0x0800c4f8       0x40 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .rodata.dp_l   0x0800c538        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
- .rodata.dp_h   0x0800c540        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
- .rodata.bp     0x0800c548        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
-                0x0800c550                        . = ALIGN (0x4)
+ .rodata.CSWTCH.112
+                0x0800c538       0x40 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+ .rodata.dp_l   0x0800c578        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
+ .rodata.dp_h   0x0800c580        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
+ .rodata.bp     0x0800c588        0x8 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a(libm_a-ef_pow.o)
+                0x0800c590                        . = ALIGN (0x4)
 
-.ARM.extab      0x0800c550        0x0
-                0x0800c550                        . = ALIGN (0x4)
+.ARM.extab      0x0800c590        0x0
+                0x0800c590                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0800c550                        . = ALIGN (0x4)
+                0x0800c590                        . = ALIGN (0x4)
 
-.ARM            0x0800c550        0x0
-                0x0800c550                        . = ALIGN (0x4)
-                0x0800c550                        __exidx_start = .
+.ARM            0x0800c590        0x0
+                0x0800c590                        . = ALIGN (0x4)
+                0x0800c590                        __exidx_start = .
  *(.ARM.exidx*)
-                0x0800c550                        __exidx_end = .
-                0x0800c550                        . = ALIGN (0x4)
+                0x0800c590                        __exidx_end = .
+                0x0800c590                        . = ALIGN (0x4)
 
-.preinit_array  0x0800c550        0x0
-                0x0800c550                        . = ALIGN (0x4)
-                0x0800c550                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0800c590        0x0
+                0x0800c590                        . = ALIGN (0x4)
+                0x0800c590                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0800c550                        PROVIDE (__preinit_array_end = .)
-                0x0800c550                        . = ALIGN (0x4)
+                0x0800c590                        PROVIDE (__preinit_array_end = .)
+                0x0800c590                        . = ALIGN (0x4)
 
-.init_array     0x0800c550        0x4
-                0x0800c550                        . = ALIGN (0x4)
-                0x0800c550                        PROVIDE (__init_array_start = .)
+.init_array     0x0800c590        0x4
+                0x0800c590                        . = ALIGN (0x4)
+                0x0800c590                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x0800c550        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x0800c554                        PROVIDE (__init_array_end = .)
-                0x0800c554                        . = ALIGN (0x4)
+ .init_array    0x0800c590        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x0800c594                        PROVIDE (__init_array_end = .)
+                0x0800c594                        . = ALIGN (0x4)
 
-.fini_array     0x0800c554        0x4
-                0x0800c554                        . = ALIGN (0x4)
+.fini_array     0x0800c594        0x4
+                0x0800c594                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0800c554        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .fini_array    0x0800c594        0x4 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x0800c558                        . = ALIGN (0x4)
-                0x0800c558                        _sidata = LOADADDR (.data)
+                0x0800c598                        . = ALIGN (0x4)
+                0x0800c598                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x0800c558        0x0
- .rel.iplt      0x0800c558        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x0800c598        0x0
+ .rel.iplt      0x0800c598        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.data           0x20000000      0x584 load address 0x0800c558
+.data           0x20000000      0x584 load address 0x0800c598
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -13643,11 +13642,11 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x20000584                        . = ALIGN (0x4)
                 0x20000584                        _edata = .
 
-.igot.plt       0x20000584        0x0 load address 0x0800cadc
+.igot.plt       0x20000584        0x0 load address 0x0800cb1c
  .igot.plt      0x20000584        0x0 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/crtbegin.o
                 0x20000584                        . = ALIGN (0x4)
 
-.bss            0x20000584     0x1994 load address 0x0800cadc
+.bss            0x20000584     0x1994 load address 0x0800cb1c
                 0x20000584                        _sbss = .
                 0x20000584                        __bss_start__ = _sbss
  *(.bss)
@@ -13860,7 +13859,7 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                 0x20001f18                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x20001f18      0x600 load address 0x0800cadc
+                0x20001f18      0x600 load address 0x0800cb1c
                 0x20001f18                        . = ALIGN (0x8)
                 [!provide]                        PROVIDE (end = .)
                 0x20001f18                        PROVIDE (_end = .)
@@ -14052,211 +14051,211 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
 LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a
 LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a
 
-.debug_line     0x00000000    0x5139d
+.debug_line     0x00000000    0x5143b
  .debug_line    0x00000000       0x7b ./Application/Startup/startup_stm32g431cbux.o
- .debug_line    0x0000007b     0x1894 ./Application/User/CAN_processing_v2.o
- .debug_line    0x0000190f     0x1108 ./Application/User/SCurveTrajectory.o
- .debug_line    0x00002a17     0x170a ./Application/User/aspep.o
- .debug_line    0x00004121     0x1a2c ./Application/User/calibration.o
- .debug_line    0x00005b4d      0xdf9 ./Application/User/can_telemetry.o
- .debug_line    0x00006946      0xfb1 ./Application/User/esc_sensors.o
- .debug_line    0x000078f7      0xe77 ./Application/User/hf_registers.o
- .debug_line    0x0000876e     0x22ff ./Application/User/main.o
- .debug_line    0x0000aa6d     0x1282 ./Application/User/mc_api.o
- .debug_line    0x0000bcef      0xa25 ./Application/User/mc_app_hooks.o
- .debug_line    0x0000c714      0xf0f ./Application/User/mc_config.o
- .debug_line    0x0000d623      0xf16 ./Application/User/mc_config_common.o
- .debug_line    0x0000e539      0xc2b ./Application/User/mc_configuration_registers.o
- .debug_line    0x0000f164     0x1ae8 ./Application/User/mc_interface.o
- .debug_line    0x00010c4c      0xc4e ./Application/User/mc_math.o
- .debug_line    0x0001189a      0xf00 ./Application/User/mc_parameters.o
- .debug_line    0x0001279a     0x160d ./Application/User/mc_tasks.o
- .debug_line    0x00013da7     0x15d2 ./Application/User/mc_tasks_foc.o
- .debug_line    0x00015379     0x126a ./Application/User/mcp.o
- .debug_line    0x000165e3      0xb0a ./Application/User/mcp_config.o
- .debug_line    0x000170ed      0xf4f ./Application/User/motorcontrol.o
- .debug_line    0x0001803c     0x1404 ./Application/User/planner.o
- .debug_line    0x00019440      0xc4a ./Application/User/pwm_common.o
- .debug_line    0x0001a08a     0x1211 ./Application/User/pwm_curr_fdbk.o
- .debug_line    0x0001b29b     0x1107 ./Application/User/regular_conversion_manager.o
- .debug_line    0x0001c3a2      0xea6 ./Application/User/speed_torq_ctrl.o
- .debug_line    0x0001d248     0x137c ./Application/User/stm32_mc_common_it.o
- .debug_line    0x0001e5c4     0x1783 ./Application/User/stm32g4xx_hal_msp.o
- .debug_line    0x0001fd47      0xf98 ./Application/User/stm32g4xx_it.o
- .debug_line    0x00020cdf      0xe81 ./Application/User/stm32g4xx_mc_it.o
- .debug_line    0x00021b60     0x1fd7 ./Application/User/sync_registers.o
- .debug_line    0x00023b37     0x11ff ./Application/User/usart_aspep_driver.o
- .debug_line    0x00024d36      0xafd ./Application/User/velocity_ctrl.o
- .debug_line    0x00025833      0x949 ./Drivers/CMSIS/system_stm32g4xx.o
- .debug_line    0x0002617c      0xdd7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
- .debug_line    0x00026f53     0x2ebe ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
- .debug_line    0x00029e11     0x2883 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
- .debug_line    0x0002c694      0xe12 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
- .debug_line    0x0002d4a6     0x13ee ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
- .debug_line    0x0002e894      0xf11 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
- .debug_line    0x0002f7a5     0x11f5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
- .debug_line    0x0003099a     0x1260 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
- .debug_line    0x00031bfa     0x25fb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
- .debug_line    0x000341f5     0x1123 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
- .debug_line    0x00035318      0xdf4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
- .debug_line    0x0003610c     0x100c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
- .debug_line    0x00037118     0x1613 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
- .debug_line    0x0003872b     0x1681 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
- .debug_line    0x00039dac     0x6645 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
- .debug_line    0x000403f1     0x26ea ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .debug_line    0x00042adb      0xac3 ./Middlewares/MotorControl/bus_voltage_sensor.o
- .debug_line    0x0004359e      0xb59 ./Middlewares/MotorControl/circle_limitation.o
- .debug_line    0x000440f7      0xc48 ./Middlewares/MotorControl/enc_align_ctrl.o
- .debug_line    0x00044d3f     0x11bc ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
- .debug_line    0x00045efb     0x1290 ./Middlewares/MotorControl/mcpa.o
- .debug_line    0x0004718b      0xc01 ./Middlewares/MotorControl/ntc_temperature_sensor.o
- .debug_line    0x00047d8c      0xefd ./Middlewares/MotorControl/pid_regulator.o
- .debug_line    0x00048c89      0xb58 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
- .debug_line    0x000497e1     0x336d ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
- .debug_line    0x0004cb4e      0xc0b ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
- .debug_line    0x0004d759      0xd37 ./Middlewares/MotorControl/ramp_ext_mngr.o
- .debug_line    0x0004e490      0xbf5 ./Middlewares/MotorControl/speed_pos_fdbk.o
- .debug_line    0x0004f085     0x135e ./Middlewares/MotorControl/trajectory_ctrl.o
- .debug_line    0x000503e3      0xfba ./Middlewares/MotorControl/virtual_speed_sensor.o
+ .debug_line    0x0000007b     0x1926 ./Application/User/CAN_processing_v2.o
+ .debug_line    0x000019a1     0x1108 ./Application/User/SCurveTrajectory.o
+ .debug_line    0x00002aa9     0x170a ./Application/User/aspep.o
+ .debug_line    0x000041b3     0x1a2c ./Application/User/calibration.o
+ .debug_line    0x00005bdf      0xdf9 ./Application/User/can_telemetry.o
+ .debug_line    0x000069d8      0xfb1 ./Application/User/esc_sensors.o
+ .debug_line    0x00007989      0xe77 ./Application/User/hf_registers.o
+ .debug_line    0x00008800     0x230b ./Application/User/main.o
+ .debug_line    0x0000ab0b     0x1282 ./Application/User/mc_api.o
+ .debug_line    0x0000bd8d      0xa25 ./Application/User/mc_app_hooks.o
+ .debug_line    0x0000c7b2      0xf0f ./Application/User/mc_config.o
+ .debug_line    0x0000d6c1      0xf16 ./Application/User/mc_config_common.o
+ .debug_line    0x0000e5d7      0xc2b ./Application/User/mc_configuration_registers.o
+ .debug_line    0x0000f202     0x1ae8 ./Application/User/mc_interface.o
+ .debug_line    0x00010cea      0xc4e ./Application/User/mc_math.o
+ .debug_line    0x00011938      0xf00 ./Application/User/mc_parameters.o
+ .debug_line    0x00012838     0x160d ./Application/User/mc_tasks.o
+ .debug_line    0x00013e45     0x15d2 ./Application/User/mc_tasks_foc.o
+ .debug_line    0x00015417     0x126a ./Application/User/mcp.o
+ .debug_line    0x00016681      0xb0a ./Application/User/mcp_config.o
+ .debug_line    0x0001718b      0xf4f ./Application/User/motorcontrol.o
+ .debug_line    0x000180da     0x1404 ./Application/User/planner.o
+ .debug_line    0x000194de      0xc4a ./Application/User/pwm_common.o
+ .debug_line    0x0001a128     0x1211 ./Application/User/pwm_curr_fdbk.o
+ .debug_line    0x0001b339     0x1107 ./Application/User/regular_conversion_manager.o
+ .debug_line    0x0001c440      0xea6 ./Application/User/speed_torq_ctrl.o
+ .debug_line    0x0001d2e6     0x137c ./Application/User/stm32_mc_common_it.o
+ .debug_line    0x0001e662     0x1783 ./Application/User/stm32g4xx_hal_msp.o
+ .debug_line    0x0001fde5      0xf98 ./Application/User/stm32g4xx_it.o
+ .debug_line    0x00020d7d      0xe81 ./Application/User/stm32g4xx_mc_it.o
+ .debug_line    0x00021bfe     0x1fd7 ./Application/User/sync_registers.o
+ .debug_line    0x00023bd5     0x11ff ./Application/User/usart_aspep_driver.o
+ .debug_line    0x00024dd4      0xafd ./Application/User/velocity_ctrl.o
+ .debug_line    0x000258d1      0x949 ./Drivers/CMSIS/system_stm32g4xx.o
+ .debug_line    0x0002621a      0xdd7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+ .debug_line    0x00026ff1     0x2ebe ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+ .debug_line    0x00029eaf     0x2883 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+ .debug_line    0x0002c732      0xe12 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+ .debug_line    0x0002d544     0x13ee ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+ .debug_line    0x0002e932      0xf11 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+ .debug_line    0x0002f843     0x11f5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+ .debug_line    0x00030a38     0x1260 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+ .debug_line    0x00031c98     0x25fb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+ .debug_line    0x00034293     0x1123 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+ .debug_line    0x000353b6      0xdf4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+ .debug_line    0x000361aa     0x100c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+ .debug_line    0x000371b6     0x1613 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+ .debug_line    0x000387c9     0x1681 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+ .debug_line    0x00039e4a     0x6645 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+ .debug_line    0x0004048f     0x26ea ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+ .debug_line    0x00042b79      0xac3 ./Middlewares/MotorControl/bus_voltage_sensor.o
+ .debug_line    0x0004363c      0xb59 ./Middlewares/MotorControl/circle_limitation.o
+ .debug_line    0x00044195      0xc48 ./Middlewares/MotorControl/enc_align_ctrl.o
+ .debug_line    0x00044ddd     0x11bc ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+ .debug_line    0x00045f99     0x1290 ./Middlewares/MotorControl/mcpa.o
+ .debug_line    0x00047229      0xc01 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+ .debug_line    0x00047e2a      0xefd ./Middlewares/MotorControl/pid_regulator.o
+ .debug_line    0x00048d27      0xb58 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+ .debug_line    0x0004987f     0x336d ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+ .debug_line    0x0004cbec      0xc0b ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+ .debug_line    0x0004d7f7      0xd37 ./Middlewares/MotorControl/ramp_ext_mngr.o
+ .debug_line    0x0004e52e      0xbf5 ./Middlewares/MotorControl/speed_pos_fdbk.o
+ .debug_line    0x0004f123     0x135e ./Middlewares/MotorControl/trajectory_ctrl.o
+ .debug_line    0x00050481      0xfba ./Middlewares/MotorControl/virtual_speed_sensor.o
 
 .debug_line_str
                 0x00000000       0xa1
  .debug_line_str
                 0x00000000       0xa1 ./Application/Startup/startup_stm32g431cbux.o
 
-.debug_info     0x00000000    0x4f91d
+.debug_info     0x00000000    0x4fa6a
  .debug_info    0x00000000       0x30 ./Application/Startup/startup_stm32g431cbux.o
- .debug_info    0x00000030     0x1c1f ./Application/User/CAN_processing_v2.o
- .debug_info    0x00001c4f      0x5c5 ./Application/User/SCurveTrajectory.o
- .debug_info    0x00002214     0x112b ./Application/User/aspep.o
- .debug_info    0x0000333f      0xe45 ./Application/User/calibration.o
- .debug_info    0x00004184      0xcd7 ./Application/User/can_telemetry.o
- .debug_info    0x00004e5b      0x624 ./Application/User/esc_sensors.o
- .debug_info    0x0000547f     0x14df ./Application/User/hf_registers.o
- .debug_info    0x0000695e     0x47b5 ./Application/User/main.o
- .debug_info    0x0000b113     0x22c2 ./Application/User/mc_api.o
- .debug_info    0x0000d3d5      0x1db ./Application/User/mc_app_hooks.o
- .debug_info    0x0000d5b0     0x1f7e ./Application/User/mc_config.o
- .debug_info    0x0000f52e     0x13b7 ./Application/User/mc_config_common.o
- .debug_info    0x000108e5      0x56d ./Application/User/mc_configuration_registers.o
- .debug_info    0x00010e52     0x29cf ./Application/User/mc_interface.o
- .debug_info    0x00013821      0x764 ./Application/User/mc_math.o
- .debug_info    0x00013f85      0xa25 ./Application/User/mc_parameters.o
- .debug_info    0x000149aa     0x29ed ./Application/User/mc_tasks.o
- .debug_info    0x00017397     0x2c3c ./Application/User/mc_tasks_foc.o
- .debug_info    0x00019fd3     0x1a92 ./Application/User/mcp.o
- .debug_info    0x0001ba65      0xaf2 ./Application/User/mcp_config.o
- .debug_info    0x0001c557     0x1602 ./Application/User/motorcontrol.o
- .debug_info    0x0001db59     0x10bb ./Application/User/planner.o
- .debug_info    0x0001ec14      0x953 ./Application/User/pwm_common.o
- .debug_info    0x0001f567     0x1395 ./Application/User/pwm_curr_fdbk.o
- .debug_info    0x000208fc      0xb62 ./Application/User/regular_conversion_manager.o
- .debug_info    0x0002145e      0x9b7 ./Application/User/speed_torq_ctrl.o
- .debug_info    0x00021e15     0x1be6 ./Application/User/stm32_mc_common_it.o
- .debug_info    0x000239fb     0x29da ./Application/User/stm32g4xx_hal_msp.o
- .debug_info    0x000263d5     0x10b8 ./Application/User/stm32g4xx_it.o
- .debug_info    0x0002748d     0x124f ./Application/User/stm32g4xx_mc_it.o
- .debug_info    0x000286dc     0x2ceb ./Application/User/sync_registers.o
- .debug_info    0x0002b3c7     0x1267 ./Application/User/usart_aspep_driver.o
- .debug_info    0x0002c62e      0x717 ./Application/User/velocity_ctrl.o
- .debug_info    0x0002cd45      0x5a7 ./Drivers/CMSIS/system_stm32g4xx.o
- .debug_info    0x0002d2ec      0xbe1 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
- .debug_info    0x0002decd     0x3508 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
- .debug_info    0x000313d5     0x2d2c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
- .debug_info    0x00034101      0x869 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
- .debug_info    0x0003496a      0xdc3 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
- .debug_info    0x0003572d      0xfd6 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
- .debug_info    0x00036703      0xe09 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
- .debug_info    0x0003750c      0xeb9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
- .debug_info    0x000383c5     0x1c54 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
- .debug_info    0x0003a019      0x795 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
- .debug_info    0x0003a7ae      0x84b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
- .debug_info    0x0003aff9      0x993 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
- .debug_info    0x0003b98c      0xe7b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
- .debug_info    0x0003c807      0xd46 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
- .debug_info    0x0003d54d     0x500d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
- .debug_info    0x0004255a     0x25d0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .debug_info    0x00044b2a      0x2c3 ./Middlewares/MotorControl/bus_voltage_sensor.o
- .debug_info    0x00044ded      0x387 ./Middlewares/MotorControl/circle_limitation.o
- .debug_info    0x00045174      0xb60 ./Middlewares/MotorControl/enc_align_ctrl.o
- .debug_info    0x00045cd4      0xc4b ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
- .debug_info    0x0004691f      0x715 ./Middlewares/MotorControl/mcpa.o
- .debug_info    0x00047034      0x3f8 ./Middlewares/MotorControl/ntc_temperature_sensor.o
- .debug_info    0x0004742c      0x8ea ./Middlewares/MotorControl/pid_regulator.o
- .debug_info    0x00047d16      0x51c ./Middlewares/MotorControl/pqd_motor_power_measurement.o
- .debug_info    0x00048232     0x50cb ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
- .debug_info    0x0004d2fd      0x397 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
- .debug_info    0x0004d694      0x502 ./Middlewares/MotorControl/ramp_ext_mngr.o
- .debug_info    0x0004db96      0x4ee ./Middlewares/MotorControl/speed_pos_fdbk.o
- .debug_info    0x0004e084     0x1109 ./Middlewares/MotorControl/trajectory_ctrl.o
- .debug_info    0x0004f18d      0x790 ./Middlewares/MotorControl/virtual_speed_sensor.o
+ .debug_info    0x00000030     0x1d72 ./Application/User/CAN_processing_v2.o
+ .debug_info    0x00001da2      0x5c5 ./Application/User/SCurveTrajectory.o
+ .debug_info    0x00002367     0x112b ./Application/User/aspep.o
+ .debug_info    0x00003492      0xe45 ./Application/User/calibration.o
+ .debug_info    0x000042d7      0xcd7 ./Application/User/can_telemetry.o
+ .debug_info    0x00004fae      0x624 ./Application/User/esc_sensors.o
+ .debug_info    0x000055d2     0x14df ./Application/User/hf_registers.o
+ .debug_info    0x00006ab1     0x47af ./Application/User/main.o
+ .debug_info    0x0000b260     0x22c2 ./Application/User/mc_api.o
+ .debug_info    0x0000d522      0x1db ./Application/User/mc_app_hooks.o
+ .debug_info    0x0000d6fd     0x1f7e ./Application/User/mc_config.o
+ .debug_info    0x0000f67b     0x13b7 ./Application/User/mc_config_common.o
+ .debug_info    0x00010a32      0x56d ./Application/User/mc_configuration_registers.o
+ .debug_info    0x00010f9f     0x29cf ./Application/User/mc_interface.o
+ .debug_info    0x0001396e      0x764 ./Application/User/mc_math.o
+ .debug_info    0x000140d2      0xa25 ./Application/User/mc_parameters.o
+ .debug_info    0x00014af7     0x29ed ./Application/User/mc_tasks.o
+ .debug_info    0x000174e4     0x2c3c ./Application/User/mc_tasks_foc.o
+ .debug_info    0x0001a120     0x1a92 ./Application/User/mcp.o
+ .debug_info    0x0001bbb2      0xaf2 ./Application/User/mcp_config.o
+ .debug_info    0x0001c6a4     0x1602 ./Application/User/motorcontrol.o
+ .debug_info    0x0001dca6     0x10bb ./Application/User/planner.o
+ .debug_info    0x0001ed61      0x953 ./Application/User/pwm_common.o
+ .debug_info    0x0001f6b4     0x1395 ./Application/User/pwm_curr_fdbk.o
+ .debug_info    0x00020a49      0xb62 ./Application/User/regular_conversion_manager.o
+ .debug_info    0x000215ab      0x9b7 ./Application/User/speed_torq_ctrl.o
+ .debug_info    0x00021f62     0x1be6 ./Application/User/stm32_mc_common_it.o
+ .debug_info    0x00023b48     0x29da ./Application/User/stm32g4xx_hal_msp.o
+ .debug_info    0x00026522     0x10b8 ./Application/User/stm32g4xx_it.o
+ .debug_info    0x000275da     0x124f ./Application/User/stm32g4xx_mc_it.o
+ .debug_info    0x00028829     0x2ceb ./Application/User/sync_registers.o
+ .debug_info    0x0002b514     0x1267 ./Application/User/usart_aspep_driver.o
+ .debug_info    0x0002c77b      0x717 ./Application/User/velocity_ctrl.o
+ .debug_info    0x0002ce92      0x5a7 ./Drivers/CMSIS/system_stm32g4xx.o
+ .debug_info    0x0002d439      0xbe1 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+ .debug_info    0x0002e01a     0x3508 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+ .debug_info    0x00031522     0x2d2c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+ .debug_info    0x0003424e      0x869 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+ .debug_info    0x00034ab7      0xdc3 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+ .debug_info    0x0003587a      0xfd6 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+ .debug_info    0x00036850      0xe09 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+ .debug_info    0x00037659      0xeb9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+ .debug_info    0x00038512     0x1c54 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+ .debug_info    0x0003a166      0x795 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+ .debug_info    0x0003a8fb      0x84b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+ .debug_info    0x0003b146      0x993 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+ .debug_info    0x0003bad9      0xe7b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+ .debug_info    0x0003c954      0xd46 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+ .debug_info    0x0003d69a     0x500d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+ .debug_info    0x000426a7     0x25d0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+ .debug_info    0x00044c77      0x2c3 ./Middlewares/MotorControl/bus_voltage_sensor.o
+ .debug_info    0x00044f3a      0x387 ./Middlewares/MotorControl/circle_limitation.o
+ .debug_info    0x000452c1      0xb60 ./Middlewares/MotorControl/enc_align_ctrl.o
+ .debug_info    0x00045e21      0xc4b ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+ .debug_info    0x00046a6c      0x715 ./Middlewares/MotorControl/mcpa.o
+ .debug_info    0x00047181      0x3f8 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+ .debug_info    0x00047579      0x8ea ./Middlewares/MotorControl/pid_regulator.o
+ .debug_info    0x00047e63      0x51c ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+ .debug_info    0x0004837f     0x50cb ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+ .debug_info    0x0004d44a      0x397 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+ .debug_info    0x0004d7e1      0x502 ./Middlewares/MotorControl/ramp_ext_mngr.o
+ .debug_info    0x0004dce3      0x4ee ./Middlewares/MotorControl/speed_pos_fdbk.o
+ .debug_info    0x0004e1d1     0x1109 ./Middlewares/MotorControl/trajectory_ctrl.o
+ .debug_info    0x0004f2da      0x790 ./Middlewares/MotorControl/virtual_speed_sensor.o
 
-.debug_abbrev   0x00000000     0xad12
+.debug_abbrev   0x00000000     0xad43
  .debug_abbrev  0x00000000       0x24 ./Application/Startup/startup_stm32g431cbux.o
- .debug_abbrev  0x00000024      0x4a8 ./Application/User/CAN_processing_v2.o
- .debug_abbrev  0x000004cc      0x1d2 ./Application/User/SCurveTrajectory.o
- .debug_abbrev  0x0000069e      0x39b ./Application/User/aspep.o
- .debug_abbrev  0x00000a39      0x430 ./Application/User/calibration.o
- .debug_abbrev  0x00000e69      0x2d6 ./Application/User/can_telemetry.o
- .debug_abbrev  0x0000113f      0x192 ./Application/User/esc_sensors.o
- .debug_abbrev  0x000012d1      0x246 ./Application/User/hf_registers.o
- .debug_abbrev  0x00001517      0x546 ./Application/User/main.o
- .debug_abbrev  0x00001a5d      0x2b4 ./Application/User/mc_api.o
- .debug_abbrev  0x00001d11       0x98 ./Application/User/mc_app_hooks.o
- .debug_abbrev  0x00001da9      0x1f9 ./Application/User/mc_config.o
- .debug_abbrev  0x00001fa2      0x19b ./Application/User/mc_config_common.o
- .debug_abbrev  0x0000213d       0xee ./Application/User/mc_configuration_registers.o
- .debug_abbrev  0x0000222b      0x434 ./Application/User/mc_interface.o
- .debug_abbrev  0x0000265f      0x279 ./Application/User/mc_math.o
- .debug_abbrev  0x000028d8      0x132 ./Application/User/mc_parameters.o
- .debug_abbrev  0x00002a0a      0x470 ./Application/User/mc_tasks.o
- .debug_abbrev  0x00002e7a      0x468 ./Application/User/mc_tasks_foc.o
- .debug_abbrev  0x000032e2      0x32e ./Application/User/mcp.o
- .debug_abbrev  0x00003610      0x1c7 ./Application/User/mcp_config.o
- .debug_abbrev  0x000037d7      0x26d ./Application/User/motorcontrol.o
- .debug_abbrev  0x00003a44      0x3fb ./Application/User/planner.o
- .debug_abbrev  0x00003e3f      0x231 ./Application/User/pwm_common.o
- .debug_abbrev  0x00004070      0x3a3 ./Application/User/pwm_curr_fdbk.o
- .debug_abbrev  0x00004413      0x2c1 ./Application/User/regular_conversion_manager.o
- .debug_abbrev  0x000046d4      0x253 ./Application/User/speed_torq_ctrl.o
- .debug_abbrev  0x00004927      0x3bc ./Application/User/stm32_mc_common_it.o
- .debug_abbrev  0x00004ce3      0x2e5 ./Application/User/stm32g4xx_hal_msp.o
- .debug_abbrev  0x00004fc8      0x21e ./Application/User/stm32g4xx_it.o
- .debug_abbrev  0x000051e6      0x2a7 ./Application/User/stm32g4xx_mc_it.o
- .debug_abbrev  0x0000548d      0x42d ./Application/User/sync_registers.o
- .debug_abbrev  0x000058ba      0x2c0 ./Application/User/usart_aspep_driver.o
- .debug_abbrev  0x00005b7a      0x26e ./Application/User/velocity_ctrl.o
- .debug_abbrev  0x00005de8      0x120 ./Drivers/CMSIS/system_stm32g4xx.o
- .debug_abbrev  0x00005f08      0x2dd ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
- .debug_abbrev  0x000061e5      0x355 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
- .debug_abbrev  0x0000653a      0x3eb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
- .debug_abbrev  0x00006925      0x2a5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
- .debug_abbrev  0x00006bca      0x2b4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
- .debug_abbrev  0x00006e7e      0x387 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
- .debug_abbrev  0x00007205      0x291 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
- .debug_abbrev  0x00007496      0x2bb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
- .debug_abbrev  0x00007751      0x2a2 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
- .debug_abbrev  0x000079f3      0x1f9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
- .debug_abbrev  0x00007bec      0x1f7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
- .debug_abbrev  0x00007de3      0x281 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
- .debug_abbrev  0x00008064      0x352 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
- .debug_abbrev  0x000083b6      0x2ce ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
- .debug_abbrev  0x00008684      0x3c0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
- .debug_abbrev  0x00008a44      0x3d0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
- .debug_abbrev  0x00008e14      0x10c ./Middlewares/MotorControl/bus_voltage_sensor.o
- .debug_abbrev  0x00008f20      0x126 ./Middlewares/MotorControl/circle_limitation.o
- .debug_abbrev  0x00009046      0x235 ./Middlewares/MotorControl/enc_align_ctrl.o
- .debug_abbrev  0x0000927b      0x30b ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
- .debug_abbrev  0x00009586      0x2a4 ./Middlewares/MotorControl/mcpa.o
- .debug_abbrev  0x0000982a      0x196 ./Middlewares/MotorControl/ntc_temperature_sensor.o
- .debug_abbrev  0x000099c0      0x1b1 ./Middlewares/MotorControl/pid_regulator.o
- .debug_abbrev  0x00009b71      0x1df ./Middlewares/MotorControl/pqd_motor_power_measurement.o
- .debug_abbrev  0x00009d50      0x4c0 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
- .debug_abbrev  0x0000a210      0x182 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
- .debug_abbrev  0x0000a392      0x1fb ./Middlewares/MotorControl/ramp_ext_mngr.o
- .debug_abbrev  0x0000a58d      0x1bb ./Middlewares/MotorControl/speed_pos_fdbk.o
- .debug_abbrev  0x0000a748      0x3b8 ./Middlewares/MotorControl/trajectory_ctrl.o
- .debug_abbrev  0x0000ab00      0x212 ./Middlewares/MotorControl/virtual_speed_sensor.o
+ .debug_abbrev  0x00000024      0x4e4 ./Application/User/CAN_processing_v2.o
+ .debug_abbrev  0x00000508      0x1d2 ./Application/User/SCurveTrajectory.o
+ .debug_abbrev  0x000006da      0x39b ./Application/User/aspep.o
+ .debug_abbrev  0x00000a75      0x430 ./Application/User/calibration.o
+ .debug_abbrev  0x00000ea5      0x2d6 ./Application/User/can_telemetry.o
+ .debug_abbrev  0x0000117b      0x192 ./Application/User/esc_sensors.o
+ .debug_abbrev  0x0000130d      0x246 ./Application/User/hf_registers.o
+ .debug_abbrev  0x00001553      0x53b ./Application/User/main.o
+ .debug_abbrev  0x00001a8e      0x2b4 ./Application/User/mc_api.o
+ .debug_abbrev  0x00001d42       0x98 ./Application/User/mc_app_hooks.o
+ .debug_abbrev  0x00001dda      0x1f9 ./Application/User/mc_config.o
+ .debug_abbrev  0x00001fd3      0x19b ./Application/User/mc_config_common.o
+ .debug_abbrev  0x0000216e       0xee ./Application/User/mc_configuration_registers.o
+ .debug_abbrev  0x0000225c      0x434 ./Application/User/mc_interface.o
+ .debug_abbrev  0x00002690      0x279 ./Application/User/mc_math.o
+ .debug_abbrev  0x00002909      0x132 ./Application/User/mc_parameters.o
+ .debug_abbrev  0x00002a3b      0x470 ./Application/User/mc_tasks.o
+ .debug_abbrev  0x00002eab      0x468 ./Application/User/mc_tasks_foc.o
+ .debug_abbrev  0x00003313      0x32e ./Application/User/mcp.o
+ .debug_abbrev  0x00003641      0x1c7 ./Application/User/mcp_config.o
+ .debug_abbrev  0x00003808      0x26d ./Application/User/motorcontrol.o
+ .debug_abbrev  0x00003a75      0x3fb ./Application/User/planner.o
+ .debug_abbrev  0x00003e70      0x231 ./Application/User/pwm_common.o
+ .debug_abbrev  0x000040a1      0x3a3 ./Application/User/pwm_curr_fdbk.o
+ .debug_abbrev  0x00004444      0x2c1 ./Application/User/regular_conversion_manager.o
+ .debug_abbrev  0x00004705      0x253 ./Application/User/speed_torq_ctrl.o
+ .debug_abbrev  0x00004958      0x3bc ./Application/User/stm32_mc_common_it.o
+ .debug_abbrev  0x00004d14      0x2e5 ./Application/User/stm32g4xx_hal_msp.o
+ .debug_abbrev  0x00004ff9      0x21e ./Application/User/stm32g4xx_it.o
+ .debug_abbrev  0x00005217      0x2a7 ./Application/User/stm32g4xx_mc_it.o
+ .debug_abbrev  0x000054be      0x42d ./Application/User/sync_registers.o
+ .debug_abbrev  0x000058eb      0x2c0 ./Application/User/usart_aspep_driver.o
+ .debug_abbrev  0x00005bab      0x26e ./Application/User/velocity_ctrl.o
+ .debug_abbrev  0x00005e19      0x120 ./Drivers/CMSIS/system_stm32g4xx.o
+ .debug_abbrev  0x00005f39      0x2dd ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+ .debug_abbrev  0x00006216      0x355 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+ .debug_abbrev  0x0000656b      0x3eb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+ .debug_abbrev  0x00006956      0x2a5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+ .debug_abbrev  0x00006bfb      0x2b4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+ .debug_abbrev  0x00006eaf      0x387 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+ .debug_abbrev  0x00007236      0x291 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+ .debug_abbrev  0x000074c7      0x2bb ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+ .debug_abbrev  0x00007782      0x2a2 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+ .debug_abbrev  0x00007a24      0x1f9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+ .debug_abbrev  0x00007c1d      0x1f7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+ .debug_abbrev  0x00007e14      0x281 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+ .debug_abbrev  0x00008095      0x352 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+ .debug_abbrev  0x000083e7      0x2ce ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+ .debug_abbrev  0x000086b5      0x3c0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+ .debug_abbrev  0x00008a75      0x3d0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+ .debug_abbrev  0x00008e45      0x10c ./Middlewares/MotorControl/bus_voltage_sensor.o
+ .debug_abbrev  0x00008f51      0x126 ./Middlewares/MotorControl/circle_limitation.o
+ .debug_abbrev  0x00009077      0x235 ./Middlewares/MotorControl/enc_align_ctrl.o
+ .debug_abbrev  0x000092ac      0x30b ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+ .debug_abbrev  0x000095b7      0x2a4 ./Middlewares/MotorControl/mcpa.o
+ .debug_abbrev  0x0000985b      0x196 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+ .debug_abbrev  0x000099f1      0x1b1 ./Middlewares/MotorControl/pid_regulator.o
+ .debug_abbrev  0x00009ba2      0x1df ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+ .debug_abbrev  0x00009d81      0x4c0 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+ .debug_abbrev  0x0000a241      0x182 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+ .debug_abbrev  0x0000a3c3      0x1fb ./Middlewares/MotorControl/ramp_ext_mngr.o
+ .debug_abbrev  0x0000a5be      0x1bb ./Middlewares/MotorControl/speed_pos_fdbk.o
+ .debug_abbrev  0x0000a779      0x3b8 ./Middlewares/MotorControl/trajectory_ctrl.o
+ .debug_abbrev  0x0000ab31      0x212 ./Middlewares/MotorControl/virtual_speed_sensor.o
 
 .debug_aranges  0x00000000     0x2408
  .debug_aranges
@@ -14394,7 +14393,7 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_str     0x00000000   0x10d27c ./Application/Startup/startup_stm32g431cbux.o
                                  0xbd (size before relaxing)
  .debug_str     0x0010d27c        0x0 ./Application/User/CAN_processing_v2.o
-                              0xfd18c (size before relaxing)
+                              0xfd24c (size before relaxing)
  .debug_str     0x0010d27c        0x0 ./Application/User/SCurveTrajectory.o
                               0xfc4fa (size before relaxing)
  .debug_str     0x0010d27c        0x0 ./Application/User/aspep.o
@@ -14523,7 +14522,7 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
                               0xf2317 (size before relaxing)
 
 .debug_rnglists
-                0x00000000     0x3830
+                0x00000000     0x3831
  .debug_rnglists
                 0x00000000       0x19 ./Application/Startup/startup_stm32g431cbux.o
  .debug_rnglists
@@ -14541,222 +14540,222 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_rnglists
                 0x0000045b       0x1a ./Application/User/hf_registers.o
  .debug_rnglists
-                0x00000475       0xd6 ./Application/User/main.o
+                0x00000475       0xd7 ./Application/User/main.o
  .debug_rnglists
-                0x0000054b      0x157 ./Application/User/mc_api.o
+                0x0000054c      0x157 ./Application/User/mc_api.o
  .debug_rnglists
-                0x000006a2       0x19 ./Application/User/mc_app_hooks.o
+                0x000006a3       0x19 ./Application/User/mc_app_hooks.o
  .debug_rnglists
-                0x000006bb      0x1a8 ./Application/User/mc_interface.o
+                0x000006bc      0x1a8 ./Application/User/mc_interface.o
  .debug_rnglists
-                0x00000863       0x32 ./Application/User/mc_math.o
+                0x00000864       0x32 ./Application/User/mc_math.o
  .debug_rnglists
-                0x00000895      0x12d ./Application/User/mc_tasks.o
+                0x00000896      0x12d ./Application/User/mc_tasks.o
  .debug_rnglists
-                0x000009c2       0x9d ./Application/User/mc_tasks_foc.o
+                0x000009c3       0x9d ./Application/User/mc_tasks_foc.o
  .debug_rnglists
-                0x00000a5f       0x28 ./Application/User/mcp.o
+                0x00000a60       0x28 ./Application/User/mcp.o
  .debug_rnglists
-                0x00000a87       0x13 ./Application/User/motorcontrol.o
+                0x00000a88       0x13 ./Application/User/motorcontrol.o
  .debug_rnglists
-                0x00000a9a      0x151 ./Application/User/planner.o
+                0x00000a9b      0x151 ./Application/User/planner.o
  .debug_rnglists
-                0x00000beb       0x8f ./Application/User/pwm_common.o
+                0x00000bec       0x8f ./Application/User/pwm_common.o
  .debug_rnglists
-                0x00000c7a       0xe6 ./Application/User/pwm_curr_fdbk.o
+                0x00000c7b       0xe6 ./Application/User/pwm_curr_fdbk.o
  .debug_rnglists
-                0x00000d60       0xc8 ./Application/User/regular_conversion_manager.o
+                0x00000d61       0xc8 ./Application/User/regular_conversion_manager.o
  .debug_rnglists
-                0x00000e28       0x68 ./Application/User/speed_torq_ctrl.o
+                0x00000e29       0x68 ./Application/User/speed_torq_ctrl.o
  .debug_rnglists
-                0x00000e90      0x15b ./Application/User/stm32_mc_common_it.o
+                0x00000e91      0x15b ./Application/User/stm32_mc_common_it.o
  .debug_rnglists
-                0x00000feb      0x1b3 ./Application/User/stm32g4xx_hal_msp.o
+                0x00000fec      0x1b3 ./Application/User/stm32g4xx_hal_msp.o
  .debug_rnglists
-                0x0000119e       0x2b ./Application/User/stm32g4xx_it.o
+                0x0000119f       0x2b ./Application/User/stm32g4xx_it.o
  .debug_rnglists
-                0x000011c9       0x4f ./Application/User/stm32g4xx_mc_it.o
+                0x000011ca       0x4f ./Application/User/stm32g4xx_mc_it.o
  .debug_rnglists
-                0x00001218      0x242 ./Application/User/sync_registers.o
+                0x00001219      0x242 ./Application/User/sync_registers.o
  .debug_rnglists
-                0x0000145a       0xdd ./Application/User/usart_aspep_driver.o
+                0x0000145b       0xdd ./Application/User/usart_aspep_driver.o
  .debug_rnglists
-                0x00001537       0x9b ./Application/User/velocity_ctrl.o
+                0x00001538       0x9b ./Application/User/velocity_ctrl.o
  .debug_rnglists
-                0x000015d2       0x1a ./Drivers/CMSIS/system_stm32g4xx.o
+                0x000015d3       0x1a ./Drivers/CMSIS/system_stm32g4xx.o
  .debug_rnglists
-                0x000015ec       0xf1 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x000015ed       0xf1 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
  .debug_rnglists
-                0x000016dd      0x4e3 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+                0x000016de      0x4e3 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
  .debug_rnglists
-                0x00001bc0      0x3fc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+                0x00001bc1      0x3fc ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
  .debug_rnglists
-                0x00001fbc       0x86 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+                0x00001fbd       0x86 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
  .debug_rnglists
-                0x00002042       0xf4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+                0x00002043       0xf4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
  .debug_rnglists
-                0x00002136       0xfa ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x00002137       0xfa ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
  .debug_rnglists
-                0x00002230       0x8e ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x00002231       0x8e ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
  .debug_rnglists
-                0x000022be       0x8e ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+                0x000022bf       0x8e ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
  .debug_rnglists
-                0x0000234c      0x1ac ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x0000234d      0x1ac ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
  .debug_rnglists
-                0x000024f8       0x4d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x000024f9       0x4d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
  .debug_rnglists
-                0x00002545       0x51 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+                0x00002546       0x51 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
  .debug_rnglists
-                0x00002596       0xf0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+                0x00002597       0xf0 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
  .debug_rnglists
-                0x00002686       0xab ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x00002687       0xab ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
  .debug_rnglists
-                0x00002731       0xc2 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+                0x00002732       0xc2 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
  .debug_rnglists
-                0x000027f3      0x5b9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x000027f4      0x5b9 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
  .debug_rnglists
-                0x00002dac      0x232 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x00002dad      0x232 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
  .debug_rnglists
-                0x00002fde       0x19 ./Middlewares/MotorControl/bus_voltage_sensor.o
+                0x00002fdf       0x19 ./Middlewares/MotorControl/bus_voltage_sensor.o
  .debug_rnglists
-                0x00002ff7       0x13 ./Middlewares/MotorControl/circle_limitation.o
+                0x00002ff8       0x13 ./Middlewares/MotorControl/circle_limitation.o
  .debug_rnglists
-                0x0000300a       0x31 ./Middlewares/MotorControl/enc_align_ctrl.o
+                0x0000300b       0x31 ./Middlewares/MotorControl/enc_align_ctrl.o
  .debug_rnglists
-                0x0000303b       0xb0 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x0000303c       0xb0 ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
  .debug_rnglists
-                0x000030eb       0x2d ./Middlewares/MotorControl/mcpa.o
+                0x000030ec       0x2d ./Middlewares/MotorControl/mcpa.o
  .debug_rnglists
-                0x00003118       0x40 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+                0x00003119       0x40 ./Middlewares/MotorControl/ntc_temperature_sensor.o
  .debug_rnglists
-                0x00003158       0x9e ./Middlewares/MotorControl/pid_regulator.o
+                0x00003159       0x9e ./Middlewares/MotorControl/pid_regulator.o
  .debug_rnglists
-                0x000031f6       0x1f ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+                0x000031f7       0x1f ./Middlewares/MotorControl/pqd_motor_power_measurement.o
  .debug_rnglists
-                0x00003215      0x449 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x00003216      0x449 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .debug_rnglists
-                0x0000365e       0x37 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+                0x0000365f       0x37 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
  .debug_rnglists
-                0x00003695       0x56 ./Middlewares/MotorControl/ramp_ext_mngr.o
+                0x00003696       0x56 ./Middlewares/MotorControl/ramp_ext_mngr.o
  .debug_rnglists
-                0x000036eb       0x37 ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x000036ec       0x37 ./Middlewares/MotorControl/speed_pos_fdbk.o
  .debug_rnglists
-                0x00003722       0xbd ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x00003723       0xbd ./Middlewares/MotorControl/trajectory_ctrl.o
  .debug_rnglists
-                0x000037df       0x51 ./Middlewares/MotorControl/virtual_speed_sensor.o
+                0x000037e0       0x51 ./Middlewares/MotorControl/virtual_speed_sensor.o
 
 .debug_loclists
-                0x00000000    0x1e4f1
+                0x00000000    0x1e510
  .debug_loclists
-                0x00000000     0x100e ./Application/User/CAN_processing_v2.o
+                0x00000000     0x1013 ./Application/User/CAN_processing_v2.o
  .debug_loclists
-                0x0000100e      0x105 ./Application/User/SCurveTrajectory.o
+                0x00001013      0x105 ./Application/User/SCurveTrajectory.o
  .debug_loclists
-                0x00001113     0x1281 ./Application/User/aspep.o
+                0x00001118     0x1281 ./Application/User/aspep.o
  .debug_loclists
-                0x00002394      0x299 ./Application/User/calibration.o
+                0x00002399      0x299 ./Application/User/calibration.o
  .debug_loclists
-                0x0000262d      0x356 ./Application/User/can_telemetry.o
+                0x00002632      0x356 ./Application/User/can_telemetry.o
  .debug_loclists
-                0x00002983      0x136 ./Application/User/hf_registers.o
+                0x00002988      0x136 ./Application/User/hf_registers.o
  .debug_loclists
-                0x00002ab9      0x29b ./Application/User/main.o
+                0x00002abe      0x2b5 ./Application/User/main.o
  .debug_loclists
-                0x00002d54      0x1cb ./Application/User/mc_api.o
+                0x00002d73      0x1cb ./Application/User/mc_api.o
  .debug_loclists
-                0x00002f1f      0xd25 ./Application/User/mc_interface.o
+                0x00002f3e      0xd25 ./Application/User/mc_interface.o
  .debug_loclists
-                0x00003c44      0x525 ./Application/User/mc_math.o
+                0x00003c63      0x525 ./Application/User/mc_math.o
  .debug_loclists
-                0x00004169      0x315 ./Application/User/mc_tasks.o
+                0x00004188      0x315 ./Application/User/mc_tasks.o
  .debug_loclists
-                0x0000447e      0x28d ./Application/User/mc_tasks_foc.o
+                0x0000449d      0x28d ./Application/User/mc_tasks_foc.o
  .debug_loclists
-                0x0000470b      0x4df ./Application/User/mcp.o
+                0x0000472a      0x4df ./Application/User/mcp.o
  .debug_loclists
-                0x00004bea     0x185b ./Application/User/planner.o
+                0x00004c09     0x185b ./Application/User/planner.o
  .debug_loclists
-                0x00006445      0x176 ./Application/User/pwm_common.o
+                0x00006464      0x176 ./Application/User/pwm_common.o
  .debug_loclists
-                0x000065bb      0x5c2 ./Application/User/pwm_curr_fdbk.o
+                0x000065da      0x5c2 ./Application/User/pwm_curr_fdbk.o
  .debug_loclists
-                0x00006b7d      0x296 ./Application/User/regular_conversion_manager.o
+                0x00006b9c      0x296 ./Application/User/regular_conversion_manager.o
  .debug_loclists
-                0x00006e13      0x315 ./Application/User/speed_torq_ctrl.o
+                0x00006e32      0x315 ./Application/User/speed_torq_ctrl.o
  .debug_loclists
-                0x00007128      0x3df ./Application/User/stm32_mc_common_it.o
+                0x00007147      0x3df ./Application/User/stm32_mc_common_it.o
  .debug_loclists
-                0x00007507      0x2a2 ./Application/User/stm32g4xx_hal_msp.o
+                0x00007526      0x2a2 ./Application/User/stm32g4xx_hal_msp.o
  .debug_loclists
-                0x000077a9       0x6c ./Application/User/stm32g4xx_mc_it.o
+                0x000077c8       0x6c ./Application/User/stm32g4xx_mc_it.o
  .debug_loclists
-                0x00007815     0x2f16 ./Application/User/sync_registers.o
+                0x00007834     0x2f16 ./Application/User/sync_registers.o
  .debug_loclists
-                0x0000a72b      0x7bf ./Application/User/usart_aspep_driver.o
+                0x0000a74a      0x7bf ./Application/User/usart_aspep_driver.o
  .debug_loclists
-                0x0000aeea      0x5ae ./Application/User/velocity_ctrl.o
+                0x0000af09      0x5ae ./Application/User/velocity_ctrl.o
  .debug_loclists
-                0x0000b498       0x7e ./Drivers/CMSIS/system_stm32g4xx.o
+                0x0000b4b7       0x7e ./Drivers/CMSIS/system_stm32g4xx.o
  .debug_loclists
-                0x0000b516      0x173 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
+                0x0000b535      0x173 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal.o
  .debug_loclists
-                0x0000b689     0x1a6d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
+                0x0000b6a8     0x1a6d ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc.o
  .debug_loclists
-                0x0000d0f6     0x1655 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
+                0x0000d115     0x1655 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_adc_ex.o
  .debug_loclists
-                0x0000e74b      0x347 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
+                0x0000e76a      0x347 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_comp.o
  .debug_loclists
-                0x0000ea92      0x9af ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
+                0x0000eab1      0x9af ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cordic.o
  .debug_loclists
-                0x0000f441      0x5d5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
+                0x0000f460      0x5d5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_cortex.o
  .debug_loclists
-                0x0000fa16      0x7e8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
+                0x0000fa35      0x7e8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac.o
  .debug_loclists
-                0x000101fe      0x94c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
+                0x0001021d      0x94c ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_dac_ex.o
  .debug_loclists
-                0x00010b4a      0xfdd ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
+                0x00010b69      0xfdd ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_fdcan.o
  .debug_loclists
-                0x00011b27      0x4a7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
+                0x00011b46      0x4a7 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_gpio.o
  .debug_loclists
-                0x00011fce      0x388 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
+                0x00011fed      0x388 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_opamp.o
  .debug_loclists
-                0x00012356      0x4b4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
+                0x00012375      0x4b4 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_pwr_ex.o
  .debug_loclists
-                0x0001280a      0x5f5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
+                0x00012829      0x5f5 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc.o
  .debug_loclists
-                0x00012dff      0x71b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
+                0x00012e1e      0x71b ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_rcc_ex.o
  .debug_loclists
-                0x0001351a     0x4fa8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
+                0x00013539     0x4fa8 ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim.o
  .debug_loclists
-                0x000184c2     0x1a0a ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
+                0x000184e1     0x1a0a ./Drivers/STM32G4xx_HAL_Driver/stm32g4xx_hal_tim_ex.o
  .debug_loclists
-                0x00019ecc       0x6c ./Middlewares/MotorControl/bus_voltage_sensor.o
+                0x00019eeb       0x6c ./Middlewares/MotorControl/bus_voltage_sensor.o
  .debug_loclists
-                0x00019f38      0x26e ./Middlewares/MotorControl/circle_limitation.o
+                0x00019f57      0x26e ./Middlewares/MotorControl/circle_limitation.o
  .debug_loclists
-                0x0001a1a6      0x13a ./Middlewares/MotorControl/enc_align_ctrl.o
+                0x0001a1c5      0x13a ./Middlewares/MotorControl/enc_align_ctrl.o
  .debug_loclists
-                0x0001a2e0      0x3ff ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
+                0x0001a2ff      0x3ff ./Middlewares/MotorControl/encoder_speed_pos_fdbk.o
  .debug_loclists
-                0x0001a6df      0x399 ./Middlewares/MotorControl/mcpa.o
+                0x0001a6fe      0x399 ./Middlewares/MotorControl/mcpa.o
  .debug_loclists
-                0x0001aa78      0x165 ./Middlewares/MotorControl/ntc_temperature_sensor.o
+                0x0001aa97      0x165 ./Middlewares/MotorControl/ntc_temperature_sensor.o
  .debug_loclists
-                0x0001abdd      0x3c2 ./Middlewares/MotorControl/pid_regulator.o
+                0x0001abfc      0x3c2 ./Middlewares/MotorControl/pid_regulator.o
  .debug_loclists
-                0x0001af9f       0xf0 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
+                0x0001afbe       0xf0 ./Middlewares/MotorControl/pqd_motor_power_measurement.o
  .debug_loclists
-                0x0001b08f     0x2534 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
+                0x0001b0ae     0x2534 ./Middlewares/MotorControl/r3_2_g4xx_pwm_curr_fdbk.o
  .debug_loclists
-                0x0001d5c3       0xf1 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
+                0x0001d5e2       0xf1 ./Middlewares/MotorControl/r_divider_bus_voltage_sensor.o
  .debug_loclists
-                0x0001d6b4      0x3ac ./Middlewares/MotorControl/ramp_ext_mngr.o
+                0x0001d6d3      0x3ac ./Middlewares/MotorControl/ramp_ext_mngr.o
  .debug_loclists
-                0x0001da60      0x195 ./Middlewares/MotorControl/speed_pos_fdbk.o
+                0x0001da7f      0x195 ./Middlewares/MotorControl/speed_pos_fdbk.o
  .debug_loclists
-                0x0001dbf5      0x40c ./Middlewares/MotorControl/trajectory_ctrl.o
+                0x0001dc14      0x40c ./Middlewares/MotorControl/trajectory_ctrl.o
  .debug_loclists
-                0x0001e001      0x4f0 ./Middlewares/MotorControl/virtual_speed_sensor.o
+                0x0001e020      0x4f0 ./Middlewares/MotorControl/virtual_speed_sensor.o
 
 .debug_macro    0x00000000    0x3268c
  .debug_macro   0x00000000      0x60b ./Application/User/CAN_processing_v2.o

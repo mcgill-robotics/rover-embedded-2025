@@ -169,6 +169,15 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
     case RUN_STOP:
         MC_StopMotor1();
         controlMode = MODE_IDLE;
+
+        __disable_irq();
+        ((PosCtrlHandle *)paths_planned[0])->isTrajExecuting = false;
+        ((PosCtrlHandle *)paths_planned[1])->isTrajExecuting = false;
+        plan_ready = false;
+        newSetpointDetected = false;   /* drop any pending position request */
+        __enable_irq();
+
+
         uart_debug_print("  -> STOP\r\n");
         break;
 
@@ -186,6 +195,13 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
         float v_max  = 0.5f;  /* rad/s */
         if (demand >  v_max) demand =  v_max;
         if (demand < -v_max) demand = -v_max;
+
+        __disable_irq();
+        ((PosCtrlHandle *)paths_planned[0])->isTrajExecuting = false;
+        ((PosCtrlHandle *)paths_planned[1])->isTrajExecuting = false;
+        plan_ready = false;
+        newSetpointDetected = false;   /* drop any pending position request */
+        __enable_irq();
 
         /* Always call velCtrlStart so the velocity controller cleanly
            inherits the current tracker state (theta, omega, accel) on

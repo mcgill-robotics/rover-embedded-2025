@@ -95,7 +95,7 @@ static VelCtrlHandle velCtrl_buffer;
 VelCtrlHandle *velCtrl = &velCtrl_buffer;
 
 /* motor information */
-float gearRatio = 100.0f; // 1:100 Interpreted as 100 rotations of input shaft = 1 rotation of output
+float gearRatio = 120.0f; // 1:100 Interpreted as 100 rotations of input shaft = 1 rotation of output
 
 /* USER CODE END PV */
 

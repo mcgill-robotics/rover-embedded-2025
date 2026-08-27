@@ -154,6 +154,10 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
             return;
         }
 
+        controlMode = MODE_POSITION;
+
+
+
     }
 
 //    /* Gate 2: Block all other commands until calibration has completed.   */

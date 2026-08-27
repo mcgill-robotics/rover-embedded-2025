@@ -131,7 +131,9 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
        the half-float-decoded value with a misaligned 4-byte read of
        the first slot in the broadcast payload. */
     (void)rxData;
+
     float information = info;
+
 
     uart_debug_print("Handle_Run_Command: runSpec=%d, info=%d\r\n",
                      (int)id->runSpec, (int)information);
@@ -167,7 +169,17 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
     switch (id->runSpec) {
 
     case RUN_STOP:
+
+
         MC_StopMotor1();
+
+        __disable_irq();
+        ((PosCtrlHandle *)paths_planned[0])->isTrajExecuting = false;
+        ((PosCtrlHandle *)paths_planned[1])->isTrajExecuting = false;
+        plan_ready = false;
+        newSetpointDetected = false;   /* drop any pending position request */
+        __enable_irq();
+
         controlMode = MODE_IDLE;
         uart_debug_print("  -> STOP\r\n");
         break;
@@ -182,10 +194,19 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
            range (Calibration_GetActiveUpperLimit - GetActiveLowerLimit)
            rather than JOINT_MAX_RAD - JOINT_MIN_RAD so the ceiling
            tracks any runtime tightening of the upper limit. */
+        if (!isfinite(information)) return;
         float demand = information;
         float v_max  = 0.5;
         if (demand >  v_max) demand =  v_max;
         if (demand < -v_max) demand = -v_max;
+
+        __disable_irq();
+        ((PosCtrlHandle *)paths_planned[0])->isTrajExecuting = false;
+        ((PosCtrlHandle *)paths_planned[1])->isTrajExecuting = false;
+        plan_ready = false;
+        newSetpointDetected = false;   /* drop any pending position request */
+        __enable_irq();
+
 
         /* Always call velCtrlStart so the velocity controller cleanly
            inherits the current tracker state (theta, omega, accel) on
@@ -204,6 +225,7 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
            (rezeroed at calibration, retightened on upper-switch hits)
            and may differ from the JOINT_MIN_RAD / JOINT_MAX_RAD compile-
            time defaults. */
+        if (!isfinite(information)) return;
         float setpoint_rad = degreesToRad(information);
         float lo = Calibration_GetActiveLowerLimit();
         float hi = Calibration_GetActiveUpperLimit();
