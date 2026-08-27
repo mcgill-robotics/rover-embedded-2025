@@ -1,0 +1,31 @@
+#ifndef USB_CDC_ITF
+#define USB_CDC_ITF 0
+#endif
+
+#ifndef USB_CDC_FIFO_SIZE
+#define USB_CDC_FIFO_SIZE 4096
+#endif
+
+#ifndef USB_CDC_EP_BUF_SIZE
+#define USB_CDC_EP_BUF_SIZE 2048
+#endif
+
+#ifndef ENDPOINT_COUNT 
+#define ENDPOINT_COUNT 1
+#endif
+
+#ifndef ENDPOINT_BUF_LEN
+#define ENDPOINT_BUF_LEN 2048
+#endif
+
+#ifndef USB_MANUFACTURER_STR
+#define USB_MANUFACTURER_STR "McGill Robotics Rover"
+#endif
+
+#ifndef USB_PRODUCT_STR
+#define USB_PRODUCT_STR "Pantilt Board"
+#endif
+
+#ifndef USB_BASE_PID
+#define USB_BASE_PID 0x5001
+#endif

@@ -1,0 +1,9 @@
+../Core/Src/encoder.c:14:5:is_debouncing	4	static
+../Core/Src/encoder.c:18:6:set_debounce	16	static
+../Core/Src/encoder.c:22:6:set_counts	16	static
+../Core/Src/encoder.c:27:5:get_counts	4	static
+../Core/Src/encoder.c:31:7:count_to_angle	24	static
+../Core/Src/encoder.c:38:5:angle_to_count	24	static
+../Core/Src/encoder.c:44:6:reset_debounce_buffer	4	static
+../Core/Src/encoder.c:49:5:scan_switch	16	static
+../Core/Src/encoder.c:56:5:try_calibrate_encoder	8	static

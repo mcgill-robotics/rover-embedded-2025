@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "CAN_processing.h"
 #include "uart_debugging.h"
+#include "parameters_conversion.h"
 #include <stdbool.h>
 
 
@@ -32,17 +33,28 @@
 #define START_WD_WINDOW_MS   5000   // length of rolling window
 #define START_WD_THRESHOLD   3     // # kicks that trigger a fault
 
+// Torque boost parameters
+#define STALL_ERROR_THRESHOLD       200.0f //only happens if stall is 200 rpm behind set
+#define STALL_RECOVERY_THRESHOLD  100.0f  // must drop below this to be considered recovered (prevent hysteresis
+#define TORQUE_BOOST_A              18.0f //boosts to 18A
+#define TORQUE_NOMINAL_A            9.34f //normal at 9.34A
+#define TORQUE_BOOST_RAMP_MS        150 //only short boost time 150ms to get to the velocity setpoints
+#define STALL_TIMEOUT_MS            2000 //back off after 2s of continuous stall
+
+
 // For print statements
 extern UART_HandleTypeDef huart2;
-
+extern MCI_Handle_t* pMCI[];//for torque control
 // Variable declarations
 static float g_lastCommandedSpeed = 0; // Previous speed setpoint given to the esc
+static uint32_t s_stallStartTick = 0;  // 0 means not currently stalled
 int s_previousDirection = 0 ; // 0 means idle, 1 means forward, -1 means backward
 int DELTA_SPEED_THRESH = 200; // Threshold to clip differing speed commands
 const float SPEED_ZERO_THR = 50.0f; // Threshold to consider "almost zero" / unreliable speed feedback point
 const float MAX_SPEED_THR = 3200.0f;
 const int WAIT_AFTER_STOP = 250; // amountin ms motor will wait after it has issued a stopMotor command
 const int SAFE_STOP_SPEED_THRESHOLD = 400;
+
 
 //Motor parameters --> Get these from the profiled motor!!
 static float g_maxTorque   = 0.30f;    // [N·m]  conservative value
@@ -381,17 +393,71 @@ void runSingleMotorV2(float newSpeed){
 
 	uint16_t myRampTime = (uint16_t)computeRampTimeMs(MC_GetMecSpeedReferenceMotor1_F(), speedCmd, false);
 	float currentSpeed = MC_GetMecSpeedReferenceMotor1_F();
+    float speedError = fabsf(speedCmd) - fabsf(currentSpeed);
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 uart_debug_print("Motor is already moving, change setpoint in same direction\r\n");
 	 uart_debug_print("New Ramp Setpoint %d RPM\r\n", (int)speedCmd);
 	 uart_debug_print("New Ramp time allocated %d ms\r\n", (int)myRampTime);
 	 uart_debug_print("Current direction is %d \r\n", s_previousDirection);
 	 uart_debug_print("Current actual speed is %d\r\n", (int)currentSpeed);
+	 uart_debug_print("Current Speed Error %d RPM\r\n", (int)speedError);
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
-	s_previousDirection = (speedCmd > 0) ? 1 : -1;
-    g_lastCommandedSpeed = speedCmd;
+	  if (fabsf(speedCmd) > SPEED_ZERO_THR && speedError > STALL_ERROR_THRESHOLD) {
+
+	        uint32_t now = HAL_GetTick();
+
+	        if (s_stallStartTick == 0) {
+	            s_stallStartTick = now;
+	            uart_debug_print("Stall detected - starting stall timer\r\n");
+	        }
+
+	        uint32_t stallDuration = now - s_stallStartTick;
+
+	        if (stallDuration > STALL_TIMEOUT_MS) {
+	            uart_debug_print("Stall timeout reached - backing off\r\n");
+	            s_stallStartTick = 0;
+	            safeStopMotor(currentSpeed, RUN);
+	            return;
+	        }
+
+	        uart_debug_print("Applying torque boost, stalled for %d ms\r\n", (int)stallDuration);
+
+	        MCI_ExecTorqueRamp_F(pMCI[0],
+	            (speedCmd > 0) ? TORQUE_BOOST_A : -TORQUE_BOOST_A,
+	            TORQUE_BOOST_RAMP_MS); //apply the torque boost for 150ms
+	        HAL_Delay(300); //wait for ramp down
+
+	        // Hand back to speed mode
+	        MCI_ExecSpeedRamp_F(pMCI[0], speedCmd, myRampTime);
+
+	    } else {
+
+	        if (s_stallStartTick != 0) {
+	            // Was stalling - only clear the timer if we've recovered enough
+	            if (speedError < STALL_RECOVERY_THRESHOLD) {
+	                uart_debug_print("Wheel recovered from stall\r\n");
+	                s_stallStartTick = 0;
+	            } else {
+	                // Still in the hysteresis band (between 100-200 RPM error)
+	                // keep boosting but DONT reset the timer
+	                uart_debug_print("In hysteresis band, continuing boost\r\n");
+	                MCI_ExecTorqueRamp_F(pMCI[0],
+	                    (speedCmd > 0) ? TORQUE_BOOST_A : -TORQUE_BOOST_A,
+	                    TORQUE_BOOST_RAMP_MS);
+	                HAL_Delay(300);
+	                MCI_ExecSpeedRamp_F(pMCI[0], speedCmd, myRampTime);
+	                s_previousDirection = (speedCmd > 0) ? 1 : -1;
+	                g_lastCommandedSpeed = speedCmd;
+	                return;
+	            }
+	        }
+	        MC_ProgramSpeedRampMotor1_F(speedCmd, myRampTime);
+	    }
+	    s_previousDirection = (speedCmd > 0) ? 1 : -1;
+	    g_lastCommandedSpeed = speedCmd;
 }
 
 
