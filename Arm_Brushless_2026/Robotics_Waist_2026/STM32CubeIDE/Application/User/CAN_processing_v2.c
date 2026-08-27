@@ -145,23 +145,32 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
            TIM6 ISR applies every tick — that step gets multiplied by
            gearRatio at the SDK input and lurches the motor.  Restart
            preserves the live offset until the new switch hit installs
-           a fresh one atomically. */
-        Calibration_Restart();
-        controlMode = MODE_CALIBRATING;
-        return;
+//           a fresh one atomically. */
+//        Calibration_Restart();
+//        controlMode = MODE_CALIBRATING;
+//        return;
+        if (MC_GetSTMStateMotor1() == IDLE) {
+            MC_StartMotor1();
+            return;
+        }
+
+        controlMode = MODE_POSITION;
+
+
+
     }
 
-    /* Gate 2: Block all other commands until calibration has completed.   */
-    if (!Calibration_IsDone()) {
-        uart_debug_print("  -> Not calibrated yet, command rejected\r\n");
-        return;
-    }
-
-    /* Gate 3: Start FOC if needed (motor stopped but calibrated).         */
-    if (MC_GetSTMStateMotor1() == IDLE) {
-        MC_StartMotor1();
-        return;
-    }
+//    /* Gate 2: Block all other commands until calibration has completed.   */
+//    if (!Calibration_IsDone()) {
+//        uart_debug_print("  -> Not calibrated yet, command rejected\r\n");
+//        return;
+//    }
+//
+//    /* Gate 3: Start FOC if needed (motor stopped but calibrated).         */
+//    if (MC_GetSTMStateMotor1() == IDLE) {
+//        MC_StartMotor1();
+//        return;
+//    }
 
     /* Normal command dispatch                                             */
     switch (id->runSpec) {
@@ -205,15 +214,15 @@ void Handle_Run_Command(ParsedCANID *id, uint8_t *rxData, float info)
            and may differ from the JOINT_MIN_RAD / JOINT_MAX_RAD compile-
            time defaults. */
         float setpoint_rad = degreesToRad(information);
-        float lo = Calibration_GetActiveLowerLimit();
-        float hi = Calibration_GetActiveUpperLimit();
+//        float lo = Calibration_GetActiveLowerLimit();
+//        float hi = Calibration_GetActiveUpperLimit();
 
-        if (setpoint_rad < lo) {
+        if (setpoint_rad < -0.785) {
             uart_debug_print("  -> POSITION clamped to active lower\r\n");
-            setpoint_rad = lo;
-        } else if (setpoint_rad > hi) {
+            setpoint_rad = -0.785;
+        } else if (setpoint_rad > 0.785) {
             uart_debug_print("  -> POSITION clamped to active upper\r\n");
-            setpoint_rad = hi;
+            setpoint_rad = 0.785;
         }
 
         positionSetpoint    = setpoint_rad;

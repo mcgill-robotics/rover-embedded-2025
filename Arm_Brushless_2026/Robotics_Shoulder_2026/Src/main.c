@@ -1142,6 +1142,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         } else if (controlMode == MODE_CALIBRATING) {
             Calibration_ISRStep();
         }
+
+
         /* MODE_IDLE: no kinematic update — tracker->theta holds last value */
 
         Calibration_Tick_1ms();
@@ -1157,17 +1159,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         if (MC_GetSTMStateMotor1() == RUN) {
             float calibrated_setpoint;
 
-            if (controlMode == MODE_POSITION) {
-                PosCtrlHandle *plan =
-                    (PosCtrlHandle *)paths_planned[active_plan];
-                calibrated_setpoint = plan->theta;
-            } else {
-                /* MODE_VELOCITY, MODE_CALIBRATING, MODE_IDLE — all use
-                   tracker->theta as the canonical calibrated-frame
-                   position. */
-                calibrated_setpoint =
-                    ((VelocityFilter *)motorTracker)->theta;
-            }
+            PosCtrlHandle *plan = (PosCtrlHandle *)paths_planned[active_plan];
+
+                       if (controlMode == MODE_POSITION && plan->isTrajExecuting) {
+                           /* A live, valid trajectory owns the setpoint. */
+                           calibrated_setpoint = plan->theta;
+                       } else {
+                           /* MODE_VELOCITY, MODE_CALIBRATING, MODE_IDLE — and the
+                              brief window in MODE_POSITION before a fresh plan has
+                              been built/swapped in.  In that window the plan buffer
+                              may hold a stale theta from a previous move, so fall
+                              back to tracker->theta (the current commanded position)
+                              and simply hold still until the new plan goes live. */
+                           calibrated_setpoint =
+                               ((VelocityFilter *)motorTracker)->theta;
+                       }
 
             float raw_setpoint = calibrated_setpoint
                                + Calibration_GetOffset();

@@ -29,6 +29,7 @@ Project structure:
 import argparse
 import json
 import sqlite3
+import sys
 import time
 import threading
 from pathlib import Path
@@ -320,7 +321,6 @@ def _parse_motor_type(value) -> int:
     if isinstance(value, str):
         return MotorType.STEERING if value.upper() == "STEERING" else MotorType.DRIVE
     return int(value)
-
 
 
 # Serve the dashboard HTML
@@ -902,6 +902,19 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     flex-wrap: wrap;
   }
 
+  /* --- Hot Keys (preset poses) --- */
+  .hotkey-section { margin: 0 0 22px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .hotkey-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
+  .hotkey-hint { font-size: 11px; font-weight: 400; color: var(--text-secondary); font-family: var(--mono); }
+  .hotkey-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .hotkey { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; aspect-ratio: 1 / 1; background: var(--bg-card-hover); border: 1px solid var(--border-active); border-radius: var(--radius); color: var(--text-primary); cursor: pointer; padding: 10px; text-align: center; transition: all 0.15s; }
+  .hotkey:hover { border-color: var(--accent-blue); background: rgba(88,166,255,0.10); }
+  .hotkey:active { transform: scale(0.96); }
+  .hotkey-label { font-size: 14px; font-weight: 700; line-height: 1.15; }
+  .hotkey-sub { font-size: 11px; color: var(--text-secondary); font-family: var(--mono); }
+  @media (max-width: 900px) { .hotkey-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .hotkey-grid { grid-template-columns: repeat(2, 1fr); } }
+
   /* --- Command Panels Grid --- */
   .cmd-panels-grid {
     display: grid;
@@ -944,6 +957,23 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .cmd-feedback.err { color: var(--accent-red); }
   .cmd-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
   .cmd-quick-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* --- Camera panel --- */
+  .ctrl-panel { margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .ctrl-panel-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .ctrl-panel-title { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--text-primary); }
+  .ctrl-btns { display:flex; gap:10px; margin-left:auto; flex-wrap:wrap; }
+  .ctrl-btn-big { padding:10px 20px; font-size:13px; }
+  .ctrl-error { font-family:var(--mono); font-size:11px; color:var(--accent-red); width:100%; }
+  .ctrl-source-badge { font-family:var(--mono); font-size:11px; font-weight:600; padding:4px 10px; border-radius:5px; letter-spacing:0.04em; }
+  .ctrl-source-badge.gui { background:rgba(88,166,255,0.12); color:var(--accent-blue); border:1px solid rgba(88,166,255,0.3); }
+  @keyframes pulse-badge { 0%,100%{ box-shadow:0 0 0 0 rgba(248,81,73,0.25);} 50%{ box-shadow:0 0 0 5px rgba(248,81,73,0);} }
+  .cam-body { padding:16px 18px; }
+  .cam-wrap { margin-top:14px; background:#000; border-radius:10px; overflow:hidden; line-height:0; }
+  .cam-img { width:100%; height:auto; display:block; }
+  .cam-info { font-family:var(--mono); font-size:12px; color:var(--text-secondary); }
+  .cam-info .val { color:var(--text-primary); font-weight:500; }
+  .cam-badge-live { background:rgba(248,81,73,0.14); color:var(--accent-red); border:1px solid rgba(248,81,73,0.4); animation:pulse-badge 1.6s ease-in-out infinite; }
 
   /* --- 3D Arm Viewer --- */
   .arm-viewer-panel { margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
@@ -995,6 +1025,30 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </div>
 
 <div class="main" id="mainContent">
+
+  <!-- Camera panel -->
+  <div class="ctrl-panel" id="camPanel">
+    <div class="ctrl-panel-header">
+      <div class="ctrl-panel-title">
+        <span class="icon">&#x1F4F7;</span> Camera
+      </div>
+      <span class="ctrl-source-badge gui" id="camBadge">IDLE</span>
+    </div>
+    <div class="cam-body">
+      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+        <div class="cam-info" id="camInfo">Camera idle &mdash; starts when shown</div>
+        <div class="ctrl-btns">
+          <button class="cmd-btn success ctrl-btn-big" id="camShowBtn" onclick="camShow()">&#x1F4F7; Show camera</button>
+          <button class="cmd-btn danger ctrl-btn-big" id="camHideBtn" onclick="camHide()" style="display:none;">Hide camera</button>
+          <button class="cmd-btn ctrl-btn-big" id="camSnapBtn" onclick="camSnapshot()">Snapshot</button>
+        </div>
+      </div>
+      <div class="ctrl-error" id="camError"></div>
+      <div class="cam-wrap" id="camWrap" style="display:none;">
+        <img class="cam-img" id="camImg" alt="Live camera stream">
+      </div>
+    </div>
+  </div>
 
   <!-- 3D Arm Viewer -->
   <div class="arm-viewer-panel open" id="armViewerPanel">
@@ -1217,6 +1271,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Hot Keys — one click sends a preset pose to shoulder + elbow -->
+  <div class="hotkey-section">
+    <div class="hotkey-title">
+      Hot Keys
+      <span class="hotkey-hint">edit labels &amp; angles in the HOTKEYS list (JS)</span>
+    </div>
+    <div class="hotkey-grid" id="hotkeyGrid"></div>
+    <div class="cmd-feedback" id="hotkeyFb"></div>
   </div>
 
   <!-- ESC sections get inserted here dynamically -->
@@ -1786,6 +1850,106 @@ async function cmdPollStatus() {
 }
 
 // ---------------------------------------------------------------------------
+// Camera is served by the standalone camera_server.py on its own port
+// (default 5001). Derive its origin from whatever host loaded this page,
+// so it works both via SSH tunnel (localhost) and over the LAN (Pi's IP).
+// Set CAM_PORT to match camera_server.py --port; blank CAM_BASE = same origin.
+const CAM_PORT = 5001;
+const CAM_BASE = location.protocol + '//' + location.hostname + ':' + CAM_PORT;
+
+// Camera — lazy MJPEG stream (pipeline starts on Show, idles out on Hide)
+// ---------------------------------------------------------------------------
+let camVisible = false;
+let camStatusTimer = null;
+
+function camSetBadge(live) {
+  const b = document.getElementById('camBadge');
+  if (live) {
+    b.textContent = '\u25CF LIVE';
+    b.className = 'ctrl-source-badge cam-badge-live';
+  } else {
+    b.textContent = 'IDLE';
+    b.className = 'ctrl-source-badge gui';
+  }
+}
+
+async function camPollStatus() {
+  try {
+    const res = await fetch(CAM_BASE + '/api/camera/status');
+    const s = await res.json();
+    if (!s.available) {
+      document.getElementById('camPanel').style.display = 'none';
+      if (camStatusTimer) clearInterval(camStatusTimer);
+      return;
+    }
+    const info = document.getElementById('camInfo');
+    if (s.running) {
+      info.innerHTML =
+        '<span class="val">' + s.device + '</span> &middot; ' +
+        '<span class="val">' + s.resolution + '</span> &middot; ' +
+        s.fps_measured + ' fps (' +
+        (s.mode === 'mjpeg-passthrough' ? 'passthrough' : 'sw encode') +
+        ') &middot; viewers: ' + s.viewers;
+    } else {
+      info.textContent = 'Camera idle \u2014 starts when shown';
+      // Server idled out (or errored) while we thought it was live
+      if (camVisible) camHide(true);
+    }
+    if (s.error && !s.running) {
+      document.getElementById('camError').textContent = '\u2717 ' + s.error;
+    }
+    camSetBadge(s.running);
+  } catch {}
+}
+
+function camShow() {
+  const img = document.getElementById('camImg');
+  document.getElementById('camError').textContent = '';
+  document.getElementById('camInfo').textContent =
+    'Starting camera pipeline\u2026';
+  // Connecting the <img> is what lazily starts the pipeline server-side.
+  img.onerror = () => {
+    if (!camVisible) return;
+    document.getElementById('camError').textContent =
+      '\u2717 Stream failed \u2014 check camera status below or the ' +
+      'dashboard console on the Pi';
+    camHide(true);
+  };
+  img.src = CAM_BASE + '/api/camera/stream?ts=' + Date.now();
+  document.getElementById('camWrap').style.display = '';
+  document.getElementById('camShowBtn').style.display = 'none';
+  document.getElementById('camHideBtn').style.display = '';
+  camVisible = true;
+  if (camStatusTimer) clearInterval(camStatusTimer);
+  camStatusTimer = setInterval(camPollStatus, 2000);
+  setTimeout(camPollStatus, 800);
+}
+
+function camHide(silent) {
+  const img = document.getElementById('camImg');
+  img.onerror = null;
+  // Dropping src aborts the HTTP connection; the server's idle timer
+  // then stops the GStreamer pipeline after the timeout.
+  img.src = '';
+  img.removeAttribute('src');
+  document.getElementById('camWrap').style.display = 'none';
+  document.getElementById('camShowBtn').style.display = '';
+  document.getElementById('camHideBtn').style.display = 'none';
+  camVisible = false;
+  camSetBadge(false);
+  if (!silent) {
+    document.getElementById('camInfo').textContent =
+      'Camera idle \u2014 pipeline stops shortly after last viewer leaves';
+  }
+  if (camStatusTimer) { clearInterval(camStatusTimer); camStatusTimer = null; }
+  camStatusTimer = setInterval(camPollStatus, 5000);
+}
+
+function camSnapshot() {
+  window.open(CAM_BASE + '/api/camera/snapshot?ts=' + Date.now(), '_blank');
+}
+
+// ---------------------------------------------------------------------------
 // Stats polling & uptime
 // ---------------------------------------------------------------------------
 async function pollStats() {
@@ -1799,6 +1963,75 @@ async function pollStats() {
 }
 
 // Load initial data, then connect SSE
+// ---------------------------------------------------------------------------
+// Hot Keys — preset poses. Each click sends a POSITION command to the
+// shoulder ESC and the elbow ESC. Customise everything in this block.
+// ---------------------------------------------------------------------------
+const HOTKEY_SHOULDER_ID = 1;          // ESC ID for the shoulder
+const HOTKEY_ELBOW_ID    = 2;          // ESC ID for the elbow
+const HOTKEY_MOTOR_TYPE  = 'STEERING'; // 'STEERING' or 'DRIVE' — must match your ESC config
+
+// 6 presets. degrees are absolute position setpoints. First is "Stow".
+// Edit label / shoulder / elbow to define your own poses (0 = no change baseline).
+const HOTKEYS = [
+  { label: 'Stow',     shoulder: 5, elbow: 5 },
+  { label: 'Preset 2', shoulder: 0, elbow: 0 },
+  { label: 'Preset 3', shoulder: 0, elbow: 0 },
+  { label: 'Preset 4', shoulder: 0, elbow: 0 },
+  { label: 'Preset 5', shoulder: 0, elbow: 0 },
+  { label: 'Preset 6', shoulder: 0, elbow: 0 },
+];
+
+function hotkeySend(deviceId, degrees) {
+  return fetch('/api/cmd/position', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      device_id: deviceId,
+      motor_type: HOTKEY_MOTOR_TYPE,
+      degrees: degrees,
+    }),
+  }).then(r => r.json());
+}
+
+async function hotkeyFire(idx) {
+  const hk = HOTKEYS[idx];
+  if (!hk) return;
+  cmdFeedback('hotkeyFb', '\u2026 sending ' + hk.label, true);
+  try {
+    const [s, e] = await Promise.all([
+      hotkeySend(HOTKEY_SHOULDER_ID, hk.shoulder),
+      hotkeySend(HOTKEY_ELBOW_ID, hk.elbow),
+    ]);
+    if (s.ok && e.ok) {
+      cmdFeedback('hotkeyFb',
+        '\u2713 ' + hk.label + ': shoulder ' + hk.shoulder + '\u00B0, elbow ' + hk.elbow + '\u00B0',
+        true);
+    } else {
+      const err = ((s.error || '') + ' ' + (e.error || '')).trim();
+      cmdFeedback('hotkeyFb', '\u2717 ' + hk.label + ': ' + (err || 'command rejected'), false);
+    }
+  } catch (err) {
+    cmdFeedback('hotkeyFb', '\u2717 ' + err.message, false);
+  }
+}
+
+function renderHotkeys() {
+  const grid = document.getElementById('hotkeyGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  HOTKEYS.forEach((hk, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'hotkey';
+    btn.type = 'button';
+    btn.onclick = () => hotkeyFire(i);
+    btn.innerHTML =
+      '<span class="hotkey-label">' + hk.label + '</span>' +
+      '<span class="hotkey-sub">S ' + hk.shoulder + '\u00B0 \u00B7 E ' + hk.elbow + '\u00B0</span>';
+    grid.appendChild(btn);
+  });
+}
+
 async function init() {
   // Fetch current state
   try {
@@ -1814,7 +2047,10 @@ async function init() {
 
   await pollStats();
   cmdPollStatus();
+  camPollStatus();
+  camStatusTimer = setInterval(camPollStatus, 5000);
   connectSSE();
+  renderHotkeys();
 
   // Refresh stats and commander status periodically
   setInterval(pollStats, 5000);
@@ -1845,6 +2081,7 @@ def main():
     parser.add_argument("--cmd-port", type=int, default=5555,
                         help="TCP port of logger's CmdServer (default: 5555). "
                              "Commands are sent to can_logger.py via this port.")
+
     args = parser.parse_args()
 
     DB_PATH = args.db
@@ -1865,6 +2102,7 @@ def main():
     print(f"  URL       : http://{args.host}:{args.port}")
     print(f"  SSE poll  : {POLL_INTERVAL}s")
     print(f"  Cmd relay : localhost:{args.cmd_port} (via can_logger.py)")
+    print(f"  Camera    : external (camera_server.py via CAM_BASE)")
     print()
 
     app.run(host=args.host, port=args.port, debug=False, threaded=True)

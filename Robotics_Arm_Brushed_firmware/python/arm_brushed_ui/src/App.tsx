@@ -18,8 +18,8 @@ function App() {
   const HEARTBEAT_TIMEOUT = 2000
   const [isScience, setIsScience] = useState(false)
   const commandMap = new Map(Object.entries({
-    "o":"Gripper Open",
-    "c":"Gripper Close",
+    "c":"Gripper Open",
+    "o":"Gripper Close",
     "w":"Roll CCW",
     "d":"Roll CW",
     "r":"Roll Stop",
@@ -69,10 +69,10 @@ function App() {
         let key = event.key.toLowerCase()
         if (key === "w"){
           //open gripper
-          sendCommand('o')
+          sendCommand('c')
         } else if (key == "s"){
           // close gripper
-          sendCommand('c')
+          sendCommand('o')
         }else if (key == "a"){
           // counter-clockwise roll
           sendCommand('w')
@@ -374,8 +374,8 @@ function App() {
         <Flex p="2" direction="column" gap="3">
           <Text size="5" weight="bold">{isScience ? "Lead Screw" : "Gripper"}</Text>
           <Flex direction="row" gap="2">
-            <Button variant="soft" onClick={()=>{sendCommand('o')}}>{isScience ? "Rover Right" : "Open"}</Button>
-            <Button variant="soft" onClick={()=>{sendCommand('c')}} >{isScience ? "Rover Left" : "Close"}</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('c')}}>{isScience ? "Rover Right" : "Open"}</Button>
+            <Button variant="soft" onClick={()=>{sendCommand('o')}} >{isScience ? "Rover Left" : "Close"}</Button>
             <Button color="red" onClick={()=>{sendCommand('s')}}>Stop</Button>
           </Flex>
         </Flex>

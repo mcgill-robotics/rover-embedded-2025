@@ -95,7 +95,7 @@ static VelCtrlHandle velCtrl_buffer;
 VelCtrlHandle *velCtrl = &velCtrl_buffer;
 
 /* motor information */
-float gearRatio = 100.0f; // 1:100 Interpreted as 100 rotations of input shaft = 1 rotation of output
+float gearRatio = 120.0f; // 1:100 Interpreted as 100 rotations of input shaft = 1 rotation of output
 
 /* USER CODE END PV */
 
@@ -183,7 +183,7 @@ int main(void)
   	velCtrlInitStatic(&velCtrl_buffer, 0.0f);  // your refactored init
 
   	/* Initialize calibration subsystem */
-  	Calibration_Init();
+//  	Calibration_Init();
 
     /* Start in idle, CAN commands will switch to POSITION or VELOCITY */
     controlMode = MODE_IDLE;
@@ -198,13 +198,6 @@ int main(void)
 	/* Enable TIM6 interrupt */
 	HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6, 0);
 	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
-
-	  /* Enable EXTI interrupts for limit switches */
-	  HAL_NVIC_SetPriority(EXTI3_IRQn, 4, 0);   /* higher priority than CAN */
-	  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-	  HAL_NVIC_SetPriority(EXTI4_IRQn, 4, 0);
-	  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
 	/* Configure accept-all filter for standard IDs into FIFO0 */
 	FDCAN_FilterTypeDef filter;
@@ -245,14 +238,14 @@ int main(void)
 	while (1) {
 
 		// Calibration Loop
-	    if (controlMode == MODE_CALIBRATING) {
-	        Calibration_MainStep();
-
-	        if (Calibration_IsDone()) {
-	            /* Transition to idle — ready for CAN commands */
-	            controlMode = MODE_IDLE;
-	        }
-	    }
+//	    if (controlMode == MODE_CALIBRATING) {
+//	        Calibration_MainStep();
+//
+//	        if (Calibration_IsDone()) {
+//	            /* Transition to idle — ready for CAN commands */
+//	            controlMode = MODE_IDLE;
+//	        }
+//	    }
 
 		// Service CAN commands
 		if (can_rx_ready) {
@@ -1023,7 +1016,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 169;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 999;
+  htim6.Init.Period = 65535;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -1060,33 +1053,20 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(User_LED_GPIO_Port, User_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED_STATUS_Pin */
-  GPIO_InitStruct.Pin = LED_STATUS_Pin;
+  /*Configure GPIO pin : User_LED_Pin */
+  GPIO_InitStruct.Pin = User_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_STATUS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(User_LED_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Start_Stop_Pin */
   GPIO_InitStruct.Pin = Start_Stop_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Start_Stop_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LIMIT_SW_LOWER_Pin LIMIT_SW_UPPER_Pin */
-  GPIO_InitStruct.Pin = LIMIT_SW_LOWER_Pin|LIMIT_SW_UPPER_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -1112,20 +1092,20 @@ static GPIO_PinState read_pin_synced(GPIO_TypeDef *port, uint16_t pin)
     return (a == b) ? a : HAL_GPIO_ReadPin(port, pin);
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    if (GPIO_Pin == LIMIT_SW_LOWER_Pin) {
-        bool rising = (read_pin_synced(GPIOB, LIMIT_SW_LOWER_Pin)
-                       == GPIO_PIN_SET);
-        Calibration_LimitEdge(LIMIT_LOWER, rising);
-    }
-    else if (GPIO_Pin == LIMIT_SW_UPPER_Pin) {
-        bool rising = (read_pin_synced(LIMIT_SW_UPPER_GPIO_Port,
-                                       LIMIT_SW_UPPER_Pin)
-                       == GPIO_PIN_SET);
-        Calibration_LimitEdge(LIMIT_UPPER, rising);
-    }
-}
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+//{
+//    if (GPIO_Pin == LIMIT_SW_LOWER_Pin) {
+//        bool rising = (read_pin_synced(GPIOB, LIMIT_SW_LOWER_Pin)
+//                       == GPIO_PIN_SET);
+//        Calibration_LimitEdge(LIMIT_LOWER, rising);
+//    }
+//    else if (GPIO_Pin == LIMIT_SW_UPPER_Pin) {
+//        bool rising = (read_pin_synced(LIMIT_SW_UPPER_GPIO_Port,
+//                                       LIMIT_SW_UPPER_Pin)
+//                       == GPIO_PIN_SET);
+//        Calibration_LimitEdge(LIMIT_UPPER, rising);
+//    }
+//}
 
 /**
  * @brief  TIM6 period elapsed callback — fires at 1 kHz.
@@ -1139,12 +1119,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
             PosCtrl_ISRStep();
         } else if (controlMode == MODE_VELOCITY) {
             velCtrl_ISRStep(velCtrl, (VelocityFilter *)motorTracker);
-        } else if (controlMode == MODE_CALIBRATING) {
-            Calibration_ISRStep();
         }
+
+//        else if (controlMode == MODE_CALIBRATING) {
+//            Calibration_ISRStep();
+//        }
         /* MODE_IDLE: no kinematic update — tracker->theta holds last value */
 
-        Calibration_Tick_1ms();
+//        Calibration_Tick_1ms();
 
         /* Push current calibrated-frame position to the SDK every tick,
            regardless of mode.  In MODE_IDLE, tracker->theta typically
@@ -1155,22 +1137,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
            runtime limit-switch back-off does nothing — the SDK never
            sees the new target. */
         if (MC_GetSTMStateMotor1() == RUN) {
-            float calibrated_setpoint;
+            float calibrated_setpoint = 0;
 
             if (controlMode == MODE_POSITION) {
                 PosCtrlHandle *plan =
                     (PosCtrlHandle *)paths_planned[active_plan];
                 calibrated_setpoint = plan->theta;
-            } else {
-                /* MODE_VELOCITY, MODE_CALIBRATING, MODE_IDLE — all use
-                   tracker->theta as the canonical calibrated-frame
-                   position. */
-                calibrated_setpoint =
-                    ((VelocityFilter *)motorTracker)->theta;
             }
 
-            float raw_setpoint = calibrated_setpoint
-                               + Calibration_GetOffset();
+            float raw_setpoint = calibrated_setpoint;
+
             float pid_setpoint = outputShaftToInput(raw_setpoint, gearRatio);
             MC_ProgramPositionCommandMotor1(pid_setpoint, 0);
         }
