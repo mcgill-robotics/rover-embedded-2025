@@ -1,2 +1,6 @@
 .venv
 can_log.db
+build
+can_log.db-shm
+can_log.db-wal
+esc_can.egg-info

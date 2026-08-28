@@ -4,3 +4,5 @@ Version: 0.1.0
 Summary: CAN FD protocol helpers for the B-G431B-ESC1
 Requires-Python: >=3.10
 Requires-Dist: python-can>=4.0
+Requires-Dist: pyserial>=3.5
+Requires-Dist: flask==3.1.3
